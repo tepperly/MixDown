@@ -23,6 +23,18 @@ def findShallowestFile(startPath, fileList):
             elif item in fileList:
                 return currPath + item # success
 
+def getBasename(path):
+    basename = os.path.basename(path)
+    if not os.path.isdir(path):
+        i = 0
+        for c in basename:
+            if (c == '.') and (not i == 0):
+               break
+            i += 1
+        basename = basename[:i]    
+    return basename
+  
+
 def includeTrailingPathDelimiter(path):
     if (not os.path.isfile(path)) and (not path[len(path)-1:] == '/'):
         return path + '/'
