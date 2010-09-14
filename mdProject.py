@@ -63,14 +63,22 @@ class Project:
                         if currTarget.getPath() != "":
                             printErrorAndExit("Project targets can only have one 'Path' defined", self.path, lineCount)
                         currTarget.setPath(currPair[1])
+                    elif currName == "output":
+                        if currTarget.getOutput() != "":
+                            printErrorAndExit("Project targets can only have one 'Output' defined", self.path, lineCount)
+                        currTarget.setOutput(currPair[1])
                     elif currName == "dependson":
                         if currTarget.getDependsOn() != []:
                             printErrorAndExit("Project targets can only have one 'DependsOn' defined (use a comma delimited list for multiple dependancies)", self.path, lineCount)
                         if currPair[1] != "":
-                            dependsOnList = currPair[1].split(",")
+                            dependsOnList = stripItemsInList(currPair[1].split(","))
                             if currTarget.getName() in dependsOnList:
                                 printErrorAndExit("Project targets cannot depend on themselves", self.path, lineCount)
                             currTarget.setDependsOn(dependsOnList)
+                    elif currName == "steps":
+                        if currTarget.getSteps() != []:
+                            printErrorAndExit("Project targets can only have one 'Steps' defined (use a comma delimited list for multiple steps)", self.path, lineCount)
+                        currTarget.setSteps(stripItemsInList(str.lower(currPair[1]).split(",")))
                             
             if currTarget.isValid():
                 self.__addTarget(currTarget, lastPackageLineNumber)

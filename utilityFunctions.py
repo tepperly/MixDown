@@ -29,7 +29,7 @@ def getBasename(path):
         i = 0
         for c in basename:
             if (c == '.') and (not i == 0):
-               break
+                break
             i += 1
         basename = basename[:i]    
     return basename
@@ -71,6 +71,12 @@ def removeDir(path):
         raise IOError("Error: Cannot clean directory '" + path + "' : File exists by the same name.")
     if os.path.exists(path):
         shutil.rmtree(path)
+        
+def stripItemsInList(value):
+    retList = []
+    for item in value[:]:
+        retList.append(str.strip(item))
+    return retList
 
 def untar(tarPath, outPath = ""):
     tar = tarfile.open(tarPath, "r")

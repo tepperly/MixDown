@@ -6,6 +6,9 @@ from options import *
 from project import *
 from target import *
 from utilityFunctions import *
+from preConfigure import *
+from configure import *
+from build import *
 
 #--------------------------------Main---------------------------------
 def main():
@@ -64,7 +67,7 @@ def setup():
             targetPaths[i] = includeTrailingPathDelimiter(currPath)
         elif os.path.isfile(currPath):
             if tarfile.is_tarfile(currPath):
-                tarOutputFolder = includeTrailingPathDelimiter(options.getBuildDir() + os.path.basename(currPath))
+                tarOutputFolder = includeTrailingPathDelimiter(options.getBuildDir() + getBasename(currPath))
                 untar(currPath, tarOutputFolder)
                 currTarget.setPath(tarOutputFolder)
             else:

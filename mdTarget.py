@@ -7,9 +7,11 @@ class Target:
     def __init__(self, targetName):
         self.name = targetName
         self.path = ""
+        self.output = ""
         self.sourceTypes = []
         self.buildSystems = []
         self.dependsOn = []
+        self.steps = []
         
     def isValid(self):
         if self.name == "":
@@ -78,10 +80,20 @@ class Target:
     def setPath(self, value):
         self.path = value
     
+    def getOutput(self):
+        return self.output
+    def setOutput(self, value):
+        self.output = value
+    
     def getDependsOn(self):
         return self.dependsOn
     def setDependsOn(self, value):
         self.dependsOn = value
+
+    def getSteps(self):
+        return self.steps
+    def setSteps(self, value):
+        self.steps = value
 
     def getBuildSystems(self):
         return self.buildSystems
