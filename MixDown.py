@@ -2,20 +2,22 @@
 
 import os, sys, tarfile, urllib
 
-from options import *
-from project import *
-from target import *
+from mdOptions import *
+from mdProject import *
+from mdTarget import *
 from utilityFunctions import *
-from preConfigure import *
-from configure import *
-from build import *
+from mdPreConfigure import *
+from mdConfigure import *
+from mdBuild import *
 
 #--------------------------------Main---------------------------------
 def main():
     printProgramHeader()
 
     project, options = setup()
-    execute(project, options)
+    preConfigure(project, options)
+    configure(project, options)
+    build(project, options)
     deploy(project, options)    
     cleanup(options)
     
@@ -67,12 +69,13 @@ def setup():
             targetPaths[i] = includeTrailingPathDelimiter(currPath)
         elif os.path.isfile(currPath):
             if tarfile.is_tarfile(currPath):
-                tarOutputFolder = includeTrailingPathDelimiter(options.getBuildDir() + getBasename(currPath))
-                untar(currPath, tarOutputFolder)
+                basename = splitFileName(currPath)[0]
+                tarOutputFolder = includeTrailingPathDelimiter(options.getBuildDir() + basename)
+                untar(currPath, tarOutputFolder, True)
                 currTarget.setPath(tarOutputFolder)
             else:
                 fileExt = os.path.splitext(currPath)[1]
-                if fileExt in [".tar", ".gz", ".tgz", ".bz2", ".tbz", ".tb2"]: #TODO: might want to change this to a bunch of endswith checks
+                if basename.endswith(".tar.gz") or basename.endswith(".tar.bz2") or basename.endswith(".tar") or basename.endswith(".tgz") or basename.endswith(".tbz") or basename.endswith(".tb2"):
                     printErrorAndExit("Given tar file '" + currPath +"' not understood by python's tarfile package")
                 else:
                     printErrorAndExit("Given target '" + currPath + "' not understood (folders, URLs, and tar files are acceptable)")
@@ -84,17 +87,6 @@ def setup():
 
     return project, options
 
-#-----------------------------Execute---------------------------------
-def execute(project, options):
-    for currName in project.getBuildOrder():
-        currTarget = project.getTarget(currName)
-        if "make" in currTarget.getBuildSystems():
-            makefile = findShallowestFile(currTarget.getPath(), ["GNUmakefile", "makefile", "Makefile"])
-            wd = includeTrailingPathDelimiter(os.path.dirname(makefile))
-            status = executeCommand("make", "", wd, True)
-            if status != 0:
-                printErrorAndExit("Command 'make': exited with error code " + str(status))
-    
 #------------------------------Deploy---------------------------------
 def deploy(project, options):
     print "TODO: deploy not implemented yet"

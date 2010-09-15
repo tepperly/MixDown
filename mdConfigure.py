@@ -1,5 +1,5 @@
-from options import *
-from project import *
+from mdOptions import *
+from mdProject import *
 
-def configure(options, project):
+def configure(project, options):
     pass

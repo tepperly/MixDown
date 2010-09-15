@@ -1,6 +1,6 @@
 import os, Queue
 
-from target import *
+from mdTarget import *
 from utilityFunctions import *
 
 class Project:

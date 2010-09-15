@@ -1,4 +1,4 @@
-import os, Queue, shutil, sys, tarfile, urllib2
+import os, Queue, shutil, sys, tarfile, tempfile, urllib2
 
 def executeCommand(command, args = "", workingDirectory = "", verbose=False):
     try:
@@ -22,7 +22,7 @@ def findShallowestFile(startPath, fileList):
                 q.put(itemPath)
             elif item in fileList:
                 return currPath + item # success
-
+            
 def getBasename(path):
     basename = os.path.basename(path)
     if not os.path.isdir(path):
@@ -36,7 +36,7 @@ def getBasename(path):
   
 
 def includeTrailingPathDelimiter(path):
-    if (not os.path.isfile(path)) and (not path[len(path)-1:] == '/'):
+    if (not path[len(path)-1:] == '/') and (not os.path.isfile(path)):
         return path + '/'
     return path
 
@@ -72,17 +72,55 @@ def removeDir(path):
     if os.path.exists(path):
         shutil.rmtree(path)
         
+def splitFileName(fileName):
+    basename = fileName
+    version = ""
+    
+    if basename.endswith(".tar.gz"):
+        basename = basename[:-7]
+    elif basename.endswith(".tar.bz2"):
+        basename = basename[:-8]
+    elif basename.endswith(".tar") or basename.endswith(".tgz") or basename.endswith(".tbz") or basename.endswith(".tb2"):
+        basename = basename[:-4]
+    
+    basename = os.path.basename(basename)
+        
+    i = 0
+    for c in basename:
+        if c in ['1', '2', '3', '4', '5', '6', '7', '8', '9', '0']:
+            version = basename[i:]
+            basename = basename[:i]
+            if basename[-1] == '-':
+                basename = basename[:-1]
+            break
+        i += 1
+        
+    return basename, version
+        
 def stripItemsInList(value):
     retList = []
     for item in value[:]:
         retList.append(str.strip(item))
     return retList
 
-def untar(tarPath, outPath = ""):
+def untar(tarPath, outPath = "", stripDir=False):
     tar = tarfile.open(tarPath, "r")
+    if stripDir:
+        unTarOutpath = tempfile.mkdtemp()
+    else:
+        unTarOutpath = outPath
+        
     for item in tar:
         #TODO: check for relative path's
-        tar.extract(item, outPath)
+        tar.extract(item, unTarOutpath)
+        
+    if stripDir:
+        dirList = os.listdir(unTarOutpath)
+        if len(dirList) == 1:
+            src = includeTrailingPathDelimiter(unTarOutpath) + dirList[0]
+        else:
+            src = includeTrailingPathDelimiter(unTarOutpath)
+        shutil.move(src, outPath)
         
 def URLToFilename(url):
     filename = url[(str.rfind(url, "/")+1):]

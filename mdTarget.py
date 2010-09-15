@@ -1,6 +1,5 @@
 import os
 
-import utilityFunctions
 from utilityFunctions import *
 
 class Target:
