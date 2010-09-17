@@ -1,13 +1,16 @@
 import os, Queue, shutil, sys, tarfile, tempfile, urllib2
 
-def executeCommand(command, args = "", workingDirectory = "", verbose=False):
+def executeCommand(command, args = "", workingDirectory = "", verbose=False, exitOnError=False):
     try:
         lastcwd = os.getcwd()
         if workingDirectory != "":
             os.chdir(workingDirectory)
+        fullCommand = command + args
         if verbose:
-            print "Executing: " + command + args + ": Working Directory: " + workingDirectory
-        return os.system(command + args)
+            print "Executing: " + fullCommand + ": Working Directory: " + workingDirectory
+        errorCode = os.system(command + args)
+        if exitOnError and errorCode != 0:
+            printErrorAndExit("Command '" + fullCommand + "': exited with error code " + str(errorCode))
     finally:
         os.chdir(lastcwd)
         
@@ -33,7 +36,6 @@ def getBasename(path):
             i += 1
         basename = basename[:i]    
     return basename
-  
 
 def includeTrailingPathDelimiter(path):
     if (not path[len(path)-1:] == '/') and (not os.path.isfile(path)):
@@ -104,12 +106,12 @@ def stripItemsInList(value):
     return retList
 
 def untar(tarPath, outPath = "", stripDir=False):
-    tar = tarfile.open(tarPath, "r")
     if stripDir:
         unTarOutpath = tempfile.mkdtemp()
     else:
         unTarOutpath = outPath
         
+    tar = tarfile.open(tarPath, "r")
     for item in tar:
         #TODO: check for relative path's
         tar.extract(item, unTarOutpath)

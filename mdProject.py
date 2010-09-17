@@ -79,6 +79,22 @@ class Project:
                         if currTarget.getSteps() != []:
                             printErrorAndExit("Project targets can only have one 'Steps' defined (use a comma delimited list for multiple steps)", self.path, lineCount)
                         currTarget.setSteps(stripItemsInList(str.lower(currPair[1]).split(",")))
+                    elif currName == "preconfigcmd":
+                        if currTarget.getPreConfigCmd() != "":
+                            printErrorAndExit("Project targets can only have one 'PreConfigCmd' defined", self.path, lineCount)
+                        currTarget.setPreConfigCmd(currPair[1])
+                    elif currName == "configcmd":
+                        if currTarget.getConfigCmd() != "":
+                            printErrorAndExit("Project targets can only have one 'ConfigCmd' defined", self.path, lineCount)
+                        currTarget.setConfigCmd(currPair[1])
+                    elif currName == "buildcmd":
+                        if currTarget.getBuildCmd() != "":
+                            printErrorAndExit("Project targets can only have one 'BuildCmd' defined", self.path, lineCount)
+                        currTarget.setBuildCmd(currPair[1])
+                    elif currName == "installcmd":
+                        if currTarget.getInstallCmd() != "":
+                            printErrorAndExit("Project targets can only have one 'InstallCmd' defined", self.path, lineCount)
+                        currTarget.setInstallCmd(currPair[1])
                             
             if currTarget.isValid():
                 self.__addTarget(currTarget, lastPackageLineNumber)

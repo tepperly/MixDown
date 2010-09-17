@@ -15,10 +15,13 @@ def main():
     printProgramHeader()
 
     project, options = setup()
-    preConfigure(project, options)
-    configure(project, options)
-    build(project, options)
-    deploy(project, options)    
+    print prettyPrintList(project.getBuildOrder(), "Build Order:", "", "  ")
+    for currName in project.getBuildOrder():
+        currTarget = project.getTarget(currName)
+        preConfigure(currTarget)
+        configure(currTarget)
+        build(currTarget)
+        deploy(project, options)    
     cleanup(options)
     
     sys.exit()

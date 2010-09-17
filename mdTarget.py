@@ -11,6 +11,10 @@ class Target:
         self.buildSystems = []
         self.dependsOn = []
         self.steps = []
+        self.preConfigCmd = ""
+        self.configCmd = ""
+        self.buildCmd = ""
+        self.installCmd = ""
         
     def isValid(self):
         if self.name == "":
@@ -92,18 +96,48 @@ class Target:
     def getSteps(self):
         return self.steps
     def setSteps(self, value):
-        self.steps = value
+        steps = []
+        for step in value[:]:
+            steps.append(str.lower(step))
+        self.steps = steps
+    
+    def hasStep(self, stepName):
+        if len(self.steps) == 0:
+            return True
+        for step in self.steps:
+            if step.startswith(stepName):
+                return True
+        return False
 
     def getBuildSystems(self):
         return self.buildSystems
-    
     def addBuildSystem(self, buildSystem):
         if not buildSystem in self.buildSystems:
             self.buildSystems.append(buildSystem)
 
     def getSourceTypes(self):
         return self.sourceTypes
-    
     def addSourceType(self, sourceType):
         if not sourceType in self.sourceTypes:
             self.sourceTypes.append(sourceType)
+
+    def getPreConfigCmd(self):
+        return self.preConfigCmd
+    def setPreConfigCmd(self, value):
+        self.preConfigCmd = value
+
+    def getConfigCmd(self):
+        return self.configCmd
+    def setConfigCmd(self, value):
+        self.configCmd = value
+
+    def getBuildCmd(self):
+        return self.buildCmd
+    def setBuildCmd(self, value):
+        self.buildCmd = value
+
+    def getInstallCmd(self):
+        return self.installCmd
+    def setInstallCmd(self, value):
+        self.installCmd = value
+
