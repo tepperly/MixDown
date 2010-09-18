@@ -7,6 +7,7 @@ class Target:
         self.name = targetName
         self.path = ""
         self.output = ""
+        self.dependancyDepth = 0
         self.sourceTypes = []
         self.buildSystems = []
         self.dependsOn = []
@@ -87,6 +88,11 @@ class Target:
         return self.output
     def setOutput(self, value):
         self.output = value
+    
+    def getDependancyDepth(self):
+        return self.dependancyDepth
+    def setDependancyDepth(self, value):
+        self.dependancyDepth = value
     
     def getDependsOn(self):
         return self.dependsOn
