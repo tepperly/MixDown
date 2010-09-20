@@ -70,10 +70,12 @@ def setup():
             targetPaths[i] = includeTrailingPathDelimiter(currPath)
         elif os.path.isfile(currPath):
             if tarfile.is_tarfile(currPath):
-                basename = splitFileName(currPath)[0]
-                tarOutputFolder = includeTrailingPathDelimiter(options.getBuildDir() + basename)
-                untar(currPath, tarOutputFolder, True)
-                currTarget.setPath(tarOutputFolder)
+                if currTarget.getOutput() == "":
+                    outDir = includeTrailingPathDelimiter(options.getBuildDir() + splitFileName(currPath)[0])
+                else:
+                    outDir = includeTrailingPathDelimiter(options.getBuildDir() + currTarget.getOutput())
+                untar(currPath, outDir, True)
+                currTarget.setPath(outDir)
             else:
                 fileExt = os.path.splitext(currPath)[1]
                 if basename.endswith(".tar.gz") or basename.endswith(".tar.bz2") or basename.endswith(".tar") or basename.endswith(".tgz") or basename.endswith(".tbz") or basename.endswith(".tb2"):
