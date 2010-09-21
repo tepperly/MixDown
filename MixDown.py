@@ -64,7 +64,9 @@ def setup():
             currTarget.setPath(filenamePath)
     
     #Untar and add trailing path delimiter to any folders
-    for currTarget in project.getTargets():
+    targetList = project.getTargets()[:]
+    targetList.reverse()
+    for currTarget in targetList:
         currPath = currTarget.getPath()
         if os.path.isdir(currPath):
             targetPaths[i] = includeTrailingPathDelimiter(currPath)
