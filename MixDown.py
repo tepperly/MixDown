@@ -75,7 +75,7 @@ def setup():
                 if currTarget.getOutput() == "":
                     outDir = includeTrailingPathDelimiter(options.getBuildDir() + splitFileName(currPath)[0])
                 else:
-                    outDir = includeTrailingPathDelimiter(options.getBuildDir() + currTarget.getOutput())
+                    outDir = currTarget.getOutput()
                 untar(currPath, outDir, True)
                 currTarget.setPath(outDir)
             else:

@@ -68,7 +68,7 @@ class Project:
                     elif currName == "output":
                         if currTarget.getOutput() != "":
                             printErrorAndExit("Project targets can only have one 'Output' defined", self.path, lineCount)
-                        currTarget.setOutput(currPair[1])
+                        currTarget.setOutput(includeTrailingPathDelimiter(currPair[1]))
                     elif currName == "dependson":
                         if currTarget.getDependsOn() != []:
                             printErrorAndExit("Project targets can only have one 'DependsOn' defined (use a comma delimited list for multiple dependancies)", self.path, lineCount)
