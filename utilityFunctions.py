@@ -60,12 +60,14 @@ def prettyPrintList(list, header = "", headerIndent = "", itemIndent = ""):
     return retStr
             
 def printErrorAndExit(errorStr, filePath = "", lineNumber = 0):
+    sys.stdin.flush()
     if filePath == "" and lineNumber == 0:
-        print "Error: %s" % (errorStr)
+        sys.stderr.write("Error: %s\n" % (errorStr))
     elif lineNumber == 0:
-        print "Error: %s: %s" % (filePath, errorStr)
+        sys.stderr.write("Error: %s: %s\n" % (filePath, errorStr))
     else:
-        print "Error: %s (line %d): %s" % (filePath, lineNumber, errorStr)
+        sys.stderr.write("Error: %s (line %d): %s\n" % (filePath, lineNumber, errorStr))
+    sys.stderr.flush()
     sys.exit()
 
 def removeDir(path):
