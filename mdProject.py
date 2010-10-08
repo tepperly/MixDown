@@ -1,5 +1,6 @@
 import os, Queue
 
+from mdLoggerBase import LoggerBase
 from mdTarget import *
 from utilityFunctions import *
 
@@ -15,20 +16,17 @@ class Project:
         
     def __addTarget(self, target, lineCount = 0):
         for currTarget in self.targets:
-            currName = target.getName()
-            if currName == currTarget.getName():
+            currName = target.name
+            if currName == currTarget.name:
                 printErrorAndExit("Cannot have more than one project target by the same name, " + currName, self.path, lineCount)
         self.targets.append(target)
         
     def getTarget(self, targetName):
         for currTarget in self.targets:
-            if targetName == currTarget.getName():
+            if targetName == currTarget.name:
                 return currTarget
         return None
-    
-    def getTargets(self):
-        return self.targets
-        
+
     def __read(self):
         f = open(self.path, "r")
         try:
@@ -62,41 +60,41 @@ class Project:
                                 printErrorAndExit("New target started before previous was finished, all targets require ('Package'|'Project') and 'Path' to be declared", self.path, lineCount)
                         currTarget = Target(currPair[1])
                     elif currName == "path":
-                        if currTarget.getPath() != "":
+                        if currTarget.path != "":
                             printErrorAndExit("Project targets can only have one 'Path' defined", self.path, lineCount)
-                        currTarget.setPath(currPair[1])
+                        currTarget.path = currPair[1]
                     elif currName == "output":
-                        if currTarget.getOutput() != "":
+                        if currTarget.output != "":
                             printErrorAndExit("Project targets can only have one 'Output' defined", self.path, lineCount)
-                        currTarget.setOutput(includeTrailingPathDelimiter(currPair[1]))
+                        currTarget.output = includeTrailingPathDelimiter(currPair[1])
                     elif currName == "dependson":
-                        if currTarget.getDependsOn() != []:
+                        if currTarget.dependsOn != []:
                             printErrorAndExit("Project targets can only have one 'DependsOn' defined (use a comma delimited list for multiple dependancies)", self.path, lineCount)
                         if currPair[1] != "":
                             dependsOnList = stripItemsInList(currPair[1].split(","))
                             if currTarget.getName() in dependsOnList:
                                 printErrorAndExit("Project targets cannot depend on themselves", self.path, lineCount)
-                            currTarget.setDependsOn(dependsOnList)
+                            currTarget.dependsOn = dependsOnList
                     elif currName == "steps":
-                        if currTarget.getSteps() != []:
+                        if currTarget.steps != []:
                             printErrorAndExit("Project targets can only have one 'Steps' defined (use a comma delimited list for multiple steps)", self.path, lineCount)
-                        currTarget.setSteps(stripItemsInList(str.lower(currPair[1]).split(",")))
+                        currTarget.steps = stripItemsInList(str.lower(currPair[1]).split(","))
                     elif currName == "preconfigcmd":
-                        if currTarget.getPreConfigCmd() != "":
+                        if currTarget.preConfigCmd != "":
                             printErrorAndExit("Project targets can only have one 'PreConfigCmd' defined", self.path, lineCount)
-                        currTarget.setPreConfigCmd(currPair[1])
+                        currTarget.preConfigCmd = currPair[1]
                     elif currName == "configcmd":
-                        if currTarget.getConfigCmd() != "":
+                        if currTarget.configCmd != "":
                             printErrorAndExit("Project targets can only have one 'ConfigCmd' defined", self.path, lineCount)
-                        currTarget.setConfigCmd(currPair[1])
+                        currTarget.configCmd = currPair[1]
                     elif currName == "buildcmd":
-                        if currTarget.getBuildCmd() != "":
+                        if currTarget.buildCmd != "":
                             printErrorAndExit("Project targets can only have one 'BuildCmd' defined", self.path, lineCount)
-                        currTarget.setBuildCmd(currPair[1])
+                        currTarget.buildCmd = currPair[1]
                     elif currName == "installcmd":
-                        if currTarget.getInstallCmd() != "":
+                        if currTarget.installCmd != "":
                             printErrorAndExit("Project targets can only have one 'InstallCmd' defined", self.path, lineCount)
-                        currTarget.setInstallCmd(currPair[1])
+                        currTarget.installCmd = currPair[1]
                             
             if currTarget.isValid():
                 self.__addTarget(currTarget, lastPackageLineNumber)
@@ -108,18 +106,18 @@ class Project:
     def __validateDependsOnLists(self):
         depQueue = Queue.Queue()
         for currTarget in self.targets:
-            currFullDepList = [currTarget.getName()]
-            depQueue.put(currTarget.getName())
+            currFullDepList = [currTarget.name]
+            depQueue.put(currTarget.name)
             
             while not depQueue.empty():
                 currDepName = depQueue.get()
                 currDepTarget = self.getTarget(currDepName)
                 if currDepTarget is None:
-                    printErrorAndExit("Project target '%s' has non-existant dependancy '%s'" % (currDepTarget.getName(), currDepName))
+                    printErrorAndExit("Project target '%s' has non-existant dependancy '%s'" % (currDepTarget.name, currDepName))
                     
-                for name in currDepTarget.getDependsOn():
+                for name in currDepTarget.dependsOn:
                     if name in currFullDepList:
-                        printErrorAndExit("Cyclical dependancy between project targets '%s' and '%s'" % (currTarget.getName(), currDepTarget.getName()))                        
+                        printErrorAndExit("Cyclical dependancy between project targets '%s' and '%s'" % (currTarget.name, currDepTarget.name))
                     currFullDepList += name
                     depQueue.put(name)
                     
@@ -129,10 +127,10 @@ class Project:
         while not q.empty():
             currName = q.get()
             currTarget = self.getTarget(currName)
-            for currChildName in currTarget.getDependsOn():
+            for currChildName in currTarget.dependsOn:
                 currChildTarget = self.getTarget(currChildName)
-                if currChildTarget.getDependancyDepth() < (currTarget.getDependancyDepth() + 1):
-                    currChildTarget.setDependancyDepth(currTarget.getDependancyDepth() + 1)
+                if currChildTarget.dependancyDepth < (currTarget.dependancyDepth + 1):
+                    currChildTarget.dependancyDepth = currTarget.dependancyDepth + 1
                     q.put(currChildName)
 
     def __sortTargetList(self, targetList):
@@ -140,8 +138,6 @@ class Project:
             return []
         else:
             pivot = targetList[0]
-            lesser = self.__sortTargetList([x for x in targetList[1:] if x.getDependancyDepth() >= pivot.getDependancyDepth()])
-            greater = self.__sortTargetList([x for x in targetList[1:] if x.getDependancyDepth() < pivot.getDependancyDepth()])
-            return lesser + [pivot] + greater
-        
-                
+            lesser = self.__sortTargetList([x for x in targetList[1:] if x.dependancyDepth >= pivot.dependancyDepth])
+            greater = self.__sortTargetList([x for x in targetList[1:] if x.dependancyDepth < pivot.dependancyDepth])
+            return lesser + [pivot] + greater                

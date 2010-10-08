@@ -1,15 +1,16 @@
+from mdLoggerBase import *
 from mdOptions import *
 from mdProject import *
 
-def build(target, options):
+def build(target, options, logger):
     if target.hasStep("build"):
-        if options.getVerbose():
-            print "Building target " + target.getName() + "..."
-        targetPath = target.getPath()
-        if target.getBuildCmd() != "":
-            executeCommand(target.getBuildCmd(), "", targetPath, options.getVerbose(), True)
+        if options.verbose:
+            logger.writeMessage("Building target " + target.name + "...")
+        outFd = logger.getOutFd(target.name, "build")
+        if target.buildCmd != "":
+            executeSubProcess(target.buildCmd.split(" "), target.path, outFd, options.verbose, True)
         else:
-            if "make" in target.getBuildSystems():
-                makefile = findShallowestFile(target.getPath(), ["GNUmakefile", "makefile", "Makefile"])
+            if "make" in target.buildSystems:
+                makefile = findShallowestFile(target.path, ["GNUmakefile", "makefile", "Makefile"])
                 wd = includeTrailingPathDelimiter(os.path.dirname(makefile))
-                executeCommand("make", "", wd, options.getVerbose(), True)
+                executeSubProcess(["./make"], wd, outFd, options.verbose, True)

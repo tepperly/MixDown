@@ -1,6 +1,6 @@
-import os, Queue, shutil, sys, tarfile, tempfile, urllib2
+import os, Queue, shutil, sys, tarfile, tempfile, urllib2, subprocess
 
-def executeCommand(command, args = "", workingDirectory = "", verbose=False, exitOnError=False):
+def executeCommand(command, args = "", workingDirectory = "", verbose = False, exitOnError = False):
     try:
         lastcwd = os.getcwd()
         if workingDirectory != "":
@@ -8,11 +8,20 @@ def executeCommand(command, args = "", workingDirectory = "", verbose=False, exi
         fullCommand = command + args
         if verbose:
             print "Executing: " + fullCommand + ": Working Directory: " + workingDirectory
-        errorCode = os.system(command + args)
+        errorCode = os.system(fullCommand)
         if exitOnError and errorCode != 0:
             printErrorAndExit("Command '" + fullCommand + "': exited with error code " + str(errorCode))
     finally:
         os.chdir(lastcwd)
+
+def executeSubProcess(args, workingDirectory = "", outFileHandle = 1, verbose = False, exitOnError = False):
+    fullCommand = " ".join(args)
+    if verbose:
+        print "Executing: " + fullCommand + ": Working Directory: " + workingDirectory
+    process = subprocess.Popen(args, stdout=outFileHandle, stderr=outFileHandle, cwd=workingDirectory)
+    process.wait()
+    if exitOnError and process.returncode != 0:
+        printErrorAndExit("Command '" + fullCommand + "': exited with error code " + str(process.returncode))
         
 def findShallowestFile(startPath, fileList):
     q = Queue.Queue()

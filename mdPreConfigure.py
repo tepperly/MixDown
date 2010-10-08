@@ -4,20 +4,20 @@ from mdTarget import *
 from mdOptions import *
 from mdProject import *
 from utilityFunctions import *
+from mdLoggerBase import *
 
-def preConfigure(target, options):
+def preConfigure(target, options, logger):
     if target.hasStep("preconfig"):
-        if options.getVerbose():
-            print "Preconfiguring target " + target.getName() + "..."
-        targetPath = target.getPath()
-        if target.getPreConfigCmd() != "":
-            executeCommand(target.getPreConfigCmd(), "", targetPath, options.getVerbose(), True)
+        if options.verbose:
+            logger.writeMessage("Preconfiguring target " + target.name + "...")
+        targetPath = target.path
+        outFd = logger.getOutFd(target.name, "preConfigure")
+        if target.preConfigCmd != "":
+            executeSubProcess(target.preConfigCmd.split(" "), targetPath, outFd, options.verbose, True)
         else:
             for item in os.listdir(targetPath):
                 itemPath = includeTrailingPathDelimiter(targetPath) + item
                 if os.path.isfile(itemPath):
                     basename = os.path.basename(item)
                     if basename in ['buildconf']:
-                        executeCommand('./' + basename, "", targetPath, options.getVerbose(), True)
-            
-    
+                        executeSubProcess(["./" + basename], targetPath, outFd, options.verbose, True)

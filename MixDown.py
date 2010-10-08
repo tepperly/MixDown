@@ -9,18 +9,21 @@ from utilityFunctions import *
 from mdPreConfigure import *
 from mdConfigure import *
 from mdBuild import *
+from mdLoggerBase import *
+from mdLoggerFile import *
+from mdLoggerHtml import *
 
 #--------------------------------Main---------------------------------
 def main():
     printProgramHeader()
 
-    project, options = setup()
-    for target in project.getTargets():
-        preConfigure(target, options)
-        configure(target, options)
-        build(target, options)
-        deploy(project, options)    
-    cleanup(options)
+    project, options, logger = setup()
+    for target in project.targets:
+        preConfigure(target, options, logger)
+        configure(target, options, logger)
+        build(target, options, logger)
+        deploy(project, options, logger)    
+    cleanup(options, logger)
     
     sys.exit()
         
@@ -29,83 +32,91 @@ def setup():
     options = Options()
     print "Processing commandline options..."
     options.processCommandline()
-    if options.getVerbose():
-        print options
+    if options.logger == "html":
+        logger = LoggerHtml()
+    elif options.logger == "file":
+        logger = LoggerFile()
+    else:
+        logger = LoggerBase()
+    
+    if options.verbose:
+        logger.writeMessage(str(options))
 
     #Clean workspaces if told to clean before
-    if options.getCleanBefore():
-        print "Cleaning MixDown directories..."
+    #TODO: Clean output directories in all targets
+    if options.cleanBefore:
+        logger.writeMessage("Cleaning MixDown directories...")
         try:
-            removeDir(options.getBuildDir())
-            removeDir(options.getDownloadDir())
-            removeDir(options.getInstallDir())
+            removeDir(options.buildDir)
+            removeDir(options.downloadDir)
+            removeDir(options.installDir)
+            removeDir(options.logDir)
         except IOError, e:
             print e
             sys.exit()
-    if not os.path.isdir(options.getBuildDir()):
-        os.makedirs(options.getBuildDir())
-    if not os.path.isdir(options.getDownloadDir()):
-        os.makedirs(options.getDownloadDir())
-    if not os.path.isdir(options.getInstallDir()):
-        os.makedirs(options.getInstallDir())
+    if not os.path.isdir(options.buildDir):
+        os.makedirs(options.buildDir)
+    if not os.path.isdir(options.downloadDir):
+        os.makedirs(options.downloadDir)
+    if not os.path.isdir(options.installDir):
+        os.makedirs(options.installDir)
     
     #Read project file
-    project = Project(options.getProjectFile())
+    project = Project(options.projectFile)
     
     #Convert all targetPaths to folders (download and/or unpack if necessary)
-    print "Converting all targets to local directories..."
+    logger.writeMessage("Converting all targets to local directories...")
 
     #Check for files that need to be downloaded
-    for currTarget in project.getTargets():
-        currPath = currTarget.getPath()
+    for currTarget in project.targets:
+        currPath = currTarget.path
         if (not os.path.isdir(currPath)) and (not os.path.isfile(currPath)) and isURL(currPath):
-            filenamePath = options.getDownloadDir() + URLToFilename(currPath)
+            filenamePath = options.downloadDir + URLToFilename(currPath)
             urllib.urlretrieve(currPath, filenamePath)
-            currTarget.setPath(filenamePath)
+            currTarget.path = filenamePath
     
     #Untar and add trailing path delimiter to any folders
-    targetList = project.getTargets()[:]
+    targetList = project.targets[:]
     targetList.reverse()
     for currTarget in targetList:
-        currPath = currTarget.getPath()
+        currPath = currTarget.path
         if os.path.isdir(currPath):
             targetPaths[i] = includeTrailingPathDelimiter(currPath)
         elif os.path.isfile(currPath):
             if tarfile.is_tarfile(currPath):
                 if currTarget.getOutput() == "":
-                    outDir = includeTrailingPathDelimiter(options.getBuildDir() + splitFileName(currPath)[0])
+                    outDir = includeTrailingPathDelimiter(options.buildDir + splitFileName(currPath)[0])
                 else:
-                    outDir = currTarget.getOutput()
+                    outDir = currTarget.output
                 untar(currPath, outDir, True)
                 currTarget.setPath(outDir)
             else:
                 fileExt = os.path.splitext(currPath)[1]
                 if basename.endswith(".tar.gz") or basename.endswith(".tar.bz2") or basename.endswith(".tar") or basename.endswith(".tgz") or basename.endswith(".tbz") or basename.endswith(".tb2"):
-                    printErrorAndExit("Given tar file '" + currPath +"' not understood by python's tarfile package")
+                    logger.writeError("Given tar file '" + currPath +"' not understood by python's tarfile package", exit=True)
                 else:
-                    printErrorAndExit("Given target '" + currPath + "' not understood (folders, URLs, and tar files are acceptable)")
+                    logger.writeError("Given target '" + currPath + "' not understood (folders, URLs, and tar files are acceptable)", exit=True)
         else:
-            printErrorAndExit("Given target '" + currPath + "' does not exist")
+            logger.writeError("Given target '" + currPath + "' does not exist", exit=True)
             
-    for currTarget in project.getTargets():
+    for currTarget in project.targets:
         currTarget.examine()
 
-    return project, options
+    return project, options, logger
 
 #------------------------------Deploy---------------------------------
 def deploy(project, options):
     print "TODO: deploy not implemented yet"
     
 #-----------------------------Clean up--------------------------------
-def cleanup(options):
-    if options.getCleanAfter():
-        print "Cleaning MixDown Build and Download directories..."
+def cleanup(options, logger):
+    if options.cleanAfter:
+        logger.writeMessage("Cleaning MixDown Build and Download directories...")
         try:
-            removeDir(options.getBuildDir())
-            removeDir(options.getDownloadDir())
+            removeDir(options.buildDir)
+            removeDir(options.downloadDir)
         except IOError, e:
-            print e
-            sys.exit()
+            logger.writeError(e, exit=True)
 
 #----------------------------------------------------------------------        
 def printProgramHeader():

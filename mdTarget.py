@@ -73,77 +73,26 @@ class Target:
         retStr += prettyPrintList(self.sourceTypes, "Source Types: ", "  ", "    ") + "\n"
         retStr += prettyPrintList(self.buildSystems, "Build Systems: ", "  ", "    ") + "\n"
         return retStr
-    
-    def getName(self):
-        return self.name
-    def setName(self, value):
-        self.name = value
 
-    def getPath(self):
-        return self.path
-    def setPath(self, value):
-        self.path = value
-    
-    def getOutput(self):
-        return self.output
-    def setOutput(self, value):
-        self.output = value
-    
-    def getDependancyDepth(self):
-        return self.dependancyDepth
-    def setDependancyDepth(self, value):
-        self.dependancyDepth = value
-    
-    def getDependsOn(self):
-        return self.dependsOn
-    def setDependsOn(self, value):
-        self.dependsOn = value
-
-    def getSteps(self):
-        return self.steps
-    def setSteps(self, value):
+    @property
+    def steps(self, value):
         steps = []
         for step in value[:]:
             steps.append(str.lower(step))
         self.steps = steps
     
     def hasStep(self, stepName):
-        if len(self.steps) == 0:
+        if len(self.steps) == 0: #no steps were specified, do all steps
             return True
         for step in self.steps:
             if step.startswith(stepName):
                 return True
         return False
 
-    def getBuildSystems(self):
-        return self.buildSystems
     def addBuildSystem(self, buildSystem):
         if not buildSystem in self.buildSystems:
             self.buildSystems.append(buildSystem)
 
-    def getSourceTypes(self):
-        return self.sourceTypes
     def addSourceType(self, sourceType):
         if not sourceType in self.sourceTypes:
             self.sourceTypes.append(sourceType)
-
-    def getPreConfigCmd(self):
-        return self.preConfigCmd
-    def setPreConfigCmd(self, value):
-        self.preConfigCmd = value
-
-    def getConfigCmd(self):
-        return self.configCmd
-    def setConfigCmd(self, value):
-        self.configCmd = value
-
-    def getBuildCmd(self):
-        return self.buildCmd
-    def setBuildCmd(self, value):
-        self.buildCmd = value
-
-    def getInstallCmd(self):
-        return self.installCmd
-    def setInstallCmd(self, value):
-        self.installCmd = value
-

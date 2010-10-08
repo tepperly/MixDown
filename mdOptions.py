@@ -8,10 +8,12 @@ class Options:
         self.buildDir = "mdBuild/"
         self.downloadDir = "mdDownload/"
         self.installDir = "mdInstall/"
+        self.logDir = "mdLogFiles/"
         self.cleanBefore = False
         self.cleanAfter = False
         self.verbose = False
-        
+        self.logger = ""
+
     def __str__(self):
         retStr = "Options:\n"
         retStr += "  Project File: " + self.projectFile + "\n"
@@ -21,43 +23,21 @@ class Options:
         retStr += "  Clean Before: " + str(self.cleanBefore) + "\n"
         retStr += "  Clean After:  " + str(self.cleanAfter) + "\n"
         retStr += "  Verbose:      " + str(self.verbose) + "\n"
+        retStr += "  Logger:       " + self.logger.capitalize() + "\n"
         return retStr
         
-    def getProjectFile(self):
-        return self.projectFile 
-    def setProjectFile(self, value):
-        self.projectFile = value
-
-    def getBuildDir(self):
-        return self.buildDir  
-    def setBuildDir(self, value):
+    @property
+    def buildDir(self, value):
         self.buildDir = includeTrailingPathDelimiter(value)
-        
-    def getDownloadDir(self):
-        return self.downloadDir
-    def setDownloadDir(self, value):
-        self.downloadDir = value
-        
-    def getInstallDir(self):
-        return self.installDir
-    def setInstallDir(self, value):
-        self.installDir = value        
-        
-    def getCleanBefore(self):
-        return self.cleanBefore
-    def setCleanBefore(self, value):
-        self.cleanBefore = value        
-        
-    def getCleanAfter(self):
-        return self.cleanAfter
-    def setCleanAfter(self, value):
-        self.cleanAfter = value
-        
-    def getVerbose(self):
-        return self.verbose
-    def setVerbose(self, value):
-        self.verbose = value
 
+    @property
+    def downloadDir(self, value):
+        self.downloadDir = includeTrailingPathDelimiter(value)
+
+    @property
+    def installDir(self, value):
+        self.installDir = includeTrailingPathDelimiter(value)
+        
     def processCommandline(self):
         if len(sys.argv) < 2:
             printUsageAndExit()
@@ -66,15 +46,18 @@ class Options:
             currFlag = str.lower(currArg[:2])
             currValue = currArg[2:]
             
-            if currFlag == "-b":
+            if currFlag == "-l":
                 validateOptionPair(currFlag, currValue)
-                self.setBuildDir(currValue)
+                self.logger = str.lower(currValue)
+            elif currFlag == "-b":
+                validateOptionPair(currFlag, currValue)
+                self.buildDir = currValue
             elif currFlag == "-d":
                 validateOptionPair(currFlag, currValue)
-                self.setDownloadDir(currValue)
+                self.downloadDir = currValue
             elif currFlag == "-i":
                 validateOptionPair(currFlag, currValue)
-                self.setInstallDir(currValue)
+                self.installDir = currValue
             elif currFlag == "-c":
                 validateOptionPair(currFlag, currValue)
                 lowerCurrValue = str.lower(currValue)
@@ -85,14 +68,14 @@ class Options:
                     printUsageAndExit("Unexpected value '" + currValue + "' given with -c option")
                     
                 if currValue == 'a':
-                    self.setCleanAfter(True)
+                    self.cleanAfter = True
                 elif currValue == 'b':
-                    self.setCleanBefore(True)
+                    self.cleanBefore = True
                 else:
                     printUsageAndExit("Unexpected value '" + currValue + "' given with -c option")
             elif currFlag == "-v":
                 validateOption(currFlag, currValue)
-                self.setVerbose(True)
+                self.verbose = True
             elif currArg.lower() in ("/help", "/h", "-help", "--help", "-h"):
                 printUsageAndExit()
             elif os.path.splitext(currArg)[1] == ".md":
