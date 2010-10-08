@@ -21,6 +21,28 @@ def SetLogger(loggerName = ""):
             __loggerInstance.writeError(loggerName + " logger not found, falling back on console logger")
     else:
         raise IOError("Error: logger cannot be set after it has already been set")
+
+class LoggerBase:
+    def close(self):
+        pass
     
+    def writeMessage(self, message):
+        pass
+
+    def writeMessage(self, message, targetName = "", targetStep = ""):
+        pass
+
+    def writeError(self, message, targetName = "", targetStep = "", filePath = "", lineNumber = 0, exit = False):
+        pass
+
+    def getOutFd(self, targetName = "", targetStep = ""):
+        return sys.stdout
+
+    def getErrorFd(self, targetName = "", targetStep = ""):
+        return sys.stderr
+
+    def testSingleton(self):
+        print "singleton = Html"
+
 
     

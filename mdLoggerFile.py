@@ -1,12 +1,18 @@
 import os, sys
 
-from mdLoggerBase import LoggerBase
-
-class LoggerFile(LoggerBase):
+class LoggerFile:
     def __init__(self):
         self.errorFds = dict()
         self.outFds = dict()
         
+    def __FormatErrorMessage(self, message, filePath = "", lineNumber = 0):
+        if filePath == "" and lineNumber == 0:
+            return "Error: %s\n" % (message)
+        elif lineNumber == 0:
+            return "Error: %s: %s\n" % (filePath, message)
+        else:
+            return "Error: %s (line %d): %s\n" % (filePath, lineNumber, message)
+
     def close(self):
         for fd in self.errorFds:
             fd.close()
@@ -17,7 +23,7 @@ class LoggerFile(LoggerBase):
         key = str.lower(targetName + targetStep)
         value = self.outFds.get(key)
         if value == None and targetName != "":
-            value = os.open("mdLogFiles/" + targetName + "_" + targetStep + ".log", os.O_CREAT|os.O_WRONLY|os.O_TRUNC)
+            value = os.open(targetName + "_" + targetStep + ".log", os.O_CREAT|os.O_WRONLY|os.O_TRUNC)
             self.outFds[key] = value
         return value
 
@@ -25,7 +31,7 @@ class LoggerFile(LoggerBase):
         key = str.lower(targetName + targetStep)
         value = self.errorFds.get(key)
         if value == None and targetName != "":
-            value = os.open("mdLogFiles/" + targetName + "_" + targetStep + ".log", os.O_CREAT|os.O_WRONLY|os.O_TRUNC)
+            value = os.open(targetName + "_" + targetStep + ".log", os.O_CREAT|os.O_WRONLY|os.O_TRUNC)
             self.errFds[key] = value
         return value
 

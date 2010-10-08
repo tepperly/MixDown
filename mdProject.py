@@ -1,6 +1,6 @@
 import os, Queue
 
-from mdLoggerBase import LoggerBase
+from mdLogger import *
 from mdTarget import *
 from utilityFunctions import *
 
@@ -72,7 +72,7 @@ class Project:
                             printErrorAndExit("Project targets can only have one 'DependsOn' defined (use a comma delimited list for multiple dependancies)", self.path, lineCount)
                         if currPair[1] != "":
                             dependsOnList = stripItemsInList(currPair[1].split(","))
-                            if currTarget.getName() in dependsOnList:
+                            if currTarget.name in dependsOnList:
                                 printErrorAndExit("Project targets cannot depend on themselves", self.path, lineCount)
                             currTarget.dependsOn = dependsOnList
                     elif currName == "steps":

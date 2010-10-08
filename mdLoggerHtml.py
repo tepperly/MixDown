@@ -1,11 +1,17 @@
 import sys
 
-from mdLoggerBase import LoggerBase
-
-class LoggerHtml(LoggerBase):
+class LoggerHtml:
     def close(self):
         pass
     
+    def __FormatErrorMessage(self, message, filePath = "", lineNumber = 0):
+        if filePath == "" and lineNumber == 0:
+            return "Error: %s\n" % (message)
+        elif lineNumber == 0:
+            return "Error: %s: %s\n" % (filePath, message)
+        else:
+            return "Error: %s (line %d): %s\n" % (filePath, lineNumber, message)
+
     def writeMessage(self, message):
         self.writeMessage(message, "", "")
 

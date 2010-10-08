@@ -5,7 +5,7 @@ from mdProject import *
 def configure(target, options):
     if target.hasStep("config"):
         if options.verbose:
-            Logger().writeMessage("Configuring target " + target.getName() + "...")
+            Logger().writeMessage("Configuring target " + target.name + "...")
         targetPath = target.path
         outFd = Logger().getOutFd(target.name, "configure")
         if target.configCmd != "":
