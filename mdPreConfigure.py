@@ -4,14 +4,14 @@ from mdTarget import *
 from mdOptions import *
 from mdProject import *
 from utilityFunctions import *
-from mdLoggerBase import *
+from mdLogger import *
 
-def preConfigure(target, options, logger):
+def preConfigure(target, options):
     if target.hasStep("preconfig"):
         if options.verbose:
-            logger.writeMessage("Preconfiguring target " + target.name + "...")
+            Logger().writeMessage("Preconfiguring target " + target.name + "...")
         targetPath = target.path
-        outFd = logger.getOutFd(target.name, "preConfigure")
+        outFd = Logger().getOutFd(target.name, "preConfigure")
         if target.preConfigCmd != "":
             executeSubProcess(target.preConfigCmd.split(" "), targetPath, outFd, options.verbose, True)
         else:

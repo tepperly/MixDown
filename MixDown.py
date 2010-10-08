@@ -9,21 +9,19 @@ from utilityFunctions import *
 from mdPreConfigure import *
 from mdConfigure import *
 from mdBuild import *
-from mdLoggerBase import *
-from mdLoggerFile import *
-from mdLoggerHtml import *
+from mdLogger import *
 
 #--------------------------------Main---------------------------------
 def main():
     printProgramHeader()
 
-    project, options, logger = setup()
+    project, options = setup()
     for target in project.targets:
-        preConfigure(target, options, logger)
-        configure(target, options, logger)
-        build(target, options, logger)
-        deploy(project, options, logger)    
-    cleanup(options, logger)
+        preConfigure(target, options)
+        configure(target, options)
+        build(target, options)
+        deploy(project, options)    
+    cleanup(options)
     
     sys.exit()
         
@@ -32,20 +30,15 @@ def setup():
     options = Options()
     print "Processing commandline options..."
     options.processCommandline()
-    if options.logger == "html":
-        logger = LoggerHtml()
-    elif options.logger == "file":
-        logger = LoggerFile()
-    else:
-        logger = LoggerBase()
+    SetLogger(options.logger)
     
     if options.verbose:
-        logger.writeMessage(str(options))
+        Logger().writeMessage(str(options))
 
     #Clean workspaces if told to clean before
     #TODO: Clean output directories in all targets
     if options.cleanBefore:
-        logger.writeMessage("Cleaning MixDown directories...")
+        Logger().writeMessage("Cleaning MixDown directories...")
         try:
             removeDir(options.buildDir)
             removeDir(options.downloadDir)
@@ -65,7 +58,7 @@ def setup():
     project = Project(options.projectFile)
     
     #Convert all targetPaths to folders (download and/or unpack if necessary)
-    logger.writeMessage("Converting all targets to local directories...")
+    Logger().writeMessage("Converting all targets to local directories...")
 
     #Check for files that need to be downloaded
     for currTarget in project.targets:
@@ -93,30 +86,30 @@ def setup():
             else:
                 fileExt = os.path.splitext(currPath)[1]
                 if basename.endswith(".tar.gz") or basename.endswith(".tar.bz2") or basename.endswith(".tar") or basename.endswith(".tgz") or basename.endswith(".tbz") or basename.endswith(".tb2"):
-                    logger.writeError("Given tar file '" + currPath +"' not understood by python's tarfile package", exit=True)
+                    Logger().writeError("Given tar file '" + currPath +"' not understood by python's tarfile package", exit=True)
                 else:
-                    logger.writeError("Given target '" + currPath + "' not understood (folders, URLs, and tar files are acceptable)", exit=True)
+                    Logger().writeError("Given target '" + currPath + "' not understood (folders, URLs, and tar files are acceptable)", exit=True)
         else:
-            logger.writeError("Given target '" + currPath + "' does not exist", exit=True)
+            Logger().writeError("Given target '" + currPath + "' does not exist", exit=True)
             
     for currTarget in project.targets:
         currTarget.examine()
 
-    return project, options, logger
+    return project, options
 
 #------------------------------Deploy---------------------------------
 def deploy(project, options):
     print "TODO: deploy not implemented yet"
     
 #-----------------------------Clean up--------------------------------
-def cleanup(options, logger):
+def cleanup(options):
     if options.cleanAfter:
-        logger.writeMessage("Cleaning MixDown Build and Download directories...")
+        Logger().writeMessage("Cleaning MixDown Build and Download directories...")
         try:
             removeDir(options.buildDir)
             removeDir(options.downloadDir)
         except IOError, e:
-            logger.writeError(e, exit=True)
+            Logger().writeError(e, exit=True)
 
 #----------------------------------------------------------------------        
 def printProgramHeader():

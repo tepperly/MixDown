@@ -1,25 +1,6 @@
 import sys
 
-class LoggerBase():
-    __instance = None
-    
-    #def __new__(classtype, *args, **kwargs):
-        ## Check to see if a __instance exists already for this class
-        ## Compare class types instead of just looking for None so
-        ## that subclasses will create their own __instance objects
-        #if classtype != type(classtype.__instance):
-            #classtype.__instance = object.__new__(classtype, *args, **kwargs)
-        #return classtype.__instance
-
-    #def __new__(cls, *args, **kwargs):
-        #if not cls._instance:
-            #cls._instance = super(Singleton, cls).__new__(cls, *args, **kwargs)
-        #return cls._instance
-
-    def __init__(self):
-        if not self.__instance:
-            self.__instance = LoggerBase()
-        
+class LoggerConsole:
     def close(self):
         pass
     
@@ -49,5 +30,4 @@ class LoggerBase():
         return sys.stderr
     
     def testSingleton(self):
-        print "singleton = Base"
-        
+        print "singleton = Console"
