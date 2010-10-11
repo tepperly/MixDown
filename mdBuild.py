@@ -13,4 +13,4 @@ def build(target, options):
             if "make" in target.buildSystems:
                 makefile = findShallowestFile(target.path, ["GNUmakefile", "makefile", "Makefile"])
                 wd = includeTrailingPathDelimiter(os.path.dirname(makefile))
-                executeSubProcess(["./make"], wd, outFd, options.verbose, True)
+                executeSubProcess(["make"], wd, outFd, options.verbose, True)
