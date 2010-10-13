@@ -24,6 +24,12 @@ class LoggerHtml:
         sys.stderr.write(self.__FormatErrorMessage(message, filePath, lineNumber))
         sys.stderr.flush()
 
+    def reportSuccess(self, targetName = "", targetStep = ""):
+        pass
+
+    def reportFailure(self, targetName = "", targetStep = "", returnCode = 0, exit = False):
+        pass
+
     def getOutFd(self, targetName = "", targetStep = ""):
         return sys.stdout
 

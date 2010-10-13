@@ -14,11 +14,22 @@ class LoggerConsole:
 
     def writeMessage(self, message, targetName = "", targetStep = ""):
         sys.stderr.flush()
-        sys.stdout.write(message + "\n")        
+        sys.stdout.write(message + "\n")
 
     def writeError(self, message, targetName = "", targetStep = "", filePath = "", lineNumber = 0, exit = False):
         sys.stdout.flush()
         sys.stderr.write(self.__FormatErrorMessage(message, filePath, lineNumber))
+        sys.stderr.flush()
+        if exit:
+            sys.exit()
+
+    def reportSuccess(self, targetName = "", targetStep = ""):
+        sys.stderr.flush()
+        sys.stdout.write(targetStep + " for " + targetName + " succeeded.\n")
+
+    def reportFailure(self, targetName = "", targetStep = "", returnCode = 0, exit = False):
+        sys.stdout.flush()
+        sys.stderr.write(targetStep + " for " + targetName + " failed with error code " + returnCode + ".\n")
         sys.stderr.flush()
         if exit:
             sys.exit()

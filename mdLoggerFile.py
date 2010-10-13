@@ -15,9 +15,9 @@ class LoggerFile:
 
     def close(self):
         for fd in self.errorFds:
-            fd.close()
+            os.close(fd)
         for fd in self.outFds:
-            fd.close()
+            os.close(fd)
 
     def __LookupOutFd(self, targetName, targetStep):
         key = str.lower(targetName + targetStep)
@@ -41,8 +41,23 @@ class LoggerFile:
 
     def writeError(self, message, targetName = "", targetStep = "", filePath = "", lineNumber = 0, exit = False):
         sys.stdin.flush()
-        self.getErrorFd(targetName, targetStep).write(self.__FormatErrorMessage(message, filePath, lineNumber))
+        os.write(self.getErrorFd(targetName, targetStep), self.__FormatErrorMessage(message, filePath, lineNumber))
         sys.stderr.flush()
+
+    def reportSuccess(self, targetName = "", targetStep = ""):
+        message = targetStep + " for " + targetName + " succeeded.\n"
+        sys.stderr.flush()
+        sys.stdout.write(message)
+        os.write(self.getOutFd(targetName, targetStep), message)
+
+    def reportFailure(self, targetName = "", targetStep = "", returnCode = 0, exit = False):
+        message = targetStep + " for " + targetName + " failed with error code " + returnCode + ".\n"
+        sys.stdout.flush()
+        sys.stderr.write(message)
+        os.write(self.getErrorFd(targetName, targetStep), message)
+        sys.stderr.flush()
+        if exit:
+            sys.exit()
 
     def getOutFd(self, targetName = "", targetStep = ""):
         if targetName != "" and targetStep != "":

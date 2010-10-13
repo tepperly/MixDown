@@ -22,6 +22,7 @@ def executeSubProcess(args, workingDirectory = "", outFileHandle = 1, verbose = 
     process.wait()
     if exitOnError and process.returncode != 0:
         printErrorAndExit("Command '" + fullCommand + "': exited with error code " + str(process.returncode))
+    return process.returncode
         
 def findShallowestFile(startPath, fileList):
     q = Queue.Queue()
