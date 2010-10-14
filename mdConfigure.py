@@ -18,8 +18,9 @@ def configure(target, options):
                     basename = os.path.basename(item)
                     if str.lower(basename) in ['configure']:
                         returnCode = executeSubProcess(["./configure"], targetPath, outFd, options.verbose, True)
-        if returnCode != None:
-            if returnCode != 0:
-                Logger().reportFailure(target.name, "configure", returnCode, True)
-            else:
-                Logger().reportSuccess(target.name, "configure")
+        if returnCode == None:
+            Logger().reportSkipped(target.name, "configure")
+        elif returnCode != 0:
+            Logger().reportFailure(target.name, "configure", returnCode, True)
+        else:
+            Logger().reportSuccess(target.name, "configure")

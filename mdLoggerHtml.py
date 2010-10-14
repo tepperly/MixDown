@@ -24,6 +24,9 @@ class LoggerHtml:
         sys.stderr.write(self.__FormatErrorMessage(message, filePath, lineNumber))
         sys.stderr.flush()
 
+    def reportSkipped(self, targetName = "", targetStep = ""):
+        pass
+
     def reportStart(self, targetName = "", targetStep = ""):
         pass
 

@@ -22,8 +22,9 @@ def preConfigure(target, options):
                     basename = os.path.basename(item)
                     if basename in ['buildconf']:
                         returnCode = executeSubProcess(["./" + basename], targetPath, outFd, options.verbose, True)
-        if returnCode != None:
-            if returnCode != 0:
-                Logger().reportFailure(target.name, "preConfigure", returnCode, True)
-            else:
-                Logger().reportSuccess(target.name, "preConfigure")
+        if returnCode == None:
+            Logger().reportSkipped(target.name, "preConfigure")
+        elif returnCode != 0:
+            Logger().reportFailure(target.name, "preConfigure", returnCode, True)
+        else:
+            Logger().reportSuccess(target.name, "preConfigure")

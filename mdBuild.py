@@ -15,8 +15,9 @@ def build(target, options):
                 makefile = findShallowestFile(target.path, ["GNUmakefile", "makefile", "Makefile"])
                 wd = includeTrailingPathDelimiter(os.path.dirname(makefile))
                 returnCode = executeSubProcess(["make"], wd, outFd, options.verbose, False)
-        if returnCode != None:
-            if returnCode != 0:
-                Logger().reportFailure(target.name, "build", returnCode, True)
-            else:
-                Logger().reportSuccess(target.name, "build")
+        if returnCode == None:
+            Logger().reportSkipped(target.name, "build")
+        elif returnCode != 0:
+            Logger().reportFailure(target.name, "build", returnCode, True)
+        else:
+            Logger().reportSuccess(target.name, "build")

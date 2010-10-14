@@ -44,6 +44,12 @@ class LoggerFile:
         os.write(self.getErrorFd(targetName, targetStep), self.__FormatErrorMessage(message, filePath, lineNumber))
         sys.stderr.flush()
 
+    def reportSkipped(self, targetName = "", targetStep = ""):
+        message = targetName + ": " + str.capitalize(targetStep) + ": Skipped...\n"
+        sys.stderr.flush()
+        sys.stdout.write(message)
+        os.write(self.getOutFd(targetName, targetStep), message)
+    
     def reportStart(self, targetName = "", targetStep = ""):
         message = targetName + ": " + str.capitalize(targetStep) + ": Starting...\n"
         sys.stderr.flush()

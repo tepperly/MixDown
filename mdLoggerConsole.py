@@ -23,6 +23,10 @@ class LoggerConsole:
         if exit:
             sys.exit()
 
+    def reportSkipped(self, targetName = "", targetStep = ""):
+        sys.stderr.flush()
+        sys.stdout.write(targetName + ": " + str.capitalize(targetStep) + ": Skipped...\n")
+    
     def reportStart(self, targetName = "", targetStep = ""):
         sys.stderr.flush()
         sys.stdout.write(targetName + ": " + str.capitalize(targetStep) + ": Starting...\n")
