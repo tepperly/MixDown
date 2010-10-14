@@ -5,7 +5,7 @@ from mdProject import *
 def build(target, options):
     if target.hasStep("build"):
         if options.verbose:
-            Logger().writeMessage("Building target " + target.name + "...")
+            Logger().reportStart(target.name, "build")
         returnCode = None
         outFd = Logger().getOutFd(target.name, "build")
         if target.buildCmd != "":

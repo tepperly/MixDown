@@ -44,14 +44,20 @@ class LoggerFile:
         os.write(self.getErrorFd(targetName, targetStep), self.__FormatErrorMessage(message, filePath, lineNumber))
         sys.stderr.flush()
 
+    def reportStart(self, targetName = "", targetStep = ""):
+        message = targetName + ": " + str.capitalize(targetStep) + ": Starting...\n"
+        sys.stderr.flush()
+        sys.stdout.write(message)
+        os.write(self.getOutFd(targetName, targetStep), message)
+
     def reportSuccess(self, targetName = "", targetStep = ""):
-        message = targetStep + " for " + targetName + " succeeded.\n"
+        message = targetName + ": " + str.capitalize(targetStep) + ": Succeeded.\n"
         sys.stderr.flush()
         sys.stdout.write(message)
         os.write(self.getOutFd(targetName, targetStep), message)
 
     def reportFailure(self, targetName = "", targetStep = "", returnCode = 0, exit = False):
-        message = targetStep + " for " + targetName + " failed with error code " + returnCode + ".\n"
+        message = "Error: " + targetName + ": " + str.capitalize(targetStep) + ": Failed with error code " + returnCode + ".\n"
         sys.stdout.flush()
         sys.stderr.write(message)
         os.write(self.getErrorFd(targetName, targetStep), message)

@@ -35,6 +35,9 @@ class LoggerBase:
     def writeError(self, message, targetName = "", targetStep = "", filePath = "", lineNumber = 0, exit = False):
         pass
     
+    def reportStart(self, targetName = "", targetStep = ""):
+        pass
+    
     def reportSuccess(self, targetName = "", targetStep = ""):
         pass
 

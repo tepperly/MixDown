@@ -9,7 +9,7 @@ from mdLogger import *
 def preConfigure(target, options):
     if target.hasStep("preconfig"):
         if options.verbose:
-            Logger().writeMessage("Preconfiguring target " + target.name + "...")
+            Logger().reportStart(target.name, "preConfigure")
         returnCode = None
         targetPath = target.path
         outFd = Logger().getOutFd(target.name, "preConfigure")

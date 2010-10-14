@@ -23,13 +23,17 @@ class LoggerConsole:
         if exit:
             sys.exit()
 
+    def reportStart(self, targetName = "", targetStep = ""):
+        sys.stderr.flush()
+        sys.stdout.write(targetName + ": " + str.capitalize(targetStep) + ": Starting...\n")
+
     def reportSuccess(self, targetName = "", targetStep = ""):
         sys.stderr.flush()
-        sys.stdout.write(targetStep + " for " + targetName + " succeeded.\n")
+        sys.stdout.write(targetName + ": " + str.capitalize(targetStep) + ": Succeeded\n")
 
     def reportFailure(self, targetName = "", targetStep = "", returnCode = 0, exit = False):
         sys.stdout.flush()
-        sys.stderr.write(targetStep + " for " + targetName + " failed with error code " + returnCode + ".\n")
+        sys.stderr.write("Error: " + targetName + ": " + str.capitalize(targetStep) + ": Failed with error code " + returnCode + ".\n")
         sys.stderr.flush()
         if exit:
             sys.exit()
