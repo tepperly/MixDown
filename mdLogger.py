@@ -7,13 +7,13 @@ def Logger():
         SetLogger()
     return __loggerInstance
 
-def SetLogger(loggerName = ""):
+def SetLogger(loggerName = "", logOutputDir = ""):
     global __loggerInstance
     if __loggerInstance == None:
         if loggerName == "html":
-            __loggerInstance = mdLoggerHtml.LoggerHtml()
+            __loggerInstance = mdLoggerHtml.LoggerHtml(logOutputDir)
         elif loggerName == "file":
-            __loggerInstance = mdLoggerFile.LoggerFile()
+            __loggerInstance = mdLoggerFile.LoggerFile(logOutputDir)
         elif loggerName == "console":
             __loggerInstance = mdLoggerConsole.LoggerConsole()
         else:

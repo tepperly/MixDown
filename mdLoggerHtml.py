@@ -1,6 +1,11 @@
 import sys
 
 class LoggerHtml:
+    def __init__(self, logOutputDir = ""):
+        self.logOutputDir = logOutputDir
+        if not os.path.isdir(self.logOutputDir):
+            os.makedirs(self.logOutputDir)
+        
     def close(self):
         pass
     

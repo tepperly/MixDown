@@ -30,15 +30,13 @@ def setup():
     options = Options()
     print "Processing commandline options..."
     options.processCommandline()
-    SetLogger(options.logger)
-    
-    if options.verbose:
-        Logger().writeMessage(str(options))
 
+    #Read project file
+    project = Project(options.projectFile)
+    
     #Clean workspaces if told to clean before
-    #TODO: Clean output directories in all targets
     if options.cleanBefore:
-        Logger().writeMessage("Cleaning MixDown directories...")
+        print "Cleaning MixDown directories..."
         try:
             removeDir(options.buildDir)
             removeDir(options.downloadDir)
@@ -47,23 +45,23 @@ def setup():
         except IOError, e:
             print e
             sys.exit()
-    if not os.path.isdir(options.buildDir):
-        os.makedirs(options.buildDir)
-    if not os.path.isdir(options.downloadDir):
-        os.makedirs(options.downloadDir)
-    if not os.path.isdir(options.installDir):
-        os.makedirs(options.installDir)
-    
-    #Read project file
-    project = Project(options.projectFile)
+        for currTarget in project.targets:
+            if currTarget.output != "" and os.path.exists(currTarget.output):
+                removeDir(currTarget.output)
+                
+    SetLogger(options.logger, options.logDir)
+    if options.verbose:
+        Logger().writeMessage(str(options))
     
     #Convert all targetPaths to folders (download and/or unpack if necessary)
     Logger().writeMessage("Converting all targets to local directories...")
-
+    
     #Check for files that need to be downloaded
     for currTarget in project.targets:
         currPath = currTarget.path
         if (not os.path.isdir(currPath)) and (not os.path.isfile(currPath)) and isURL(currPath):
+            if not os.path.isdir(options.downloadDir):
+                os.makedirs(options.downloadDir)
             filenamePath = options.downloadDir + URLToFilename(currPath)
             urllib.urlretrieve(currPath, filenamePath)
             currTarget.path = filenamePath
@@ -78,6 +76,8 @@ def setup():
         elif os.path.isfile(currPath):
             if tarfile.is_tarfile(currPath):
                 if currTarget.output == "":
+                    if not os.path.isdir(options.buildDir):
+                        os.makedirs(options.buildDir)
                     outDir = includeTrailingPathDelimiter(options.buildDir + splitFileName(currPath)[0])
                 else:
                     outDir = currTarget.output

@@ -1,7 +1,10 @@
-import os, sys
+import os, sys, utilityFunctions
 
 class LoggerFile:
-    def __init__(self):
+    def __init__(self, logOutputDir = ""):
+        self.logOutputDir = logOutputDir
+        if not os.path.isdir(self.logOutputDir):
+            os.makedirs(self.logOutputDir)
         self.errorFds = dict()
         self.outFds = dict()
         
@@ -23,7 +26,8 @@ class LoggerFile:
         key = str.lower(targetName + targetStep)
         value = self.outFds.get(key)
         if value == None and targetName != "":
-            value = os.open(targetName + "_" + targetStep + ".log", os.O_CREAT|os.O_WRONLY|os.O_TRUNC)
+            logName = utilityFunctions.includeTrailingPathDelimiter(self.logOutputDir) + targetName + "_" + targetStep + ".log"
+            value = os.open(logName, os.O_CREAT|os.O_WRONLY|os.O_TRUNC)
             self.outFds[key] = value
         return value
 
@@ -31,7 +35,8 @@ class LoggerFile:
         key = str.lower(targetName + targetStep)
         value = self.errorFds.get(key)
         if value == None and targetName != "":
-            value = os.open(targetName + "_" + targetStep + ".log", os.O_CREAT|os.O_WRONLY|os.O_TRUNC)
+            logName = utilityFunctions.includeTrailingPathDelimiter(self.logOutputDir) + targetName + "_" + targetStep + "_errors.log"
+            value = os.open(logName, os.O_CREAT|os.O_WRONLY|os.O_TRUNC)
             self.errFds[key] = value
         return value
 
