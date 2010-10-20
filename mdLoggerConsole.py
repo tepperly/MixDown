@@ -1,6 +1,6 @@
-import sys
+import mdLogger, sys
 
-class LoggerConsole:
+class LoggerConsole(mdLogger.LoggerBase):
     def close(self):
         pass
     

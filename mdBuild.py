@@ -15,6 +15,13 @@ def build(target, options):
                 makefile = findShallowestFile(target.path, ["GNUmakefile", "makefile", "Makefile"])
                 wd = includeTrailingPathDelimiter(os.path.dirname(makefile))
                 returnCode = executeSubProcess(["make"], wd, outFd, options.verbose, False)
+            elif "automake" in target.buildSystems:
+                makefile = findShallowestFile(target.path, ["GNUmakefile", "makefile", "Makefile"])
+                if makefile == "":
+                    Logger().writeError(message="Automake did not create a Makefile", targetName=target.name, targetStep="build", exit=False)
+                    Logger().reportFailure(target.name, "build", 1, True)
+                wd = includeTrailingPathDelimiter(os.path.dirname(makefile))
+                returnCode = executeSubProcess(["make"], wd, outFd, options.verbose, False)
         if returnCode == None:
             Logger().reportSkipped(target.name, "build")
         elif returnCode != 0:

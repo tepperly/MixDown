@@ -99,7 +99,8 @@ def setup():
 
 #------------------------------Deploy---------------------------------
 def deploy(project, options):
-    print "TODO: deploy not implemented yet"
+    #TODO: implement
+    pass
     
 #-----------------------------Clean up--------------------------------
 def cleanup(options):

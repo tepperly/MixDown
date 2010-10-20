@@ -1,5 +1,3 @@
-import mdLoggerConsole, mdLoggerFile, mdLoggerHtml
-
 __loggerInstance = None
 
 def Logger():
@@ -11,12 +9,16 @@ def SetLogger(loggerName = "", logOutputDir = ""):
     global __loggerInstance
     if __loggerInstance == None:
         if loggerName == "html":
+            import mdLoggerHtml
             __loggerInstance = mdLoggerHtml.LoggerHtml(logOutputDir)
         elif loggerName == "file":
+            import mdLoggerFile
             __loggerInstance = mdLoggerFile.LoggerFile(logOutputDir)
         elif loggerName == "console":
+            import mdLoggerConsole
             __loggerInstance = mdLoggerConsole.LoggerConsole()
         else:
+            import mdLoggerConsole
             __loggerInstance = mdLoggerConsole.LoggerConsole()
             __loggerInstance.writeError(loggerName + " logger not found, falling back on console logger")
     else:

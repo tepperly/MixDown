@@ -1,6 +1,6 @@
-import sys
+import mdLogger, sys
 
-class LoggerHtml:
+class LoggerHtml(mdLogger.LoggerBase):
     def __init__(self, logOutputDir = ""):
         self.logOutputDir = logOutputDir
         if not os.path.isdir(self.logOutputDir):

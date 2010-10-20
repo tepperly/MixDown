@@ -113,7 +113,7 @@ class Project:
                 currDepName = depQueue.get()
                 currDepTarget = self.getTarget(currDepName)
                 if currDepTarget is None:
-                    printErrorAndExit("Project target '%s' has non-existant dependancy '%s'" % (currDepTarget.name, currDepName))
+                    printErrorAndExit("Project target '%s' has non-existant dependancy '%s'" % (currTarget.name, currDepName))
                     
                 for name in currDepTarget.dependsOn:
                     if name in currFullDepList:

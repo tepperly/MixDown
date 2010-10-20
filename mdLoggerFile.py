@@ -1,6 +1,6 @@
-import os, sys, utilityFunctions
+import mdLogger, os, sys, utilityFunctions
 
-class LoggerFile:
+class LoggerFile(mdLogger.LoggerBase):
     def __init__(self, logOutputDir = ""):
         self.logOutputDir = logOutputDir
         if not os.path.isdir(self.logOutputDir):
@@ -50,7 +50,7 @@ class LoggerFile:
         sys.stderr.flush()
 
     def reportSkipped(self, targetName = "", targetStep = ""):
-        message = targetName + ": " + str.capitalize(targetStep) + ": Skipped...\n"
+        message = targetName + ": " + str.capitalize(targetStep) + ": Skipped.\n"
         sys.stderr.flush()
         sys.stdout.write(message)
         os.write(self.getOutFd(targetName, targetStep), message)
