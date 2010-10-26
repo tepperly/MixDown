@@ -21,7 +21,7 @@ def main():
         preConfigure(target, options)
         configure(target, options)
         build(target, options)
-        install(project, options)
+        install(target, options)
     cleanup(options)
     
     sys.exit()
