@@ -13,18 +13,19 @@ class Options:
         self.cleanAfter = False
         self.verbose = False
         self.logger = ""
+        self.prefix = "mdPrefix/"
 
     def __str__(self):
-        retStr = "Options:\n"
-        retStr += "  Project File: " + self.projectFile + "\n"
-        retStr += "  Build Dir:    " + self.buildDir + "\n"
-        retStr += "  Download Dir: " + self.downloadDir + "\n"
-        retStr += "  Install Dir:  " + self.installDir + "\n"
-        retStr += "  Clean Before: " + str(self.cleanBefore) + "\n"
-        retStr += "  Clean After:  " + str(self.cleanAfter) + "\n"
-        retStr += "  Verbose:      " + str(self.verbose) + "\n"
-        retStr += "  Logger:       " + self.logger.capitalize() + "\n"
-        return retStr
+        return "Options:\n\
+  Project File: " + self.projectFile + "\n\
+  Prefix Dir:   " + self.prefix + "\n\
+  Build Dir:    " + self.buildDir + "\n\
+  Download Dir: " + self.downloadDir + "\n\
+  Install Dir:  " + self.installDir + "\n\
+  Clean Before: " + str(self.cleanBefore) + "\n\
+  Clean After:  " + str(self.cleanAfter) + "\n\
+  Verbose:      " + str(self.verbose) + "\n\
+  Logger:       " + self.logger.capitalize() + "\n"
         
     @property
     def buildDir(self, value):
@@ -46,7 +47,11 @@ class Options:
             currFlag = str.lower(currArg[:2])
             currValue = currArg[2:]
             
-            if currFlag == "-l":
+            
+            if currFlag == "-p":
+                validateOptionPair(currFlag, currValue)
+                self.prefix = currValue
+            elif currFlag == "-l":
                 validateOptionPair(currFlag, currValue)
                 self.logger = str.lower(currValue)
             elif currFlag == "-b":

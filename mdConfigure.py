@@ -17,7 +17,11 @@ def configure(target, options):
                 if os.path.isfile(itemPath):
                     basename = os.path.basename(item)
                     if str.lower(basename) in ['configure']:
-                        returnCode = executeSubProcess(["./configure"], targetPath, outFd, options.verbose, True)
+                        args = ["./configure"]
+                        args.append("--prefix=" + options.prefix)
+                        for dependancy in target.dependsOn:
+                            args.append("--with-" + dependancy + "=" + options.prefix)
+                        returnCode = executeSubProcess(args, targetPath, outFd, options.verbose, True)
         if returnCode == None:
             Logger().reportSkipped(target.name, "configure")
         elif returnCode != 0:

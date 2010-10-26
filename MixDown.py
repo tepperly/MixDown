@@ -9,6 +9,7 @@ from utilityFunctions import *
 from mdPreConfigure import *
 from mdConfigure import *
 from mdBuild import *
+from mdInstall import *
 from mdLogger import *
 
 #--------------------------------Main---------------------------------
@@ -20,7 +21,7 @@ def main():
         preConfigure(target, options)
         configure(target, options)
         build(target, options)
-        deploy(project, options)    
+        install(project, options)
     cleanup(options)
     
     sys.exit()
@@ -97,11 +98,6 @@ def setup():
 
     return project, options
 
-#------------------------------Deploy---------------------------------
-def deploy(project, options):
-    #TODO: implement
-    pass
-    
 #-----------------------------Clean up--------------------------------
 def cleanup(options):
     if options.cleanAfter:
@@ -123,17 +119,20 @@ def printUsageAndExit(errorStr = ""):
 def printUsage(errorStr = ""):
     if errorStr != "":
         print "Error: " + errorStr + "\n"
-    
+        
     printProgramHeader()
+    
     print "    Example Usage: ./MixDown.py foo.md\\\n\
 \n\
     Required:\n\
     <path to .md file>   Path to MixDown project file\n\
 \n\
     Optional:\n\
+    -p<path>      Override prefix directory\n\
     -b<path>      Override build directory\n\
     -d<path>      Override deploy directory\n\
     -u<path>      Override unpack folder\n\
+    -l<logger>    Override default logger (Console, File, Html)\n\
     -cb           Cleanup before running (deletes unpack, build, and deploy directories)\n\
     -ca           Cleanup after deploy (deletes unpack and build directories)\n\
 \n\
