@@ -95,6 +95,12 @@ def setup():
             
     for currTarget in project.targets:
         currTarget.examine()
+        
+    prevLibPath = ""
+    if os.environ.has_key("LD_LIBRARY_PATH"):
+        prevLibPath = ":" + os.environ["LD_LIBRARY_PATH"]
+    strippedPrefix = stripTrailingPathDelimiter(options.prefix)
+    os.environ["LD_LIBRARY_PATH"] = strippedPrefix + "/lib:" + strippedPrefix + "/lib64" + prevLibPath
 
     return project, options
 

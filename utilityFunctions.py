@@ -117,6 +117,11 @@ def stripItemsInList(value):
         retList.append(str.strip(item))
     return retList
 
+def stripTrailingPathDelimiter(path):
+    if (path[len(path)-1:] == '/'):
+        return path[:len(path)-1]
+    return path
+
 def untar(tarPath, outPath = "", stripDir=False):
     if stripDir:
         unTarOutpath = tempfile.mkdtemp()
