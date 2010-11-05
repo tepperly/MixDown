@@ -3,9 +3,10 @@ import os
 from utilityFunctions import *
 
 class Target:
-    def __init__(self, targetName):
+    def __init__(self, targetName, path = ""):
         self.name = targetName
-        self.path = ""
+        self.aliases = []
+        self.path = path
         self.output = ""
         self.dependancyDepth = 0
         self.sourceTypes = []
@@ -69,9 +70,29 @@ class Target:
                         elif currFileExt in [".pas"]:
                             self.addSourceType("Pascal")
     def __str__(self):
-        retStr = "Target: " + self.path + "\n"
-        retStr += prettyPrintList(self.sourceTypes, "Source Types: ", "  ", "    ") + "\n"
-        retStr += prettyPrintList(self.buildSystems, "Build Systems: ", "  ", "    ") + "\n"
+        retStr  = "Target:\n"
+        retStr += "  Name: " + self.name + "\n"
+        retStr += "  Path: " + self.path + "\n"
+        if len(self.aliases) != 0:
+            retStr += "  Alias: " + ",".join(self.aliases) + "\n"        
+        if self.output != "":
+            retStr += "  Output: " + self.output + "\n"
+        if len(self.dependsOn) != 0:
+            retStr += "  DependsOn: " + ",".join(self.dependsOn) + "\n"        
+        if len(self.sourceTypes) != 0:
+            retStr += "  Source Types: " + ",".join(self.sourceTypes) + "\n"
+        if len(self.buildSystems) != 0:
+            retStr += "  Build Systems: " + ",".join(self.buildSystems) + "\n"
+        if len(self.steps) != 0:
+            retStr += "  Steps: " + ",".join(self.steps) + "\n"
+        if self.preConfigCmd != "":
+            retStr += "  PreConfig Command: " + self.preConfigCmd + "\n"
+        if self.configCmd != "":
+            retStr += "  Config Command: " + self.configCmd + "\n"
+        if self.buildCmd != "":
+            retStr += "  Build Command: " + self.buildCmd + "\n"
+        if self.installCmd != "":
+            retStr += "  Install Command: " + self.installCmd + "\n"
         return retStr
 
     @property
