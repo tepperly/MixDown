@@ -103,7 +103,7 @@ def searchForPossibleAliasInList(possibleAlias, targetList, interactive = False)
                     target.aliases.append(possibleAlias)
                     return target
             else:
-                print target.name + ": Alias, " + possibleAlias + ", added"
+                print target.name + ": Alias added (" + possibleAlias + ")"
                 target.aliases.append(possibleAlias)
                 return target
     return None
