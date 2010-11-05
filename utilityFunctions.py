@@ -82,7 +82,7 @@ def printErrorAndExit(errorStr, filePath = "", lineNumber = 0):
 
 def removeDir(path):
     if (path[len(path)-1:] == '/') and os.path.isfile(path[:len(path)-1]):
-        raise IOError("Error: Cannot clean directory '" + path + "' : File exists by the same name.")
+        raise IOError("Error: Cannot clean directory '" + path + "' : File (not directory) exists by the same name.")
     if os.path.exists(path):
         shutil.rmtree(path)
         
