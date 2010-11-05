@@ -12,6 +12,8 @@ from mdBuild import *
 from mdInstall import *
 from mdLogger import *
 
+originalLibraryPath = ""
+
 #--------------------------------Main---------------------------------
 def main():
     printProgramHeader()
@@ -95,12 +97,14 @@ def setup():
             
     for currTarget in project.targets:
         currTarget.examine()
-        
-    prevLibPath = ""
-    if os.environ.has_key("LD_LIBRARY_PATH"):
-        prevLibPath = ":" + os.environ["LD_LIBRARY_PATH"]
+
     strippedPrefix = stripTrailingPathDelimiter(options.prefix)
-    os.environ["LD_LIBRARY_PATH"] = strippedPrefix + "/lib:" + strippedPrefix + "/lib64" + prevLibPath
+    libraryPaths = strippedPrefix + "/lib:" + strippedPrefix + "/lib64"
+    if os.environ.has_key("LD_LIBRARY_PATH"):
+        originalLibraryPath = str.strip(os.environ["LD_LIBRARY_PATH"])
+        if originalLibraryPath != "":
+            libraryPaths += ":" + originalLibraryPath
+    os.environ["LD_LIBRARY_PATH"] = libraryPaths
 
     return project, options
 
@@ -113,6 +117,8 @@ def cleanup(options):
             removeDir(options.downloadDir)
         except IOError, e:
             Logger().writeError(e, exit=True)
+
+    os.environ["LD_LIBRARY_PATH"] = originalLibraryPath
 
 #----------------------------------------------------------------------        
 def printProgramHeader():
