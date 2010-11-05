@@ -18,72 +18,78 @@ class LoggerFile(mdLogger.LoggerBase):
 
     def close(self):
         for fd in self.errorFds:
-            os.close(fd)
+            fd.close()
         for fd in self.outFds:
-            os.close(fd)
+            fd.close()
 
-    def __LookupOutFd(self, targetName, targetStep):
+    def __LookupOutFile(self, targetName, targetStep):
         key = str.lower(targetName + targetStep)
         value = self.outFds.get(key)
         if value == None and targetName != "":
             logName = utilityFunctions.includeTrailingPathDelimiter(self.logOutputDir) + targetName + "_" + targetStep + ".log"
-            value = os.open(logName, os.O_CREAT|os.O_WRONLY|os.O_TRUNC)
+            value = open(logName, "w")
             self.outFds[key] = value
         return value
 
-    def __LookupErrorFd(self, targetName, targetStep):
+    def __LookupErrorFile(self, targetName, targetStep):
         key = str.lower(targetName + targetStep)
         value = self.errorFds.get(key)
         if value == None and targetName != "":
             logName = utilityFunctions.includeTrailingPathDelimiter(self.logOutputDir) + targetName + "_" + targetStep + "_errors.log"
-            value = os.open(logName, os.O_CREAT|os.O_WRONLY|os.O_TRUNC)
+            value = open(logName, "w")
             self.errFds[key] = value
         return value
 
     def writeMessage(self, message, targetName = "", targetStep = ""):
         sys.stderr.flush()
-        self.getOutFd(targetName, targetStep).write(message + "\n")
+        if targetName == "":
+            sys.stdout.write(message + "\n")
+        else:
+            self.__LookupOutFile(targetName, targetStep).write(message + "\n")
 
     def writeError(self, message, targetName = "", targetStep = "", filePath = "", lineNumber = 0, exit = False):
         sys.stdin.flush()
-        os.write(self.getErrorFd(targetName, targetStep), self.__FormatErrorMessage(message, filePath, lineNumber))
+        if targetName == "":
+            sys.stderr.write(message + "\n")
+        else:
+            self.__LookupErrorFile(targetName, targetStep).write(self.__FormatErrorMessage(message, filePath, lineNumber))
         sys.stderr.flush()
 
     def reportSkipped(self, targetName = "", targetStep = ""):
         message = targetName + ": " + str.capitalize(targetStep) + ": Skipped.\n"
         sys.stderr.flush()
         sys.stdout.write(message)
-        os.write(self.getOutFd(targetName, targetStep), message)
+        self.__LookupOutFile(targetName, targetStep).write(message)
     
     def reportStart(self, targetName = "", targetStep = ""):
         message = targetName + ": " + str.capitalize(targetStep) + ": Starting...\n"
         sys.stderr.flush()
         sys.stdout.write(message)
-        os.write(self.getOutFd(targetName, targetStep), message)
+        self.__LookupOutFile(targetName, targetStep).write(message)
 
     def reportSuccess(self, targetName = "", targetStep = ""):
         message = targetName + ": " + str.capitalize(targetStep) + ": Succeeded.\n"
         sys.stderr.flush()
         sys.stdout.write(message)
-        os.write(self.getOutFd(targetName, targetStep), message)
+        self.__LookupOutFile(targetName, targetStep).write(message)
 
     def reportFailure(self, targetName = "", targetStep = "", returnCode = 0, exit = False):
         message = "Error: " + targetName + ": " + str.capitalize(targetStep) + ": Failed with error code " + returnCode + ".\n"
         sys.stdout.flush()
         sys.stderr.write(message)
-        os.write(self.getErrorFd(targetName, targetStep), message)
+        self.__LookupErrorFile(targetName, targetStep).write(message)
         sys.stderr.flush()
         if exit:
             sys.exit()
 
     def getOutFd(self, targetName = "", targetStep = ""):
         if targetName != "" and targetStep != "":
-            return self.__LookupOutFd(targetName, targetStep)
+            return self.__LookupOutFile(targetName, targetStep).fileno()
         return sys.stdout
 
     def getErrorFd(self, targetName = "", targetStep = ""):
         if targetName != "" and targetStep != "":
-            return self.__LookupErrorFd(targetName, targetStep)
+            return self.__LookupErrorFile(targetName, targetStep).fileno()
         return sys.stderr
 
     def testSingleton(self):
