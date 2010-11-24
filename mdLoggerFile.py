@@ -39,10 +39,10 @@ class LoggerFile(mdLogger.LoggerBase):
             return "Error: %s (line %d): %s\n" % (filePath, lineNumber, message)
 
     def close(self):
-        for fd in self.errorFds:
-            fd.close()
-        for fd in self.outFds:
-            fd.close()
+        for key in self.errorFds.keys():
+            self.errorFds[key].close()
+        for key in self.outFds.keys():
+            self.outFds[key].close()
 
     def __LookupOutFile(self, targetName, targetStep):
         key = str.lower(targetName + targetStep)
