@@ -1,22 +1,45 @@
-import os
+# Copyright (c) 2010, Lawrence Livermore National Security, LLC
+# Produced at Lawrence Livermore National Laboratory
+# LLNL-CODE-462894
+# All rights reserved.
+#
+# This file is part of MixDown. Please read the COPYRIGHT file
+# for Our Notice and the LICENSE file for the GNU Lesser General Public
+# License.
+#
+# This program is free software; you can redistribute it and/or modify it
+# under the terms of the GNU Lesser General Public License (as published by
+# the Free Software Foundation) version 3 dated June 2007.
+#
+# This program is distributed in the hope that it will be useful, but
+# WITHOUT ANY WARRANTY; without even the IMPLIED WARRANTY OF
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the terms and
+# conditions of the GNU Lesser General Public License for more details.
+#
+#  You should have recieved a copy of the GNU Lesser General Public License
+# along with this program; if not, write to the Free Software Foundation,
+# Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+
+import mdBuild, mdCommands, os
 
 from utilityFunctions import *
 
 class Target:
     def __init__(self, targetName, path = ""):
         self.name = targetName
+        self.main = False
         self.aliases = []
+        self.origPath = path
         self.path = path
         self.output = ""
         self.dependancyDepth = 0
-        self.sourceTypes = []
-        self.buildSystems = []
         self.dependsOn = []
-        self.steps = []
-        self.preConfigCmd = ""
-        self.configCmd = ""
-        self.buildCmd = ""
-        self.installCmd = ""
+        self.skipSteps = []
+        self.commands = dict()
+        self.commands["preconfig"] = ""
+        self.commands["config"] = ""
+        self.commands["build"] = ""
+        self.commands["install"] = ""
         
     def isValid(self):
         if self.name == "":
@@ -25,95 +48,43 @@ class Target:
             return False
         return True
         
-    def examine(self):
-        self.__examine(self.path)
+    def examine(self, options):
+        self.__determineCommands(options)
         
-    def __examine(self, path):
-        for item in os.listdir(path):
-            #TODO: follow directories
-            itemPath = includeTrailingPathDelimiter(path) + item
-            if os.path.isdir(itemPath):
-                self.__examine(itemPath)
-            elif os.path.isfile(itemPath):
-                #Look for build systems
-                currBaseName = os.path.basename(item)
-                if currBaseName in ["GNUmakefile", "makefile", "Makefile"]:
-                    self.addBuildSystem("make")
-                elif currBaseName == "build.xml":
-                    self.addBuildSystem("ant")
-                elif currBaseName == "configure.ac":
-                    self.addBuildSystem("autoconf")
-                elif currBaseName == "Makefile.am":
-                    self.addBuildSystem("automake")
-                elif currBaseName == "CMakeLists.txt":
-                    self.addBuildSystem("cmake")
-                else:
-                    #Look for source types
-                    currFileExt = str.lower(os.path.splitext(item)[1])
-                    if not currFileExt == "":
-                        if currFileExt in [".c", ".h"]:
-                            self.addSourceType("C")
-                        elif currFileExt in [".cpp", ".hpp"]:
-                            self.addSourceType("C++")
-                        elif currFileExt in [".java"]:
-                            self.addSourceType("Java")
-                        elif currFileExt in [".py"]:
-                            self.addSourceType("Python")
-                        elif currFileExt in [".f", ".for"]:
-                            self.addSourceType("Fortran")
-                        elif currFileExt in [".f77"]:
-                            self.addSourceType("Fortran 77")
-                        elif currFileExt in [".f90"]:
-                            self.addSourceType("Fortran 90")            
-                        elif currFileExt in [".lisp"]:
-                            self.addSourceType("Lisp")        
-                        elif currFileExt in [".pas"]:
-                            self.addSourceType("Pascal")
+    def __determineCommands(self, options):
+        for stepName in mdCommands.getBuildStepList():
+            self.commands[stepName] = mdCommands.getCommand(stepName, self, options)
+    
     def __str__(self):
-        retStr  = "Target:\n"
-        retStr += "  Name: " + self.name + "\n"
-        retStr += "  Path: " + self.path + "\n"
+        retStr = "Name: " + self.name + "\n"
+        retStr += "Path: " + self.origPath + "\n"
+        if self.main:
+            retStr += "Main: True\n"
         if len(self.aliases) != 0:
-            retStr += "  Alias: " + ",".join(self.aliases) + "\n"        
+            retStr += "Aliases: " + ",".join(self.aliases) + "\n"        
         if self.output != "":
-            retStr += "  Output: " + self.output + "\n"
+            retStr += "Output: " + self.output + "\n"
         if len(self.dependsOn) != 0:
-            retStr += "  DependsOn: " + ",".join(self.dependsOn) + "\n"        
-        if len(self.sourceTypes) != 0:
-            retStr += "  Source Types: " + ",".join(self.sourceTypes) + "\n"
-        if len(self.buildSystems) != 0:
-            retStr += "  Build Systems: " + ",".join(self.buildSystems) + "\n"
-        if len(self.steps) != 0:
-            retStr += "  Steps: " + ",".join(self.steps) + "\n"
-        if self.preConfigCmd != "":
-            retStr += "  PreConfig Command: " + self.preConfigCmd + "\n"
-        if self.configCmd != "":
-            retStr += "  Config Command: " + self.configCmd + "\n"
-        if self.buildCmd != "":
-            retStr += "  Build Command: " + self.buildCmd + "\n"
-        if self.installCmd != "":
-            retStr += "  Install Command: " + self.installCmd + "\n"
+            retStr += "DependsOn: " + ",".join(self.dependsOn) + "\n"        
+        if len(self.skipSteps) != 0:
+            retStr += "SkipSteps: " + ",".join(self.skipSteps) + "\n"
+        for key in self.commands.keys():
+            command = self.commands[key]
+            if command != "":
+                retStr += key.capitalize() + ": " + command + "\n"
         return retStr
 
     @property
-    def steps(self, value):
-        steps = []
+    def skipSteps(self, value):
+        loweredList = []
         for step in value[:]:
-            steps.append(str.lower(step))
-        self.steps = steps
+            loweredList.append(str.lower(step))
+        self.skipSteps = loweredList
     
     def hasStep(self, stepName):
-        if len(self.steps) == 0: #no steps were specified, do all steps
+        if len(self.skipSteps) == 0: #no steps were specified, do all steps
             return True
-        for step in self.steps:
+        for step in self.skipSteps:
             if step.startswith(stepName):
-                return True
-        return False
-
-    def addBuildSystem(self, buildSystem):
-        if not buildSystem in self.buildSystems:
-            self.buildSystems.append(buildSystem)
-
-    def addSourceType(self, sourceType):
-        if not sourceType in self.sourceTypes:
-            self.sourceTypes.append(sourceType)
+                return False
+        return True

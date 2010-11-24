@@ -1,30 +1,14 @@
-import os
+import os, utilityFunctions
 
-from mdTarget import *
-from mdOptions import *
-from mdProject import *
-from utilityFunctions import *
 from mdLogger import *
+from mdTarget import *
 
-def preConfigure(target, options):
-    if target.hasStep("preconfig"):
-        if options.verbose:
-            Logger().reportStart(target.name, "preConfigure")
-        returnCode = None
-        targetPath = target.path
-        outFd = Logger().getOutFd(target.name, "preConfigure")
-        if target.preConfigCmd != "":
-            returnCode = executeSubProcess(target.preConfigCmd.split(" "), targetPath, outFd, options.verbose, True)
-        else:
-            for item in os.listdir(targetPath):
-                itemPath = includeTrailingPathDelimiter(targetPath) + item
-                if os.path.isfile(itemPath):
-                    basename = os.path.basename(item)
-                    if basename in ['buildconf']:
-                        returnCode = executeSubProcess(["./" + basename], targetPath, outFd, options.verbose, True)
-        if returnCode == None:
-            Logger().reportSkipped(target.name, "preConfigure")
-        elif returnCode != 0:
-            Logger().reportFailure(target.name, "preConfigure", returnCode, True)
-        else:
-            Logger().reportSuccess(target.name, "preConfigure")
+def getPreConfigureCommand(target):
+    command = ""
+    for item in os.listdir(target.path):
+        itemPath = utilityFunctions.includeTrailingPathDelimiter(target.path) + item
+        if os.path.isfile(itemPath):
+            basename = os.path.basename(item)
+            if basename in ['buildconf']:
+                command = "./buildconf"
+    return command

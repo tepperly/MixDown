@@ -1,15 +1,34 @@
+# Copyright (c) 2010, Lawrence Livermore National Security, LLC
+# Produced at Lawrence Livermore National Laboratory
+# LLNL-CODE-462894
+# All rights reserved.
+#
+# This file is part of MixDown. Please read the COPYRIGHT file
+# for Our Notice and the LICENSE file for the GNU Lesser General Public
+# License.
+#
+# This program is free software; you can redistribute it and/or modify it
+# under the terms of the GNU Lesser General Public License (as published by
+# the Free Software Foundation) version 3 dated June 2007.
+#
+# This program is distributed in the hope that it will be useful, but
+# WITHOUT ANY WARRANTY; without even the IMPLIED WARRANTY OF
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the terms and
+# conditions of the GNU Lesser General Public License for more details.
+#
+#  You should have recieved a copy of the GNU Lesser General Public License
+# along with this program; if not, write to the Free Software Foundation,
+# Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+
 #! /usr/bin/env python
 
 import os, sys, tarfile, urllib
 
+from mdCommands import *
 from mdOptions import *
 from mdProject import *
 from mdTarget import *
 from utilityFunctions import *
-from mdPreConfigure import *
-from mdConfigure import *
-from mdBuild import *
-from mdInstall import *
 from mdLogger import *
 
 originalLibraryPath = ""
@@ -20,31 +39,47 @@ def main():
 
     project, options = setup()
     for target in project.targets:
-        preConfigure(target, options)
-        configure(target, options)
-        build(target, options)
-        install(target, options)
+        for step in getBuildStepList():
+            buildStepActor(step, target, options)
     cleanup(options)
     
     sys.exit()
+    
+def buildStepActor(stepName, target, options):
+    Logger().reportStart(target.name, stepName)
+    returnCode = None
+    if target.hasStep(stepName):
+        outFd = Logger().getOutFd(target.name, stepName)
+        command = getCommand(stepName, target, options)
+        if command != "":
+            returnCode = executeSubProcess(command.split(" "), target.path, outFd, options.verbose, True)
+    if returnCode == None:
+        Logger().reportSkipped(target.name, stepName)
+    elif returnCode != 0:
+        Logger().reportFailure(target.name, stepName, returnCode, True)
+    else:
+        Logger().reportSuccess(target.name, stepName)    
         
 #--------------------------------Setup---------------------------------
 def setup():
     options = Options()
     print "Processing commandline options..."
     options.processCommandline()
-
+    removeDir(options.logDir)
+    SetLogger(options.logger, options.logDir)
+    if options.verbose:
+        Logger().writeMessage(str(options))
+    
     #Read project file
     project = Project(options.projectFile)
     
     #Clean workspaces if told to clean before
     if options.cleanBefore:
-        print "Cleaning MixDown directories..."
+        Logger().writeMessage("Cleaning MixDown directories...")
         try:
             removeDir(options.buildDir)
             removeDir(options.downloadDir)
             removeDir(options.installDir)
-            removeDir(options.logDir)
         except IOError, e:
             print e
             sys.exit()
@@ -52,10 +87,6 @@ def setup():
             if currTarget.output != "" and os.path.exists(currTarget.output):
                 removeDir(currTarget.output)
                 
-    SetLogger(options.logger, options.logDir)
-    if options.verbose:
-        Logger().writeMessage(str(options))
-    
     #Convert all targetPaths to folders (download and/or unpack if necessary)
     Logger().writeMessage("Converting all targets to local directories...")
     
@@ -89,22 +120,23 @@ def setup():
             else:
                 fileExt = os.path.splitext(currPath)[1]
                 if basename.endswith(".tar.gz") or basename.endswith(".tar.bz2") or basename.endswith(".tar") or basename.endswith(".tgz") or basename.endswith(".tbz") or basename.endswith(".tb2"):
-                    Logger().writeError("Given tar file '" + currPath +"' not understood by python's tarfile package", exit=True)
+                    Logger().writeError("Given tar file '" + currPath +"' not understood by python's tarfile package", exitProgram=True)
                 else:
-                    Logger().writeError("Given target '" + currPath + "' not understood (folders, URLs, and tar files are acceptable)", exit=True)
+                    Logger().writeError("Given target '" + currPath + "' not understood (folders, URLs, and tar files are acceptable)", exitProgram=True)
         else:
-            Logger().writeError("Given target '" + currPath + "' does not exist", exit=True)
+            Logger().writeError("Given target '" + currPath + "' does not exist", exitProgram=True)
             
-    for currTarget in project.targets:
-        currTarget.examine()
+    project.examine(options)
 
-    strippedPrefix = stripTrailingPathDelimiter(options.prefix)
-    libraryPaths = strippedPrefix + "/lib:" + strippedPrefix + "/lib64"
-    if os.environ.has_key("LD_LIBRARY_PATH"):
-        originalLibraryPath = str.strip(os.environ["LD_LIBRARY_PATH"])
-        if originalLibraryPath != "":
-            libraryPaths += ":" + originalLibraryPath
-    os.environ["LD_LIBRARY_PATH"] = libraryPaths
+    prefixDefine = options.getDefine("prefix")
+    if prefixDefine != "":
+        strippedPrefix = stripTrailingPathDelimiter(prefixDefine)
+        libraryPaths = strippedPrefix + "/lib:" + strippedPrefix + "/lib64"
+        if os.environ.has_key("LD_LIBRARY_PATH"):
+            originalLibraryPath = str.strip(os.environ["LD_LIBRARY_PATH"])
+            if originalLibraryPath != "":
+                libraryPaths += ":" + originalLibraryPath
+        os.environ["LD_LIBRARY_PATH"] = libraryPaths
 
     return project, options
 
@@ -116,9 +148,11 @@ def cleanup(options):
             removeDir(options.buildDir)
             removeDir(options.downloadDir)
         except IOError, e:
-            Logger().writeError(e, exit=True)
+            Logger().writeError(e, exitProgram=True)
 
-    os.environ["LD_LIBRARY_PATH"] = originalLibraryPath
+    prefixDefine = options.getDefine("prefix")
+    if prefixDefine != "":
+        os.environ["LD_LIBRARY_PATH"] = originalLibraryPath
 
 #----------------------------------------------------------------------        
 def printProgramHeader():
@@ -142,7 +176,7 @@ def printUsage(errorStr = ""):
     Optional:\n\
     -p<path>      Override prefix directory\n\
     -b<path>      Override build directory\n\
-    -d<path>      Override deploy directory\n\
+    -o<path>      Override download directory\n\
     -u<path>      Override unpack folder\n\
     -l<logger>    Override default logger (Console, File, Html)\n\
     -cb           Cleanup before running (deletes unpack, build, and deploy directories)\n\

@@ -1,26 +1,14 @@
-from mdLogger import *
-from mdOptions import *
-from mdProject import *
+import os, utilityFunctions
 
-def install(target, options):
-    if target.hasStep("install"):
-        if options.verbose:
-            Logger().reportStart(target.name, "install")
-        returnCode = None
-        targetPath = target.path
-        outFd = Logger().getOutFd(target.name, "install")
-        if target.installCmd != "":
-            returnCode = executeSubProcess(target.installCmd.split(" "), target.path, outFd, options.verbose, True)
-        else:
-            for item in os.listdir(targetPath):
-                itemPath = includeTrailingPathDelimiter(targetPath) + item
-                if os.path.isfile(itemPath):
-                    basename = os.path.basename(item)
-                    if str.lower(basename) in ["GNUmakefile", "makefile", "Makefile"]:
-                        returnCode = executeSubProcess(["make", "install"], targetPath, outFd, options.verbose, False)
-        if returnCode == None:
-            Logger().reportSkipped(target.name, "install")
-        elif returnCode != 0:
-            Logger().reportFailure(target.name, "install", returnCode, True)
-        else:
-            Logger().reportSuccess(target.name, "install")
+from mdLogger import *
+from mdTarget import *
+
+def getInstallCommand(target):
+    command = ""
+    for item in os.listdir(target.path):
+        itemPath = utilityFunctions.includeTrailingPathDelimiter(target.path) + item
+        if os.path.isfile(itemPath):
+            basename = os.path.basename(item)
+            if str.lower(basename) in ["GNUmakefile", "makefile", "Makefile", "GNUmakefile.in", "makefile.in", "Makefile.in", "GNUmakefile.am", "makefile.am", "Makefile.am"]:
+                command = "make install"
+    return command

@@ -1,6 +1,6 @@
 #! /usr/bin/env python
 
-import os, re, shutil, sys, tarfile, tempfile, utilityFunctions
+import mdCommands, mdOptions, mdProject, os, re, shutil, sys, tarfile, tempfile, utilityFunctions
 
 from mdTarget import *
 
@@ -8,38 +8,41 @@ def main():
     tempDir = utilityFunctions.includeTrailingPathDelimiter(tempfile.mkdtemp(prefix="mixdown-"))
     finalTargets = []
     ignoredTargets = []
+    mainTargetFlagged = False
     
     printProgramHeader()
     interactive, notReviewedTargets = processCommandlineOptions()
     
     while len(notReviewedTargets) != 0:
         target = notReviewedTargets.pop(0)
-        tempPath = target.path
+        if not mainTargetFlagged:
+            target.main = True
+            mainTargetFlagged = True
     
         print target.name + ": Analyzing target"
-        if utilityFunctions.isURL(tempPath):
+        if utilityFunctions.isURL(target.path):
             print target.name + ": Downloading target to temporary directory"
-            newPath = os.path.join(tempDir, URLToFilename(tempPath))
-            urllib.urlretrieve(tempPath, newPath)
-            tempPath = newPath
+            newPath = os.path.join(tempDir, URLToFilename(target.path))
+            urllib.urlretrieve(target.path, newPath)
+            target.path = newPath
             
-        if os.path.isfile(tempPath) and tarfile.is_tarfile(tempPath):
+        if os.path.isfile(target.path) and tarfile.is_tarfile(target.path):
             print target.name + ": Untaring target to temporary directory"
-            newPath = tempDir + utilityFunctions.splitFileName(tempPath)[0]
-            utilityFunctions.untar(tempPath, newPath, True)
-        elif os.path.isdir(tempPath):
+            newPath = tempDir + utilityFunctions.splitFileName(target.path)[0]
+            utilityFunctions.untar(target.path, newPath, True)
+        elif os.path.isdir(target.path):
             print target.name + ": Copying target directory to temporary directory"
-            newPath = tempDir + os.path.basename(tempPath)
-            shutil.copytree(tempPath, newPath)
+            newPath = tempDir + os.path.basename(target.path)
+            shutil.copytree(target.path, newPath)
         else:
             printUsageAndExit(target.name + ": Cannot understand given target")
-        tempPath = newPath
+        target.path = newPath
 
-        if os.path.exists(tempPath + "/configure"):
+        if os.path.exists(target.path + "/configure"):
             print target.name + ": Analyzing 'configure --help' output"
-            helpFileName = tempPath + "/configure_help.log"
+            helpFileName = target.path + "/configure_help.log"
             helpFile = open(helpFileName, "w")
-            utilityFunctions.executeSubProcess(["./configure", "--help"], tempPath, helpFile.fileno(), False, True)
+            utilityFunctions.executeSubProcess(["./configure", "--help"], target.path, helpFile.fileno(), False, True)
             helpFile.close()
             
             helpFile = open(helpFileName, "r")
@@ -81,15 +84,26 @@ def main():
                                     printErrorAndExit(userInput + ": Alias location not understood.")
                     else:
                         print target.name + ": Ignoring unknown dependancy (" + possibleDependancy + ")"
-
             helpFile.close()
-
         finalTargets.append(target)
-    
-    print "Final targets..."
-    for target in finalTargets:
-        print str(target)           
         
+    #Create project for targets
+    mainTargetName, mainTargetVersion = utilityFunctions.splitFileName(finalTargets[0].origPath)
+    if mainTargetVersion != "":
+        outFileName = mainTargetName + "-" + mainTargetVersion + ".md"
+    else:
+        outFileName = mainTargetName + ".md"        
+    project = mdProject.Project(outFileName, finalTargets)
+
+    options = mdOptions.Options()
+    options.importer = True
+    options.setDefine("prefix", "$(PREFIX)")
+    project.examine(options)
+    
+    print "\nFinal targets...\n"
+    project.printToScreen()
+    project.saveToFile(outFileName)
+
     utilityFunctions.removeDir(tempDir)
 
 def searchForPossibleAliasInList(possibleAlias, targetList, interactive = False):
