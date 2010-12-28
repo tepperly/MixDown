@@ -46,7 +46,7 @@ def main():
             helpFile.close()
             
             helpFile = open(helpFileName, "r")
-            targetRe = re.compile(r"--with-([a-zA-Z\-_]+)=(?:PREFIX|PATH)")
+            targetRe = re.compile(r"--with-([a-zA-Z\-_]+)=(?:PREFIX|PATH|DIR)")
             for line in helpFile:
                 match = targetRe.search(line)
                 if match != None:

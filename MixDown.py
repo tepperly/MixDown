@@ -1,3 +1,5 @@
+#! /usr/bin/env python
+
 # Copyright (c) 2010, Lawrence Livermore National Security, LLC
 # Produced at Lawrence Livermore National Laboratory
 # LLNL-CODE-462894
@@ -19,8 +21,6 @@
 #  You should have recieved a copy of the GNU Lesser General Public License
 # along with this program; if not, write to the Free Software Foundation,
 # Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
-
-#! /usr/bin/env python
 
 import os, sys, tarfile, urllib
 
@@ -122,8 +122,7 @@ def setup():
                 untar(currPath, outDir, True)
                 currTarget.path = outDir
             else:
-                fileExt = os.path.splitext(currPath)[1]
-                if basename.endswith(".tar.gz") or basename.endswith(".tar.bz2") or basename.endswith(".tar") or basename.endswith(".tgz") or basename.endswith(".tbz") or basename.endswith(".tb2"):
+                if currPath.endswith(".tar.gz") or currPath.endswith(".tar.bz2") or currPath.endswith(".tar") or currPath.endswith(".tgz") or currPath.endswith(".tbz") or currPath.endswith(".tb2"):
                     Logger().writeError("Given tar file '" + currPath +"' not understood by python's tarfile package", exitProgram=True)
                 else:
                     Logger().writeError("Given target '" + currPath + "' not understood (folders, URLs, and tar files are acceptable)", exitProgram=True)
