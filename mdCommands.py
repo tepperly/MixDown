@@ -20,7 +20,7 @@
 # along with this program; if not, write to the Free Software Foundation,
 # Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 
-import mdOptions, os, utilityFunctions
+import mdStrings, mdOptions, os, utilityFunctions
 
 from mdLogger import *
 from mdTarget import *
@@ -35,7 +35,7 @@ def getCommand(stepName, target, options):
     elif stepName == "preconfig":
         command = __getPreConfigureCommand(target)
     elif stepName == "config":
-        command = __getConfigureCommand(target, options.getDefine("prefix"))
+        command = __getConfigureCommand(target, options.getDefine(mdStrings.mdDefinePrefix))
     elif stepName == "build":
         command = __getBuildCommand(target)
     elif stepName == "install":
@@ -53,6 +53,10 @@ def __getPreConfigureCommand(target):
             basename = os.path.basename(item)
             if basename in ['buildconf']:
                 command = "./buildconf"
+            elif basename in ['autogen.sh']:
+                command = "./autogen.sh"
+            elif basename in ['configure.ac', 'configure.in']:
+                command = "autoconf"
     return command
 
 def __getBuildCommand(target):
@@ -61,8 +65,8 @@ def __getBuildCommand(target):
         itemPath = utilityFunctions.includeTrailingPathDelimiter(target.path) + item
         if os.path.isfile(itemPath):
             basename = os.path.basename(item)
-            if str.lower(basename) in ["GNUmakefile", "makefile", "Makefile", "GNUmakefile.in", "makefile.in", "Makefile.in", "GNUmakefile.am", "makefile.am", "Makefile.am"]:
-                command = "make"
+            if str.lower(basename) in ["gnumakefile", "gnumakefile.in", "gnumakefile.am", "makefile", "makefile.in", "makefile.am"]:
+                command = "make $(" + mdStrings.mdMakeJobSlotsDefineName + ")"
     return command
 
 def __getConfigureCommand(target, prefix=""):
@@ -71,12 +75,14 @@ def __getConfigureCommand(target, prefix=""):
         itemPath = utilityFunctions.includeTrailingPathDelimiter(target.path) + item
         if os.path.isfile(itemPath):
             basename = os.path.basename(item)
-            if str.lower(basename) in ['configure']:
+            if basename == "Configure":
+                command = "./Configure"
+            elif str.lower(basename) in ['configure']:
                 command = "./configure"
                 if prefix != "":
-                    command += " --prefix=" + prefix
+                    command += " --prefix=$(" + mdStrings.mdDefinePrefix + ")"
                     for dependancy in target.dependsOn:
-                        command += " --with-" + dependancy + "=" + prefix
+                        command += " --with-" + dependancy + "=$(" + mdStrings.mdDefinePrefix + ")"
     return command
 
 def __getInstallCommand(target):
@@ -85,6 +91,6 @@ def __getInstallCommand(target):
         itemPath = utilityFunctions.includeTrailingPathDelimiter(target.path) + item
         if os.path.isfile(itemPath):
             basename = os.path.basename(item)
-            if str.lower(basename) in ["GNUmakefile", "makefile", "Makefile", "GNUmakefile.in", "makefile.in", "Makefile.in", "GNUmakefile.am", "makefile.am", "Makefile.am"]:
-                command = "make install"
+            if str.lower(basename) in ["gnumakefile", "gnumakefile.in", "gnumakefile.am", "makefile", "makefile.in", "makefile.am"]:
+                command = "make $(" + mdStrings.mdMakeJobSlotsDefineName + ") install"
     return command

@@ -31,23 +31,23 @@ def Logger():
 
 def SetLogger(loggerName = "", logOutputDir = ""):
     global __loggerInstance
-    if loggerName == "html":
-        import mdLoggerHtml
-        if logOutputDir != "":
-            os.makedirs(logOutputDir)
-        __loggerInstance = mdLoggerHtml.LoggerHtml(logOutputDir)
-    elif loggerName == "file":
+    if loggerName == "file" or loggerName == "":
         import mdLoggerFile
         if logOutputDir != "":
             os.makedirs(logOutputDir)
         __loggerInstance = mdLoggerFile.LoggerFile(logOutputDir)
+    elif loggerName == "html":
+        import mdLoggerHtml
+        if logOutputDir != "":
+            os.makedirs(logOutputDir)
+        __loggerInstance = mdLoggerHtml.LoggerHtml(logOutputDir)
     elif loggerName == "console":
         import mdLoggerConsole
         __loggerInstance = mdLoggerConsole.LoggerConsole()
     else:
-        import mdLoggerConsole
-        __loggerInstance = mdLoggerConsole.LoggerConsole()
-        __loggerInstance.writeError(loggerName + " logger not found, falling back on console logger")
+        import mdLoggerFile
+        __loggerInstance = mdLoggerConsole.LoggerFile()
+        __loggerInstance.writeWarning(loggerName + " logger not found, falling back on file logger")
 
 class LoggerBase:
     def close(self):
@@ -62,7 +62,7 @@ class LoggerBase:
     def writeError(self, message, targetName = "", targetStep = "", filePath = "", lineNumber = 0, exitProgram = False):
         pass
     
-    def reportSkipped(self, targetName = "", targetStep = ""):
+    def reportSkipped(self, targetName = "", targetStep = "", reason = ""):
         pass
     
     def reportStart(self, targetName = "", targetStep = ""):
@@ -79,9 +79,5 @@ class LoggerBase:
 
     def getErrorFd(self, targetName = "", targetStep = ""):
         return sys.stderr
-
-    def testSingleton(self):
-        print "singleton = Base"
-
 
     

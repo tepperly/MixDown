@@ -79,8 +79,8 @@ class LoggerFile(mdLogger.LoggerBase):
         if exitProgram:
             sys.exit()
 
-    def reportSkipped(self, targetName = "", targetStep = ""):
-        message = targetName + ": " + str.capitalize(targetStep) + ": Skipped.\n"
+    def reportSkipped(self, targetName = "", targetStep = "", reason = ""):
+        message = targetName + ": " + str.capitalize(targetStep) + ": " + reason + ": Skipped.\n"
         sys.stderr.flush()
         sys.stdout.write(message)
         self.__LookupOutFile(targetName, targetStep).write(message)
@@ -115,7 +115,4 @@ class LoggerFile(mdLogger.LoggerBase):
         if targetName != "" and targetStep != "":
             return self.__LookupErrorFile(targetName, targetStep).fileno()
         return sys.stderr
-
-    def testSingleton(self):
-        print "singleton = File"
     

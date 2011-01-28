@@ -22,7 +22,7 @@
 # along with this program; if not, write to the Free Software Foundation,
 # Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 
-import os, sys, tarfile, urllib
+import mdStrings, os, sys, tarfile, urllib
 
 from mdCommands import *
 from mdOptions import *
@@ -56,9 +56,14 @@ def buildStepActor(stepName, target, options):
         outFd = Logger().getOutFd(target.name, stepName)
         command = getCommand(stepName, target, options)
         if command != "":
-            returnCode = executeSubProcess(command.split(" "), target.path, outFd, options.verbose, True)
+            returnCode = executeSubProcess(command, target.path, outFd, options.verbose, True)
+        else:
+            skipReason = "Command could not be determined by MixDown"
+    else:
+        skipReason = "Target specified to skip step"
+
     if returnCode == None:
-        Logger().reportSkipped(target.name, stepName)
+        Logger().reportSkipped(target.name, stepName, skipReason)
     elif returnCode != 0:
         Logger().reportFailure(target.name, stepName, returnCode, True)
     else:
@@ -73,6 +78,10 @@ def setup():
     SetLogger(options.logger, options.logDir)
     if options.verbose:
         Logger().writeMessage(str(options))
+    if options.getDefine(mdStrings.mdDefinePrefix) == "":
+        if options.verbose:
+            Logger().writeWarning("No prefix defined, defaulting to '/usr/local'")
+        options.setDefine(mdStrings.mdDefinePrefix, '/usr/local')
     
     #Read project file
     project = Project(options.projectFile)
@@ -131,7 +140,7 @@ def setup():
             
     project.examine(options)
 
-    prefixDefine = options.getDefine("prefix")
+    prefixDefine = options.getDefine(mdStrings.mdDefinePrefix)
     if prefixDefine != "":
         strippedPrefix = stripTrailingPathDelimiter(prefixDefine)
         libraryPaths = strippedPrefix + "/lib:" + strippedPrefix + "/lib64"
@@ -153,8 +162,9 @@ def cleanup(options):
         except IOError, e:
             Logger().writeError(e, exitProgram=True)
 
-    prefixDefine = options.getDefine("prefix")
+    prefixDefine = options.getDefine(mdStrings.mdDefinePrefix)
     if prefixDefine != "":
+        #TODO: should this not clean up or maybe warn user to add it to their permament environment variable?
         os.environ["LD_LIBRARY_PATH"] = originalLibraryPath
 
 #----------------------------------------------------------------------        

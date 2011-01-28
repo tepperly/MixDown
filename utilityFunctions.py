@@ -36,14 +36,19 @@ def executeCommand(command, args = "", workingDirectory = "", verbose = False, e
     finally:
         os.chdir(lastcwd)
 
-def executeSubProcess(args, workingDirectory = "", outFileHandle = 1, verbose = False, exitOnError = False):
-    fullCommand = " ".join(args)
+def executeSubProcess(command, workingDirectory = "", outFileHandle = 1, verbose = False, exitOnError = False):
     if verbose:
-        print "Executing: " + fullCommand + ": Working Directory: " + workingDirectory
+        print "Executing: " + command + ": Working Directory: " + workingDirectory
+    tempArgs = command.split(" ")
+    args = []
+    for arg in tempArgs:
+        arg = arg.strip()
+        if arg != "":
+            args.append(arg)
     process = subprocess.Popen(args, stdout=outFileHandle, stderr=outFileHandle, cwd=workingDirectory)
     process.wait()
     if exitOnError and process.returncode != 0:
-        printErrorAndExit("Command '" + fullCommand + "': exited with error code " + str(process.returncode))
+        printErrorAndExit("Command '" + command + "': exited with error code " + str(process.returncode))
     return process.returncode
         
 def findShallowestFile(startPath, fileList):

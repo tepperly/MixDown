@@ -1,6 +1,6 @@
 #! /usr/bin/env python
 
-import mdCommands, mdOptions, mdProject, os, re, shutil, sys, tarfile, tempfile, utilityFunctions
+import mdCommands, mdOptions, mdProject, mdStrings, os, re, shutil, sys, tarfile, tempfile, utilityFunctions
 
 from mdTarget import *
 
@@ -42,7 +42,7 @@ def main():
             print target.name + ": Analyzing 'configure --help' output"
             helpFileName = target.path + "/configure_help.log"
             helpFile = open(helpFileName, "w")
-            utilityFunctions.executeSubProcess(["./configure", "--help"], target.path, helpFile.fileno(), False, True)
+            utilityFunctions.executeSubProcess("./configure --help", target.path, helpFile.fileno(), False, True)
             helpFile.close()
             
             helpFile = open(helpFileName, "r")
@@ -97,7 +97,7 @@ def main():
 
     options = mdOptions.Options()
     options.importer = True
-    options.setDefine("prefix", "$(PREFIX)")
+    options.setDefine(mdStrings.mdDefinePrefix, "$(" + mdStrings.mdDefinePrefix + ")")
     project.examine(options)
     
     print "\nFinal targets...\n"

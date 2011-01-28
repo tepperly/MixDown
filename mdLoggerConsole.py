@@ -45,9 +45,9 @@ class LoggerConsole(mdLogger.LoggerBase):
         if exitProgram:
             sys.exit()
 
-    def reportSkipped(self, targetName = "", targetStep = ""):
+    def reportSkipped(self, targetName = "", targetStep = "", reason = ""):
         sys.stderr.flush()
-        sys.stdout.write(targetName + ": " + str.capitalize(targetStep) + ": Skipped...\n")
+        sys.stdout.write(targetName + ": " + str.capitalize(targetStep) + ": " + reason + ": Skipped...\n")
     
     def reportStart(self, targetName = "", targetStep = ""):
         sys.stderr.flush()
@@ -69,6 +69,3 @@ class LoggerConsole(mdLogger.LoggerBase):
 
     def getErrorFd(self, targetName = "", targetStep = ""):
         return sys.stderr
-    
-    def testSingleton(self):
-        print "singleton = Console"

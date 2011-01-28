@@ -51,7 +51,7 @@ class LoggerHtml(mdLogger.LoggerBase):
         sys.stderr.write(self.__FormatErrorMessage(message, filePath, lineNumber))
         sys.stderr.flush()
 
-    def reportSkipped(self, targetName = "", targetStep = ""):
+    def reportSkipped(self, targetName = "", targetStep = "", reason = ""):
         pass
 
     def reportStart(self, targetName = "", targetStep = ""):
@@ -68,7 +68,4 @@ class LoggerHtml(mdLogger.LoggerBase):
 
     def getErrorFd(self, targetName = "", targetStep = ""):
         return sys.stderr
-
-    def testSingleton(self):
-        print "singleton = Html"
     

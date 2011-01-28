@@ -20,7 +20,7 @@
 # along with this program; if not, write to the Free Software Foundation,
 # Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 
-import os, MixDown
+import mdStrings, os, MixDown
 
 from MixDown import *
 
@@ -35,9 +35,9 @@ class Options:
         self.cleanAfter = False
         self.verbose = False
         self.logger = ""
-        self._defines = dict()
-        self._defines.setdefault("")
         self.importer = False
+        self._defines = dict()
+        self._defines.setdefault("")        
 
     def __str__(self):
         return "Options:\n\
@@ -51,11 +51,30 @@ class Options:
   Verbose:      " + str(self.verbose) + "\n\
   Logger:       " + self.logger.capitalize() + "\n"
     
+    def _normalizeKey(self, key, lower=True):
+        normalizedKey = key.strip()
+        if lower:
+            normalizedKey = normalizedKey.lower()
+        if normalizedKey.startswith("$("):
+            normalizedKey = normalizedKey[2:]
+            if normalizedKey.endswith(")"):
+                normalizedKey = normalizedKey[:-1]
+            normalizedKey = normalizedKey.strip()
+        return normalizedKey
+    
     def setDefine(self, key, value):
-        self._defines[key.lower()] = value.strip()
+        self._defines[self._normalizeKey(key)] = value.strip()
         
     def getDefine(self, key):
-        return self._defines[key.lower()]
+        normalizedKey = self._normalizeKey(key)
+        strippedKey = self._normalizeKey(key, False)
+        if normalizedKey in self._defines:
+            value = self._defines[normalizedKey]
+        elif strippedKey in os.environ:
+            value = os.environ[strippedKey]
+        else:
+            value = ""
+        return value
         
     @property
     def buildDir(self, value):
@@ -93,11 +112,9 @@ class Options:
                     if expandedString[j] == ")":
                         endIndex = j
                         break
-                defineName = expandedString[startIndex+2:endIndex]
+                defineName = expandedString[startIndex:endIndex+1]
                 defineValue = self.getDefine(defineName)
-                if defineValue == "":
-                    Logger().writeError("Unknown define found '" + defineName + "'", exitProgram=True)
-                expandedString = expandedString.replace("$(" + defineName + ")", defineValue)
+                expandedString = expandedString.replace(defineName, defineValue)
             loopCount += 1
         return expandedString
         
@@ -118,6 +135,14 @@ class Options:
                     if splitPair[0].lower() in self._defines:
                         Logger().writeError("Define pair already given, " + definePair, exitProgram=True)
                     self.setDefine(splitPair[0], splitPair[1])
+            elif currFlag == "-p":
+                validateOptionPair(currFlag, currValue)
+                self.setDefine(mdStrings.mdDefinePrefix, currValue)
+            elif currFlag == "-j":
+                validateOptionPair(currFlag, currValue)
+                self.setDefine(mdStrings.mdDefineJobSlots, currValue)
+                #Add "-j<jobSlots>" only if user defines -j on commandline
+                self.setDefine(mdStrings.mdMakeJobSlotsDefineName, mdStrings.mdMakeJobSlotsDefineValue)
             elif currFlag == "-l":
                 validateOptionPair(currFlag, currValue)
                 self.logger = str.lower(currValue)
