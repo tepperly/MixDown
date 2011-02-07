@@ -36,7 +36,7 @@ def executeCommand(command, args = "", workingDirectory = "", verbose = False, e
     finally:
         os.chdir(lastcwd)
 
-def executeSubProcess(command, workingDirectory = "", outFileHandle = 1, verbose = False, exitOnError = False):
+def executeSubProcess(command, workingDirectory = "/tmp", outFileHandle = 1, verbose = False, exitOnError = False):
     if verbose:
         print "Executing: " + command + ": Working Directory: " + workingDirectory
     tempArgs = command.split(" ")

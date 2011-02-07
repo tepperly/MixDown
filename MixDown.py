@@ -100,43 +100,9 @@ def setup():
             if currTarget.output != "" and os.path.exists(currTarget.output):
                 removeDir(currTarget.output)
                 
-    #Convert all targetPaths to folders (download and/or unpack if necessary)
     Logger().writeMessage("Converting all targets to local directories...")
-    
-    #Check for files that need to be downloaded
     for currTarget in project.targets:
-        currPath = currTarget.path
-        if (not os.path.isdir(currPath)) and (not os.path.isfile(currPath)) and isURL(currPath):
-            if not os.path.isdir(options.downloadDir):
-                os.makedirs(options.downloadDir)
-            filenamePath = options.downloadDir + URLToFilename(currPath)
-            urllib.urlretrieve(currPath, filenamePath)
-            currTarget.path = filenamePath
-    
-    #Untar and add trailing path delimiter to any folders
-    targetList = project.targets[:]
-    targetList.reverse()
-    for currTarget in targetList:
-        currPath = currTarget.path
-        if os.path.isdir(currPath):
-            targetPaths[i] = includeTrailingPathDelimiter(currPath)
-        elif os.path.isfile(currPath):
-            if tarfile.is_tarfile(currPath):
-                if currTarget.output == "":
-                    if not os.path.isdir(options.buildDir):
-                        os.makedirs(options.buildDir)
-                    outDir = includeTrailingPathDelimiter(options.buildDir + splitFileName(currPath)[0])
-                else:
-                    outDir = currTarget.output
-                untar(currPath, outDir, True)
-                currTarget.path = outDir
-            else:
-                if currPath.endswith(".tar.gz") or currPath.endswith(".tar.bz2") or currPath.endswith(".tar") or currPath.endswith(".tgz") or currPath.endswith(".tbz") or currPath.endswith(".tb2"):
-                    Logger().writeError("Given tar file '" + currPath +"' not understood by python's tarfile package", exitProgram=True)
-                else:
-                    Logger().writeError("Given target '" + currPath + "' not understood (folders, URLs, and tar files are acceptable)", exitProgram=True)
-        else:
-            Logger().writeError("Given target '" + currPath + "' does not exist", exitProgram=True)
+        currTarget.extract()
             
     project.examine(options)
 
