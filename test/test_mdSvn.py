@@ -20,3 +20,52 @@
 # along with this program; if not, write to the Free Software Foundation,
 # Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 
+import os, sys, unittest, tempfile
+
+class test_mdSvn(unittest.TestCase):
+    def _createTempSvnRepository(self):
+        tempPath = utilityFunctions.includeTrailingPathDelimiter(tempfile.mkdtemp(prefix="mixdown-"))
+        repoPath = tempPath + "repo"
+        repoURL = "file://" + repoPath + "/trunk"
+        workPath = tempPath + "work"
+        projPath = tempPath + "project"
+        os.mkdir(repoPath)
+        os.mkdir(projPath)
+
+        utilityFunctions.executeSubProcess("svnadmin create " + repoPath, tempPath)
+        utilityFunctions.executeSubProcess("touch testFile", projPath)
+        utilityFunctions.executeSubProcess("svn import --quiet --non-interactive " + projPath + " " + repoURL + " -m message", tempPath)
+        return repoURL
+
+    def test_isSvnInstalled(self):
+        returnValue = mdSvn.isSvnInstalled()
+        self.assertEqual(returnValue, True, "Svn is not installed in your system, all Svn tests will fail.")
+
+    def test_isSvnRepo(self):
+        #Create repository and test if is svn repo
+        tempRepo = self._createTempSvnRepository()
+        try:
+            returnValue = mdSvn.isSvnRepo(tempRepo)
+            self.assertEqual(returnValue, True, "mdSvn.isSvnRepo(" + tempRepo + ") should have returned true.")
+        finally:
+            utilityFunctions.removeDir(tempRepo[6:len(tempRepo)-11]) #"file://tmp/mixdown-*/repo/trunk" -> "//tmp/mixdown-*/"
+        #Test if wrong path returns false
+        falsePath = "http://foo/wrong/path"
+        returnValue = mdSvn.isSvnRepo(falsePath)
+        self.assertEqual(returnValue, False, "mdSvn.isSvnRepo(" + falsePath + ") should have returned false.")
+
+    def test_svnCheckout(self):
+        tempDir = utilityFunctions.includeTrailingPathDelimiter(tempfile.mkdtemp(prefix="mixdown-"))
+        tempRepo = self._createTempSvnRepository()
+        try:
+            mdSvn.svnCheckout(tempRepo, tempDir)
+            returnValue = os.path.exists(tempDir + "testFile")
+            self.assertEqual(returnValue, True, "'testFile' did not exist after mdSvn.svnCheckout(" + tempRepo + ") was called.")
+        finally:
+            utilityFunctions.removeDir(tempDir)
+            utilityFunctions.removeDir(tempRepo[6:len(tempRepo)-11]) #"file://tmp/mixdown-*/repo/trunk" -> "//tmp/mixdown-*/"
+
+if __name__ == "__main__":
+    sys.path.append("..")
+    import mdSvn, utilityFunctions
+    unittest.main()

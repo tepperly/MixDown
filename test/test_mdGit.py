@@ -30,19 +30,11 @@ class test_mdGit(unittest.TestCase):
         utilityFunctions.executeSubProcess("git add testFile", repoPath)
         utilityFunctions.executeSubProcess("git commit -m message --quiet", repoPath)
         return repoPath
-        
-    def setUp(self):
-        #self.mixDownRepo = "git://github.com/tepperly/MixDown.git"
-        #self.mixDownRepo = "https://white238@github.com/tepperly/MixDown.git"
-        pass
-    
-    def tearDown(self):
-        pass
-    
+
     def test_isGitInstalled(self):
         returnValue = mdGit.isGitInstalled()
         self.assertEqual(returnValue, True, "Git is not installed in your system, all Git tests will fail.")
-        
+
     def test_isGitRepo(self):
         #Create repository and test if is git repo
         tempRepo = self._createTempGitRepository()
@@ -52,10 +44,10 @@ class test_mdGit(unittest.TestCase):
         finally:
             utilityFunctions.removeDir(tempRepo)
         #Test if wrong path returns false
-        mixDownRepoFalse = "http://foo/wrong/path"
-        returnValue = mdGit.isGitRepo(mixDownRepoFalse)
-        self.assertEqual(returnValue, False, "mdGit.isGitRepo(" + mixDownRepoFalse + ") should have returned false.")
-        
+        falsePath = "http://foo/wrong/path"
+        returnValue = mdGit.isGitRepo(falsePath)
+        self.assertEqual(returnValue, False, "mdGit.isGitRepo(" + falsePath + ") should have returned false.")
+
     def test_gitCheckout(self):
         tempDir = utilityFunctions.includeTrailingPathDelimiter(tempfile.mkdtemp(prefix="mixdown-"))
         tempRepo = self._createTempGitRepository()
