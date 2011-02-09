@@ -42,11 +42,8 @@ def main():
             for step in getBuildStepList():
                 buildStepActor(step, target, options)
         cleanup(options)
-    except SystemExit, e:
-        #Any forced exiting is more than likely a result of the logger reporting an error
-        # and halting the program, cleaning up the logger should still happen
-        pass
-    Logger().close()
+    finally:
+        Logger().close()
     sys.exit()
     
 def buildStepActor(stepName, target, options):
