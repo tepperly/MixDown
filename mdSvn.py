@@ -56,10 +56,9 @@ def svnCheckout(repoLocation, outPath):
     if repoLocation == "" or outPath == "" or not isSvnInstalled():
         return False
     outFile = open(os.devnull, "w")
-    returnCode = executeSubProcess("svn co --non-interactive" + repoLocation + " " + outPath, outFileHandle = outFile)
+    returnCode = executeSubProcess("svn co --non-interactive " + repoLocation + " " + outPath, outFileHandle = outFile)
     outFile.close()
     if returnCode == 0:
         return False
     return True
-    
-    
+
