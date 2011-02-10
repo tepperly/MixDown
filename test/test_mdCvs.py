@@ -20,3 +20,50 @@
 # along with this program; if not, write to the Free Software Foundation,
 # Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 
+import os, sys, unittest, tempfile
+
+class test_mdCvs(unittest.TestCase):
+    def _createTempCvsRepository(self):
+        tempPath = utilityFunctions.includeTrailingPathDelimiter(tempfile.mkdtemp(prefix="mixdown-"))
+        repoPath = tempPath + "repo"
+        projPath = tempPath + "project"
+        os.mkdir(repoPath)
+        os.mkdir(projPath)
+
+        utilityFunctions.executeSubProcess("cvs -d " + repoPath + " init", tempPath)
+        utilityFunctions.executeSubProcess("touch testFile", projPath)
+        utilityFunctions.executeSubProcess("cvs -d " + repoPath + " -q import -m message project vendor start", projPath)
+        return repoPath
+
+    def test_isCvsInstalled(self):
+        returnValue = mdCvs.isCvsInstalled()
+        self.assertEqual(returnValue, True, "Cvs is not installed in your system, all Cvs tests will fail.")
+
+    def test_isCvsRepo(self):
+        #Create repository and test if is cvs repo
+        tempRepo = self._createTempCvsRepository()
+        try:
+            returnValue = mdCvs.isCvsRepo(tempRepo)
+            self.assertEqual(returnValue, True, "mdCvs.isCvsRepo(" + tempRepo + ") should have returned true.")
+        finally:
+            utilityFunctions.removeDir(tempRepo)
+        #Test if wrong path returns false
+        falsePath = "http://foo/wrong/path"
+        returnValue = mdCvs.isCvsRepo(falsePath)
+        self.assertEqual(returnValue, False, "mdCvs.isCvsRepo(" + falsePath + ") should have returned false.")
+
+    def _test_cvsCheckout(self):
+        tempDir = utilityFunctions.includeTrailingPathDelimiter(tempfile.mkdtemp(prefix="mixdown-"))
+        tempRepo = self._createTempCvsRepository()
+        try:
+            mdCvs.cvsCheckout(tempRepo, tempDir)
+            returnValue = os.path.exists(tempDir + "testFile")
+            self.assertEqual(returnValue, True, "'testFile' did not exist after mdCvs.cvsCheckout(" + tempRepo + ") was called.")
+        finally:
+            utilityFunctions.removeDir(tempDir)
+            utilityFunctions.removeDir(tempRepo)
+
+if __name__ == "__main__":
+    sys.path.append("..")
+    import mdCvs, utilityFunctions
+    unittest.main()

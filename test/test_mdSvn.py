@@ -27,7 +27,6 @@ class test_mdSvn(unittest.TestCase):
         tempPath = utilityFunctions.includeTrailingPathDelimiter(tempfile.mkdtemp(prefix="mixdown-"))
         repoPath = tempPath + "repo"
         repoURL = "file://" + repoPath + "/trunk"
-        workPath = tempPath + "work"
         projPath = tempPath + "project"
         os.mkdir(repoPath)
         os.mkdir(projPath)

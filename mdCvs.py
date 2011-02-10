@@ -30,7 +30,7 @@ def isCvsInstalled():
     global _isCvsInstalled
     if _isCvsInstalled == None:
         outFile = open(os.devnull, "w")
-        returnCode = executeSubProcess("cvs --help", outFileHandle = outFile)
+        returnCode = executeSubProcess("cvs --version", outFileHandle = outFile)
         outFile.close()
         if returnCode == 0:
             _isCvsInstalled = True
@@ -40,27 +40,29 @@ def isCvsInstalled():
     return _isCvsInstalled
 
 def isCvsRepo(location):
+    #TODO: this does not work, as far as I can tell there is no cvs command that can be called on the server, only
+    #      checked out repositories
     location = location.strip()
     if location == "" or not isCvsInstalled():
         return False
     outFile = open(os.devnull, "w")
-    #TODO: this does not work...
-    returnCode = executeSubProcess("cvs log " + location, outFileHandle = outFile)
+    returnCode = executeSubProcess("cvs -d " + location + " log", outFileHandle = outFile)
     outFile.close()
     if returnCode == 0:
         return True
     return False
 
-def cvsCheckout(repoLocation, outPath):
+def cvsCheckout(repoLocation, project, outPath):
+    #TODO: CVS requires a project name inside of the repository. decide if i want to have a special format for cvs
+    #TODO: Add code to handle outPath since cvs does not accept an out directory in the checkout command
     repoLocation = repoLocation.strip()
     outPath = outPath.strip()
     if repoLocation == "" or outPath == "" or not isCvsInstalled():
         return False
     outFile = open(os.devnull, "w")
-    returnCode = executeSubProcess("cvs co --non-interactive --quiet " + repoLocation + " " + outPath, outFileHandle = outFile)
+    returnCode = executeSubProcess("cvs -d " + repoLocation + " -Q checkout", outFileHandle = outFile)
     outFile.close()
     if returnCode == 0:
         return False
     return True
-    
-    
+
