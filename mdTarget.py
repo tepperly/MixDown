@@ -20,8 +20,9 @@
 # along with this program; if not, write to the Free Software Foundation,
 # Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 
-import mdBuild, mdCommands, os
+import mdCommands, os
 
+from mdLogger import *
 from utilityFunctions import *
 
 class Target:
@@ -40,18 +41,18 @@ class Target:
         self.commands["config"] = ""
         self.commands["build"] = ""
         self.commands["install"] = ""
-        
+
     def isValid(self):
         if self.name == "":
             return False
         if self.path == "":
             return False
         return True
-    
-    def extract(self, outputPath):
+
+    def extract(self, outputPath, ExitOnFailure=True):
         #Check if it is a repository (CVS, SVN, Git, Hg)
         #TODO
-        
+
         #Download if necessary
         currPath = self.path
         if (not os.path.isdir(currPath)) and (not os.path.isfile(currPath)) and isURL(currPath):
@@ -60,11 +61,11 @@ class Target:
             filenamePath = options.downloadDir + URLToFilename(currPath)
             urllib.urlretrieve(currPath, filenamePath)
             self.path = filenamePath
-        
+
         #Untar and add trailing path delimiter to any folders
         currPath = self.path
         if os.path.isdir(currPath):
-            targetPaths[i] = includeTrailingPathDelimiter(currPath)
+            self.path = includeTrailingPathDelimiter(currPath)
         elif os.path.isfile(currPath):
             if tarfile.is_tarfile(currPath):
                 if currTarget.output == "":
@@ -77,30 +78,30 @@ class Target:
                 self.path = outDir
             else:
                 if currPath.endswith(".tar.gz") or currPath.endswith(".tar.bz2") or currPath.endswith(".tar") or currPath.endswith(".tgz") or currPath.endswith(".tbz") or currPath.endswith(".tb2"):
-                    Logger().writeError("Given tar file '" + currPath +"' not understood by python's tarfile package", exitProgram=True)
+                    Logger().writeError("Given tar file '" + currPath +"' not understood by python's tarfile package", exitProgram=ExitOnFailure)
                 else:
-                    Logger().writeError("Given target '" + currPath + "' not understood (folders, URLs, and tar files are acceptable)", exitProgram=True)
+                    Logger().writeError("Given target '" + currPath + "' not understood (folders, URLs, and tar files are acceptable)", exitProgram=ExitOnFailure)
         else:
-            Logger().writeError("Given target '" + currPath + "' does not exist", exitProgram=True)
-        
+            Logger().writeError("Given target '" + currPath + "' does not exist", exitProgram=ExitOnFailure)
+
     def examine(self, options):
         self.__determineCommands(options)
-        
+
     def __determineCommands(self, options):
         for stepName in mdCommands.getBuildStepList():
             self.commands[stepName] = mdCommands.getCommand(stepName, self, options)
-    
+
     def __str__(self):
         retStr = "Name: " + self.name + "\n"
         retStr += "Path: " + self.origPath + "\n"
         if self.main:
             retStr += "Main: True\n"
         if len(self.aliases) != 0:
-            retStr += "Aliases: " + ",".join(self.aliases) + "\n"        
+            retStr += "Aliases: " + ",".join(self.aliases) + "\n"
         if self.output != "":
             retStr += "Output: " + self.output + "\n"
         if len(self.dependsOn) != 0:
-            retStr += "DependsOn: " + ",".join(self.dependsOn) + "\n"        
+            retStr += "DependsOn: " + ",".join(self.dependsOn) + "\n"
         if len(self.skipSteps) != 0:
             retStr += "SkipSteps: " + ",".join(self.skipSteps) + "\n"
         for key in self.commands.keys():
@@ -115,7 +116,7 @@ class Target:
         for step in value[:]:
             loweredList.append(str.lower(step))
         self.skipSteps = loweredList
-    
+
     def hasStep(self, stepName):
         if len(self.skipSteps) == 0: #no steps were specified, do all steps
             return True

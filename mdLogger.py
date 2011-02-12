@@ -31,6 +31,7 @@ def Logger():
 
 def SetLogger(loggerName = "", logOutputDir = ""):
     global __loggerInstance
+    loggerName = loggerName.lower()
     if loggerName == "file" or loggerName == "":
         import mdLoggerFile
         if logOutputDir != "":
@@ -46,13 +47,13 @@ def SetLogger(loggerName = "", logOutputDir = ""):
         __loggerInstance = mdLoggerConsole.LoggerConsole()
     else:
         import mdLoggerFile
-        __loggerInstance = mdLoggerConsole.LoggerFile()
+        __loggerInstance = mdLoggerFile.LoggerFile()
         __loggerInstance.writeWarning(loggerName + " logger not found, falling back on file logger")
 
 class LoggerBase:
     def close(self):
         pass
-    
+
     def writeMessage(self, message):
         pass
 
@@ -61,13 +62,13 @@ class LoggerBase:
 
     def writeError(self, message, targetName = "", targetStep = "", filePath = "", lineNumber = 0, exitProgram = False):
         pass
-    
+
     def reportSkipped(self, targetName = "", targetStep = "", reason = ""):
         pass
-    
+
     def reportStart(self, targetName = "", targetStep = ""):
         pass
-    
+
     def reportSuccess(self, targetName = "", targetStep = ""):
         pass
 
@@ -80,4 +81,3 @@ class LoggerBase:
     def getErrorFd(self, targetName = "", targetStep = ""):
         return sys.stderr
 
-    
