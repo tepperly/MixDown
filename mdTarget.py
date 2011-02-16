@@ -20,7 +20,7 @@
 # along with this program; if not, write to the Free Software Foundation,
 # Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 
-import mdCommands, os
+import os, mdCommands, mdGit, mdHg, mdSvn
 
 from mdLogger import *
 from utilityFunctions import *
@@ -51,39 +51,48 @@ class Target:
 
     def extract(self, options, ExitOnFailure=True):
         #Check if it is a repository (CVS, SVN, Git, Hg)
-        #TODO
-
-        #Download if necessary
-        currPath = self.path
-        if (not os.path.isdir(currPath)) and (not os.path.isfile(currPath)) and isURL(currPath):
-            if not os.path.isdir(options.downloadDir):
-                os.makedirs(options.downloadDir)
-            filenamePath = options.downloadDir + URLToFilename(currPath)
-            urllib.urlretrieve(currPath, filenamePath)
-            self.path = filenamePath
-
-        #Untar and add trailing path delimiter to any folders
-        currPath = self.path
-        if os.path.isdir(currPath):
-            self.path = includeTrailingPathDelimiter(currPath)
-        elif os.path.isfile(currPath):
-            if tarfile.is_tarfile(currPath):
-                if self.output == "":
-                    if not os.path.isdir(options.buildDir):
-                        os.makedirs(options.buildDir)
-                        options.buildDir = includeTrailingPathDelimiter(options.buildDir)
-                    outDir = includeTrailingPathDelimiter(options.buildDir + splitFileName(currPath)[0])
-                else:
-                    outDir = self.output
-                untar(currPath, outDir, True)
-                self.path = outDir
-            else:
-                if currPath.endswith(".tar.gz") or currPath.endswith(".tar.bz2") or currPath.endswith(".tar") or currPath.endswith(".tgz") or currPath.endswith(".tbz") or currPath.endswith(".tb2"):
-                    Logger().writeError("Given tar file '" + currPath +"' not understood by python's tarfile package", exitProgram=ExitOnFailure)
-                else:
-                    Logger().writeError("Given target '" + currPath + "' not understood (folders, URLs, and tar files are acceptable)", exitProgram=ExitOnFailure)
+        outDir = includeTrailingPathDelimiter(options.buildDir + self.name)
+        if mdGit.isGitRepo(self.path):
+            mdGit.gitCheckout(self.path, outDir)
+            self.path = outDir
+        elif mdHg.isHgRepo(self.path):
+            mdHg.hgCheckout(self.path, outDir)
+            self.path = outDir
+        elif mdSvn.isSvnRepo(self.path):
+            mdSvn.svnCheckout(self.path, outDir)
+            self.path = outDir
         else:
-            Logger().writeError("Given target '" + currPath + "' does not exist", exitProgram=ExitOnFailure)
+            #Download if necessary
+            currPath = self.path
+            if (not os.path.isdir(currPath)) and (not os.path.isfile(currPath)) and isURL(currPath):
+                if not os.path.isdir(options.downloadDir):
+                    os.makedirs(options.downloadDir)
+                filenamePath = options.downloadDir + URLToFilename(currPath)
+                urllib.urlretrieve(currPath, filenamePath)
+                self.path = filenamePath
+
+            #Untar and add trailing path delimiter to any folders
+            currPath = self.path
+            if os.path.isdir(currPath):
+                self.path = includeTrailingPathDelimiter(currPath)
+            elif os.path.isfile(currPath):
+                if tarfile.is_tarfile(currPath):
+                    if self.output == "":
+                        if not os.path.isdir(options.buildDir):
+                            os.makedirs(options.buildDir)
+                            options.buildDir = includeTrailingPathDelimiter(options.buildDir)
+                        outDir = includeTrailingPathDelimiter(options.buildDir + splitFileName(currPath)[0])
+                    else:
+                        outDir = self.output
+                    untar(currPath, outDir, True)
+                    self.path = outDir
+                else:
+                    if currPath.endswith(".tar.gz") or currPath.endswith(".tar.bz2") or currPath.endswith(".tar") or currPath.endswith(".tgz") or currPath.endswith(".tbz") or currPath.endswith(".tb2"):
+                        Logger().writeError("Given tar file '" + currPath +"' not understood by python's tarfile package", exitProgram=ExitOnFailure)
+                    else:
+                        Logger().writeError("Given target '" + currPath + "' not understood (folders, URLs, and tar files are acceptable)", exitProgram=ExitOnFailure)
+            else:
+                Logger().writeError("Given target '" + currPath + "' does not exist", exitProgram=ExitOnFailure)
 
     def examine(self, options):
         self.__determineCommands(options)

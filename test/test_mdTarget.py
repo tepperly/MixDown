@@ -43,7 +43,7 @@ class test_mdTarget(unittest.TestCase):
         try:
             repoPath = mdTestUtilities.createCvsRepository()
             target = mdTarget.Target("CvsTarget", repoPath)
-            target.extract(self.testDir, False)
+            target.extract(self.options, False)
             returnValue = os.path.exists(target.path + mdTestUtilities.testFileName)
         finally:
             utilityFunctions.removeDir(repoPath)
@@ -55,7 +55,7 @@ class test_mdTarget(unittest.TestCase):
         try:
             repoPath = mdTestUtilities.createGitRepository()
             target = mdTarget.Target("GitTarget", repoPath)
-            target.extract(self.testDir, False)
+            target.extract(self.options, False)
             returnValue = os.path.exists(target.path+ mdTestUtilities.testFileName)
         finally:
             utilityFunctions.removeDir(repoPath)
@@ -67,7 +67,7 @@ class test_mdTarget(unittest.TestCase):
         try:
             repoPath = mdTestUtilities.createHgRepository()
             target = mdTarget.Target("HgTarget", repoPath)
-            target.extract(self.testDir, False)
+            target.extract(self.options, False)
             returnValue = os.path.exists(target.path + mdTestUtilities.testFileName)
         finally:
             utilityFunctions.removeDir(repoPath)
@@ -79,7 +79,7 @@ class test_mdTarget(unittest.TestCase):
         try:
             repoPath = mdTestUtilities.createSvnRepository()
             target = mdTarget.Target("SvnTarget", repoPath)
-            target.extract(self.testDir, False)
+            target.extract(self.options, False)
             returnValue = os.path.exists(target.path + mdTestUtilities.testFileName)
         finally:
             utilityFunctions.removeDir(repoPath)
