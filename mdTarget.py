@@ -49,7 +49,7 @@ class Target:
             return False
         return True
 
-    def extract(self, outputPath, ExitOnFailure=True):
+    def extract(self, options, ExitOnFailure=True):
         #Check if it is a repository (CVS, SVN, Git, Hg)
         #TODO
 
@@ -68,12 +68,13 @@ class Target:
             self.path = includeTrailingPathDelimiter(currPath)
         elif os.path.isfile(currPath):
             if tarfile.is_tarfile(currPath):
-                if currTarget.output == "":
+                if self.output == "":
                     if not os.path.isdir(options.buildDir):
                         os.makedirs(options.buildDir)
+                        options.buildDir = includeTrailingPathDelimiter(options.buildDir)
                     outDir = includeTrailingPathDelimiter(options.buildDir + splitFileName(currPath)[0])
                 else:
-                    outDir = currTarget.output
+                    outDir = self.output
                 untar(currPath, outDir, True)
                 self.path = outDir
             else:
