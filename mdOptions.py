@@ -20,9 +20,9 @@
 # along with this program; if not, write to the Free Software Foundation,
 # Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 
-import mdStrings, os, MixDown
+import os, mdStrings, utilityFunctions
 
-from MixDown import *
+from mdLogger import *
 
 class Options:
     def __init__(self):
@@ -37,7 +37,7 @@ class Options:
         self.logger = ""
         self.importer = False
         self._defines = dict()
-        self._defines.setdefault("")        
+        self._defines.setdefault("")
 
     def __str__(self):
         return "Options:\n\
@@ -50,7 +50,7 @@ class Options:
   Clean After:  " + str(self.cleanAfter) + "\n\
   Verbose:      " + str(self.verbose) + "\n\
   Logger:       " + self.logger.capitalize() + "\n"
-    
+
     def _normalizeKey(self, key, lower=True):
         normalizedKey = key.strip()
         if lower:
@@ -61,10 +61,10 @@ class Options:
                 normalizedKey = normalizedKey[:-1]
             normalizedKey = normalizedKey.strip()
         return normalizedKey
-    
+
     def setDefine(self, key, value):
         self._defines[self._normalizeKey(key)] = value.strip()
-        
+
     def getDefine(self, key):
         normalizedKey = self._normalizeKey(key)
         strippedKey = self._normalizeKey(key, False)
@@ -75,26 +75,26 @@ class Options:
         else:
             value = ""
         return value
-        
+
     @property
     def buildDir(self, value):
-        self.buildDir = includeTrailingPathDelimiter(value)
+        self.buildDir = utilityFunctions.includeTrailingPathDelimiter(value)
 
     @property
     def downloadDir(self, value):
-        self.downloadDir = includeTrailingPathDelimiter(value)
+        self.downloadDir = utilityFunctions.includeTrailingPathDelimiter(value)
 
     @property
     def installDir(self, value):
-        self.installDir = includeTrailingPathDelimiter(value)
-        
+        self.installDir = utilityFunctions.includeTrailingPathDelimiter(value)
+
     def expandDefines(self, inString):
         expandedString = inString
         loopCount = 0
         while expandedString.find("$(") != -1:
             if loopCount > 10:
                 Logger().writeError("Define depth count (10) exceeded in string '" + inString + "'", exitProgram=True)
-            
+
             strLength = len(expandedString)
             startIndex = 0
             endIndex = 0
@@ -117,11 +117,11 @@ class Options:
                 expandedString = expandedString.replace(defineName, defineValue)
             loopCount += 1
         return expandedString
-        
+
     def processCommandline(self):
         if len(sys.argv) < 2:
             printUsageAndExit()
-            
+
         for currArg in sys.argv[1:]: #skip script name
             currFlag = str.lower(currArg[:2])
             currValue = currArg[2:]
@@ -161,7 +161,7 @@ class Options:
                 valueLength = len(currValue)
                 if valueLength == 0:
                     Logger().writeError("Value, 'a' or 'b', expected after -c option", exitProgram=True)
-                    
+
                 if currValue == 'a':
                     self.cleanAfter = True
                 elif currValue == 'b':
@@ -184,7 +184,7 @@ class Options:
 def validateOptionPair(flag, value):
     if value == "":
         Logger().writeError(Flag + " option requires a following value", exitProgram=True)
-            
+
 def validateOption(flag, value):
     if value != "":
         Logger().writeError(Flag + " option does not require a following value", exitProgram=True)
