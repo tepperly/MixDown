@@ -50,17 +50,31 @@ class Target:
         return True
 
     def extract(self, options, ExitOnFailure=True):
+        extracted = False
+        if self.output == "":
+            if not os.path.isdir(options.buildDir):
+                os.makedirs(options.buildDir)
+                options.buildDir = includeTrailingPathDelimiter(options.buildDir)
+            outPath = includeTrailingPathDelimiter(options.buildDir + self.name)
+        else:
+            outPath = self.output
+
         #Check if it is a repository (CVS, SVN, Git, Hg)
-        outDir = includeTrailingPathDelimiter(options.buildDir + self.name)
         if mdGit.isGitRepo(self.path):
-            mdGit.gitCheckout(self.path, outDir)
-            self.path = outDir
+            if not mdGit.gitCheckout(self.path, outPath):
+                Logger().writeError("Given Git repo '" + currPath +"' was unable to be checked out", exitProgram=ExitOnFailure)
+            else:
+                extracted = True
         elif mdHg.isHgRepo(self.path):
-            mdHg.hgCheckout(self.path, outDir)
-            self.path = outDir
+            if not mdHg.hgCheckout(self.path, outPath):
+                Logger().writeError("Given Hg repo '" + currPath +"' was unable to be checked out", exitProgram=ExitOnFailure)
+            else:
+                extracted = True
         elif mdSvn.isSvnRepo(self.path):
-            mdSvn.svnCheckout(self.path, outDir)
-            self.path = outDir
+            if not mdSvn.svnCheckout(self.path, outPath):
+                Logger().writeError("Given Svn repo '" + currPath +"' was unable to be checked out", exitProgram=ExitOnFailure)
+            else:
+                extracted = True
         else:
             #Download if necessary
             currPath = self.path
@@ -74,25 +88,23 @@ class Target:
             #Untar and add trailing path delimiter to any folders
             currPath = self.path
             if os.path.isdir(currPath):
-                self.path = includeTrailingPathDelimiter(currPath)
+                outPath = includeTrailingPathDelimiter(currPath)
+                extracted = True
             elif os.path.isfile(currPath):
                 if tarfile.is_tarfile(currPath):
-                    if self.output == "":
-                        if not os.path.isdir(options.buildDir):
-                            os.makedirs(options.buildDir)
-                            options.buildDir = includeTrailingPathDelimiter(options.buildDir)
-                        outDir = includeTrailingPathDelimiter(options.buildDir + splitFileName(currPath)[0])
-                    else:
-                        outDir = self.output
-                    untar(currPath, outDir, True)
-                    self.path = outDir
+                    untar(currPath, outPath, True)
+                    extracted = True
                 else:
                     if currPath.endswith(".tar.gz") or currPath.endswith(".tar.bz2") or currPath.endswith(".tar") or currPath.endswith(".tgz") or currPath.endswith(".tbz") or currPath.endswith(".tb2"):
                         Logger().writeError("Given tar file '" + currPath +"' not understood by python's tarfile package", exitProgram=ExitOnFailure)
                     else:
-                        Logger().writeError("Given target '" + currPath + "' not understood (folders, URLs, and tar files are acceptable)", exitProgram=ExitOnFailure)
+                        Logger().writeError("Given target '" + currPath + "' not understood (Folders, URLs, Repositories, and Tar files are acceptable)", exitProgram=ExitOnFailure)
             else:
                 Logger().writeError("Given target '" + currPath + "' does not exist", exitProgram=ExitOnFailure)
+
+        if extracted:
+            self.path = outPath
+        return extracted
 
     def examine(self, options):
         self.__determineCommands(options)

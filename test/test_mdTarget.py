@@ -43,10 +43,11 @@ class test_mdTarget(unittest.TestCase):
         try:
             repoPath = mdTestUtilities.createCvsRepository()
             target = mdTarget.Target("CvsTarget", repoPath)
-            target.extract(self.options, False)
+            extracted = target.extract(self.options, False)
             returnValue = os.path.exists(target.path + mdTestUtilities.testFileName)
         finally:
             utilityFunctions.removeDir(repoPath)
+        self.assertEqual(extracted, True, "Cvs repository failed to extract.")
         self.assertEqual(returnValue, True, "'" + mdTestUtilities.testFileName + "' did not exist after extracting a target with a Cvs repository as its path.")
 
     def test_extractGit(self):
@@ -55,10 +56,11 @@ class test_mdTarget(unittest.TestCase):
         try:
             repoPath = mdTestUtilities.createGitRepository()
             target = mdTarget.Target("GitTarget", repoPath)
-            target.extract(self.options, False)
+            extracted = target.extract(self.options, False)
             returnValue = os.path.exists(target.path+ mdTestUtilities.testFileName)
         finally:
             utilityFunctions.removeDir(repoPath)
+        self.assertEqual(extracted, True, "Git repository failed to extract.")
         self.assertEqual(returnValue, True, "'" + mdTestUtilities.testFileName + "' did not exist after extracting a target with a Git repository as its path.")
 
     def test_extractHg(self):
@@ -67,10 +69,11 @@ class test_mdTarget(unittest.TestCase):
         try:
             repoPath = mdTestUtilities.createHgRepository()
             target = mdTarget.Target("HgTarget", repoPath)
-            target.extract(self.options, False)
+            extracted = target.extract(self.options, False)
             returnValue = os.path.exists(target.path + mdTestUtilities.testFileName)
         finally:
             utilityFunctions.removeDir(repoPath)
+        self.assertEqual(extracted, True, "Hg repository failed to extract.")
         self.assertEqual(returnValue, True, "'" + mdTestUtilities.testFileName + "' did not exist after extracting a target with a Hg repository as its path.")
 
     def test_extractSvn(self):
@@ -79,7 +82,7 @@ class test_mdTarget(unittest.TestCase):
         try:
             repoPath = mdTestUtilities.createSvnRepository()
             target = mdTarget.Target("SvnTarget", repoPath)
-            target.extract(self.options, False)
+            extracted = target.extract(self.options, False)
             returnValue = os.path.exists(target.path + mdTestUtilities.testFileName)
         finally:
             utilityFunctions.removeDir(repoPath)
@@ -90,10 +93,11 @@ class test_mdTarget(unittest.TestCase):
             tarDir, tarName = mdTestUtilities.createTarFile()
             tarPath = tarDir + tarName
             target = mdTarget.Target("TarTarget", tarPath)
-            target.extract(self.options, False)
+            extracted = target.extract(self.options, False)
             returnValue = os.path.exists(target.path + mdTestUtilities.testFileName)
         finally:
             utilityFunctions.removeDir(tarDir)
+        self.assertEqual(extracted, True, "Tar file failed to extract.")
         self.assertEqual(returnValue, True, "'" + mdTestUtilities.testFileName + "' did not exist after extracting a target with a Tar file as its path.")
 
     def test_extractBzip(self):
@@ -101,10 +105,11 @@ class test_mdTarget(unittest.TestCase):
             tarDir, tarName = mdTestUtilities.createBzipFile()
             tarPath = tarDir + tarName
             target = mdTarget.Target("BzipTarget", tarPath)
-            target.extract(self.options, False)
+            extracted = target.extract(self.options, False)
             returnValue = os.path.exists(target.path + mdTestUtilities.testFileName)
         finally:
             utilityFunctions.removeDir(tarDir)
+        self.assertEqual(extracted, True, "BZip file failed to extract.")
         self.assertEqual(returnValue, True, "'" + mdTestUtilities.testFileName + "' did not exist after extracting a target with a Bzip file as its path.")
 
     def test_extractGzip(self):
@@ -112,10 +117,11 @@ class test_mdTarget(unittest.TestCase):
             tarDir, tarName = mdTestUtilities.createGzipFile()
             tarPath = tarDir + tarName
             target = mdTarget.Target("GzipTarget", tarPath)
-            target.extract(self.options, False)
+            extracted = target.extract(self.options, False)
             returnValue = os.path.exists(target.path + mdTestUtilities.testFileName)
         finally:
             utilityFunctions.removeDir(tarDir)
+        self.assertEqual(extracted, True, "Gzip file failed to extract.")
         self.assertEqual(returnValue, True, "'" + mdTestUtilities.testFileName + "' did not exist after extracting a target with a Gzip file as its path.")
 
 if __name__ == "__main__":
