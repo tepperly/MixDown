@@ -57,6 +57,6 @@ def gitCheckout(repoLocation, outPath):
     returnCode = utilityFunctions.executeSubProcess("git clone " + repoLocation + " " + outPath, outFileHandle = outFile)
     outFile.close()
     if returnCode == 0:
-        return False
-    return True
+        return True
+    return False
 

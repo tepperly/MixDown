@@ -61,6 +61,6 @@ def cvsCheckout(repoLocation, project, outPath):
     returnCode = utilityFunctions.executeSubProcess("cvs -d " + repoLocation + " -Q checkout", outFileHandle = outFile)
     outFile.close()
     if returnCode == 0:
-        return False
-    return True
+        return True
+    return False
 

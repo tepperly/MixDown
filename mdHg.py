@@ -57,5 +57,5 @@ def hgCheckout(repoLocation, outPath):
     returnCode = utilityFunctions.executeSubProcess("hg clone --noninteractive " + repoLocation + " " + outPath, outFileHandle = outFile)
     outFile.close()
     if returnCode == 0:
-        return False
-    return True
+        return True
+    return False

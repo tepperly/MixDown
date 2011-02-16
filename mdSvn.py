@@ -57,6 +57,6 @@ def svnCheckout(repoLocation, outPath):
     returnCode = utilityFunctions.executeSubProcess("svn co --non-interactive " + repoLocation + " " + outPath, outFileHandle = outFile)
     outFile.close()
     if returnCode == 0:
-        return False
-    return True
+        return True
+    return False
 
