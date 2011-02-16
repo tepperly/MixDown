@@ -20,9 +20,7 @@
 # along with this program; if not, write to the Free Software Foundation,
 # Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 
-import mdLogger, os
-
-from utilityFunctions import *
+import os, mdLogger, utilityFunctions
 
 _isSvnInstalled = None
 
@@ -30,7 +28,7 @@ def isSvnInstalled():
     global _isSvnInstalled
     if _isSvnInstalled == None:
         outFile = open(os.devnull, "w")
-        returnCode = executeSubProcess("svn --help", outFileHandle = outFile)
+        returnCode = utilityFunctions.executeSubProcess("svn --help", outFileHandle = outFile)
         outFile.close()
         if returnCode == 0:
             _isSvnInstalled = True
@@ -44,7 +42,7 @@ def isSvnRepo(location):
     if location == "" or not isSvnInstalled():
         return False
     outFile = open(os.devnull, "w")
-    returnCode = executeSubProcess("svn ls " + location, outFileHandle = outFile)
+    returnCode = utilityFunctions.executeSubProcess("svn ls " + location, outFileHandle = outFile)
     outFile.close()
     if returnCode == 0:
         return True
@@ -56,7 +54,7 @@ def svnCheckout(repoLocation, outPath):
     if repoLocation == "" or outPath == "" or not isSvnInstalled():
         return False
     outFile = open(os.devnull, "w")
-    returnCode = executeSubProcess("svn co --non-interactive " + repoLocation + " " + outPath, outFileHandle = outFile)
+    returnCode = utilityFunctions.executeSubProcess("svn co --non-interactive " + repoLocation + " " + outPath, outFileHandle = outFile)
     outFile.close()
     if returnCode == 0:
         return False

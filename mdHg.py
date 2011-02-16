@@ -20,9 +20,7 @@
 # along with this program; if not, write to the Free Software Foundation,
 # Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 
-import mdLogger, os
-
-from utilityFunctions import *
+import os, mdLogger, utilityFunctions
 
 _isHgInstalled = None
 
@@ -30,7 +28,7 @@ def isHgInstalled():
     global _isHgInstalled
     if _isHgInstalled == None:
         outFile = open(os.devnull, "w")
-        returnCode = executeSubProcess("hg --help", outFileHandle = outFile)
+        returnCode = utilityFunctions.executeSubProcess("hg --help", outFileHandle = outFile)
         outFile.close()
         if returnCode == 0:
             _isHgInstalled = True
@@ -44,7 +42,7 @@ def isHgRepo(location):
     if location == "" or not isHgInstalled():
         return False
     outFile = open(os.devnull, "w")
-    returnCode = executeSubProcess("hg log --limit 1 " + location, outFileHandle = outFile)
+    returnCode = utilityFunctions.executeSubProcess("hg log --limit 1 " + location, outFileHandle = outFile)
     outFile.close()
     if returnCode == 0:
         return True
@@ -56,7 +54,7 @@ def hgCheckout(repoLocation, outPath):
     if repoLocation == "" or outPath == "" or not isHgInstalled():
         return False
     outFile = open(os.devnull, "w")
-    returnCode = executeSubProcess("hg clone --noninteractive " + repoLocation + " " + outPath, outFileHandle = outFile)
+    returnCode = utilityFunctions.executeSubProcess("hg clone --noninteractive " + repoLocation + " " + outPath, outFileHandle = outFile)
     outFile.close()
     if returnCode == 0:
         return False

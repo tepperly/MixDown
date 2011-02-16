@@ -20,9 +20,7 @@
 # along with this program; if not, write to the Free Software Foundation,
 # Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 
-import mdLogger, os
-
-from utilityFunctions import *
+import os, mdLogger, utilityFunctions
 
 _isCvsInstalled = None
 
@@ -30,7 +28,7 @@ def isCvsInstalled():
     global _isCvsInstalled
     if _isCvsInstalled == None:
         outFile = open(os.devnull, "w")
-        returnCode = executeSubProcess("cvs --version", outFileHandle = outFile)
+        returnCode = utilityFunctions.executeSubProcess("cvs --version", outFileHandle = outFile)
         outFile.close()
         if returnCode == 0:
             _isCvsInstalled = True
@@ -46,7 +44,7 @@ def isCvsRepo(location):
     if location == "" or not isCvsInstalled():
         return False
     outFile = open(os.devnull, "w")
-    returnCode = executeSubProcess("cvs -d " + location + " log", outFileHandle = outFile)
+    returnCode = utilityFunctions.executeSubProcess("cvs -d " + location + " log", outFileHandle = outFile)
     outFile.close()
     if returnCode == 0:
         return True
@@ -60,7 +58,7 @@ def cvsCheckout(repoLocation, project, outPath):
     if repoLocation == "" or outPath == "" or not isCvsInstalled():
         return False
     outFile = open(os.devnull, "w")
-    returnCode = executeSubProcess("cvs -d " + repoLocation + " -Q checkout", outFileHandle = outFile)
+    returnCode = utilityFunctions.executeSubProcess("cvs -d " + repoLocation + " -Q checkout", outFileHandle = outFile)
     outFile.close()
     if returnCode == 0:
         return False

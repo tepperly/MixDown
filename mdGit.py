@@ -20,9 +20,7 @@
 # along with this program; if not, write to the Free Software Foundation,
 # Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 
-import mdLogger, os
-
-from utilityFunctions import *
+import os, mdLogger, utilityFunctions
 
 _isGitInstalled = None
 
@@ -30,7 +28,7 @@ def isGitInstalled():
     global _isGitInstalled
     if _isGitInstalled == None:
         outFile = open(os.devnull, "w")
-        returnCode = executeSubProcess("git --help", outFileHandle = outFile)
+        returnCode = utilityFunctions.executeSubProcess("git --help", outFileHandle = outFile)
         outFile.close()
         if returnCode == 0:
             _isGitInstalled = True
@@ -44,7 +42,7 @@ def isGitRepo(location):
     if location == "" or not isGitInstalled():
         return False
     outFile = open(os.devnull, "w")
-    returnCode = executeSubProcess("git ls-remote " + location, outFileHandle = outFile)
+    returnCode = utilityFunctions.executeSubProcess("git ls-remote " + location, outFileHandle = outFile)
     outFile.close()
     if returnCode == 0:
         return True
@@ -56,10 +54,9 @@ def gitCheckout(repoLocation, outPath):
     if repoLocation == "" or outPath == "" or not isGitInstalled():
         return False
     outFile = open(os.devnull, "w")
-    returnCode = executeSubProcess("git clone " + repoLocation + " " + outPath, outFileHandle = outFile)
+    returnCode = utilityFunctions.executeSubProcess("git clone " + repoLocation + " " + outPath, outFileHandle = outFile)
     outFile.close()
     if returnCode == 0:
         return False
     return True
-    
-    
+
