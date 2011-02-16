@@ -24,20 +24,28 @@ import os, sys, unittest, mdTestUtilities
 
 if not ".." in sys.path:
     sys.path.append("..")
-import mdCvs, mdSvn, mdGit, mdHg, mdLogger, mdTarget, utilityFunctions
+import mdCvs, mdSvn, mdGit, mdHg, mdLogger, mdOptions, mdTarget, utilityFunctions
 
 class test_mdTarget(unittest.TestCase):
+    def setUp(self):
+        self.testDir = mdTestUtilities.makeTempDir()
+        self.options = mdOptions.Options()
+        self.options.buildDir = self.testDir + "mdBuild"
+
+    def tearDown(self):
+        if os.path.exists(self.testDir):
+            utilityFunctions.removeDir(self.testDir)
+        self.testDir = ""
+
     def test_extractCvs(self):
         if not mdCvs.isCvsInstalled():
             self.fail("Cvs is not installed on your system.  All Cvs tests will fail.")
         try:
-            tempDir = mdTestUtilities.makeTempDir()
             repoPath = mdTestUtilities.createCvsRepository()
             target = mdTarget.Target("CvsTarget", repoPath)
-            target.extract(tempDir, False)
-            returnValue = os.path.exists(tempDir + mdTestUtilities.testFileName)
+            target.extract(self.testDir, False)
+            returnValue = os.path.exists(target.path + mdTestUtilities.testFileName)
         finally:
-            utilityFunctions.removeDir(tempDir)
             utilityFunctions.removeDir(repoPath)
         self.assertEqual(returnValue, True, "'" + mdTestUtilities.testFileName + "' did not exist after extracting a target with a Cvs repository as its path.")
 
@@ -45,13 +53,11 @@ class test_mdTarget(unittest.TestCase):
         if not mdGit.isGitInstalled():
             self.fail("Git is not installed on your system.  All Git tests will fail.")
         try:
-            tempDir = mdTestUtilities.makeTempDir()
             repoPath = mdTestUtilities.createGitRepository()
             target = mdTarget.Target("GitTarget", repoPath)
-            target.extract(tempDir, False)
-            returnValue = os.path.exists(tempDir + mdTestUtilities.testFileName)
+            target.extract(self.testDir, False)
+            returnValue = os.path.exists(target.path+ mdTestUtilities.testFileName)
         finally:
-            utilityFunctions.removeDir(tempDir)
             utilityFunctions.removeDir(repoPath)
         self.assertEqual(returnValue, True, "'" + mdTestUtilities.testFileName + "' did not exist after extracting a target with a Git repository as its path.")
 
@@ -59,13 +65,11 @@ class test_mdTarget(unittest.TestCase):
         if not mdHg.isHgInstalled():
             self.fail("Hg is not installed on your system.  All Hg tests will fail.")
         try:
-            tempDir = mdTestUtilities.makeTempDir()
             repoPath = mdTestUtilities.createHgRepository()
             target = mdTarget.Target("HgTarget", repoPath)
-            target.extract(tempDir, False)
-            returnValue = os.path.exists(tempDir + mdTestUtilities.testFileName)
+            target.extract(self.testDir, False)
+            returnValue = os.path.exists(target.path + mdTestUtilities.testFileName)
         finally:
-            utilityFunctions.removeDir(tempDir)
             utilityFunctions.removeDir(repoPath)
         self.assertEqual(returnValue, True, "'" + mdTestUtilities.testFileName + "' did not exist after extracting a target with a Hg repository as its path.")
 
@@ -73,15 +77,46 @@ class test_mdTarget(unittest.TestCase):
         if not mdSvn.isSvnInstalled():
             self.fail("Svn is not installed on your system.  All Svn tests will fail.")
         try:
-            tempDir = mdTestUtilities.makeTempDir()
             repoPath = mdTestUtilities.createSvnRepository()
             target = mdTarget.Target("SvnTarget", repoPath)
-            target.extract(tempDir, False)
-            returnValue = os.path.exists(tempDir + mdTestUtilities.testFileName)
+            target.extract(self.testDir, False)
+            returnValue = os.path.exists(target.path + mdTestUtilities.testFileName)
         finally:
-            utilityFunctions.removeDir(tempDir)
             utilityFunctions.removeDir(repoPath)
         self.assertEqual(returnValue, True, "'" + mdTestUtilities.testFileName + "' did not exist after extracting a target with a Svn repository as its path.")
+
+    def test_extractTar(self):
+        try:
+            tarDir, tarName = mdTestUtilities.createTarFile()
+            tarPath = tarDir + tarName
+            target = mdTarget.Target("TarTarget", tarPath)
+            target.extract(self.options, False)
+            returnValue = os.path.exists(target.path + mdTestUtilities.testFileName)
+        finally:
+            utilityFunctions.removeDir(tarDir)
+        self.assertEqual(returnValue, True, "'" + mdTestUtilities.testFileName + "' did not exist after extracting a target with a Tar file as its path.")
+
+    def test_extractBzip(self):
+        try:
+            tarDir, tarName = mdTestUtilities.createBzipFile()
+            tarPath = tarDir + tarName
+            target = mdTarget.Target("BzipTarget", tarPath)
+            target.extract(self.options, False)
+            returnValue = os.path.exists(target.path + mdTestUtilities.testFileName)
+        finally:
+            utilityFunctions.removeDir(tarDir)
+        self.assertEqual(returnValue, True, "'" + mdTestUtilities.testFileName + "' did not exist after extracting a target with a Bzip file as its path.")
+
+    def test_extractGzip(self):
+        try:
+            tarDir, tarName = mdTestUtilities.createGzipFile()
+            tarPath = tarDir + tarName
+            target = mdTarget.Target("GzipTarget", tarPath)
+            target.extract(self.options, False)
+            returnValue = os.path.exists(target.path + mdTestUtilities.testFileName)
+        finally:
+            utilityFunctions.removeDir(tarDir)
+        self.assertEqual(returnValue, True, "'" + mdTestUtilities.testFileName + "' did not exist after extracting a target with a Gzip file as its path.")
 
 if __name__ == "__main__":
     mdLogger.SetLogger("Console")

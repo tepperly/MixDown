@@ -28,6 +28,27 @@ import utilityFunctions
 
 testFileName = "testFile"
 
+def createTarFile():
+    tempPath = utilityFunctions.includeTrailingPathDelimiter(tempfile.mkdtemp(prefix="mixdown-"))
+    os.mkdir(tempPath + "test")
+    utilityFunctions.executeSubProcess("touch test/" + testFileName, tempPath)
+    utilityFunctions.executeSubProcess("tar -cf test.tar test", tempPath)
+    return tempPath, "test.tar"
+
+def createGzipFile():
+    tempPath = utilityFunctions.includeTrailingPathDelimiter(tempfile.mkdtemp(prefix="mixdown-"))
+    os.mkdir(tempPath + "test")
+    utilityFunctions.executeSubProcess("touch test/" + testFileName, tempPath)
+    utilityFunctions.executeSubProcess("tar -czf test.tgz test", tempPath)
+    return tempPath, "test.tgz"
+
+def createBzipFile():
+    tempPath = utilityFunctions.includeTrailingPathDelimiter(tempfile.mkdtemp(prefix="mixdown-"))
+    os.mkdir(tempPath + "test")
+    utilityFunctions.executeSubProcess("touch test/" + testFileName, tempPath)
+    utilityFunctions.executeSubProcess("tar -cjf test.tar.bz2 test", tempPath)
+    return tempPath, "test.tar.bz2"
+
 def createCvsRepository():
     tempPath = utilityFunctions.includeTrailingPathDelimiter(tempfile.mkdtemp(prefix="mixdown-"))
     repoPath = tempPath + "repo"
