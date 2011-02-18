@@ -49,7 +49,7 @@ class test_mdTarget(unittest.TestCase):
             returnValue = os.path.exists(target.path + mdTestUtilities.testFileName)
         finally:
             self.tearDownTargetDirectory()
-            utilityFunctions.removeDir(repoPath)
+            utilityFunctions.removeDir(repoPath[:len(repoPath)-4])
         self.assertEqual(extracted, True, "Cvs repository failed to extract.")
         self.assertEqual(returnValue, True, "'" + mdTestUtilities.testFileName + "' did not exist after extracting a target with a Cvs repository as its path.")
 
@@ -94,7 +94,7 @@ class test_mdTarget(unittest.TestCase):
             returnValue = os.path.exists(target.path + mdTestUtilities.testFileName)
         finally:
             self.tearDownTargetDirectory()
-            utilityFunctions.removeDir(repoPath)
+            utilityFunctions.removeDir(repoPath[7:len(repoPath)-10])
         self.assertEqual(returnValue, True, "'" + mdTestUtilities.testFileName + "' did not exist after extracting a target with a Svn repository as its path.")
 
     def test_extractTar(self):
