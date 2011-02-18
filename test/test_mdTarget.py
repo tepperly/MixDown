@@ -27,25 +27,28 @@ if not ".." in sys.path:
 import mdCvs, mdSvn, mdGit, mdHg, mdLogger, mdOptions, mdTarget, utilityFunctions
 
 class test_mdTarget(unittest.TestCase):
-    def setUp(self):
+    def setUpTargetDirectory(self):
         self.testDir = mdTestUtilities.makeTempDir()
         self.options = mdOptions.Options()
         self.options.buildDir = self.testDir + "mdBuild"
 
-    def tearDown(self):
+    def tearDownTargetDirectory(self):
         if os.path.exists(self.testDir):
             utilityFunctions.removeDir(self.testDir)
         self.testDir = ""
+        self.options = None
 
     def test_extractCvs(self):
         if not mdCvs.isCvsInstalled():
             self.fail("Cvs is not installed on your system.  All Cvs tests will fail.")
         try:
+            self.setUpTargetDirectory()
             repoPath = mdTestUtilities.createCvsRepository()
             target = mdTarget.Target("CvsTarget", repoPath)
             extracted = target.extract(self.options, False)
             returnValue = os.path.exists(target.path + mdTestUtilities.testFileName)
         finally:
+            self.tearDownTargetDirectory()
             utilityFunctions.removeDir(repoPath)
         self.assertEqual(extracted, True, "Cvs repository failed to extract.")
         self.assertEqual(returnValue, True, "'" + mdTestUtilities.testFileName + "' did not exist after extracting a target with a Cvs repository as its path.")
@@ -54,11 +57,13 @@ class test_mdTarget(unittest.TestCase):
         if not mdGit.isGitInstalled():
             self.fail("Git is not installed on your system.  All Git tests will fail.")
         try:
+            self.setUpTargetDirectory()
             repoPath = mdTestUtilities.createGitRepository()
             target = mdTarget.Target("GitTarget", repoPath)
             extracted = target.extract(self.options, False)
             returnValue = os.path.exists(target.path+ mdTestUtilities.testFileName)
         finally:
+            self.tearDownTargetDirectory()
             utilityFunctions.removeDir(repoPath)
         self.assertEqual(extracted, True, "Git repository failed to extract.")
         self.assertEqual(returnValue, True, "'" + mdTestUtilities.testFileName + "' did not exist after extracting a target with a Git repository as its path.")
@@ -67,11 +72,13 @@ class test_mdTarget(unittest.TestCase):
         if not mdHg.isHgInstalled():
             self.fail("Hg is not installed on your system.  All Hg tests will fail.")
         try:
+            self.setUpTargetDirectory()
             repoPath = mdTestUtilities.createHgRepository()
             target = mdTarget.Target("HgTarget", repoPath)
             extracted = target.extract(self.options, False)
             returnValue = os.path.exists(target.path + mdTestUtilities.testFileName)
         finally:
+            self.tearDownTargetDirectory()
             utilityFunctions.removeDir(repoPath)
         self.assertEqual(extracted, True, "Hg repository failed to extract.")
         self.assertEqual(returnValue, True, "'" + mdTestUtilities.testFileName + "' did not exist after extracting a target with a Hg repository as its path.")
@@ -80,49 +87,85 @@ class test_mdTarget(unittest.TestCase):
         if not mdSvn.isSvnInstalled():
             self.fail("Svn is not installed on your system.  All Svn tests will fail.")
         try:
+            self.setUpTargetDirectory()
             repoPath = mdTestUtilities.createSvnRepository()
             target = mdTarget.Target("SvnTarget", repoPath)
             extracted = target.extract(self.options, False)
             returnValue = os.path.exists(target.path + mdTestUtilities.testFileName)
         finally:
+            self.tearDownTargetDirectory()
             utilityFunctions.removeDir(repoPath)
         self.assertEqual(returnValue, True, "'" + mdTestUtilities.testFileName + "' did not exist after extracting a target with a Svn repository as its path.")
 
     def test_extractTar(self):
         try:
+            self.setUpTargetDirectory()
             tarDir, tarName = mdTestUtilities.createTarFile()
             tarPath = tarDir + tarName
             target = mdTarget.Target("TarTarget", tarPath)
             extracted = target.extract(self.options, False)
             returnValue = os.path.exists(target.path + mdTestUtilities.testFileName)
         finally:
+            self.tearDownTargetDirectory()
             utilityFunctions.removeDir(tarDir)
         self.assertEqual(extracted, True, "Tar file failed to extract.")
         self.assertEqual(returnValue, True, "'" + mdTestUtilities.testFileName + "' did not exist after extracting a target with a Tar file as its path.")
 
     def test_extractBzip(self):
         try:
+            self.setUpTargetDirectory()
             tarDir, tarName = mdTestUtilities.createBzipFile()
             tarPath = tarDir + tarName
             target = mdTarget.Target("BzipTarget", tarPath)
             extracted = target.extract(self.options, False)
             returnValue = os.path.exists(target.path + mdTestUtilities.testFileName)
         finally:
+            self.tearDownTargetDirectory()
             utilityFunctions.removeDir(tarDir)
         self.assertEqual(extracted, True, "BZip file failed to extract.")
         self.assertEqual(returnValue, True, "'" + mdTestUtilities.testFileName + "' did not exist after extracting a target with a Bzip file as its path.")
 
     def test_extractGzip(self):
         try:
+            self.setUpTargetDirectory()
             tarDir, tarName = mdTestUtilities.createGzipFile()
             tarPath = tarDir + tarName
             target = mdTarget.Target("GzipTarget", tarPath)
             extracted = target.extract(self.options, False)
             returnValue = os.path.exists(target.path + mdTestUtilities.testFileName)
         finally:
+            self.tearDownTargetDirectory()
             utilityFunctions.removeDir(tarDir)
         self.assertEqual(extracted, True, "Gzip file failed to extract.")
         self.assertEqual(returnValue, True, "'" + mdTestUtilities.testFileName + "' did not exist after extracting a target with a Gzip file as its path.")
+
+    def test_isValid(self):
+        target = mdTarget.Target("", "")
+        returnValue = target.isValid()
+        self.assertFalse(returnValue)
+
+        target.name = "foo"
+        target.path = ""
+        returnValue = target.isValid()
+        self.assertFalse(returnValue)
+
+        target.name = ""
+        target.path = "/some/path"
+        returnValue = target.isValid()
+        self.assertFalse(returnValue)
+
+        target.name = "foo"
+        target.path = "/some/path"
+        returnValue = target.isValid()
+        self.assertTrue(returnValue)
+
+    def test_steps(self):
+        target = mdTarget.Target("foo", "/some/path")
+        target.skipSteps = ["b"]
+        returnValue = target.hasStep("b")
+        self.assertFalse(returnValue, "Specified skipped step was not skipped")
+        returnValue = target.hasStep("a")
+        self.assertTrue(returnValue, "Specified skipped step was not skipped")
 
 if __name__ == "__main__":
     mdLogger.SetLogger("Console")
