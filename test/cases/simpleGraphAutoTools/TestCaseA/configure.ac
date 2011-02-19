@@ -1,0 +1,19 @@
+#                                               -*- Autoconf -*-
+# Process this file with autoconf to produce a configure script.
+
+AC_PREREQ(2.59)
+AC_INIT([TestCaseA], [1.0], [white238@llnl.gov])
+
+# Checks for programs.
+AC_PROG_CC
+AM_PROG_CC_C_O
+
+# Checks for command-line options
+AC_ARG_WITH([TestCaseB],
+	AS_HELP_STRING([--with-TestCaseB=PREFIX],
+	[Location of TestCaseB]),,)
+AC_ARG_WITH([TestCaseC],
+	AS_HELP_STRING([--with-TestCaseC=PATH],
+	[Location of TestCaseC]),,)
+
+AC_OUTPUT
