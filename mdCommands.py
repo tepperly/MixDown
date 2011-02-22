@@ -40,7 +40,7 @@ def getCommand(stepName, target, options):
         command = __getBuildCommand(target)
     elif stepName == "install":
         command = __getInstallCommand(target)
-    
+
     if options.importer:
         return command
     return options.expandDefines(command)
@@ -53,10 +53,13 @@ def __getPreConfigureCommand(target):
             basename = os.path.basename(item)
             if basename in ['buildconf']:
                 command = "./buildconf"
+                break
             elif basename in ['autogen.sh']:
                 command = "./autogen.sh"
+                break
             elif basename in ['configure.ac', 'configure.in']:
-                command = "autoconf"
+                command = "autoreconf -i"
+                break
     return command
 
 def __getBuildCommand(target):
@@ -67,6 +70,7 @@ def __getBuildCommand(target):
             basename = os.path.basename(item)
             if str.lower(basename) in ["gnumakefile", "gnumakefile.in", "gnumakefile.am", "makefile", "makefile.in", "makefile.am"]:
                 command = "make $(" + mdStrings.mdMakeJobSlotsDefineName + ")"
+                break
     return command
 
 def __getConfigureCommand(target, prefix=""):
@@ -77,12 +81,14 @@ def __getConfigureCommand(target, prefix=""):
             basename = os.path.basename(item)
             if basename == "Configure":
                 command = "./Configure"
-            elif str.lower(basename) in ['configure']:
+                break
+            elif str.lower(basename) in ['configure', 'configure.ac', 'configure.in']:
                 command = "./configure"
                 if prefix != "":
                     command += " --prefix=$(" + mdStrings.mdDefinePrefix + ")"
                     for dependancy in target.dependsOn:
                         command += " --with-" + dependancy + "=$(" + mdStrings.mdDefinePrefix + ")"
+                break
     return command
 
 def __getInstallCommand(target):
@@ -93,4 +99,5 @@ def __getInstallCommand(target):
             basename = os.path.basename(item)
             if str.lower(basename) in ["gnumakefile", "gnumakefile.in", "gnumakefile.am", "makefile", "makefile.in", "makefile.am"]:
                 command = "make $(" + mdStrings.mdMakeJobSlotsDefineName + ") install"
+            break
     return command
