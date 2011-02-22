@@ -38,7 +38,7 @@ class test_mdTarget(unittest.TestCase):
         self.testDir = ""
         self.options = None
 
-    def test_extractCvs(self):
+    def _test_extractCvs(self):
         if not mdCvs.isCvsInstalled():
             self.fail("Cvs is not installed on your system.  All Cvs tests will fail.")
         try:
@@ -166,6 +166,63 @@ class test_mdTarget(unittest.TestCase):
         self.assertFalse(returnValue, "Specified skipped step was not skipped")
         returnValue = target.hasStep("a")
         self.assertTrue(returnValue, "Specified skipped step was not skipped")
+
+    def test_examine(self):
+        options = mdOptions.Options()
+        target = mdTarget.Target("TestCaseA", "cases/simpleGraphAutoTools/TestCaseA")
+        target.examine(options)
+        returnValue = target.commands["preconfig"] == "autoreconf -i"
+        self.assertTrue(returnValue, "'cases/simpleGraphAutoTools/TestCaseA' returned wrong preconfig command")
+        returnValue = target.commands["config"] = "./configure"
+        self.assertTrue(returnValue, "'cases/simpleGraphAutoTools/TestCaseA' returned wrong config command")
+        returnValue = target.commands["build"] = "make"
+        self.assertTrue(returnValue, "'cases/simpleGraphAutoTools/TestCaseA' returned wrong build command")
+        returnValue = target.commands["install"] = "make install"
+        self.assertTrue(returnValue, "'cases/simpleGraphAutoTools/TestCaseA' returned wrong install command")
+
+    def test_examineWithJobSlots(self):
+        options = mdOptions.Options()
+        options.processCommandline(["test", "-j4"])
+        target = mdTarget.Target("TestCaseA", "cases/simpleGraphAutoTools/TestCaseA")
+        target.examine(options)
+        returnValue = target.commands["preconfig"] == "autoreconf -i"
+        self.assertTrue(returnValue, "'cases/simpleGraphAutoTools/TestCaseA' returned wrong preconfig command")
+        returnValue = target.commands["config"] = "./configure"
+        self.assertTrue(returnValue, "'cases/simpleGraphAutoTools/TestCaseA' returned wrong config command")
+        returnValue = target.commands["build"] = "make -j4"
+        self.assertTrue(returnValue, "'cases/simpleGraphAutoTools/TestCaseA' returned wrong build command")
+        returnValue = target.commands["install"] = "make -j4 install"
+        self.assertTrue(returnValue, "'cases/simpleGraphAutoTools/TestCaseA' returned wrong install command")
+
+    def test_examineWithDependancies(self):
+        options = mdOptions.Options()
+        target = mdTarget.Target("TestCaseA", "cases/simpleGraphAutoTools/TestCaseA")
+        target.dependsOn = ["TestCaseB", "TestCaseC"]
+        target.examine(options)
+        returnValue = target.commands["preconfig"] == "autoreconf -i"
+        self.assertTrue(returnValue, "'cases/simpleGraphAutoTools/TestCaseA' returned wrong preconfig command")
+        returnValue = target.commands["config"] = "./configure"
+        self.assertTrue(returnValue, "'cases/simpleGraphAutoTools/TestCaseA' returned wrong config command")
+        returnValue = target.commands["build"] = "make"
+        self.assertTrue(returnValue, "'cases/simpleGraphAutoTools/TestCaseA' returned wrong build command")
+        returnValue = target.commands["install"] = "make install"
+        self.assertTrue(returnValue, "'cases/simpleGraphAutoTools/TestCaseA' returned wrong install command")
+
+    def test_examineWithDependanciesWithPrefix(self):
+        options = mdOptions.Options()
+        options.processCommandline(["test", "-p/test/path"])
+        target = mdTarget.Target("TestCaseA", "cases/simpleGraphAutoTools/TestCaseA")
+        target.dependsOn = ["TestCaseB", "TestCaseC"]
+        target.examine(options)
+        returnValue = target.commands["preconfig"] == "autoreconf -i"
+        self.assertTrue(returnValue, "'cases/simpleGraphAutoTools/TestCaseA' returned wrong preconfig command")
+        returnValue = target.commands["config"] = "./configure --prefix=/test/path --with-TestCaseB=/test/path --with-TestCaseC=/test/path"
+        self.assertTrue(returnValue, "'cases/simpleGraphAutoTools/TestCaseA' returned wrong config command")
+        returnValue = target.commands["build"] = "make"
+        self.assertTrue(returnValue, "'cases/simpleGraphAutoTools/TestCaseA' returned wrong build command")
+        returnValue = target.commands["install"] = "make install"
+        self.assertTrue(returnValue, "'cases/simpleGraphAutoTools/TestCaseA' returned wrong install command")
+
 
 if __name__ == "__main__":
     mdLogger.SetLogger("Console")
