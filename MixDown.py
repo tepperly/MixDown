@@ -45,7 +45,7 @@ def main():
     finally:
         Logger().close()
     sys.exit()
-    
+
 def buildStepActor(stepName, target, options):
     Logger().reportStart(target.name, stepName)
     returnCode = None
@@ -64,13 +64,13 @@ def buildStepActor(stepName, target, options):
     elif returnCode != 0:
         Logger().reportFailure(target.name, stepName, returnCode, True)
     else:
-        Logger().reportSuccess(target.name, stepName)    
-        
+        Logger().reportSuccess(target.name, stepName)
+
 #--------------------------------Setup---------------------------------
 def setup():
     options = Options()
     print "Processing commandline options..."
-    options.processCommandline()
+    options.processCommandline(sys.argv)
     removeDir(options.logDir)
     SetLogger(options.logger, options.logDir)
     if options.verbose:
@@ -79,10 +79,10 @@ def setup():
         if options.verbose:
             Logger().writeWarning("No prefix defined, defaulting to '/usr/local'")
         options.setDefine(mdStrings.mdDefinePrefix, '/usr/local')
-    
+
     #Read project file
     project = Project(options.projectFile)
-    
+
     #Clean workspaces if told to clean before
     if options.cleanBefore:
         Logger().writeMessage("Cleaning MixDown directories...")
@@ -96,11 +96,11 @@ def setup():
         for currTarget in project.targets:
             if currTarget.output != "" and os.path.exists(currTarget.output):
                 removeDir(currTarget.output)
-                
+
     Logger().writeMessage("Converting all targets to local directories...")
     for currTarget in project.targets:
         currTarget.extract()
-            
+
     project.examine(options)
 
     prefixDefine = options.getDefine(mdStrings.mdDefinePrefix)
@@ -130,10 +130,10 @@ def cleanup(options):
         #TODO: should this not clean up or maybe warn user to add it to their permament environment variable?
         os.environ["LD_LIBRARY_PATH"] = originalLibraryPath
 
-#----------------------------------------------------------------------        
+#----------------------------------------------------------------------
 def printProgramHeader():
     print "MixDown - A tool to simplify building\n"
-    
+
 def printUsageAndExit(errorStr = ""):
     printUsage(errorStr)
     sys.exit()
@@ -141,9 +141,9 @@ def printUsageAndExit(errorStr = ""):
 def printUsage(errorStr = ""):
     if errorStr != "":
         print "Error: " + errorStr + "\n"
-        
+
     printProgramHeader()
-    
+
     print "    Example Usage: ./MixDown.py foo.md\\\n\
 \n\
     Required:\n\
@@ -162,7 +162,7 @@ def printUsage(errorStr = ""):
     build: mdBuild/\n\
     deploy: mdDeploy/\n\
     unpack: mdUnpack/\n"
-    
+
 #---------------------------------------------------------------------
 
 if __name__ == "__main__":

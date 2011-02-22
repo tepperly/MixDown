@@ -116,13 +116,14 @@ class Options:
                 defineValue = self.getDefine(defineName)
                 expandedString = expandedString.replace(defineName, defineValue)
             loopCount += 1
+        expandedString = expandedString.replace("  ", " ").strip()
         return expandedString
 
-    def processCommandline(self):
-        if len(sys.argv) < 2:
+    def processCommandline(self, commandLine = []):
+        if len(commandLine) < 2:
             printUsageAndExit()
 
-        for currArg in sys.argv[1:]: #skip script name
+        for currArg in commandLine[1:]: #skip script name
             currFlag = str.lower(currArg[:2])
             currValue = currArg[2:]
 
