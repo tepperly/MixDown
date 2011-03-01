@@ -99,5 +99,5 @@ def __getInstallCommand(target):
             basename = os.path.basename(item)
             if str.lower(basename) in ["gnumakefile", "gnumakefile.in", "gnumakefile.am", "makefile", "makefile.in", "makefile.am"]:
                 command = "make $(" + mdStrings.mdMakeJobSlotsDefineName + ") install"
-            break
+                break
     return command
