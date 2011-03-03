@@ -93,3 +93,11 @@ def createSvnRepository():
 def makeTempDir():
     return utilityFunctions.includeTrailingPathDelimiter(tempfile.mkdtemp(prefix="mixdown-"))
 
+def makeTempFile(contents="", suffix=""):
+    fd, name = tempfile.mkstemp(suffix, "mixdown-", text=True)
+    if contents != "":
+        os.write(fd, contents)
+    os.close(fd)
+    return name
+
+
