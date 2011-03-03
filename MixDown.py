@@ -38,10 +38,12 @@ def main():
     printProgramHeader()
     try:
         project, options = setup()
-        for target in project.targets:
-            for step in getBuildStepList():
-                buildStepActor(step, target, options)
-        cleanup(options)
+        if project != None or options != None:
+            for target in project.targets:
+                for step in getBuildStepList():
+                    buildStepActor(step, target, options)
+        if options != None:
+            cleanup(options)
     finally:
         Logger().close()
     sys.exit()
@@ -80,19 +82,22 @@ def setup():
             Logger().writeWarning("No prefix defined, defaulting to '/usr/local'")
         options.setDefine(mdStrings.mdDefinePrefix, '/usr/local')
 
-    #Read project file
+    #Setup project and validate targets
     project = Project(options.projectFile)
+    if not project.read():
+        return None, None
+    if not project.validate():
+        return None, None
 
     #Clean workspaces if told to clean before
     if options.cleanBefore:
-        Logger().writeMessage("Cleaning MixDown directories...")
+        Logger().writeMessage("Cleaning MixDown and Target output directories...")
         try:
             removeDir(options.buildDir)
             removeDir(options.downloadDir)
-            removeDir(options.installDir)
         except IOError, e:
             print e
-            sys.exit()
+            return None, None
         for currTarget in project.targets:
             if currTarget.output != "" and os.path.exists(currTarget.output):
                 removeDir(currTarget.output)
@@ -106,6 +111,7 @@ def setup():
     prefixDefine = options.getDefine(mdStrings.mdDefinePrefix)
     if prefixDefine != "":
         strippedPrefix = stripTrailingPathDelimiter(prefixDefine)
+        #TODO: only add lib64 if on 64bit machines
         libraryPaths = strippedPrefix + "/lib:" + strippedPrefix + "/lib64"
         if os.environ.has_key("LD_LIBRARY_PATH"):
             originalLibraryPath = str.strip(os.environ["LD_LIBRARY_PATH"])
@@ -153,15 +159,13 @@ def printUsage(errorStr = ""):
     -p<path>      Override prefix directory\n\
     -b<path>      Override build directory\n\
     -o<path>      Override download directory\n\
-    -u<path>      Override unpack folder\n\
     -l<logger>    Override default logger (Console, File, Html)\n\
-    -cb           Cleanup before running (deletes unpack, build, and deploy directories)\n\
-    -ca           Cleanup after deploy (deletes unpack and build directories)\n\
+    -cb           Cleanup before running (deletes build and download directories)\n\
+    -ca           Cleanup after deploy (deletes build and download directories)\n\
 \n\
     Default Directories:\n\
     build: mdBuild/\n\
-    deploy: mdDeploy/\n\
-    unpack: mdUnpack/\n"
+    download: mdDownload/\n"
 
 #---------------------------------------------------------------------
 
