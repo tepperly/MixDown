@@ -20,13 +20,12 @@
 # along with this program; if not, write to the Free Software Foundation,
 # Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 
-import os, mdCommands, mdGit, mdHg, mdSvn
+import os, mdCommands, mdGit, mdHg, mdSvn, utilityFunctions
 
 from mdLogger import *
-from utilityFunctions import *
 
 class Target:
-    def __init__(self, targetName, path = ""):
+    def __init__(self, targetName, path=""):
         self.name = targetName
         self.main = False
         self.aliases = []
@@ -49,30 +48,30 @@ class Target:
             return False
         return True
 
-    def extract(self, options, ExitOnFailure=True):
+    def extract(self, options, exitOnFailure=True):
         extracted = False
         if self.output == "":
             if not os.path.isdir(options.buildDir):
                 os.makedirs(options.buildDir)
-                options.buildDir = includeTrailingPathDelimiter(options.buildDir)
-            outPath = includeTrailingPathDelimiter(options.buildDir + self.name)
+                options.buildDir = utilityFunctions.includeTrailingPathDelimiter(options.buildDir)
+            outPath = utilityFunctions.includeTrailingPathDelimiter(options.buildDir + self.name)
         else:
             outPath = self.output
 
         #Check if it is a repository (CVS, SVN, Git, Hg)
         if mdGit.isGitRepo(self.path):
             if not mdGit.gitCheckout(self.path, outPath):
-                Logger().writeError("Given Git repo '" + currPath +"' was unable to be checked out", exitProgram=ExitOnFailure)
+                Logger().writeError("Given Git repo '" + currPath +"' was unable to be checked out", exitProgram=exitOnFailure)
             else:
                 extracted = True
         elif mdHg.isHgRepo(self.path):
             if not mdHg.hgCheckout(self.path, outPath):
-                Logger().writeError("Given Hg repo '" + currPath +"' was unable to be checked out", exitProgram=ExitOnFailure)
+                Logger().writeError("Given Hg repo '" + currPath +"' was unable to be checked out", exitProgram=exitOnFailure)
             else:
                 extracted = True
         elif mdSvn.isSvnRepo(self.path):
             if not mdSvn.svnCheckout(self.path, outPath):
-                Logger().writeError("Given Svn repo '" + currPath +"' was unable to be checked out", exitProgram=ExitOnFailure)
+                Logger().writeError("Given Svn repo '" + currPath +"' was unable to be checked out", exitProgram=exitOnFailure)
             else:
                 extracted = True
         else:
@@ -81,14 +80,14 @@ class Target:
             if (not os.path.isdir(currPath)) and (not os.path.isfile(currPath)) and isURL(currPath):
                 if not os.path.isdir(options.downloadDir):
                     os.makedirs(options.downloadDir)
-                filenamePath = options.downloadDir + URLToFilename(currPath)
+                filenamePath = options.downloadDir + utilityFunctions.URLToFilename(currPath)
                 urllib.urlretrieve(currPath, filenamePath)
                 self.path = filenamePath
 
             #Untar and add trailing path delimiter to any folders
             currPath = self.path
             if os.path.isdir(currPath):
-                outPath = includeTrailingPathDelimiter(currPath)
+                outPath = utilityFunctions.includeTrailingPathDelimiter(currPath)
                 extracted = True
             elif os.path.isfile(currPath):
                 if tarfile.is_tarfile(currPath):
@@ -96,11 +95,11 @@ class Target:
                     extracted = True
                 else:
                     if currPath.endswith(".tar.gz") or currPath.endswith(".tar.bz2") or currPath.endswith(".tar") or currPath.endswith(".tgz") or currPath.endswith(".tbz") or currPath.endswith(".tb2"):
-                        Logger().writeError("Given tar file '" + currPath +"' not understood by python's tarfile package", exitProgram=ExitOnFailure)
+                        Logger().writeError("Given tar file '" + currPath +"' not understood by python's tarfile package", exitProgram=exitOnFailure)
                     else:
-                        Logger().writeError("Given target '" + currPath + "' not understood (Folders, URLs, Repositories, and Tar files are acceptable)", exitProgram=ExitOnFailure)
+                        Logger().writeError("Given target '" + currPath + "' not understood (Folders, URLs, Repositories, and Tar files are acceptable)", exitProgram=exitOnFailure)
             else:
-                Logger().writeError("Given target '" + currPath + "' does not exist", exitProgram=ExitOnFailure)
+                Logger().writeError("Given target '" + currPath + "' does not exist", exitProgram=exitOnFailure)
 
         if extracted:
             self.path = outPath
