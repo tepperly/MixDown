@@ -105,8 +105,8 @@ def main():
     project.examine(options)
 
     print "\nFinal targets...\n"
-    project.printToScreen()
-    project.saveToFile(outFileName)
+    print str(project)
+    project.write(outFileName)
 
     utilityFunctions.removeDir(tempDir)
 
