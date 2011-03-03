@@ -29,7 +29,6 @@ class Options:
         self.projectFile = ""
         self.buildDir = "mdBuild/"
         self.downloadDir = "mdDownload/"
-        self.installDir = "mdInstall/"
         self.logDir = "mdLogFiles/"
         self.cleanBefore = False
         self.cleanAfter = False
@@ -44,7 +43,6 @@ class Options:
   Project File: " + self.projectFile + "\n\
   Build Dir:    " + self.buildDir + "\n\
   Download Dir: " + self.downloadDir + "\n\
-  Install Dir:  " + self.installDir + "\n\
   Defines:      " + str(self._defines) + "\n\
   Clean Before: " + str(self.cleanBefore) + "\n\
   Clean After:  " + str(self.cleanAfter) + "\n\
@@ -84,10 +82,6 @@ class Options:
     def downloadDir(self, value):
         self.downloadDir = utilityFunctions.includeTrailingPathDelimiter(value)
 
-    @property
-    def installDir(self, value):
-        self.installDir = utilityFunctions.includeTrailingPathDelimiter(value)
-
     def expandDefines(self, inString):
         expandedString = inString
         loopCount = 0
@@ -119,7 +113,7 @@ class Options:
         expandedString = expandedString.replace("  ", " ").strip()
         return expandedString
 
-    def processCommandline(self, commandLine = []):
+    def processCommandline(self, commandLine=[]):
         if len(commandLine) < 2:
             printUsageAndExit()
 
@@ -153,9 +147,6 @@ class Options:
             elif currFlag == "-o":
                 validateOptionPair(currFlag, currValue)
                 self.downloadDir = currValue
-            elif currFlag == "-i":
-                validateOptionPair(currFlag, currValue)
-                self.installDir = currValue
             elif currFlag == "-c":
                 validateOptionPair(currFlag, currValue)
                 lowerCurrValue = str.lower(currValue)
