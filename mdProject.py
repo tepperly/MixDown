@@ -28,10 +28,12 @@ class Project:
     def __init__(self, projectFilePath, targets=[]):
         self.path = projectFilePath
         self.name = utilityFunctions.getBasename(self.path)
-        self.targets = targets[:] #Use copy to prevent instance to be used between project instances
+        self.targets = targets[:] #Use copy to prevent list instance to be used between project instances
         self.__validated = False
 
     def validate(self):
+        if self.path == '' or self.name == '':
+            return False
         if not self.__validateDependsOnLists():
             return False
         self.__validated = True
