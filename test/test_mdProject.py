@@ -39,7 +39,7 @@ class test_mdProjectRead(unittest.TestCase):
         try:
             projectFilePath = mdTestUtilities.makeTempFile(projectFileContents, ".md")
             project = mdProject.Project(projectFilePath) #project is being used with old values
-            project.read()
+            self.assertTrue(project.read(), "Project file could not be read")
             #Project
             self.assertEqual(project.name, utilityFunctions.getBasename(projectFilePath), "Project returned wrong name")
             self.assertEqual(project.path, projectFilePath, "Project returned wrong path")
@@ -82,7 +82,7 @@ class test_mdProjectRead(unittest.TestCase):
         try:
             projectFilePath = mdTestUtilities.makeTempFile(projectFileContents, ".md")
             project = mdProject.Project(projectFilePath)
-            project.read()
+            self.assertTrue(project.read(), "Project file could not be read")
             #Project
             self.assertEqual(project.name, utilityFunctions.getBasename(projectFilePath), "Project returned wrong name")
             self.assertEqual(project.path, projectFilePath, "Project returned wrong path")
@@ -124,7 +124,7 @@ class test_mdProjectRead(unittest.TestCase):
         try:
             projectFilePath = mdTestUtilities.makeTempFile(projectFileContents, ".md")
             project = mdProject.Project(projectFilePath) #project is being used with old values
-            project.read()
+            self.assertTrue(project.read(), "Project file could not be read")
             self.assertTrue(project.validate(), "Project could not validate")
         finally:
             os.remove(projectFilePath)
@@ -158,7 +158,7 @@ class test_mdProjectRead(unittest.TestCase):
         try:
             projectFilePath = mdTestUtilities.makeTempFile(projectFileContents, ".md")
             project = mdProject.Project(projectFilePath)
-            project.read()
+            self.assertTrue(project.read(), "Project file could not be read")
             self.assertTrue(project.validate(), "Project could not validate")
         finally:
             os.remove(projectFilePath)
@@ -171,7 +171,7 @@ class test_mdProjectRead(unittest.TestCase):
         try:
             projectFilePath = mdTestUtilities.makeTempFile(projectFileContents, ".md")
             project = mdProject.Project(projectFilePath) #project is being used with old values
-            project.read()
+            self.assertTrue(project.read(), "Project file could not be read")
             self.assertTrue(project.validate(), "Project could not validate")
         finally:
             os.remove(projectFilePath)
@@ -190,7 +190,7 @@ class test_mdProjectRead(unittest.TestCase):
         try:
             projectFilePath = mdTestUtilities.makeTempFile(projectFileContents, ".md")
             project = mdProject.Project(projectFilePath)
-            project.read()
+            self.assertTrue(project.read(), "Project file could not be read")
             self.assertTrue(project.validate(), "Project could not validate")
         finally:
             os.remove(projectFilePath)
@@ -211,7 +211,7 @@ class test_mdProjectRead(unittest.TestCase):
         try:
             projectFilePath = mdTestUtilities.makeTempFile(projectFileContents, ".md")
             project = mdProject.Project(projectFilePath)
-            project.read()
+            self.assertTrue(project.read(), "Project file could not be read")
             self.assertTrue(project.validate(), "Project could not validate")
         finally:
             os.remove(projectFilePath)
@@ -231,7 +231,7 @@ class test_mdProjectRead(unittest.TestCase):
         try:
             projectFilePath = mdTestUtilities.makeTempFile(projectFileContents, ".md")
             project = mdProject.Project(projectFilePath)
-            project.read()
+            self.assertTrue(project.read(), "Project file could not be read")
             self.assertTrue(project.validate(), "Project could not validate")
         finally:
             os.remove(projectFilePath)
@@ -250,7 +250,7 @@ class test_mdProjectRead(unittest.TestCase):
         try:
             projectFilePath = mdTestUtilities.makeTempFile(projectFileContents, ".md")
             project = mdProject.Project(projectFilePath)
-            project.read()
+            self.assertTrue(project.read(), "Project file could not be read")
             self.assertTrue(project.validate(), "Project could not validate")
         finally:
             os.remove(projectFilePath)
@@ -270,7 +270,7 @@ class test_mdProjectRead(unittest.TestCase):
         try:
             projectFilePath = mdTestUtilities.makeTempFile(projectFileContents, ".md")
             project = mdProject.Project(projectFilePath)
-            project.read()
+            self.assertTrue(project.read(), "Project file could not be read")
             self.assertTrue(project.validate(), "Project could not validate")
         finally:
             os.remove(projectFilePath)
@@ -291,7 +291,7 @@ class test_mdProjectRead(unittest.TestCase):
         try:
             projectFilePath = mdTestUtilities.makeTempFile(projectFileContents, ".md")
             project = mdProject.Project(projectFilePath)
-            project.read()
+            self.assertTrue(project.read(), "Project file could not be read")
             self.assertTrue(project.validate(), "Project could not validate")
         finally:
             os.remove(projectFilePath)
@@ -312,12 +312,12 @@ class test_mdProjectRead(unittest.TestCase):
         try:
             projectFilePath = mdTestUtilities.makeTempFile(projectFileContents, ".md")
             project = mdProject.Project(projectFilePath)
-            project.read()
+            self.assertTrue(project.read(), "Project file could not be read")
             self.assertTrue(project.validate(), "Project could not validate")
         finally:
             os.remove(projectFilePath)
 
-    def test_invalidateCyclicalProjectCase1(self):
+    def test_detectCyclicalProjectCase1(self):
         projectFileContents = textwrap.dedent("""
                                             Name: a
                                             Path: a-1.11.tar.gz
@@ -334,12 +334,12 @@ class test_mdProjectRead(unittest.TestCase):
         try:
             projectFilePath = mdTestUtilities.makeTempFile(projectFileContents, ".md")
             project = mdProject.Project(projectFilePath)
-            project.read()
+            self.assertTrue(project.read(), "Project file could not be read")
             self.assertFalse(project.validate(), "Project validated when it should not have due to cyclical dependancy graph")
         finally:
             os.remove(projectFilePath)
 
-    def test_invalidateCyclicalProjectCase2(self):
+    def test_detectCyclicalProjectCase2(self):
         projectFileContents = textwrap.dedent("""
                                             Name: a
                                             Path: a-1.11.tar.gz
@@ -356,12 +356,12 @@ class test_mdProjectRead(unittest.TestCase):
         try:
             projectFilePath = mdTestUtilities.makeTempFile(projectFileContents, ".md")
             project = mdProject.Project(projectFilePath)
-            project.read()
+            self.assertTrue(project.read(), "Project file could not be read")
             self.assertFalse(project.validate(), "Project validated when it should not have due to cyclical dependancy graph")
         finally:
             os.remove(projectFilePath)
 
-    def test_invalidateCyclicalProjectCase3(self):
+    def test_detectCyclicalProjectCase3(self):
         projectFileContents = textwrap.dedent("""
                                             Name: a
                                             Path: a-1.11.tar.gz
@@ -370,12 +370,11 @@ class test_mdProjectRead(unittest.TestCase):
         try:
             projectFilePath = mdTestUtilities.makeTempFile(projectFileContents, ".md")
             project = mdProject.Project(projectFilePath)
-            project.read()
-            self.assertFalse(project.validate(), "Project validated when it should not have due to cyclical dependancy graph")
+            self.assertFalse(project.read(), "Reading project file should have failed")
         finally:
             os.remove(projectFilePath)
 
-    def test_invalidateCyclicalProjectCase4(self):
+    def test_detectCyclicalProjectCase4(self):
         projectFileContents = textwrap.dedent("""
                                             Name: a
                                             Path: a-1.11.tar.gz
@@ -392,12 +391,11 @@ class test_mdProjectRead(unittest.TestCase):
         try:
             projectFilePath = mdTestUtilities.makeTempFile(projectFileContents, ".md")
             project = mdProject.Project(projectFilePath)
-            project.read()
-            self.assertFalse(project.validate(), "Project validated when it should not have due to cyclical dependancy graph")
+            self.assertFalse(project.read(), "Reading project file should have failed")
         finally:
             os.remove(projectFilePath)
 
-    def test_invalidateProjectWithNonExistantDependancy(self):
+    def test_detectProjectWithNonExistantDependancy(self):
         projectFileContents = textwrap.dedent("""
                                             Name: a
                                             Path: a-1.11.tar.gz
@@ -406,7 +404,7 @@ class test_mdProjectRead(unittest.TestCase):
         try:
             projectFilePath = mdTestUtilities.makeTempFile(projectFileContents, ".md")
             project = mdProject.Project(projectFilePath)
-            project.read()
+            self.assertTrue(project.read(), "Project file could not be read")
             self.assertFalse(project.validate(), "Project validated when it should not have due to non-existant dependancy")
         finally:
             os.remove(projectFilePath)
