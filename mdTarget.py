@@ -24,6 +24,9 @@ import os, mdCommands, mdGit, mdHg, mdSvn, utilityFunctions
 
 from mdLogger import *
 
+def _normalizeName(name = ""):
+    return name.strip().lower()
+
 class Target:
     def __init__(self, targetName, path=""):
         self.name = targetName
@@ -42,10 +45,15 @@ class Target:
         self.commands["install"] = ""
 
     def isValid(self):
-        if self.name == "":
+        normalizedName = _normalizeName(self.name)
+        if normalizedName == "":
             return False
         if self.path == "":
             return False
+        for alias in self.aliases:
+            if _normalizeName(alias) == normalizedName:
+                Logger().writeError(self.name + ": Target's alias cannot be same as it's name")
+                return False
         return True
 
     def extract(self, options, exitOnFailure=True):
