@@ -20,9 +20,12 @@
 # along with this program; if not, write to the Free Software Foundation,
 # Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 
-import os, Queue, mdCommands, mdTarget, utilityFunctions
+import os, collections, mdCommands, mdTarget, utilityFunctions
 
 from mdLogger import *
+
+def _normalizeName(name = ""):
+    return name.strip().lower()
 
 class Project:
     def __init__(self, projectFilePath, targets=[]):
@@ -51,15 +54,18 @@ class Project:
 
     def __addTarget(self, target, lineCount=0):
         for currTarget in self.targets:
-            currName = target.name
-            if currName == currTarget.name:
-                Logger().writeError("Cannot have more than one project target by the same name", currName, "", self.path, lineCount, True)
+            if _normalizeName(target.name) == _normalizeName(currTarget.name):
+                Logger().writeError("Cannot have more than one project target by the same name", currTarget.name, "", self.path, lineCount, True)
         self.targets.append(target)
 
     def getTarget(self, targetName):
+        normalizedTargetName = _normalizeName(targetName)
         for currTarget in self.targets:
-            if targetName == currTarget.name or targetName in currTarget.aliases:
+            if normalizedTargetName == _normalizeName(currTarget.name):
                 return currTarget
+            for alias in currTarget.aliases:
+                if normalizedTargetName == _normalizeName(alias):
+                    return currTarget
         return None
 
     def read(self):
@@ -89,7 +95,7 @@ class Project:
                             if currTarget.isValid():
                                 self.__addTarget(currTarget, lastPackageLineNumber)
                             else:
-                                Logger().writeError("New target started before previous was finished, all targets require ('Package'|'Project') and 'Path' to be declared", "", "", self.path, lineCount)
+                                Logger().writeError("New target started before previous was finished, all targets require atleast 'Package' and 'Path' to be declared", "", "", self.path, lineCount)
                                 return False
                         currTarget = mdTarget.Target(currPair[1])
                     elif currName == "main":
@@ -115,9 +121,11 @@ class Project:
                             return False
                         if currPair[1] != "":
                             dependsOnList = utilityFunctions.stripItemsInList(currPair[1].split(","))
-                            if currTarget.name in dependsOnList:
-                                Logger().writeError("Project targets cannot depend on themselves", "", "", self.path, lineCount)
-                                return False
+                            normalizedName = _normalizeName(currTarget.name)
+                            for dependancy in dependsOnList:
+                                if _normalizeName(dependancy) == normalizedName:
+                                    Logger().writeError("Project targets cannot depend on themselves", currTarget.name, "", self.path, lineCount)
+                                    return False
                             currTarget.dependsOn = dependsOnList
                     elif currName == "aliases":
                         if currTarget.aliases != []:
@@ -125,9 +133,11 @@ class Project:
                             return False
                         if currPair[1] != "":
                             aliases = utilityFunctions.stripItemsInList(currPair[1].split(","))
-                            if currTarget.name in aliases:
-                                Logger().writeError("Project target alias cannot be same as its name", "", "", self.path, lineCount)
-                                return False
+                            noralizedName = _normalizeName(currTarget.name)
+                            for alias in aliases:
+                                if _normalizeName(alias) == normalizedName:
+                                    Logger().writeError("Project target alias cannot be same as its name", currTarget.name, "", self.path, lineCount)
+                                    return False
                             currTarget.aliases = aliases
                     elif currName == "skipsteps" or currName == "skipstep":
                         if currTarget.skipSteps != []:
@@ -169,24 +179,39 @@ class Project:
             retStr += str(target)
 
     def __validateDependsOnLists(self):
-        depQueue = Queue.Queue()
         for currTarget in self.targets:
-            currFullDepList = [currTarget.name]
-            depQueue.put(currTarget.name)
-
-            while not depQueue.empty():
-                currDepName = depQueue.get()
-                currDepTarget = self.getTarget(currDepName)
-                if currDepTarget is None:
-                    Logger().writeError("Target has non-existant dependancy '" + currDepName + "'", currTarget.name, "", self.path)
+            normalizedName = _normalizeName(currTarget.name)
+            checkedDependancies = []
+            for dependancy in currTarget.dependsOn:
+                normalizedDepedancy = _normalizeName(dependancy)
+                if normalizedDepedancy == normalizedName:
+                    Logger().writeError("Target cannot depend on itself", currTarget.name, "", self.path)
                     return False
+                if normalizedDepedancy in checkedDependancies:
+                    Logger().writeError("Target has duplicate dependancy '" + dependancy + "'", currTarget.name, "", self.path)
+                    return False
+                if self.getTarget(dependancy) is None:
+                    Logger().writeError("Target has non-existant dependancy '" + dependancy + "'", currTarget.name, "", self.path)
+                    return False
+                checkedDependancies.append(normalizedDepedancy)
 
-                for name in currDepTarget.dependsOn:
-                    if name in currFullDepList:
-                        Logger().writeError("Target has cyclical dependancy with target '" + currDepName + "'", currTarget.name, "", self.path)
-                        return False
-                    currFullDepList += name
-                    depQueue.put(name)
+
+        path = []
+        unvisited = collections.deque()
+        unvisited.append(_normalizeName(self.targets[0].name))
+        while len(unvisited) > 0:
+            currName = unvisited.popleft()
+            if currName in path:
+                path.append(currName)
+                cycle = path[path.index(currName):]
+                Logger().writeError("Cycle found in dependancies: " + str(cycle))
+                return False
+            path.append(currName)
+            currTarget = self.getTarget(currName)
+            for dependancy in currTarget.dependsOn:
+                normalizedDepedancy = _normalizeName(dependancy)
+                if not normalizedDepedancy in unvisited:
+                    unvisited.append(normalizedDepedancy)
         return True
 
     def __assignDepthToTargetList(self):
