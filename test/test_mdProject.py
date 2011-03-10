@@ -24,7 +24,7 @@ import os, sys, textwrap, unittest, mdTestUtilities
 
 if not ".." in sys.path:
     sys.path.append("..")
-import mdLogger, mdProject, utilityFunctions
+import mdLogger, mdOptions, mdProject, utilityFunctions
 
 class test_mdProjectRead(unittest.TestCase):
     def test_readSingleTargetProject(self):
@@ -406,6 +406,50 @@ class test_mdProjectRead(unittest.TestCase):
             project = mdProject.Project(projectFilePath)
             self.assertTrue(project.read(), "Project file could not be read")
             self.assertFalse(project.validate(), "Project validated when it should not have due to non-existant dependancy")
+        finally:
+            os.remove(projectFilePath)
+
+    def test_getTarget(self):
+        projectFileContents = textwrap.dedent("""
+                                            Name: a
+                                            Path: a-1.11.tar.gz
+
+                                            Name: b
+                                            Path: b-2.22.tar.gz
+
+                                            Name: c
+                                            Path: c-3.33.tar.gz
+                                            """)
+        try:
+            projectFilePath = mdTestUtilities.makeTempFile(projectFileContents, ".md")
+            project = mdProject.Project(projectFilePath)
+            self.assertTrue(project.read(), "Project file could not be read")
+            #Targets that exist in project
+            self.assertIsNotNone(project.getTarget("a"), "Target 'a' could not be found in project")
+            self.assertIsNotNone(project.getTarget("b"), "Target 'b' could not be found in project")
+            self.assertIsNotNone(project.getTarget("c"), "Target 'c' could not be found in project")
+            self.assertIsNotNone(project.getTarget("A"), "Target 'a' could not be found in project")
+            self.assertIsNotNone(project.getTarget("B "), "Target 'b' could not be found in project")
+            self.assertIsNotNone(project.getTarget(" C"), "Target 'c' could not be found in project")
+            #Targets that do NOT exist in project
+            self.assertIsNone(project.getTarget("d"), "Target 'd' should not have been found in project")
+            self.assertIsNone(project.getTarget(""), "Target '' should not have been found in project")
+        finally:
+            os.remove(projectFilePath)
+
+
+    def test_examineSingleTargetDepth(self):
+        projectFileContents = textwrap.dedent("""
+                                            Name: TestCaseA
+                                            Path: cases/simpleGraphAutoTools/TestCaseA
+                                            """)
+        try:
+            projectFilePath = mdTestUtilities.makeTempFile(projectFileContents, ".md")
+            project = mdProject.Project(projectFilePath)
+            options = mdOptions.Options()
+            self.assertTrue(project.read(), "Project file could not be read")
+            self.assertTrue(project.examine(options), "Project failed to examine")
+            self.assertEquals(project.getTarget("TestCaseA").dependancyDepth, 0, "TestCaseA had wrong dependancy depth")
         finally:
             os.remove(projectFilePath)
 
