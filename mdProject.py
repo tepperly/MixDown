@@ -20,7 +20,7 @@
 # along with this program; if not, write to the Free Software Foundation,
 # Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 
-import os, collections, mdCommands, mdTarget, utilityFunctions
+import os, collections, Queue, mdCommands, mdTarget, utilityFunctions
 
 from mdLogger import *
 
@@ -43,11 +43,13 @@ class Project:
         return True
 
     def examine(self, options):
-        if not self.__validated or not self.validate():
+        if not self.__validated and not self.validate():
+            return False
+        if len(self.targets) < 1:
+            Logger().writeError("Project has no targets")
             return False
         self.__assignDepthToTargetList()
         self.targets = self.__sortTargetList(self.targets)
-        self.name = self.targets[0].name
         for target in reversed(self.targets):
             target.examine(options)
         return True
@@ -216,7 +218,7 @@ class Project:
 
     def __assignDepthToTargetList(self):
         q = Queue.Queue()
-        q.put(self.name)
+        q.put(self.targets[0].name)
         while not q.empty():
             currName = q.get()
             currTarget = self.getTarget(currName)
