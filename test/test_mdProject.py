@@ -112,6 +112,75 @@ class test_mdProjectRead(unittest.TestCase):
         finally:
             os.remove(projectFilePath)
 
+    def test_readWriteMultiTargetProject(self):
+        projectFileContents = textwrap.dedent("""
+                                            Name: a
+                                            Path: a-1.11.tar.gz
+                                            Main: True
+                                            DependsOn: b, c
+                                            PreConfig: autoreconf -i
+                                            Config: ./configure --prefix=$(_prefix) --with-b=$(_prefix) --with-c=$(_prefix)
+                                            Build: make
+                                            Install: make install
+
+                                            Name: b
+                                            Path: b-2.22.tar.gz
+                                            DependsOn: c
+                                            PreConfig: bautoreconf -i
+                                            Config: ./configure --prefix=$(_prefix) --with-c=$(_prefix)
+                                            Build: bmake
+                                            Install: bmake install
+
+                                            Name: c
+                                            Path: c-3.33.tar.gz
+                                            PreConfig: cautoreconf -i
+                                            Config: ./configure --prefix=$(_prefix)
+                                            Build: cmake
+                                            Install: cmake install
+                                            """)
+        try:
+            #Read initial values
+            projectOrigFilePath = mdTestUtilities.makeTempFile(projectFileContents, ".md")
+            projectOrig = mdProject.Project(projectOrigFilePath)
+            self.assertTrue(projectOrig.read(), "Initial project file could not be read")
+
+            #Write values to new file
+            projectFilePath = mdTestUtilities.makeTempFile(suffix=".md")
+            projectOrig.write(projectFilePath)
+
+            #Read values from written file and test to make sure they are correct
+            project = mdProject.Project(projectFilePath)
+            self.assertTrue(project.read(), "Project file could not be read")
+            #Project
+            self.assertEqual(project.name, utilityFunctions.getBasename(projectFilePath), "Project returned wrong name")
+            self.assertEqual(project.path, projectFilePath, "Project returned wrong path")
+            #Target a
+            self.assertEqual(project.targets[0].name, "a", "Project returned wrong target 'a' name")
+            self.assertEqual(project.targets[0].path, "a-1.11.tar.gz", "Project returned wrong target 'a' path")
+            self.assertEqual(project.targets[0].dependsOn, ['b', 'c'], "Project returned wrong target 'a' dependsOn")
+            self.assertEqual(project.targets[0].commands["preconfig"], "autoreconf -i", "Project returned wrong target 'a' preconfig command")
+            self.assertEqual(project.targets[0].commands["config"], "./configure --prefix=$(_prefix) --with-b=$(_prefix) --with-c=$(_prefix)", "Project returned wrong target 'a' config command")
+            self.assertEqual(project.targets[0].commands["build"], "make", "Project returned wrong target build 'a' command")
+            self.assertEqual(project.targets[0].commands["install"], "make install", "Project returned wrong target install 'a' command")
+            #Target b
+            self.assertEqual(project.targets[1].name, "b", "Project returned wrong target 'b' name")
+            self.assertEqual(project.targets[1].path, "b-2.22.tar.gz", "Project returned wrong target 'b' path")
+            self.assertEqual(project.targets[1].dependsOn, ['c'], "Project returned wrong target 'b' dependsOn")
+            self.assertEqual(project.targets[1].commands["preconfig"], "bautoreconf -i", "Project returned wrong target 'b' preconfig command")
+            self.assertEqual(project.targets[1].commands["config"], "./configure --prefix=$(_prefix) --with-c=$(_prefix)", "Project returned wrong target 'b' config command")
+            self.assertEqual(project.targets[1].commands["build"], "bmake", "Project returned wrong target 'b' build command")
+            self.assertEqual(project.targets[1].commands["install"], "bmake install", "Project returned wrong target 'b' install command")
+            #Target c
+            self.assertEqual(project.targets[2].name, "c", "Project returned wrong target 'c' name")
+            self.assertEqual(project.targets[2].path, "c-3.33.tar.gz", "Project returned wrong target 'c' path")
+            self.assertEqual(project.targets[2].commands["preconfig"], "cautoreconf -i", "Project returned wrong target 'c' preconfig command")
+            self.assertEqual(project.targets[2].commands["config"], "./configure --prefix=$(_prefix)", "Project returned wrong target 'c' config command")
+            self.assertEqual(project.targets[2].commands["build"], "cmake", "Project returned wrong target 'c' build command")
+            self.assertEqual(project.targets[2].commands["install"], "cmake install", "Project returned wrong target 'c' install command")
+        finally:
+            os.remove(projectFilePath)
+            os.remove(projectOrigFilePath)
+
     def test_validateSingleTargetProjectWithSteps(self):
         projectFileContents = textwrap.dedent("""
                                             Name: a
