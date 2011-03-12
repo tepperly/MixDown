@@ -26,7 +26,7 @@ if not ".." in sys.path:
     sys.path.append("..")
 import mdLogger, mdOptions, mdProject, utilityFunctions
 
-class test_mdProjectRead(unittest.TestCase):
+class test_mdProject(unittest.TestCase):
     def test_readSingleTargetProject(self):
         projectFileContents = textwrap.dedent("""
                                             Name: a
@@ -38,7 +38,7 @@ class test_mdProjectRead(unittest.TestCase):
                                             """)
         try:
             projectFilePath = mdTestUtilities.makeTempFile(projectFileContents, ".md")
-            project = mdProject.Project(projectFilePath) #project is being used with old values
+            project = mdProject.Project(projectFilePath)
             self.assertTrue(project.read(), "Project file could not be read")
             #Project
             self.assertEqual(project.name, utilityFunctions.getBasename(projectFilePath), "Project returned wrong name")
@@ -50,6 +50,21 @@ class test_mdProjectRead(unittest.TestCase):
             self.assertEqual(project.targets[0].commands["config"], "./configure --prefix=$(_prefix)", "Project returned wrong target 'a' config command")
             self.assertEqual(project.targets[0].commands["build"], "make", "Project returned wrong target 'a' build command")
             self.assertEqual(project.targets[0].commands["install"], "make install", "Project returned wrong target 'a' install command")
+        finally:
+            os.remove(projectFilePath)
+
+    def test_readDetectDuplicateTarget(self):
+        projectFileContents = textwrap.dedent("""
+                                            Name: a
+                                            Path: a-1.11.tar.gz
+
+                                            Name: a
+                                            Path: a-1.11.tar.gz
+                                            """)
+        try:
+            projectFilePath = mdTestUtilities.makeTempFile(projectFileContents, ".md")
+            project = mdProject.Project(projectFilePath)
+            self.assertFalse(project.read(), "Project read should have detected duplicate target")
         finally:
             os.remove(projectFilePath)
 
