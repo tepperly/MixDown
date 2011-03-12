@@ -122,7 +122,10 @@ class Target:
 
     def __str__(self):
         retStr = "Name: " + self.name + "\n"
-        retStr += "Path: " + self.origPath + "\n"
+        if self.origPath != "":
+            retStr += "Path: " + self.origPath + "\n"
+        else:
+            retStr += "Path: " + self.path + "\n"
         if self.main:
             retStr += "Main: True\n"
         if len(self.aliases) != 0:
