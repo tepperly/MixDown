@@ -33,6 +33,7 @@ class Project:
         self.name = utilityFunctions.getBasename(self.path)
         self.targets = targets[:] #Use copy to prevent list instance to be used between project instances
         self.__validated = False
+        self.__examined = False
 
     def validate(self):
         if self.path == '' or self.name == '':
@@ -43,22 +44,28 @@ class Project:
         return True
 
     def examine(self, options):
-        if not self.__validated and not self.validate():
-            return False
-        if len(self.targets) < 1:
-            Logger().writeError("Project has no targets")
-            return False
-        self.__assignDepthToTargetList()
-        self.targets = self.__sortTargetList(self.targets)
-        for target in reversed(self.targets):
-            target.examine(options)
-        return True
+        if self.__examined == True:
+            return True
+        else:
+            if not self.__validated and not self.validate():
+                return False
+            if len(self.targets) < 1:
+                Logger().writeError("Project has no targets")
+                return False
+            self.__assignDepthToTargetList()
+            self.targets = self.__sortTargetList(self.targets)
+            for target in reversed(self.targets):
+                target.examine(options)
+            self.__examined == True
+            return True
 
     def __addTarget(self, target, lineCount=0):
         for currTarget in self.targets:
             if _normalizeName(target.name) == _normalizeName(currTarget.name):
-                Logger().writeError("Cannot have more than one project target by the same name", currTarget.name, "", self.path, lineCount, True)
+                Logger().writeError("Cannot have more than one project target by the same name", currTarget.name, "", self.path, lineCount)
+                return False
         self.targets.append(target)
+        return True
 
     def getTarget(self, targetName):
         normalizedTargetName = _normalizeName(targetName)
@@ -95,7 +102,8 @@ class Project:
                         lastPackageLineNumber = lineCount
                         if not currTarget is None:
                             if currTarget.isValid():
-                                self.__addTarget(currTarget, lastPackageLineNumber)
+                                if not self.__addTarget(currTarget, lastPackageLineNumber):
+                                    return False
                             else:
                                 Logger().writeError("New target started before previous was finished, all targets require atleast 'Package' and 'Path' to be declared", "", "", self.path, lineCount)
                                 return False
@@ -156,7 +164,8 @@ class Project:
                         return False
 
             if currTarget.isValid():
-                self.__addTarget(currTarget, lastPackageLineNumber)
+                if not self.__addTarget(currTarget, lastPackageLineNumber):
+                    return False
             else:
                 Logger().writeError("Project file ended before project target was finished, all targets require 'Project' and 'Path' to be declared", "", "", self.path, lineCount)
                 return False
@@ -169,16 +178,26 @@ class Project:
             outFile = open(fileName, "w")
         else:
             outFile = open(self.path, "w")
-        for target in reversed(self.targets):
-            outFile.write(str(target) + "\n")
+        if self.__examined == True:
+            for target in reversed(self.targets):
+                outFile.write(str(target) + "\n")
+        else:
+            for target in self.targets:
+                outFile.write(str(target) + "\n")
         outFile.close()
 
     def __str__(self):
         retStr = ""
-        for target in reversed(self.targets):
-            if len(str) != 0:
-                retStr += "\n"
-            retStr += str(target)
+        if self.__examined == True:
+            for target in reversed(self.targets):
+                if len(str) != 0:
+                    retStr += "\n"
+                retStr += str(target)
+        else:
+            for target in self.targets:
+                if len(str) != 0:
+                    retStr += "\n"
+                retStr += str(target)
 
     def __validateDependsOnLists(self):
         for currTarget in self.targets:
