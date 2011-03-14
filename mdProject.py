@@ -56,7 +56,7 @@ class Project:
             self.targets = self.__sortTargetList(self.targets)
             for target in reversed(self.targets):
                 target.examine(options)
-            self.__examined == True
+            self.__examined = True
             return True
 
     def __addTarget(self, target, lineCount=0):
@@ -190,16 +190,20 @@ class Project:
         retStr = ""
         if self.__examined == True:
             for target in reversed(self.targets):
-                if len(str) != 0:
+                if len(retStr) != 0:
                     retStr += "\n"
                 retStr += str(target)
         else:
             for target in self.targets:
-                if len(str) != 0:
+                if len(retStr) != 0:
                     retStr += "\n"
                 retStr += str(target)
+        return retStr
 
     def __validateDependsOnLists(self):
+        if len(self.targets) == 0:
+            return True
+
         for currTarget in self.targets:
             normalizedName = _normalizeName(currTarget.name)
             checkedDependancies = []
@@ -216,23 +220,19 @@ class Project:
                     return False
                 checkedDependancies.append(normalizedDepedancy)
 
+        path = [_normalizeName(self.targets[0].name)]
+        return self.__searchPathsForCycles(path)
 
-        path = []
-        unvisited = collections.deque()
-        unvisited.append(_normalizeName(self.targets[0].name))
-        while len(unvisited) > 0:
-            currName = unvisited.popleft()
-            if currName in path:
-                path.append(currName)
-                cycle = path[path.index(currName):]
-                Logger().writeError("Cycle found in dependancies: " + str(cycle))
+    def __searchPathsForCycles(self, path):
+        currTarget = self.getTarget(path[len(path)-1])
+        for dependancy in currTarget.dependsOn:
+            normalizedDependancy = _normalizeName(dependancy)
+            if normalizedDependancy in path:
                 return False
-            path.append(currName)
-            currTarget = self.getTarget(currName)
-            for dependancy in currTarget.dependsOn:
-                normalizedDepedancy = _normalizeName(dependancy)
-                if not normalizedDepedancy in unvisited:
-                    unvisited.append(normalizedDepedancy)
+            path.append(normalizedDependancy)
+            if not self.__searchPathsForCycles(path):
+                return False
+            path.pop()
         return True
 
     def __assignDepthToTargetList(self):
