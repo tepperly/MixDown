@@ -1,10 +1,13 @@
 #! /usr/bin/env python
 
-import mdCommands, mdOptions, mdProject, mdStrings, os, re, shutil, sys, tarfile, tempfile, utilityFunctions
+import os, re, shutil, sys, tarfile, tempfile, urllib
+import mdCommands, mdOptions, mdProject, mdStrings, mdTarget, utilityFunctions
 
-from mdTarget import *
+from mdLogger import *
 
 def main():
+    SetLogger("console")
+
     tempDir = utilityFunctions.includeTrailingPathDelimiter(tempfile.mkdtemp(prefix="mixdown-"))
     finalTargets = []
     ignoredTargets = []
@@ -22,7 +25,7 @@ def main():
         print target.name + ": Analyzing target"
         if utilityFunctions.isURL(target.path):
             print target.name + ": Downloading target to temporary directory"
-            newPath = os.path.join(tempDir, URLToFilename(target.path))
+            newPath = os.path.join(tempDir, utilityFunctions.URLToFilename(target.path))
             urllib.urlretrieve(target.path, newPath)
             target.path = newPath
 
@@ -72,7 +75,7 @@ def main():
                         if userInput == "":
                             ignoredTargets.append(possibleDependancy)
                         elif os.path.isfile(userInput) or os.path.isdir(userInput) or utilityFunctions.isURL(userInput):
-                            notReviewedTargets.append(Target(possibleDependancy, userInput))
+                            notReviewedTargets.append(mdTarget.Target(possibleDependancy, userInput))
                             target.dependsOn.append(possibleDependancy)
                         else:
                             aliasTarget = targetNameInList(userInput, finalTargets + notReviewedTargets, possibleDependancy)
@@ -82,7 +85,7 @@ def main():
                             else:
                                 aliasLocation = raw_input(userInput + ": Alias not found in any known targets.  Location of new target:").strip()
                                 if os.path.isfile(aliasLocation) or os.path.isdir(aliasLocation) or utilityFunctions.isURL(aliasLocation):
-                                    notReviewedTargets.append(Target(userInput, aliasLocation))
+                                    notReviewedTargets.append(mdTarget.Target(userInput, aliasLocation))
                                     target.dependsOn.append(userInput)
                                 else:
                                     printErrorAndExit(userInput + ": Alias location not understood.")
@@ -102,11 +105,11 @@ def main():
     options = mdOptions.Options()
     options.importer = True
     options.setDefine(mdStrings.mdDefinePrefix, "$(" + mdStrings.mdDefinePrefix + ")")
-    project.examine(options)
 
-    print "\nFinal targets...\n"
-    print str(project)
-    project.write(outFileName)
+    if project.examine(options):
+        print "\nFinal targets...\n"
+        print str(project)
+        project.write(outFileName)
 
     utilityFunctions.removeDir(tempDir)
 
@@ -160,7 +163,7 @@ def processCommandlineOptions():
             interactive = True
         elif utilityFunctions.isURL(currArg) or os.path.isfile(currArg) or os.path.isdir(currArg):
             name = utilityFunctions.splitFileName(currArg)[0]
-            currTarget = Target(name, currArg)
+            currTarget = mdTarget.Target(name, currArg)
             targetList.append(currTarget)
 
     if len(targetList) == 0:
