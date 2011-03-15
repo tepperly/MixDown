@@ -20,7 +20,7 @@
 # along with this program; if not, write to the Free Software Foundation,
 # Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 
-import os, mdCommands, mdGit, mdHg, mdSvn, utilityFunctions
+import os, tarfile, urllib, mdCommands, mdGit, mdHg, mdSvn, utilityFunctions
 
 from mdLogger import *
 
@@ -85,7 +85,7 @@ class Target:
         else:
             #Download if necessary
             currPath = self.path
-            if (not os.path.isdir(currPath)) and (not os.path.isfile(currPath)) and isURL(currPath):
+            if (not os.path.isdir(currPath)) and (not os.path.isfile(currPath)) and utilityFunctions.isURL(currPath):
                 if not os.path.isdir(options.downloadDir):
                     os.makedirs(options.downloadDir)
                 filenamePath = options.downloadDir + utilityFunctions.URLToFilename(currPath)
@@ -99,7 +99,7 @@ class Target:
                 extracted = True
             elif os.path.isfile(currPath):
                 if tarfile.is_tarfile(currPath):
-                    untar(currPath, outPath, True)
+                    utilityFunctions.untar(currPath, outPath, True)
                     extracted = True
                 else:
                     if currPath.endswith(".tar.gz") or currPath.endswith(".tar.bz2") or currPath.endswith(".tar") or currPath.endswith(".tgz") or currPath.endswith(".tbz") or currPath.endswith(".tb2"):
