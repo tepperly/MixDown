@@ -104,7 +104,7 @@ def setup():
 
     Logger().writeMessage("Converting all targets to local directories...")
     for currTarget in project.targets:
-        currTarget.extract()
+        currTarget.extract(options)
 
     project.examine(options)
 
