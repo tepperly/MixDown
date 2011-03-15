@@ -31,20 +31,63 @@ class test_mdGit(unittest.TestCase):
         returnValue = mdGit.isGitInstalled()
         self.assertEqual(returnValue, True, "Git is not installed on your system.  All Git tests will fail.")
 
-    def test_isGitRepo(self):
+    def test_isGitRepoCase1(self):
+        #Case 1: Local directory that is a git repository
         if not mdGit.isGitInstalled():
             self.fail("Git is not installed on your system.  All Git tests will fail.")
         #Create repository and test if is git repo
-        tempRepo = mdTestUtilities.createGitRepository()
+        path = mdTestUtilities.createGitRepository()
         try:
-            returnValue = mdGit.isGitRepo(tempRepo)
-            self.assertEqual(returnValue, True, "mdGit.isGitRepo(" + tempRepo + ") should have returned true.")
+            self.assertTrue(mdGit.isGitRepo(path), "mdGit.isGitRepo(" + path + ") should have returned true.")
         finally:
-            utilityFunctions.removeDir(tempRepo)
+            utilityFunctions.removeDir(path)
+        #Test if wrong path returns false
+        falsePath = "/foo/wrong/path"
+        self.assertFalse(mdGit.isGitRepo(falsePath), "mdGit.isGitRepo(" + falsePath + ") should have returned false.")
+
+    def test_isGitRepoCase2(self):
+        #Case 2: URL that is a git repository
+        if not mdGit.isGitInstalled():
+            self.fail("Git is not installed on your system.  All Git tests will fail.")
+
+        path = "http://github.com/tepperly/MixDown.git"
+        self.assertTrue(mdGit.isGitRepo(path), "mdGit.isGitRepo(" + path + ") should have returned true.")
         #Test if wrong path returns false
         falsePath = "http://foo/wrong/path"
         returnValue = mdGit.isGitRepo(falsePath)
         self.assertEqual(returnValue, False, "mdGit.isGitRepo(" + falsePath + ") should have returned false.")
+
+    def test_isGitRepoCase3(self):
+        #Case 3: Check for false positive with .bz2 files
+        if not mdGit.isGitInstalled():
+            self.fail("Git is not installed on your system.  All Git tests will fail.")
+
+        #Local file
+        try:
+            tarDir, path = mdTestUtilities.createBzipFile()
+            self.assertFalse(mdGit.isGitRepo(path), "mdGit.isGitRepo(" + path + ") should have returned false.")
+        finally:
+            utilityFunctions.removeDir(tarDir)
+
+        #Remote file
+        path = "http://www.eng.lsu.edu/mirrors/apache//apr/apr-util-1.3.10.tar.bz2"
+        self.assertFalse(mdGit.isGitRepo(path), "mdGit.isGitRepo(" + path + ") should have returned false.")
+
+    def test_isGitRepoCase4(self):
+        #Case 4: Check for false positive with .gz files
+        if not mdGit.isGitInstalled():
+            self.fail("Git is not installed on your system.  All Git tests will fail.")
+
+        #Local file
+        try:
+            tarDir, path = mdTestUtilities.createGzipFile()
+            self.assertFalse(mdGit.isGitRepo(path), "mdGit.isGitRepo(" + path + ") should have returned false.")
+        finally:
+            utilityFunctions.removeDir(tarDir)
+
+        #Remote file
+        path = "http://www.eng.lsu.edu/mirrors/apache//apr/apr-util-1.3.10.tar.gz"
+        self.assertFalse(mdGit.isGitRepo(path), "mdGit.isGitRepo(" + path + ") should have returned false.")
 
     def test_gitCheckout(self):
         if not mdGit.isGitInstalled():
