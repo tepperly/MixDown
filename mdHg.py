@@ -42,7 +42,7 @@ def isHgRepo(location):
     if location == "" or not isHgInstalled():
         return False
     outFile = open(os.devnull, "w")
-    returnCode = utilityFunctions.executeSubProcess("hg log --limit 1 " + location, outFileHandle = outFile)
+    returnCode = utilityFunctions.executeSubProcess("hg id " + location, outFileHandle = outFile)
     outFile.close()
     if returnCode == 0:
         return True
