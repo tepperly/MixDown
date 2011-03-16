@@ -28,7 +28,11 @@ def isSvnInstalled():
     global _isSvnInstalled
     if _isSvnInstalled == None:
         outFile = open(os.devnull, "w")
-        returnCode = utilityFunctions.executeSubProcess("svn --help", outFileHandle = outFile)
+        try:
+            returnCode = utilityFunctions.executeSubProcess("svn --help", outFileHandle = outFile)
+        except:
+            #Assume any exceptions means Svn is not installed
+            returnCode = 1
         outFile.close()
         if returnCode == 0:
             _isSvnInstalled = True

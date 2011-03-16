@@ -28,7 +28,11 @@ def isHgInstalled():
     global _isHgInstalled
     if _isHgInstalled == None:
         outFile = open(os.devnull, "w")
-        returnCode = utilityFunctions.executeSubProcess("hg --help", outFileHandle = outFile)
+        try:
+            returnCode = utilityFunctions.executeSubProcess("hg --help", outFileHandle = outFile)
+        except:
+            #Assume any exceptions means Hg is not installed
+            returnCode = 1
         outFile.close()
         if returnCode == 0:
             _isHgInstalled = True

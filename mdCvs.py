@@ -28,7 +28,11 @@ def isCvsInstalled():
     global _isCvsInstalled
     if _isCvsInstalled == None:
         outFile = open(os.devnull, "w")
-        returnCode = utilityFunctions.executeSubProcess("cvs --version", outFileHandle = outFile)
+        try:
+            returnCode = utilityFunctions.executeSubProcess("cvs --version", outFileHandle = outFile)
+        except:
+            #Assume any exceptions means Cvs is not installed
+            returnCode = 1
         outFile.close()
         if returnCode == 0:
             _isCvsInstalled = True

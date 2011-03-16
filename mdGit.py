@@ -28,7 +28,11 @@ def isGitInstalled():
     global _isGitInstalled
     if _isGitInstalled == None:
         outFile = open(os.devnull, "w")
-        returnCode = utilityFunctions.executeSubProcess("git --help", outFileHandle = outFile)
+        try:
+            returnCode = utilityFunctions.executeSubProcess("git --help", outFileHandle = outFile)
+        except:
+            #Assume any exceptions means Git is not installed
+            returnCode = 1
         outFile.close()
         if returnCode == 0:
             _isGitInstalled = True
