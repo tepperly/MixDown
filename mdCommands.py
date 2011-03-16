@@ -47,57 +47,42 @@ def getCommand(stepName, target, options):
 
 def __getPreConfigureCommand(target):
     command = ""
-    for item in os.listdir(target.path):
-        itemPath = utilityFunctions.includeTrailingPathDelimiter(target.path) + item
-        if os.path.isfile(itemPath):
-            basename = os.path.basename(item)
-            if basename in ['buildconf']:
-                command = "./buildconf"
-                break
-            elif basename in ['autogen.sh']:
-                command = "./autogen.sh"
-                break
-            elif basename in ['configure.ac', 'configure.in']:
-                command = "autoreconf -i"
-                break
+    basePath = utilityFunctions.includeTrailingPathDelimiter(target.path)
+    if os.path.exists(basePath + "autogen.sh"):
+        command = "./autogen.sh"
+    elif os.path.exists(basePath + "buildconf"):
+        command = "./buildconf"
+    elif os.path.exists(basePath + "configure.ac") or os.path.exists(basePath + "configure.in"):
+        command = "autoreconf -i"
     return command
 
 def __getBuildCommand(target):
     command = ""
-    for item in os.listdir(target.path):
-        itemPath = utilityFunctions.includeTrailingPathDelimiter(target.path) + item
-        if os.path.isfile(itemPath):
-            basename = os.path.basename(item)
-            if str.lower(basename) in ["gnumakefile", "gnumakefile.in", "gnumakefile.am", "makefile", "makefile.in", "makefile.am"]:
-                command = "make $(" + mdStrings.mdMakeJobSlotsDefineName + ")"
-                break
+    basePath = utilityFunctions.includeTrailingPathDelimiter(target.path)
+    if os.path.exists(basePath + "GNUmakefile") or os.path.exists(basePath + "GNUmakefile.am") or os.path.exists(basePath + "GNUmakefile.in") or \
+       os.path.exists(basePath + "makefile") or os.path.exists(basePath + "makefile.am") or os.path.exists(basePath + "makefile.in") or \
+       os.path.exists(basePath + "Makefile") or os.path.exists(basePath + "Makefile.am") or os.path.exists(basePath + "Makefile.in"):
+        command = "make $(" + mdStrings.mdMakeJobSlotsDefineName + ")"
     return command
 
 def __getConfigureCommand(target, prefix=""):
     command = ""
-    for item in os.listdir(target.path):
-        itemPath = utilityFunctions.includeTrailingPathDelimiter(target.path) + item
-        if os.path.isfile(itemPath):
-            basename = os.path.basename(item)
-            if basename == "Configure":
-                command = "./Configure"
-                break
-            elif str.lower(basename) in ['configure', 'configure.ac', 'configure.in']:
-                command = "./configure"
-                if prefix != "":
-                    command += " --prefix=$(" + mdStrings.mdDefinePrefix + ")"
-                    for dependancy in target.dependsOn:
-                        command += " --with-" + dependancy + "=$(" + mdStrings.mdDefinePrefix + ")"
-                break
+    basePath = utilityFunctions.includeTrailingPathDelimiter(target.path)
+    if os.path.exists(basePath + "Configure"):
+        command = "./Configure"
+    elif os.path.exists(basePath + "configure") or os.path.exists(basePath + "configure.ac") or os.path.exists(basePath + "configure.in"):
+        command = "./configure"
+        if prefix != "":
+            command += " --prefix=$(" + mdStrings.mdDefinePrefix + ")"
+            for dependancy in target.dependsOn:
+                command += " --with-" + dependancy + "=$(" + mdStrings.mdDefinePrefix + ")"
     return command
 
 def __getInstallCommand(target):
     command = ""
-    for item in os.listdir(target.path):
-        itemPath = utilityFunctions.includeTrailingPathDelimiter(target.path) + item
-        if os.path.isfile(itemPath):
-            basename = os.path.basename(item)
-            if str.lower(basename) in ["gnumakefile", "gnumakefile.in", "gnumakefile.am", "makefile", "makefile.in", "makefile.am"]:
-                command = "make $(" + mdStrings.mdMakeJobSlotsDefineName + ") install"
-                break
+    basePath = utilityFunctions.includeTrailingPathDelimiter(target.path)
+    if os.path.exists(basePath + "GNUmakefile") or os.path.exists(basePath + "GNUmakefile.am") or os.path.exists(basePath + "GNUmakefile.in") or \
+       os.path.exists(basePath + "makefile") or os.path.exists(basePath + "makefile.am") or os.path.exists(basePath + "makefile.in") or \
+       os.path.exists(basePath + "Makefile") or os.path.exists(basePath + "Makefile.am") or os.path.exists(basePath + "Makefile.in"):
+        command = "make $(" + mdStrings.mdMakeJobSlotsDefineName + ") install"
     return command
