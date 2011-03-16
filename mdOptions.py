@@ -33,7 +33,7 @@ class Options:
         self.cleanBefore = False
         self.cleanAfter = False
         self.verbose = False
-        self.logger = ""
+        self.logger = "file"
         self.importer = False
         self._defines = dict()
         self._defines.setdefault("")
@@ -132,7 +132,7 @@ class Options:
                     self.setDefine(splitPair[0], splitPair[1])
             elif currFlag == "-p":
                 validateOptionPair(currFlag, currValue)
-                self.setDefine(mdStrings.mdDefinePrefix, currValue)
+                self.setDefine(mdStrings.mdDefinePrefix, os.path.abspath(currValue))
             elif currFlag == "-j":
                 validateOptionPair(currFlag, currValue)
                 self.setDefine(mdStrings.mdDefineJobSlots, currValue)
