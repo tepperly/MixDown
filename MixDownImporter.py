@@ -46,7 +46,7 @@ def main():
                 match = targetRe.search(line)
                 if match != None:
                     possibleDependancy = match.group(1)
-                    if targetNameInList(possibleDependancy, finalTargets + notReviewedTargets):
+                    if getTarget(possibleDependancy, finalTargets + notReviewedTargets):
                         Logger().writeMessage("Known dependancy found (" + possibleDependancy + ")", target.name)
                         target.dependsOn.append(possibleDependancy)
                         continue
@@ -70,7 +70,7 @@ def main():
                                 newTarget.aliases.append(possibleDependancy)
                             target.dependsOn.append(possibleDependancy)
                         else:
-                            aliasTarget = targetNameInList(userInput, finalTargets + notReviewedTargets, possibleDependancy)
+                            aliasTarget = getTarget(userInput, finalTargets + notReviewedTargets, possibleDependancy)
                             if aliasTarget != None:
                                 Logger().writeMessage("Alias added (" + userInput + ")", aliasTarget.name)
                                 target.dependsOn.append(possibleDependancy)
@@ -123,13 +123,23 @@ def searchForPossibleAliasInList(possibleAlias, targetList, interactive=False):
                 return target
     return None
 
-def targetNameInList(name, targetList, aliasToAdd = ""):
-    for target in targetList:
-        if name == target.name or name in target.aliases:
-            if aliasToAdd != "" and not aliasToAdd in target.aliases:
-                target.aliases.append(aliasToAdd)
-            return target
-    return None
+def getTarget(name, targetList, aliasToAdd = ""):
+    normalizedTargetName = mdTarget.normalizeName(name)
+    foundTarget = None
+    for currTarget in targetList:
+        if normalizedTargetName == mdTarget.normalizeName(currTarget.name):
+            foundTarget = currTarget
+            break
+        for alias in currTarget.aliases:
+            if normalizedTargetName == mdTarget.normalizeName(alias):
+                foundTarget = currTarget
+                break
+            
+    if foundTarget != None:
+        if aliasToAdd != "" and not aliasToAdd in target.aliases:
+            target.aliases.append(aliasToAdd)
+        
+    return foundTarget
 
 def targetPathInList(path, targetList):
     for target in targetList:
