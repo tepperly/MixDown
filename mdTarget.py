@@ -24,8 +24,39 @@ import os, tarfile, urllib, mdCommands, mdGit, mdHg, mdSvn, utilityFunctions
 
 from mdLogger import *
 
-def _normalizeName(name = ""):
+def normalizeName(name):
     return name.strip().lower()
+
+def targetPathToName(path, exitOnFailure=True):
+    name = ""
+    path = path.strip()
+    
+    if mdGit.isGitRepo(path):
+        if os.path.isdir(path):
+            name = os.path.basename(path)
+        elif utilityFunctions.isURL(path):
+            name = utilityFunctions.URLToFilename(path)
+            if name.endswith(".git"):
+                name = name[:-4]
+    elif mdSvn.isSvnRepo(path):
+        if path.endswith("/"):
+            path = path[:-1]
+        if path.endswith("/trunk"):
+            path = path[:-6]
+        if os.path.isdir(path):
+            name = os.path.basename(path)
+        elif utilityFunctions.isURL(path):
+            name = utilityFunctions.URLToFilename(path)
+    elif utilityFunctions.isURL(path):
+        name = utilityFunctions.URLToFilename(path)
+        name = utilityFunctions.splitFileName(name)[0]
+    elif os.path.isfile(path) and tarfile.is_tarfile(path):
+        name = utilityFunctions.splitFileName(path)[0]
+    elif os.path.isdir(target.path):
+        name = os.path.basename(path)
+    else:
+        Logger().writeError("Could not convert given target path to name: " + path, exitProgram=exitOnFailure)
+    return name
 
 class Target:
     def __init__(self, targetName, path=""):
@@ -45,13 +76,13 @@ class Target:
         self.commands["install"] = ""
 
     def isValid(self):
-        normalizedName = _normalizeName(self.name)
+        normalizedName = normalizeName(self.name)
         if normalizedName == "":
             return False
         if self.path == "":
             return False
         for alias in self.aliases:
-            if _normalizeName(alias) == normalizedName:
+            if normalizeName(alias) == normalizedName:
                 Logger().writeError(self.name + ": Target's alias cannot be same as it's name")
                 return False
         return True

@@ -24,9 +24,6 @@ import os, collections, Queue, mdCommands, mdTarget, utilityFunctions
 
 from mdLogger import *
 
-def _normalizeName(name = ""):
-    return name.strip().lower()
-
 class Project:
     def __init__(self, projectFilePath, targets=[]):
         self.path = projectFilePath
@@ -61,19 +58,19 @@ class Project:
 
     def __addTarget(self, target, lineCount=0):
         for currTarget in self.targets:
-            if _normalizeName(target.name) == _normalizeName(currTarget.name):
+            if mdTarget.normalizeName(target.name) == mdTarget.normalizeName(currTarget.name):
                 Logger().writeError("Cannot have more than one project target by the same name", currTarget.name, "", self.path, lineCount)
                 return False
         self.targets.append(target)
         return True
 
     def getTarget(self, targetName):
-        normalizedTargetName = _normalizeName(targetName)
+        normalizedTargetName = mdTarget.normalizeName(targetName)
         for currTarget in self.targets:
-            if normalizedTargetName == _normalizeName(currTarget.name):
+            if normalizedTargetName == mdTarget.normalizeName(currTarget.name):
                 return currTarget
             for alias in currTarget.aliases:
-                if normalizedTargetName == _normalizeName(alias):
+                if normalizedTargetName == mdTarget.normalizeName(alias):
                     return currTarget
         return None
 
@@ -131,9 +128,9 @@ class Project:
                             return False
                         if currPair[1] != "":
                             dependsOnList = utilityFunctions.stripItemsInList(currPair[1].split(","))
-                            normalizedName = _normalizeName(currTarget.name)
+                            normalizedName = mdTarget.normalizeName(currTarget.name)
                             for dependancy in dependsOnList:
-                                if _normalizeName(dependancy) == normalizedName:
+                                if mdTarget.normalizeName(dependancy) == normalizedName:
                                     Logger().writeError("Project targets cannot depend on themselves", currTarget.name, "", self.path, lineCount)
                                     return False
                             currTarget.dependsOn = dependsOnList
@@ -143,9 +140,9 @@ class Project:
                             return False
                         if currPair[1] != "":
                             aliases = utilityFunctions.stripItemsInList(currPair[1].split(","))
-                            noralizedName = _normalizeName(currTarget.name)
+                            noralizedName = mdTarget.normalizeName(currTarget.name)
                             for alias in aliases:
-                                if _normalizeName(alias) == normalizedName:
+                                if mdTarget.normalizeName(alias) == normalizedName:
                                     Logger().writeError("Project target alias cannot be same as its name", currTarget.name, "", self.path, lineCount)
                                     return False
                             currTarget.aliases = aliases
@@ -205,10 +202,10 @@ class Project:
             return True
 
         for currTarget in self.targets:
-            normalizedName = _normalizeName(currTarget.name)
+            normalizedName = mdTarget.normalizeName(currTarget.name)
             checkedDependancies = []
             for dependancy in currTarget.dependsOn:
-                normalizedDepedancy = _normalizeName(dependancy)
+                normalizedDepedancy = mdTarget.normalizeName(dependancy)
                 if normalizedDepedancy == normalizedName:
                     Logger().writeError("Target cannot depend on itself", currTarget.name, "", self.path)
                     return False
@@ -220,13 +217,13 @@ class Project:
                     return False
                 checkedDependancies.append(normalizedDepedancy)
 
-        path = [_normalizeName(self.targets[0].name)]
+        path = [mdTarget.normalizeName(self.targets[0].name)]
         return self.__searchPathsForCycles(path)
 
     def __searchPathsForCycles(self, path):
         currTarget = self.getTarget(path[len(path)-1])
         for dependancy in currTarget.dependsOn:
-            normalizedDependancy = _normalizeName(dependancy)
+            normalizedDependancy = mdTarget.normalizeName(dependancy)
             if normalizedDependancy in path:
                 return False
             path.append(normalizedDependancy)

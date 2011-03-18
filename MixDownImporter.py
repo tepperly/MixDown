@@ -14,7 +14,8 @@ def main():
     mainTargetFlagged = False
 
     printProgramHeader()
-    interactive, notReviewedTargets = processCommandlineOptions()
+
+    options, notReviewedTargets = processCommandlineOptions(tempDir)
 
     while len(notReviewedTargets) != 0:
         target = notReviewedTargets.pop(0)
@@ -22,31 +23,18 @@ def main():
             target.main = True
             mainTargetFlagged = True
 
-        print target.name + ": Analyzing target"
-        if utilityFunctions.isURL(target.path):
-            print target.name + ": Downloading target to temporary directory"
-            newPath = os.path.join(tempDir, utilityFunctions.URLToFilename(target.path))
-            urllib.urlretrieve(target.path, newPath)
-            target.path = newPath
-
-        if os.path.isfile(target.path) and tarfile.is_tarfile(target.path):
-            print target.name + ": Untaring target to temporary directory"
-            newPath = tempDir + utilityFunctions.splitFileName(target.path)[0]
-            utilityFunctions.untar(target.path, newPath, True)
-        elif os.path.isdir(target.path):
-            print target.name + ": Copying target directory to temporary directory"
-            newPath = tempDir + os.path.basename(target.path)
-            shutil.copytree(target.path, newPath)
-        else:
-            printUsageAndExit(target.name + ": Cannot understand given target")
-        target.path = newPath
+        Logger().writeMessage("Analyzing target", target.name)
+        Logger().writeMessage("Extracting target", target.name)
+       
+        target.output = tempDir + target.name
+        target.extract(options)
 
         if os.path.exists(target.path + "/configure.ac") and not os.path.exists(target.path + "/configure"):
-            print target.name + ": Running 'autoreconf'"
+            Logger().writeMessage("Running 'autoreconf'", target.name)
             utilityFunctions.executeSubProcess("autoreconf -i", target.path, exitOnError=True)
 
         if os.path.exists(target.path + "/configure"):
-            print target.name + ": Analyzing 'configure --help' output"
+            Logger().writeMessage("Analyzing 'configure --help' output", target.name)
             helpFileName = target.path + "/configure_help.log"
             helpFile = open(helpFileName, "w")
             utilityFunctions.executeSubProcess("./configure --help", target.path, helpFile.fileno(), False, True)
@@ -59,38 +47,46 @@ def main():
                 if match != None:
                     possibleDependancy = match.group(1)
                     if targetNameInList(possibleDependancy, finalTargets + notReviewedTargets):
-                        print target.name + ": Known dependancy found (" + possibleDependancy + ")"
+                        Logger().writeMessage("Known dependancy found (" + possibleDependancy + ")", target.name)
                         target.dependsOn.append(possibleDependancy)
                         continue
                     elif possibleDependancy in ignoredTargets:
-                        print target.name + ": Previously ignored dependancy found (" + possibleDependancy + ")"
+                        Logger().writeMessage("Previously ignored dependancy found (" + possibleDependancy + ")", target.name)
                         continue
 
-                    aliasTarget = searchForPossibleAliasInList(possibleDependancy, finalTargets + notReviewedTargets, interactive)
+                    aliasTarget = searchForPossibleAliasInList(possibleDependancy, finalTargets + notReviewedTargets, options.interactive)
                     if aliasTarget != None:
                         target.dependsOn.append(possibleDependancy)
-                    elif interactive:
-                        print target.name + ": Unknown dependancy found (" + possibleDependancy + ")"
-                        userInput = raw_input(possibleDependancy + ": Input location, alias, or blank to ignore:").strip()
+                    elif options.interactive:
+                        Logger().writeMessage("Unknown dependancy found (" + possibleDependancy + ")", target.name)
+                        userInput = raw_input(possibleDependancy + ": Input location, target name, or blank to ignore:").strip()
                         if userInput == "":
                             ignoredTargets.append(possibleDependancy)
                         elif os.path.isfile(userInput) or os.path.isdir(userInput) or utilityFunctions.isURL(userInput):
-                            notReviewedTargets.append(mdTarget.Target(possibleDependancy, userInput))
+                            name = mdTarget.targetPathToName(userInput)
+                            newTarget = mdTarget.Target(name, userInput)
+                            notReviewedTargets.append(newTarget)
+                            if mdTarget.normalizeName(possibleDependancy) != mdTarget.normalizeName(userInput):
+                                newTarget.aliases.append(possibleDependancy)
                             target.dependsOn.append(possibleDependancy)
                         else:
                             aliasTarget = targetNameInList(userInput, finalTargets + notReviewedTargets, possibleDependancy)
                             if aliasTarget != None:
-                                print aliasTarget.name + ": Alias added (" + userInput + ")"
+                                Logger().writeMessage("Alias added (" + userInput + ")", aliasTarget.name)
                                 target.dependsOn.append(possibleDependancy)
                             else:
-                                aliasLocation = raw_input(userInput + ": Alias not found in any known targets.  Location of new target:").strip()
+                                aliasLocation = raw_input(userInput + ": Target name not found in any known targets.  Location of new target:").strip()
                                 if os.path.isfile(aliasLocation) or os.path.isdir(aliasLocation) or utilityFunctions.isURL(aliasLocation):
-                                    notReviewedTargets.append(mdTarget.Target(userInput, aliasLocation))
-                                    target.dependsOn.append(userInput)
+                                    name = mdTarget.targetPathToName(aliasLocation)
+                                    newTarget = mdTarget.Target(name, aliasLocation)
+                                    notReviewedTargets.append(newTarget)
+                                    if mdTarget.normalizeName(possibleDependancy) != mdTarget.normalizeName(aliasLocation):
+                                        newTarget.aliases.append(possibleDependancy)
+                                    target.dependsOn.append(possibleDependancy)
                                 else:
                                     printErrorAndExit(userInput + ": Alias location not understood.")
                     else:
-                        print target.name + ": Ignoring unknown dependancy (" + possibleDependancy + ")"
+                        Logger().writeMessage("Ignoring unknown dependancy (" + possibleDependancy + ")", target.name)
             helpFile.close()
         finalTargets.append(target)
 
@@ -101,19 +97,17 @@ def main():
     else:
         outFileName = mainTargetName + ".md"
     project = mdProject.Project(outFileName, finalTargets)
-
-    options = mdOptions.Options()
-    options.importer = True
-    options.setDefine(mdStrings.mdDefinePrefix, "$(" + mdStrings.mdDefinePrefix + ")")
+    
+    for target in project.targets:
+        target.output = ""
 
     if project.examine(options):
-        print "\nFinal targets...\n"
-        print str(project)
+        Logger().writeMessage("\nFinal targets...\n" + str(project))
         project.write(outFileName)
 
     utilityFunctions.removeDir(tempDir)
 
-def searchForPossibleAliasInList(possibleAlias, targetList, interactive = False):
+def searchForPossibleAliasInList(possibleAlias, targetList, interactive=False):
     for target in targetList:
         if possibleAlias == target.name or possibleAlias in target.aliases:
             return target
@@ -124,7 +118,7 @@ def searchForPossibleAliasInList(possibleAlias, targetList, interactive = False)
                     target.aliases.append(possibleAlias)
                     return target
             else:
-                print target.name + ": Alias added (" + possibleAlias + ")"
+                Logger().writeMessage("Alias added (" + possibleAlias + ")", target.name)
                 target.aliases.append(possibleAlias)
                 return target
     return None
@@ -152,26 +146,34 @@ def printUsageAndExit(errorStr = ""):
 def printProgramHeader():
     print "MixDown Importer\n"
 
-def processCommandlineOptions():
-    interactive = False
-    targetList = []
+def processCommandlineOptions(tempDir):
     if len(sys.argv) < 2:
         printUsageAndExit()
 
+    targetList = []
+    options = mdOptions.Options()
+    options.verbose = True
+    options.importer = True
+    options.downloadDir = utilityFunctions.includeTrailingPathDelimiter(tempDir + "mdDownloads")
+    options.setDefine(mdStrings.mdDefinePrefix, "$(" + mdStrings.mdDefinePrefix + ")")
     for currArg in sys.argv[1:]:
         if currArg.lower() == "-i":
-            interactive = True
+            options.interactive = True
+        if currArg.lower() == "-q":
+            options.verbose = False
         elif utilityFunctions.isURL(currArg) or os.path.isfile(currArg) or os.path.isdir(currArg):
-            name = utilityFunctions.splitFileName(currArg)[0]
+            name = mdTarget.targetPathToName(currArg)
             currTarget = mdTarget.Target(name, currArg)
             targetList.append(currTarget)
+        else:
+            Logger().writeError("Could not understand given commandline option: " + currArg, exitProgram=True)
 
     if len(targetList) == 0:
         printUsageAndExit()
     else:
-        print "Root Project: " + targetList[0].name
+        Logger().writeMessage("Root Project: " + targetList[0].name)
 
-    return interactive, targetList
+    return options, targetList
 
 if __name__ == "__main__":
     main()

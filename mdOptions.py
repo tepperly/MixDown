@@ -35,6 +35,7 @@ class Options:
         self.verbose = False
         self.logger = "file"
         self.importer = False
+        self.interactive = False
         self._defines = dict()
         self._defines.setdefault("")
 
