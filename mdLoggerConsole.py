@@ -25,8 +25,8 @@ import mdLogger, sys
 class LoggerConsole(mdLogger.LoggerBase):
     def close(self):
         pass
-    
-    def __FormatErrorMessage(self, message, filePath = "", lineNumber = 0):
+
+    def __formatErrorMessage(self, message, filePath="", lineNumber=0):
         if filePath == "" and lineNumber == 0:
             return "Error: %s\n" % (message)
         elif lineNumber == 0:
@@ -34,38 +34,46 @@ class LoggerConsole(mdLogger.LoggerBase):
         else:
             return "Error: %s (line %d): %s\n" % (filePath, lineNumber, message)
 
-    def writeMessage(self, message, targetName = "", targetStep = ""):
-        sys.stderr.flush()
-        sys.stdout.write(message + "\n")
+    def __formatMessagePrefix(self, targetName="", targetStep=""):
+        messagePrefix = ""
+        if targetName != "":
+            messagePrefix = targetName + ": "
+        if targetStep != "":
+            messagePrefix += targetStep + ": "
+        return messagePrefix
 
-    def writeError(self, message, targetName = "", targetStep = "", filePath = "", lineNumber = 0, exitProgram = False):
+    def writeMessage(self, message, targetName="", targetStep=""):
+        sys.stderr.flush()
+        sys.stdout.write(self.__formatMessagePrefix(targetName, targetStep) + message + "\n")
+
+    def writeError(self, message, targetName="", targetStep="", filePath="", lineNumber=0, exitProgram=False):
         sys.stdout.flush()
-        sys.stderr.write(self.__FormatErrorMessage(message, filePath, lineNumber))
+        sys.stderr.write(self.__formatErrorMessage(self.__formatMessagePrefix(targetName, targetStep) + message, filePath, lineNumber))
         sys.stderr.flush()
         if exitProgram:
             sys.exit()
 
-    def reportSkipped(self, targetName = "", targetStep = "", reason = ""):
+    def reportSkipped(self, targetName="", targetStep="", reason=""):
         sys.stderr.flush()
-        sys.stdout.write(targetName + ": " + str.capitalize(targetStep) + ": " + reason + ": Skipped...\n")
-    
-    def reportStart(self, targetName = "", targetStep = ""):
-        sys.stderr.flush()
-        sys.stdout.write(targetName + ": " + str.capitalize(targetStep) + ": Starting...\n")
+        sys.stdout.write(self.__formatMessagePrefix(targetName, targetStep) + reason + ": Skipped...\n")
 
-    def reportSuccess(self, targetName = "", targetStep = ""):
+    def reportStart(self, targetName="", targetStep=""):
         sys.stderr.flush()
-        sys.stdout.write(targetName + ": " + str.capitalize(targetStep) + ": Succeeded\n")
+        sys.stdout.write(self.__formatMessagePrefix(targetName, targetStep) + ": Starting...\n")
 
-    def reportFailure(self, targetName = "", targetStep = "", returnCode = 0, exit = False):
+    def reportSuccess(self, targetName="", targetStep=""):
+        sys.stderr.flush()
+        sys.stdout.write(self.__formatMessagePrefix(targetName, targetStep) + ": Succeeded\n")
+
+    def reportFailure(self, targetName="", targetStep="", returnCode=0, exit=False):
         sys.stdout.flush()
-        sys.stderr.write("Error: " + targetName + ": " + str.capitalize(targetStep) + ": Failed with error code " + returnCode + ".\n")
+        sys.stderr.write("Error: " + self.__formatMessagePrefix(targetName, targetStep) + ": Failed with error code " + returnCode + ".\n")
         sys.stderr.flush()
         if exit:
             sys.exit()
 
-    def getOutFd(self, targetName = "", targetStep = ""):
+    def getOutFd(self, targetName="", targetStep=""):
         return sys.stdout
 
-    def getErrorFd(self, targetName = "", targetStep = ""):
+    def getErrorFd(self, targetName="", targetStep=""):
         return sys.stderr
