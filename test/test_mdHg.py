@@ -24,9 +24,9 @@ import os, sys, unittest, mdTestUtilities
 
 if not ".." in sys.path:
     sys.path.append("..")
-import mdHg, utilityFunctions
+import mdHg, mdLogger, utilityFunctions
 
-class test_mdHg(unittest.TestCase):
+class Test_mdHg(unittest.TestCase):
     def test_isHgInstalled(self):
         returnValue = mdHg.isHgInstalled()
         self.assertEqual(returnValue, True, "Hg is not installed on your system.  All Hg tests will fail.")
@@ -117,6 +117,11 @@ class test_mdHg(unittest.TestCase):
             utilityFunctions.removeDir(tempDir)
             utilityFunctions.removeDir(tempRepo)
 
-if __name__ == "__main__":
-    unittest.main()
+def suite():
+    suite = unittest.TestSuite()
+    suite.addTest(unittest.makeSuite(Test_mdHg))
+    return suite
 
+if __name__ == "__main__":
+    mdLogger.SetLogger("Console")
+    unittest.main()

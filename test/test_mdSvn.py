@@ -24,9 +24,9 @@ import os, sys, unittest, mdTestUtilities
 
 if not ".." in sys.path:
     sys.path.append("..")
-import mdSvn, utilityFunctions
+import mdLogger, mdSvn, utilityFunctions
 
-class test_mdSvn(unittest.TestCase):
+class Test_mdSvn(unittest.TestCase):
     def test_isSvnInstalled(self):
         returnValue = mdSvn.isSvnInstalled()
         self.assertEqual(returnValue, True, "Svn is not installed on your system.  All Svn tests will fail.")
@@ -59,5 +59,11 @@ class test_mdSvn(unittest.TestCase):
             utilityFunctions.removeDir(tempDir)
             utilityFunctions.removeDir(tempRepo[6:len(tempRepo)-11]) #"file://tmp/mixdown-*/repo/trunk" -> "//tmp/mixdown-*/"
 
+def suite():
+    suite = unittest.TestSuite()
+    suite.addTest(unittest.makeSuite(Test_mdSvn))
+    return suite
+
 if __name__ == "__main__":
+    mdLogger.SetLogger("Console")
     unittest.main()

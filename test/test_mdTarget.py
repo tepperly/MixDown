@@ -26,7 +26,7 @@ if not ".." in sys.path:
     sys.path.append("..")
 import mdCvs, mdSvn, mdGit, mdHg, mdLogger, mdOptions, mdTarget, utilityFunctions
 
-class test_mdTarget(unittest.TestCase):
+class Test_mdTarget(unittest.TestCase):
     def setUpTargetDirectory(self, filesInTarget=[]):
         self.testDir = mdTestUtilities.makeTempDir()
         for fileName in filesInTarget:
@@ -258,6 +258,11 @@ class test_mdTarget(unittest.TestCase):
         self.assertTrue(returnValue, "Target with autotool files returned wrong build command")
         returnValue = target.commands["install"] == "make install"
         self.assertTrue(returnValue, "Target with autotool files returned wrong install command")
+
+def suite():
+    suite = unittest.TestSuite()
+    suite.addTest(unittest.makeSuite(Test_mdTarget))
+    return suite
 
 if __name__ == "__main__":
     mdLogger.SetLogger("Console")

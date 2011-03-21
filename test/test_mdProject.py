@@ -26,7 +26,7 @@ if not ".." in sys.path:
     sys.path.append("..")
 import mdLogger, mdOptions, mdProject, utilityFunctions
 
-class test_mdProject(unittest.TestCase):
+class Test_mdProject(unittest.TestCase):
     def test_readSingleTargetProject(self):
         projectFileContents = textwrap.dedent("""
                                             Name: a
@@ -692,6 +692,11 @@ class test_mdProject(unittest.TestCase):
             self.assertEquals(project.targets[3].name, "A", "Sorting failed. A should have been the first target.")
         finally:
             os.remove(projectFilePath)
+
+def suite():
+    suite = unittest.TestSuite()
+    suite.addTest(unittest.makeSuite(Test_mdProject))
+    return suite
 
 if __name__ == "__main__":
     mdLogger.SetLogger("Console")

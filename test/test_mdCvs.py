@@ -24,15 +24,15 @@ import os, sys, unittest, mdTestUtilities
 
 if not ".." in sys.path:
     sys.path.append("..")
-import mdCvs, utilityFunctions
+import mdCvs, mdLogger, utilityFunctions
 
-class test_mdCvs(unittest.TestCase):
+class Test_mdCvs(unittest.TestCase):
     def test_isCvsInstalled(self):
         returnValue = mdCvs.isCvsInstalled()
         self.assertEqual(returnValue, True, "Cvs is not installed on your system.  All Cvs tests will fail.")
 
     def test_isCvsRepo(self):
-        if not mdGit.isCvsInstalled():
+        if not mdCvs.isCvsInstalled():
             self.fail("Cvs is not installed on your system.  All Cvs tests will fail.")
         #Create repository and test if is cvs repo
         tempRepo = mdTestUtilities.createCvsRepository()
@@ -47,7 +47,7 @@ class test_mdCvs(unittest.TestCase):
         self.assertEqual(returnValue, False, "mdCvs.isCvsRepo(" + falsePath + ") should have returned false.")
 
     def test_cvsCheckout(self):
-        if not mdGit.isCvsInstalled():
+        if not mdCvs.isCvsInstalled():
             self.fail("Cvs is not installed on your system.  All Cvs tests will fail.")
         tempDir = mdTestUtilities.makeTempDir()
         tempRepo = mdTestUtilities.createCvsRepository()
@@ -59,5 +59,11 @@ class test_mdCvs(unittest.TestCase):
             utilityFunctions.removeDir(tempDir)
             utilityFunctions.removeDir(tempRepo)
 
+def suite():
+    suite = unittest.TestSuite()
+    suite.addTest(unittest.makeSuite(Test_mdCvs))
+    return suite
+
 if __name__ == "__main__":
+    mdLogger.SetLogger("Console")
     unittest.main()

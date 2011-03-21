@@ -20,3 +20,25 @@
 # along with this program; if not, write to the Free Software Foundation,
 # Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 
+import sys, unittest
+import test_mdCvs, test_mdGit, test_mdHg, test_mdSvn, test_mdProject, test_mdTarget
+
+if not ".." in sys.path:
+    sys.path.append("..")
+import mdLogger
+
+def main():
+    suite = unittest.TestSuite()
+
+    #suite.addTest(test_mdCvs.suite())
+    suite.addTest(test_mdGit.suite())
+    suite.addTest(test_mdHg.suite())
+    suite.addTest(test_mdSvn.suite())
+    suite.addTest(test_mdProject.suite())
+    suite.addTest(test_mdTarget.suite())
+
+    unittest.TextTestRunner(verbosity=2).run(suite)
+
+if __name__ == "__main__":
+    mdLogger.SetLogger("Console")
+    main()

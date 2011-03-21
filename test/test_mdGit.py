@@ -24,9 +24,9 @@ import os, sys, unittest, mdTestUtilities
 
 if not ".." in sys.path:
     sys.path.append("..")
-import mdGit, utilityFunctions
+import mdGit, mdLogger, utilityFunctions
 
-class test_mdGit(unittest.TestCase):
+class Test_mdGit(unittest.TestCase):
     def test_isGitInstalled(self):
         returnValue = mdGit.isGitInstalled()
         self.assertEqual(returnValue, True, "Git is not installed on your system.  All Git tests will fail.")
@@ -102,6 +102,11 @@ class test_mdGit(unittest.TestCase):
             utilityFunctions.removeDir(tempDir)
             utilityFunctions.removeDir(tempRepo)
 
-if __name__ == "__main__":
-    unittest.main()
+def suite():
+    suite = unittest.TestSuite()
+    suite.addTest(unittest.makeSuite(Test_mdGit))
+    return suite
 
+if __name__ == "__main__":
+    mdLogger.SetLogger("Console")
+    unittest.main()
