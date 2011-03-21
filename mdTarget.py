@@ -30,7 +30,7 @@ def normalizeName(name):
 def targetPathToName(path, exitOnFailure=True):
     name = ""
     path = path.strip()
-    
+
     if mdGit.isGitRepo(path):
         if os.path.isdir(path):
             name = os.path.basename(path)
@@ -52,7 +52,7 @@ def targetPathToName(path, exitOnFailure=True):
         name = utilityFunctions.splitFileName(name)[0]
     elif os.path.isfile(path) and tarfile.is_tarfile(path):
         name = utilityFunctions.splitFileName(path)[0]
-    elif os.path.isdir(target.path):
+    elif os.path.isdir(path):
         name = os.path.basename(path)
     else:
         Logger().writeError("Could not convert given target path to name: " + path, exitProgram=exitOnFailure)
