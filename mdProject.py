@@ -28,7 +28,7 @@ class Project:
     def __init__(self, projectFilePath, targets=[]):
         self.path = projectFilePath
         if self.path.endswith(".md"):
-            self.name = self.path[:-3]
+            self.name = os.path.split(self.path)[1][:-3]
         else:
             self.name = utilityFunctions.getBasename(self.path)
         self.targets = targets[:] #Use copy to prevent list instance to be used between project instances
