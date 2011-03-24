@@ -23,15 +23,15 @@
 import mdLogger, sys
 
 class LoggerHtml(mdLogger.LoggerBase):
-    def __init__(self, logOutputDir = ""):
+    def __init__(self, logOutputDir=""):
         self.logOutputDir = logOutputDir
         if not os.path.isdir(self.logOutputDir):
             os.makedirs(self.logOutputDir)
-        
+
     def close(self):
         pass
-    
-    def __FormatErrorMessage(self, message, filePath = "", lineNumber = 0):
+
+    def __FormatErrorMessage(self, message, filePath="", lineNumber=0):
         if filePath == "" and lineNumber == 0:
             return "Error: %s\n" % (message)
         elif lineNumber == 0:
@@ -42,30 +42,29 @@ class LoggerHtml(mdLogger.LoggerBase):
     def writeMessage(self, message):
         self.writeMessage(message, "", "")
 
-    def writeMessage(self, message, targetName = "", targetStep = ""):
+    def writeMessage(self, message, targetName="", targetStep=""):
         sys.stderr.flush()
-        sys.stdin.write(message)        
+        sys.stdin.write(message)
 
-    def writeError(self, message, targetName = "", targetStep = "", filePath = "", lineNumber = 0, exit = False):
+    def writeError(self, message, targetName="", targetStep="", filePath="", lineNumber=0, exitProgram=False):
         sys.stdin.flush()
         sys.stderr.write(self.__FormatErrorMessage(message, filePath, lineNumber))
         sys.stderr.flush()
 
-    def reportSkipped(self, targetName = "", targetStep = "", reason = ""):
+    def reportSkipped(self, targetName="", targetStep="", reason=""):
         pass
 
-    def reportStart(self, targetName = "", targetStep = ""):
+    def reportStart(self, targetName="", targetStep=""):
         pass
 
-    def reportSuccess(self, targetName = "", targetStep = ""):
+    def reportSuccess(self, targetName="", targetStep=""):
         pass
 
-    def reportFailure(self, targetName = "", targetStep = "", returnCode = 0, exitProgram = False):
+    def reportFailure(self, targetName="", targetStep="", returnCode=0, exitProgram=False):
         pass
 
-    def getOutFd(self, targetName = "", targetStep = ""):
+    def getOutFd(self, targetName="", targetStep=""):
         return sys.stdout
 
-    def getErrorFd(self, targetName = "", targetStep = ""):
+    def getErrorFd(self, targetName="", targetStep=""):
         return sys.stderr
-    

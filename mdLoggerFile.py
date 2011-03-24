@@ -23,14 +23,14 @@
 import mdLogger, os, sys, utilityFunctions
 
 class LoggerFile(mdLogger.LoggerBase):
-    def __init__(self, logOutputDir = ""):
+    def __init__(self, logOutputDir=""):
         self.logOutputDir = logOutputDir
         if not os.path.isdir(self.logOutputDir):
             os.makedirs(self.logOutputDir)
         self.errorFds = dict()
         self.outFds = dict()
-        
-    def __FormatErrorMessage(self, message, filePath = "", lineNumber = 0):
+
+    def __FormatErrorMessage(self, message, filePath="", lineNumber=0):
         if filePath == "" and lineNumber == 0:
             return "Error: %s\n" % (message)
         elif lineNumber == 0:
@@ -62,14 +62,14 @@ class LoggerFile(mdLogger.LoggerBase):
             self.errorFds[key] = value
         return value
 
-    def writeMessage(self, message, targetName = "", targetStep = ""):
+    def writeMessage(self, message, targetName="", targetStep=""):
         sys.stderr.flush()
         if targetName == "":
             sys.stdout.write(message + "\n")
         else:
             self.__LookupOutFile(targetName, targetStep).write(message + "\n")
 
-    def writeError(self, message, targetName = "", targetStep = "", filePath = "", lineNumber = 0, exitProgram = False):
+    def writeError(self, message, targetName="", targetStep="", filePath="", lineNumber=0, exitProgram=False):
         sys.stdin.flush()
         if targetName == "":
             sys.stderr.write(message + "\n")
@@ -79,40 +79,40 @@ class LoggerFile(mdLogger.LoggerBase):
         if exitProgram:
             sys.exit()
 
-    def reportSkipped(self, targetName = "", targetStep = "", reason = ""):
+    def reportSkipped(self, targetName="", targetStep="", reason=""):
         message = targetName + ": " + str.capitalize(targetStep) + ": " + reason + ": Skipped.\n"
         sys.stderr.flush()
         sys.stdout.write(message)
         self.__LookupOutFile(targetName, targetStep).write(message)
-    
-    def reportStart(self, targetName = "", targetStep = ""):
+
+    def reportStart(self, targetName="", targetStep=""):
         message = targetName + ": " + str.capitalize(targetStep) + ": Starting...\n"
         sys.stderr.flush()
         sys.stdout.write(message)
         self.__LookupOutFile(targetName, targetStep).write(message)
 
-    def reportSuccess(self, targetName = "", targetStep = ""):
+    def reportSuccess(self, targetName="", targetStep=""):
         message = targetName + ": " + str.capitalize(targetStep) + ": Succeeded.\n"
         sys.stderr.flush()
         sys.stdout.write(message)
         self.__LookupOutFile(targetName, targetStep).write(message)
 
-    def reportFailure(self, targetName = "", targetStep = "", returnCode = 0, exit = False):
+    def reportFailure(self, targetName="", targetStep="", returnCode=0, exitProgram=False):
         message = "Error: " + targetName + ": " + str.capitalize(targetStep) + ": Failed with error code " + returnCode + ".\n"
         sys.stdout.flush()
         sys.stderr.write(message)
         self.__LookupErrorFile(targetName, targetStep).write(message)
         sys.stderr.flush()
-        if exit:
+        if exitProgram:
             sys.exit()
 
-    def getOutFd(self, targetName = "", targetStep = ""):
+    def getOutFd(self, targetName="", targetStep=""):
         if targetName != "" and targetStep != "":
             return self.__LookupOutFile(targetName, targetStep).fileno()
         return sys.stdout
 
-    def getErrorFd(self, targetName = "", targetStep = ""):
+    def getErrorFd(self, targetName="", targetStep=""):
         if targetName != "" and targetStep != "":
             return self.__LookupErrorFile(targetName, targetStep).fileno()
         return sys.stderr
-    
+

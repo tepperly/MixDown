@@ -65,11 +65,11 @@ class LoggerConsole(mdLogger.LoggerBase):
         sys.stderr.flush()
         sys.stdout.write(self.__formatMessagePrefix(targetName, targetStep) + ": Succeeded\n")
 
-    def reportFailure(self, targetName="", targetStep="", returnCode=0, exit=False):
+    def reportFailure(self, targetName="", targetStep="", returnCode=0, exitProgram=False):
         sys.stdout.flush()
         sys.stderr.write("Error: " + self.__formatMessagePrefix(targetName, targetStep) + ": Failed with error code " + returnCode + ".\n")
         sys.stderr.flush()
-        if exit:
+        if exitProgram:
             sys.exit()
 
     def getOutFd(self, targetName="", targetStep=""):

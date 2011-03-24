@@ -29,7 +29,7 @@ def Logger():
         SetLogger()
     return __loggerInstance
 
-def SetLogger(loggerName = "", logOutputDir = ""):
+def SetLogger(loggerName="", logOutputDir=""):
     global __loggerInstance
     loggerName = loggerName.lower()
     if loggerName == "file" or loggerName == "":
@@ -57,27 +57,27 @@ class LoggerBase:
     def writeMessage(self, message):
         pass
 
-    def writeMessage(self, message, targetName = "", targetStep = ""):
+    def writeMessage(self, message, targetName="", targetStep=""):
         pass
 
-    def writeError(self, message, targetName = "", targetStep = "", filePath = "", lineNumber = 0, exitProgram = False):
+    def writeError(self, message, targetName="", targetStep="", filePath="", lineNumber=0, exitProgram=False):
         pass
 
-    def reportSkipped(self, targetName = "", targetStep = "", reason = ""):
+    def reportSkipped(self, targetName="", targetStep="", reason=""):
         pass
 
-    def reportStart(self, targetName = "", targetStep = ""):
+    def reportStart(self, targetName="", targetStep=""):
         pass
 
-    def reportSuccess(self, targetName = "", targetStep = ""):
+    def reportSuccess(self, targetName="", targetStep=""):
         pass
 
-    def reportFailure(self, targetName = "", targetStep = "", returnCode = 0, exit = False):
+    def reportFailure(self, targetName="", targetStep="", returnCode=0, exitProgram=False):
         pass
 
-    def getOutFd(self, targetName = "", targetStep = ""):
+    def getOutFd(self, targetName="", targetStep=""):
         return sys.stdout
 
-    def getErrorFd(self, targetName = "", targetStep = ""):
+    def getErrorFd(self, targetName="", targetStep=""):
         return sys.stderr
 
