@@ -41,7 +41,7 @@ class Test_mdProject(unittest.TestCase):
             project = mdProject.Project(projectFilePath)
             self.assertTrue(project.read(), "Project file could not be read")
             #Project
-            self.assertEqual(project.name, utilityFunctions.getBasename(projectFilePath), "Project returned wrong name")
+            self.assertEqual(project.name, os.path.split(projectFilePath)[1][:-3], "Project returned wrong name")
             self.assertEqual(project.path, projectFilePath, "Project returned wrong path")
             #Target a
             self.assertEqual(project.targets[0].name, "a", "Project returned wrong target 'a' name")
@@ -99,7 +99,7 @@ class Test_mdProject(unittest.TestCase):
             project = mdProject.Project(projectFilePath)
             self.assertTrue(project.read(), "Project file could not be read")
             #Project
-            self.assertEqual(project.name, utilityFunctions.getBasename(projectFilePath), "Project returned wrong name")
+            self.assertEqual(project.name, os.path.split(projectFilePath)[1][:-3], "Project returned wrong name")
             self.assertEqual(project.path, projectFilePath, "Project returned wrong path")
             #Target a
             self.assertEqual(project.targets[0].name, "a", "Project returned wrong target 'a' name")
@@ -167,7 +167,7 @@ class Test_mdProject(unittest.TestCase):
             project = mdProject.Project(projectFilePath)
             self.assertTrue(project.read(), "Project file could not be read")
             #Project
-            self.assertEqual(project.name, utilityFunctions.getBasename(projectFilePath), "Project returned wrong name")
+            self.assertEqual(project.name, os.path.split(projectFilePath)[1][:-3], "Project returned wrong name")
             self.assertEqual(project.path, projectFilePath, "Project returned wrong path")
             #Target a
             self.assertEqual(project.targets[0].name, "a", "Project returned wrong target 'a' name")
