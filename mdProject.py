@@ -27,7 +27,10 @@ from mdLogger import *
 class Project:
     def __init__(self, projectFilePath, targets=[]):
         self.path = projectFilePath
-        self.name = utilityFunctions.getBasename(self.path)
+        if self.path.endswith(".md"):
+            self.name = self.path[:-3]
+        else:
+            self.name = utilityFunctions.getBasename(self.path)
         self.targets = targets[:] #Use copy to prevent list instance to be used between project instances
         self.__validated = False
         self.__examined = False
