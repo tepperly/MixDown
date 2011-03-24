@@ -22,7 +22,7 @@
 # along with this program; if not, write to the Free Software Foundation,
 # Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 
-import mdStrings, os, sys, tarfile, urllib
+import mdStrings, os, sys, tarfile, time, urllib
 
 from mdCommands import *
 from mdOptions import *
@@ -37,13 +37,29 @@ originalLibraryPath = ""
 def main():
     printProgramHeader()
     try:
+        timeStart = time.time()
+
         project, options = setup()
         if project != None or options != None:
             for target in project.targets:
                 for step in getBuildStepList():
-                    buildStepActor(step, target, options)
+                    succeeded = buildStepActor(step, target, options)
+                    if not succeeded:
+                        break
+                if not succeeded:
+                    break
         if options != None:
             cleanup(options)
+
+        timeFinished = time.time()
+        timeElapsed = timeFinished - timeStart
+        message = "\n" + project.name
+        if succeeded:
+            message += ": Succeeded.\n"
+        else:
+            message += ": Failed.\n"
+        message += "Total time " + secondsToHMS(timeElapsed)
+        Logger().writeMessage(message)
     finally:
         Logger().close()
     sys.exit()
@@ -51,22 +67,30 @@ def main():
 def buildStepActor(stepName, target, options):
     Logger().reportStart(target.name, stepName)
     returnCode = None
+
+    timeStart = time.time()
+
     if target.hasStep(stepName):
         outFd = Logger().getOutFd(target.name, stepName)
         command = getCommand(stepName, target, options)
         if command != "":
-            returnCode = executeSubProcess(command, target.path, outFd, options.verbose, True)
+            returnCode = executeSubProcess(command, target.path, outFd, options.verbose)
         else:
             skipReason = "Command could not be determined by MixDown"
     else:
         skipReason = "Target specified to skip step"
 
+    timeFinished = time.time()
+    timeElapsed = timeFinished - timeStart
+
     if returnCode == None:
         Logger().reportSkipped(target.name, stepName, skipReason)
     elif returnCode != 0:
-        Logger().reportFailure(target.name, stepName, returnCode, True)
+        Logger().reportFailure(target.name, stepName, timeElapsed, returnCode)
+        return False
     else:
-        Logger().reportSuccess(target.name, stepName)
+        Logger().reportSuccess(target.name, stepName, timeElapsed)
+    return True
 
 #--------------------------------Setup---------------------------------
 def setup():
