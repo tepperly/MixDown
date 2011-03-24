@@ -61,13 +61,21 @@ class LoggerConsole(mdLogger.LoggerBase):
         sys.stderr.flush()
         sys.stdout.write(self.__formatMessagePrefix(targetName, targetStep) + ": Starting...\n")
 
-    def reportSuccess(self, targetName="", targetStep=""):
+    def reportSuccess(self, targetName="", targetStep="", timeInSeconds=0):
         sys.stderr.flush()
-        sys.stdout.write(self.__formatMessagePrefix(targetName, targetStep) + ": Succeeded\n")
+        messagePrefix = self.__formatMessagePrefix(targetName, targetStep)
+        message = messagePrefix + ": Succeeded\n"
+        if timeInSeconds != 0:
+            message += messagePrefix + ": Time " + mdLogger.secondsToHMS(timeInSeconds) + "\n"
+        sys.stdout.write(message)
 
-    def reportFailure(self, targetName="", targetStep="", returnCode=0, exitProgram=False):
+    def reportFailure(self, targetName="", targetStep="", timeInSeconds=0, returnCode=0, exitProgram=False):
         sys.stdout.flush()
-        sys.stderr.write("Error: " + self.__formatMessagePrefix(targetName, targetStep) + ": Failed with error code " + returnCode + ".\n")
+        messagePrefix = self.__formatMessagePrefix(targetName, targetStep)
+        message = self.__formatErrorMessage(messagePrefix + "Failed with error code " + str(returnCode) + ".")
+        if timeInSeconds != 0:
+            message += messagePrefix + ": Time " + mdLogger.secondsToHMS(timeInSeconds) + "\n"
+        sys.stderr.write(message)
         sys.stderr.flush()
         if exitProgram:
             sys.exit()

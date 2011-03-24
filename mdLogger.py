@@ -22,6 +22,11 @@
 
 import os
 
+def secondsToHMS(seconds=0):
+    m, s = divmod(seconds, 60)
+    h, m = divmod(m, 60)
+    return "%d:%02d:%02d" % (h, m, s)
+
 __loggerInstance = None
 
 def Logger():
@@ -69,10 +74,10 @@ class LoggerBase:
     def reportStart(self, targetName="", targetStep=""):
         pass
 
-    def reportSuccess(self, targetName="", targetStep=""):
+    def reportSuccess(self, targetName="", targetStep="", timeInSeconds=0):
         pass
 
-    def reportFailure(self, targetName="", targetStep="", returnCode=0, exitProgram=False):
+    def reportFailure(self, targetName="", targetStep="", timeInSeconds=0, returnCode=0, exitProgram=False):
         pass
 
     def getOutFd(self, targetName="", targetStep=""):
