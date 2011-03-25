@@ -68,7 +68,9 @@ def __getBuildCommand(target):
 def __getConfigureCommand(target, prefix=""):
     command = ""
     basePath = utilityFunctions.includeTrailingPathDelimiter(target.path)
-    if os.path.exists(basePath + "Configure"):
+    if os.path.exists(basePath + "CMakeFileLists.txt"):
+        command = "cmake -DCMAKE_INSTALL_PREFIX=$(" + mdStrings.mdDefinePrefix + ")"
+    elif os.path.exists(basePath + "Configure"):
         command = "./Configure"
     elif os.path.exists(basePath + "configure") or os.path.exists(basePath + "configure.ac") or os.path.exists(basePath + "configure.in"):
         command = "./configure"
