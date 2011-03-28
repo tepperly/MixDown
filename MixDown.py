@@ -103,7 +103,7 @@ def setup():
         Logger().writeMessage(str(options))
     if options.getDefine(mdStrings.mdDefinePrefix) == "":
         if options.verbose:
-            Logger().writeWarning("No prefix defined, defaulting to '/usr/local'")
+            Logger().writeMessage("No prefix defined, defaulting to '/usr/local'")
         options.setDefine(mdStrings.mdDefinePrefix, '/usr/local')
 
     #Setup project and validate targets
