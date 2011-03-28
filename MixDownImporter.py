@@ -25,15 +25,19 @@ def main():
 
         Logger().writeMessage("Analyzing target", target.name)
         Logger().writeMessage("Extracting target", target.name)
-       
+
         target.output = tempDir + target.name
         target.extract(options)
 
-        if os.path.exists(target.path + "/configure.ac") and not os.path.exists(target.path + "/configure"):
-            Logger().writeMessage("Running 'autoreconf'", target.name)
-            utilityFunctions.executeSubProcess("autoreconf -i", target.path, exitOnError=True)
+        if os.path.exists(target.path + "/CMakeLists.txt"):
+            configureCommand = "cmake -DCMAKE_PREFIX_PATH=testPrefix"
+            Logger().writeMessage("Running cmake to create build files...", target.name)
+            utilityFunctions.executeSubProcess("cmake -DCMAKE_PREFIX_PATH=testPrefix", target.path, exitOnError=True)
+        elif os.path.exists(target.path + "/configure.ac") or os.path.exists(target.path + "/configure"):
+            if os.path.exists(target.path + "/configure.ac"):
+                Logger().writeMessage("Running autoreconf to create build files...", target.name)
+                utilityFunctions.executeSubProcess("autoreconf -i", target.path, exitOnError=True)
 
-        if os.path.exists(target.path + "/configure"):
             Logger().writeMessage("Analyzing 'configure --help' output", target.name)
             helpFileName = target.path + "/configure_help.log"
             helpFile = open(helpFileName, "w")
@@ -97,7 +101,7 @@ def main():
     else:
         outFileName = mainTargetName + ".md"
     project = mdProject.Project(outFileName, finalTargets)
-    
+
     for target in project.targets:
         target.output = ""
 
@@ -134,11 +138,11 @@ def getTarget(name, targetList, aliasToAdd = ""):
             if normalizedTargetName == mdTarget.normalizeName(alias):
                 foundTarget = currTarget
                 break
-            
+
     if foundTarget != None:
         if aliasToAdd != "" and not aliasToAdd in target.aliases:
             target.aliases.append(aliasToAdd)
-        
+
     return foundTarget
 
 def targetPathInList(path, targetList):
