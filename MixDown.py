@@ -53,11 +53,11 @@ def main():
 
         timeFinished = time.time()
         timeElapsed = timeFinished - timeStart
-        message = "\n" + project.name
+        message = "\nProject " + project.name
         if succeeded:
-            message += ": Succeeded.\n"
+            message += " succeeded.\n"
         else:
-            message += ": Failed.\n"
+            message += " failed.\n"
         message += "Total time " + secondsToHMS(timeElapsed)
         Logger().writeMessage(message)
     finally:
