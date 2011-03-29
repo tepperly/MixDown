@@ -32,11 +32,11 @@ class LoggerFile(mdLogger.LoggerBase):
 
     def __formatErrorMessage(self, message, filePath="", lineNumber=0):
         if filePath == "" and lineNumber == 0:
-            return "Error: %s\n" % (message)
+            return "\nError: %s\n" % (message)
         elif lineNumber == 0:
-            return "Error: %s: %s\n" % (filePath, message)
+            return "\nError: %s: %s\n" % (filePath, message)
         else:
-            return "Error: %s (line %d): %s\n" % (filePath, lineNumber, message)
+            return "\nError: %s (line %d): %s\n" % (filePath, lineNumber, message)
 
     def __formatMessagePrefix(self, targetName="", targetStep=""):
         messagePrefix = ""
@@ -52,12 +52,15 @@ class LoggerFile(mdLogger.LoggerBase):
         for key in self.outFds.keys():
             self.outFds[key].close()
 
+    def __lookupOutFileName(self, targetName, targetStep):
+        return utilityFunctions.includeTrailingPathDelimiter(self.logOutputDir) + targetName + "_" + targetStep + ".log"
+
     def __lookupOutFile(self, targetName, targetStep):
         key = str.lower(targetName + targetStep)
         value = self.outFds.get(key)
         if value == None and targetName != "":
-            logName = utilityFunctions.includeTrailingPathDelimiter(self.logOutputDir) + targetName + "_" + targetStep + ".log"
-            value = open(logName, "w")
+            outFileName = self.__lookupOutFileName(targetName, targetStep)
+            value = open(outFileName, "w")
             self.outFds[key] = value
         return value
 
@@ -101,9 +104,11 @@ class LoggerFile(mdLogger.LoggerBase):
 
     def reportFailure(self, targetName="", targetStep="", timeInSeconds=0, returnCode=0, exitProgram=False):
         messagePrefix = self.__formatMessagePrefix(targetName, targetStep)
-        message = self.__formatErrorMessage(messagePrefix + "Failed with error code " + str(returnCode) + ".")
+        message = ""
         if timeInSeconds != 0:
             message += messagePrefix + "Time " + mdLogger.secondsToHMS(timeInSeconds) + "\n"
+        message += self.__formatErrorMessage(messagePrefix + "Failed with error code " + str(returnCode) + ".")
+        message += "Look at following log file for failure reason:\n  " + self.__lookupOutFileName(targetName, targetStep)
         sys.stdout.flush()
         sys.stderr.write(message)
         self.__lookupOutFile(targetName, targetStep).write(message)
