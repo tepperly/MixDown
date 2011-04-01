@@ -35,31 +35,40 @@ class Project:
         self.__validated = False
         self.__examined = False
 
-    def validate(self):
-        if self.path == '' or self.name == '':
-            return False
-        if not self.__validateDependsOnLists():
-            return False
-        self.__validated = True
-        return True
-
-    def examine(self, options):
-        if self.__examined == True:
+    def validate(self, options):
+        if self.__validated:
             return True
         else:
-            if not self.__validated and not self.validate():
+            if self.path == '' or self.name == '':
                 return False
+            if not self.__validateDependsOnLists():
+                return False
+            for target in self.targets:
+                if not target.validate(options):
+                    return False
+            self.__validated = True
+            return True
+
+    def examine(self, options):
+        if self.__examined:
+            return True
+        else:
             if len(self.targets) < 1:
                 Logger().writeError("Project has no targets")
                 return False
             self.__assignDepthToTargetList()
             self.targets = self.__sortTargetList(self.targets)
             for target in reversed(self.targets):
-                target.examine(options)
+                if not target.examine(options):
+                    return False
             self.__examined = True
             return True
 
     def __addTarget(self, target, lineCount=0):
+        if target.name == "" or target.path == "":
+            Logger().writeError("New target started before previous was finished, all targets require atleast 'Name' and 'Path' to be declared", "", "", self.path, lineCount)
+            return False
+
         for currTarget in self.targets:
             if mdTarget.normalizeName(target.name) == mdTarget.normalizeName(currTarget.name):
                 Logger().writeError("Cannot have more than one project target by the same name", currTarget.name, "", self.path, lineCount)
@@ -82,7 +91,6 @@ class Project:
         try:
             currTarget = None
             lineCount = 0
-            mainDeclared = False
             for currLine in f:
                 lineCount += 1
                 lastPackageLineNumber = 0
@@ -100,21 +108,10 @@ class Project:
 
                     if currName == "name":
                         lastPackageLineNumber = lineCount
-                        if not currTarget is None:
-                            if currTarget.isValid():
-                                if not self.__addTarget(currTarget, lastPackageLineNumber):
-                                    return False
-                            else:
-                                Logger().writeError("New target started before previous was finished, all targets require atleast 'Package' and 'Path' to be declared", "", "", self.path, lineCount)
+                        if currTarget != None:
+                            if not self.__addTarget(currTarget, lastPackageLineNumber):
                                 return False
                         currTarget = mdTarget.Target(currPair[1])
-                    elif currName == "main":
-                        lastPackageLineNumber = lineCount
-                        if mainDeclared:
-                            Logger().writeError("Project targets can only have one 'Main' defined", "", "", self.path, lineCount)
-                            return False
-                        currTarget.main = True
-                        mainDeclared = True
                     elif currName == "path":
                         if currTarget.path != "":
                             Logger().writeError("Project targets can only have one 'Path' defined", "", "", self.path, lineCount)
@@ -160,14 +157,10 @@ class Project:
                             return False
                         currTarget.commands[currName] = currPair[1]
                     else:
-                        Logger().writeError("Not known project pair name '" + currName + "'", "", "", self.path, lineCount)
+                        Logger().writeError("Cannot understand given line: '" + currLine + "'", "", "", self.path, lineCount)
                         return False
 
-            if currTarget.isValid():
-                if not self.__addTarget(currTarget, lastPackageLineNumber):
-                    return False
-            else:
-                Logger().writeError("Project file ended before project target was finished, all targets require 'Project' and 'Path' to be declared", "", "", self.path, lineCount)
+            if not self.__addTarget(currTarget, lastPackageLineNumber):
                 return False
         finally:
             f.close()
