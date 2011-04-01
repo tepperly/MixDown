@@ -20,7 +20,7 @@
 # along with this program; if not, write to the Free Software Foundation,
 # Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 
-import os, utilityFunctions, mdCMake, mdStrings, mdOptions
+import os, utilityFunctions, mdAutoTools, mdCMake, mdMake, mdStrings, mdTarget, mdOptions
 
 from mdLogger import *
 
@@ -32,20 +32,21 @@ def getCommand(stepName, target, options):
     if target.commands.has_key(stepName) and target.commands[stepName] != "":
         command = target.commands[stepName]
     elif stepName == "preconfig":
-        command = __getPreconfigureCommand(target.path)
+        command = __getPreconfigureCommand(target)
     elif stepName == "config":
-        command = __getConfigureCommand(target.path)
+        command = __getConfigureCommand(target)
     elif stepName == "build":
-        command = __getBuildCommand(target.path)
+        command = __getBuildCommand(target)
     elif stepName == "install":
-        command = __getInstallCommand(target.path)
+        command = __getInstallCommand(target)
 
     if options.importer:
         return command
     return options.expandDefines(command)
 
-def __getPreconfigureCommand(path):
+def __getPreconfigureCommand(target):
     command = ""
+    path = utilityFunctions.includeTrailingPathDelimiter(target.path)
     if mdCMake.isCMakeProject(path):
         command = mdCMake.getPreconfigureCommand()
     elif os.path.exists(path + "autogen.sh"):
@@ -56,24 +57,27 @@ def __getPreconfigureCommand(path):
         command = mdAutoTools.getPreconfigureCommand()
     return command
 
-def __getConfigureCommand(path):
+def __getConfigureCommand(target):
     command = ""
+    path = utilityFunctions.includeTrailingPathDelimiter(target.path)
     if mdCMake.isCMakeProject(path):
         command = mdCMake.getConfigureCommand()
     elif os.path.exists(path + "Configure"):
         command = "./Configure"
     elif mdAutoTools.isAutoToolsProject(path):
-        command = mdAutoTools.getConfigureCommand()
+        command = mdAutoTools.getConfigureCommand(target)
     return command
 
-def __getBuildCommand(path):
+def __getBuildCommand(target):
     command = ""
+    path = utilityFunctions.includeTrailingPathDelimiter(target.path)
     if mdMake.isMakeProject(path):
         command = mdMake.getBuildCommand()
     return command
 
-def __getInstallCommand(path):
+def __getInstallCommand(target):
     command = ""
+    path = utilityFunctions.includeTrailingPathDelimiter(target.path)
     if mdMake.isMakeProject(path):
         command = mdMake.getInstallCommand()
     return command
