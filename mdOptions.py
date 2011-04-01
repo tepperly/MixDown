@@ -36,8 +36,10 @@ class Options:
         self.logger = "file"
         self.importer = False
         self.interactive = False
+        self.prefixDefined = False
         self._defines = dict()
         self._defines.setdefault("")
+        self.setDefine(mdStrings.mdDefinePrefix, '/usr/local')
 
     def __str__(self):
         return "Options:\n\
@@ -134,6 +136,7 @@ class Options:
             elif currFlag == "-p":
                 validateOptionPair(currFlag, currValue)
                 self.setDefine(mdStrings.mdDefinePrefix, os.path.abspath(currValue))
+                self.prefixDefined = True
             elif currFlag == "-j":
                 validateOptionPair(currFlag, currValue)
                 self.setDefine(mdStrings.mdDefineJobSlots, currValue)
