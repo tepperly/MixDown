@@ -20,7 +20,7 @@
 # along with this program; if not, write to the Free Software Foundation,
 # Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 
-import os, tarfile, urllib, mdCommands, mdGit, mdHg, mdSvn, utilityFunctions
+import os, re, tarfile, urllib, mdCommands, mdGit, mdHg, mdSvn, utilityFunctions
 
 from mdLogger import *
 
@@ -61,7 +61,6 @@ def targetPathToName(path, exitOnFailure=True):
 class Target:
     def __init__(self, targetName, path=""):
         self.name = targetName
-        self.main = False
         self.aliases = []
         self.origPath = path
         self.path = path
@@ -75,7 +74,7 @@ class Target:
         self.commands["build"] = ""
         self.commands["install"] = ""
 
-    def isValid(self):
+    def validate(self, options):
         normalizedName = normalizeName(self.name)
         if normalizedName == "":
             return False
@@ -84,6 +83,28 @@ class Target:
         for alias in self.aliases:
             if normalizeName(alias) == normalizedName:
                 Logger().writeError(self.name + ": Target's alias cannot be same as it's name")
+                return False
+
+        #Check for write access to prefix if used in commands.
+        usedPrefix = ""
+        autoToolsRe = re.compile(r"--prefix=([A-Za-z0-9\/\.]+)")
+        cMakeRe = re.compile(r"-DCMAKE_PREFIX_PATH=([A-Za-z0-9\/\.]+)")
+        mixDownPrefixRe = re.compile(r"\$\(_prefix\)")
+        for step in mdCommands.getBuildStepList():
+            command = self.commands[step]
+            mixDownMatch = mixDownPrefixRe.search(command)
+            if mixDownMatch != None:
+                usedPrefix = options.getDefine(mdStrings.mdDefinePrefix)
+            else:
+                autoToolsMatch = autoToolsRe.search(command)
+                if autoToolsMatch != None:
+                    usedPrefix = autoToolsMatch.group(1)
+                else:
+                    cMakeMatch = cMakeRe.search(command)
+                    if cMakeMatch != None:
+                        usedPrefix = cMakeMatch.group(1)
+            if usedPrefix != "" and not utilityFunctions.testWriteAccess(usedPrefix):
+                Logger().writeError("No write access to used prefix directory: " + usedPrefix, self.name, step, options.projectFile)
                 return False
         return True
 
@@ -146,6 +167,7 @@ class Target:
 
     def examine(self, options):
         self.__determineCommands(options)
+        return True
 
     def __determineCommands(self, options):
         for stepName in mdCommands.getBuildStepList():
@@ -157,8 +179,6 @@ class Target:
             retStr += "Path: " + self.origPath + "\n"
         else:
             retStr += "Path: " + self.path + "\n"
-        if self.main:
-            retStr += "Main: True\n"
         if len(self.aliases) != 0:
             retStr += "Aliases: " + ",".join(self.aliases) + "\n"
         if self.output != "":
