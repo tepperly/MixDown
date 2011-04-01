@@ -103,7 +103,7 @@ class Target:
                     cMakeMatch = cMakeRe.search(command)
                     if cMakeMatch != None:
                         usedPrefix = cMakeMatch.group(1)
-            if usedPrefix != "" and not utilityFunctions.testWriteAccess(usedPrefix):
+            if usedPrefix != "" and not utilityFunctions.haveWriteAccess(usedPrefix):
                 Logger().writeError("No write access to used prefix directory: " + usedPrefix, self.name, step, options.projectFile)
                 return False
         return True
