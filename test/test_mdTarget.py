@@ -171,11 +171,12 @@ class Test_mdTarget(unittest.TestCase):
 
     def test_examine(self):
         options = mdOptions.Options()
+        options.processCommandline(["test", "-cb"])
         target = mdTarget.Target("TestCaseA", "cases/simpleGraphAutoTools/TestCaseA")
         target.examine(options)
         returnValue = target.commands["preconfig"] == "autoreconf -i"
         self.assertTrue(returnValue, "'cases/simpleGraphAutoTools/TestCaseA' returned wrong preconfig command")
-        returnValue = target.commands["config"] == "./configure"
+        returnValue = target.commands["config"] == "./configure --prefix=/usr/local"
         self.assertTrue(returnValue, "'cases/simpleGraphAutoTools/TestCaseA' returned wrong config command")
         returnValue = target.commands["build"] == "make"
         self.assertTrue(returnValue, "'cases/simpleGraphAutoTools/TestCaseA' returned wrong build command")
@@ -189,7 +190,7 @@ class Test_mdTarget(unittest.TestCase):
         target.examine(options)
         returnValue = target.commands["preconfig"] == "autoreconf -i"
         self.assertTrue(returnValue, "'cases/simpleGraphAutoTools/TestCaseA' returned wrong preconfig command")
-        returnValue = target.commands["config"] == "./configure"
+        returnValue = target.commands["config"] == "./configure --prefix=/usr/local"
         self.assertTrue(returnValue, "'cases/simpleGraphAutoTools/TestCaseA' returned wrong config command")
         returnValue = target.commands["build"] == "make -j4"
         self.assertTrue(returnValue, "'cases/simpleGraphAutoTools/TestCaseA' returned wrong build command")
@@ -198,12 +199,13 @@ class Test_mdTarget(unittest.TestCase):
 
     def test_examineWithDependancies(self):
         options = mdOptions.Options()
+        options.processCommandline(["test", "-cb"])
         target = mdTarget.Target("TestCaseA", "cases/simpleGraphAutoTools/TestCaseA")
         target.dependsOn = ["TestCaseB", "TestCaseC"]
         target.examine(options)
         returnValue = target.commands["preconfig"] == "autoreconf -i"
         self.assertTrue(returnValue, "'cases/simpleGraphAutoTools/TestCaseA' returned wrong preconfig command")
-        returnValue = target.commands["config"] == "./configure"
+        returnValue = target.commands["config"] == "./configure --prefix=/usr/local"
         self.assertTrue(returnValue, "'cases/simpleGraphAutoTools/TestCaseA' returned wrong config command")
         returnValue = target.commands["build"] == "make"
         self.assertTrue(returnValue, "'cases/simpleGraphAutoTools/TestCaseA' returned wrong build command")
