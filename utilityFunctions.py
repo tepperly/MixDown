@@ -74,6 +74,18 @@ def getBasename(path):
         basename = basename[:i]
     return basename
 
+def testWriteAccess(path):
+    highestExistingDir = includeTrailingPathDelimiter(path)
+    while highestExistingDir != "/":
+        if os.path.exists(highestExistingDir):
+            break
+        if highestExistingDir[len(highestExistingDir)-1] == '/':
+            highestExistingDir = highestExistingDir[:-1]
+        highestExistingDir = highestExistingDir[:highestExistingDir.rfind('/')+1]
+    if os.access(highestExistingDir, os.W_OK):
+        return True
+    return False
+
 def includeTrailingPathDelimiter(path):
     if (not path[len(path)-1:] == '/') and (not os.path.isfile(path)):
         return path + '/'
