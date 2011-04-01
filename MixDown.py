@@ -51,15 +51,16 @@ def main():
         if options != None:
             cleanup(options)
 
-        timeFinished = time.time()
-        timeElapsed = timeFinished - timeStart
-        message = "\nProject " + project.name
-        if succeeded:
-            message += " succeeded.\n"
-        else:
-            message += " failed.\n"
-        message += "Total time " + secondsToHMS(timeElapsed)
-        Logger().writeMessage(message)
+        if project != None:
+            timeFinished = time.time()
+            timeElapsed = timeFinished - timeStart
+            message = "\nProject " + project.name
+            if succeeded:
+                message += " succeeded.\n"
+            else:
+                message += " failed.\n"
+            message += "Total time " + secondsToHMS(timeElapsed)
+            Logger().writeMessage(message)
     finally:
         Logger().close()
     sys.exit()
@@ -101,16 +102,11 @@ def setup():
     SetLogger(options.logger, options.logDir)
     if options.verbose:
         Logger().writeMessage(str(options))
-    if options.getDefine(mdStrings.mdDefinePrefix) == "":
-        if options.verbose:
-            Logger().writeMessage("No prefix defined, defaulting to '/usr/local'")
-        options.setDefine(mdStrings.mdDefinePrefix, '/usr/local')
+        if not options.prefixDefined:
+            Logger().writeMessage("No prefix defined, defaulting to '" + options.getDefine(mdStrings.mdDefinePrefix) + "'")
 
-    #Setup project and validate targets
     project = Project(options.projectFile)
     if not project.read():
-        return None, None
-    if not project.validate():
         return None, None
 
     #Clean workspaces if told to clean before
@@ -130,7 +126,10 @@ def setup():
     for currTarget in project.targets:
         currTarget.extract(options)
 
-    project.examine(options)
+    if not project.examine(options):
+        return None, None
+    if not project.validate(options):
+        return None, None
 
     prefixDefine = options.getDefine(mdStrings.mdDefinePrefix)
     if prefixDefine != "":
