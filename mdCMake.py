@@ -20,9 +20,10 @@
 # along with this program; if not, write to the Free Software Foundation,
 # Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 
-import os, mdMake, mdStrings
+import os, mdMake, mdStrings, utilityFunctions
 
 def isCMakeProject(path):
+    path = utilityFunctions.includeTrailingPathDelimiter(path)
     if os.path.exists(path + "CMakeLists.txt"):
         return True
     return False
