@@ -20,10 +20,9 @@
 # along with this program; if not, write to the Free Software Foundation,
 # Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 
-import mdStrings, mdOptions, os, utilityFunctions
+import os, utilityFunctions, mdCMake, mdStrings, mdOptions
 
 from mdLogger import *
-from mdTarget import *
 
 def getBuildStepList():
     return ["preconfig", "config", "build", "install"]
@@ -33,58 +32,48 @@ def getCommand(stepName, target, options):
     if target.commands.has_key(stepName) and target.commands[stepName] != "":
         command = target.commands[stepName]
     elif stepName == "preconfig":
-        command = __getPreConfigureCommand(target)
+        command = __getPreconfigureCommand(target.path)
     elif stepName == "config":
-        command = __getConfigureCommand(target, options.getDefine(mdStrings.mdDefinePrefix))
+        command = __getConfigureCommand(target.path)
     elif stepName == "build":
-        command = __getBuildCommand(target)
+        command = __getBuildCommand(target.path)
     elif stepName == "install":
-        command = __getInstallCommand(target)
+        command = __getInstallCommand(target.path)
 
     if options.importer:
         return command
     return options.expandDefines(command)
 
-def __getPreConfigureCommand(target):
+def __getPreconfigureCommand(path):
     command = ""
-    basePath = utilityFunctions.includeTrailingPathDelimiter(target.path)
-    if os.path.exists(basePath + "autogen.sh"):
+    if mdCMake.isCMakeProject(path):
+        command = mdCMake.getPreconfigureCommand()
+    elif os.path.exists(path + "autogen.sh"):
         command = "./autogen.sh"
-    elif os.path.exists(basePath + "buildconf"):
+    elif os.path.exists(path + "buildconf"):
         command = "./buildconf"
-    elif os.path.exists(basePath + "configure.ac") or os.path.exists(basePath + "configure.in"):
-        command = "autoreconf -i"
+    elif mdAutoTools.isAutoToolsProject(path):
+        command = mdAutoTools.getPreconfigureCommand()
     return command
 
-def __getBuildCommand(target):
+def __getConfigureCommand(path):
     command = ""
-    basePath = utilityFunctions.includeTrailingPathDelimiter(target.path)
-    if os.path.exists(basePath + "GNUmakefile") or os.path.exists(basePath + "GNUmakefile.am") or os.path.exists(basePath + "GNUmakefile.in") or \
-       os.path.exists(basePath + "makefile") or os.path.exists(basePath + "makefile.am") or os.path.exists(basePath + "makefile.in") or \
-       os.path.exists(basePath + "Makefile") or os.path.exists(basePath + "Makefile.am") or os.path.exists(basePath + "Makefile.in"):
-        command = "make $(" + mdStrings.mdMakeJobSlotsDefineName + ")"
-    return command
-
-def __getConfigureCommand(target, prefix=""):
-    command = ""
-    basePath = utilityFunctions.includeTrailingPathDelimiter(target.path)
-    if os.path.exists(basePath + "CMakeLists.txt"):
-        command = "cmake -DCMAKE_PREFIX_PATH=$(" + mdStrings.mdDefinePrefix + ") -DCMAKE_INSTALL_PREFIX=$(" + mdStrings.mdDefinePrefix + ")"
-    elif os.path.exists(basePath + "Configure"):
+    if mdCMake.isCMakeProject(path):
+        command = mdCMake.getConfigureCommand()
+    elif os.path.exists(path + "Configure"):
         command = "./Configure"
-    elif os.path.exists(basePath + "configure") or os.path.exists(basePath + "configure.ac") or os.path.exists(basePath + "configure.in"):
-        command = "./configure"
-        if prefix != "":
-            command += " --prefix=$(" + mdStrings.mdDefinePrefix + ")"
-            for dependancy in target.dependsOn:
-                command += " --with-" + dependancy + "=$(" + mdStrings.mdDefinePrefix + ")"
+    elif mdAutoTools.isAutoToolsProject(path):
+        command = mdAutoTools.getConfigureCommand()
     return command
 
-def __getInstallCommand(target):
+def __getBuildCommand(path):
     command = ""
-    basePath = utilityFunctions.includeTrailingPathDelimiter(target.path)
-    if os.path.exists(basePath + "GNUmakefile") or os.path.exists(basePath + "GNUmakefile.am") or os.path.exists(basePath + "GNUmakefile.in") or \
-       os.path.exists(basePath + "makefile") or os.path.exists(basePath + "makefile.am") or os.path.exists(basePath + "makefile.in") or \
-       os.path.exists(basePath + "Makefile") or os.path.exists(basePath + "Makefile.am") or os.path.exists(basePath + "Makefile.in"):
-        command = "make $(" + mdStrings.mdMakeJobSlotsDefineName + ") install"
+    if mdMake.isMakeProject(path):
+        command = mdMake.getBuildCommand()
+    return command
+
+def __getInstallCommand(path):
+    command = ""
+    if mdMake.isMakeProject(path):
+        command = mdMake.getInstallCommand()
     return command
