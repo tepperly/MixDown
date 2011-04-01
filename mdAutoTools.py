@@ -20,9 +20,10 @@
 # along with this program; if not, write to the Free Software Foundation,
 # Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 
-import os, mdMake, mdStrings
+import os, mdMake, mdStrings, mdTarget, utilityFunctions
 
 def isAutoToolsProject(path):
+    path = utilityFunctions.includeTrailingPathDelimiter(path)
     if os.path.exists(path + "configure") or os.path.exists(path + "configure.ac") or os.path.exists(path + "configure.in"):
         return True
     return False
@@ -30,7 +31,7 @@ def isAutoToolsProject(path):
 def getPreconfigureCommand():
     return "autoreconf -i"
 
-def getConfigureCommand():
+def getConfigureCommand(target):
     command = "./configure --prefix=$(" + mdStrings.mdDefinePrefix + ")"
     for dependancy in target.dependsOn:
         command += " --with-" + dependancy + "=$(" + mdStrings.mdDefinePrefix + ")"
