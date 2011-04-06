@@ -20,7 +20,7 @@
 # along with this program; if not, write to the Free Software Foundation,
 # Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 
-import os, mdMake, mdStrings, mdTarget, utilityFunctions
+import os, re, mdMake, mdStrings, mdTarget, utilityFunctions
 
 def isAutoToolsProject(path):
     path = utilityFunctions.includeTrailingPathDelimiter(path)
@@ -28,6 +28,15 @@ def isAutoToolsProject(path):
         return True
     return False
 
+def getInstallDir(command):
+    prefix = ""
+    regex = re.compile(r"--prefix=([A-Za-z0-9\/\.]+)")
+    match = regex.search(command)
+    if match != None:
+        prefix = match.group(1)
+    return prefix
+
+# Commands
 def getPreconfigureCommand():
     return "autoreconf -i"
 

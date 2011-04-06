@@ -20,7 +20,7 @@
 # along with this program; if not, write to the Free Software Foundation,
 # Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 
-import os, re, tarfile, urllib, mdCommands, mdGit, mdHg, mdSvn, utilityFunctions
+import os, re, tarfile, urllib, mdAutoTools, mdCMake, mdCommands, mdGit, mdHg, mdOptions, mdSvn, utilityFunctions
 
 from mdLogger import *
 
@@ -85,26 +85,17 @@ class Target:
                 Logger().writeError(self.name + ": Target's alias cannot be same as it's name")
                 return False
 
-        #Check for write access to prefix if used in commands.
-        usedPrefix = ""
-        autoToolsRe = re.compile(r"--prefix=([A-Za-z0-9\/\.]+)")
-        cMakeRe = re.compile(r"-DCMAKE_PREFIX_PATH=([A-Za-z0-9\/\.]+)")
-        mixDownPrefixRe = re.compile(r"\$\(_prefix\)")
+        #Check for write access to install directories used in commands.
         for step in mdCommands.getBuildStepList():
+            installDir = ""
             command = self.commands[step]
-            mixDownMatch = mixDownPrefixRe.search(command)
-            if mixDownMatch != None:
-                usedPrefix = options.getDefine(mdStrings.mdDefinePrefix)
-            else:
-                autoToolsMatch = autoToolsRe.search(command)
-                if autoToolsMatch != None:
-                    usedPrefix = autoToolsMatch.group(1)
-                else:
-                    cMakeMatch = cMakeRe.search(command)
-                    if cMakeMatch != None:
-                        usedPrefix = cMakeMatch.group(1)
-            if usedPrefix != "" and not utilityFunctions.haveWriteAccess(usedPrefix):
-                Logger().writeError("No write access to used prefix directory: " + usedPrefix, self.name, step, options.projectFile)
+            installDir = mdAutoTools.getInstallDir(command)
+            if installDir == "":
+                installDir = mdCMake.getInstallDir(command)
+
+            installDir = options.expandDefines(installDir)
+            if installDir != "" and not utilityFunctions.haveWriteAccess(installDir):
+                Logger().writeError("No write access to used install directory: " + installDir, self.name, step, options.projectFile)
                 return False
         return True
 

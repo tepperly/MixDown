@@ -20,7 +20,7 @@
 # along with this program; if not, write to the Free Software Foundation,
 # Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 
-import os, mdMake, mdStrings, utilityFunctions
+import os, re, mdMake, mdStrings, utilityFunctions
 
 def isCMakeProject(path):
     path = utilityFunctions.includeTrailingPathDelimiter(path)
@@ -28,6 +28,15 @@ def isCMakeProject(path):
         return True
     return False
 
+def getInstallDir(command):
+    prefix = ""
+    regex = re.compile(r"-DCMAKE_INSTALL_PREFIX=([A-Za-z0-9\/\.]+)")
+    match = regex.search(command)
+    if match != None:
+        prefix = match.group(1)
+    return prefix
+
+# Commands
 def getPreconfigureCommand():
     #There is no preconfigure command for CMake
     return ""
