@@ -141,33 +141,29 @@ class Test_mdTarget(unittest.TestCase):
         self.assertEqual(extracted, True, "Gzip file failed to extract.")
         self.assertEqual(returnValue, True, "'" + mdTestUtilities.testFileName + "' did not exist after extracting a target with a Gzip file as its path.")
 
-    def test_isValid(self):
+    def test_validate(self):
+        options = mdOptions.Options()
+
         target = mdTarget.Target("", "")
-        returnValue = target.isValid()
-        self.assertFalse(returnValue)
+        self.assertFalse(target.validate(options), "False positive returned when trying to validate target.")
 
         target.name = "foo"
         target.path = ""
-        returnValue = target.isValid()
-        self.assertFalse(returnValue)
+        self.assertFalse(target.validate(options), "False positive returned when trying to validate target.")
 
         target.name = ""
         target.path = "/some/path"
-        returnValue = target.isValid()
-        self.assertFalse(returnValue)
+        self.assertFalse(target.validate(options), "False positive returned when trying to validate target.")
 
         target.name = "foo"
         target.path = "/some/path"
-        returnValue = target.isValid()
-        self.assertTrue(returnValue)
+        self.assertTrue(target.validate(options), "Target should have validated.")
 
     def test_steps(self):
         target = mdTarget.Target("foo", "/some/path")
         target.skipSteps = ["b"]
-        returnValue = target.hasStep("b")
-        self.assertFalse(returnValue, "Specified skipped step was not skipped")
-        returnValue = target.hasStep("a")
-        self.assertTrue(returnValue, "Specified skipped step was not skipped")
+        self.assertFalse(target.hasStep("b"), "Specified skipped step was not skipped")
+        self.assertTrue(target.hasStep("a"), "Specified skipped step was not skipped")
 
     def test_examine(self):
         options = mdOptions.Options()
@@ -205,7 +201,7 @@ class Test_mdTarget(unittest.TestCase):
         target.examine(options)
         returnValue = target.commands["preconfig"] == "autoreconf -i"
         self.assertTrue(returnValue, "'cases/simpleGraphAutoTools/TestCaseA' returned wrong preconfig command")
-        returnValue = target.commands["config"] == "./configure --prefix=/usr/local"
+        returnValue = target.commands["config"] == "./configure --prefix=/usr/local --with-TestCaseB=/usr/local --with-TestCaseC=/usr/local"
         self.assertTrue(returnValue, "'cases/simpleGraphAutoTools/TestCaseA' returned wrong config command")
         returnValue = target.commands["build"] == "make"
         self.assertTrue(returnValue, "'cases/simpleGraphAutoTools/TestCaseA' returned wrong build command")

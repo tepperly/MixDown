@@ -72,7 +72,6 @@ class Test_mdProject(unittest.TestCase):
         projectFileContents = textwrap.dedent("""
                                             Name: a
                                             Path: a-1.11.tar.gz
-                                            Main: True
                                             DependsOn: b, c
                                             PreConfig: autoreconf -i
                                             Config: ./configure --prefix=$(_prefix) --with-b=$(_prefix) --with-c=$(_prefix)
@@ -131,7 +130,6 @@ class Test_mdProject(unittest.TestCase):
         projectFileContents = textwrap.dedent("""
                                             Name: a
                                             Path: a-1.11.tar.gz
-                                            Main: True
                                             DependsOn: b, c
                                             PreConfig: autoreconf -i
                                             Config: ./configure --prefix=$(_prefix) --with-b=$(_prefix) --with-c=$(_prefix)
@@ -207,9 +205,10 @@ class Test_mdProject(unittest.TestCase):
                                             """)
         try:
             projectFilePath = mdTestUtilities.makeTempFile(projectFileContents, ".md")
-            project = mdProject.Project(projectFilePath) #project is being used with old values
+            project = mdProject.Project(projectFilePath)
+            options = mdOptions.Options()
             self.assertTrue(project.read(), "Project file could not be read")
-            self.assertTrue(project.validate(), "Project could not validate")
+            self.assertTrue(project.validate(options), "Project could not validate")
         finally:
             os.remove(projectFilePath)
 
@@ -217,7 +216,6 @@ class Test_mdProject(unittest.TestCase):
         projectFileContents = textwrap.dedent("""
                                             Name: a
                                             Path: a-1.11.tar.gz
-                                            Main: True
                                             DependsOn: b
                                             PreConfig: autoreconf -i
                                             Config: ./configure --prefix=$(_prefix) --with-b=$(_prefix) --with-c=$(_prefix)
@@ -242,8 +240,9 @@ class Test_mdProject(unittest.TestCase):
         try:
             projectFilePath = mdTestUtilities.makeTempFile(projectFileContents, ".md")
             project = mdProject.Project(projectFilePath)
+            options = mdOptions.Options()
             self.assertTrue(project.read(), "Project file could not be read")
-            self.assertTrue(project.validate(), "Project could not validate")
+            self.assertTrue(project.validate(options), "Project could not validate")
         finally:
             os.remove(projectFilePath)
 
@@ -254,9 +253,10 @@ class Test_mdProject(unittest.TestCase):
                                             """)
         try:
             projectFilePath = mdTestUtilities.makeTempFile(projectFileContents, ".md")
-            project = mdProject.Project(projectFilePath) #project is being used with old values
+            project = mdProject.Project(projectFilePath)
+            options = mdOptions.Options()
             self.assertTrue(project.read(), "Project file could not be read")
-            self.assertTrue(project.validate(), "Project could not validate")
+            self.assertTrue(project.validate(options), "Project could not validate")
         finally:
             os.remove(projectFilePath)
 
@@ -274,8 +274,9 @@ class Test_mdProject(unittest.TestCase):
         try:
             projectFilePath = mdTestUtilities.makeTempFile(projectFileContents, ".md")
             project = mdProject.Project(projectFilePath)
+            options = mdOptions.Options()
             self.assertTrue(project.read(), "Project file could not be read")
-            self.assertTrue(project.validate(), "Project could not validate")
+            self.assertTrue(project.validate(options), "Project could not validate")
         finally:
             os.remove(projectFilePath)
 
@@ -295,8 +296,9 @@ class Test_mdProject(unittest.TestCase):
         try:
             projectFilePath = mdTestUtilities.makeTempFile(projectFileContents, ".md")
             project = mdProject.Project(projectFilePath)
+            options = mdOptions.Options()
             self.assertTrue(project.read(), "Project file could not be read")
-            self.assertTrue(project.validate(), "Project could not validate")
+            self.assertTrue(project.validate(options), "Project could not validate")
         finally:
             os.remove(projectFilePath)
 
@@ -315,8 +317,9 @@ class Test_mdProject(unittest.TestCase):
         try:
             projectFilePath = mdTestUtilities.makeTempFile(projectFileContents, ".md")
             project = mdProject.Project(projectFilePath)
+            options = mdOptions.Options()
             self.assertTrue(project.read(), "Project file could not be read")
-            self.assertTrue(project.validate(), "Project could not validate")
+            self.assertTrue(project.validate(options), "Project could not validate")
         finally:
             os.remove(projectFilePath)
 
@@ -334,8 +337,9 @@ class Test_mdProject(unittest.TestCase):
         try:
             projectFilePath = mdTestUtilities.makeTempFile(projectFileContents, ".md")
             project = mdProject.Project(projectFilePath)
+            options = mdOptions.Options()
             self.assertTrue(project.read(), "Project file could not be read")
-            self.assertTrue(project.validate(), "Project could not validate")
+            self.assertTrue(project.validate(options), "Project could not validate")
         finally:
             os.remove(projectFilePath)
 
@@ -354,8 +358,9 @@ class Test_mdProject(unittest.TestCase):
         try:
             projectFilePath = mdTestUtilities.makeTempFile(projectFileContents, ".md")
             project = mdProject.Project(projectFilePath)
+            options = mdOptions.Options()
             self.assertTrue(project.read(), "Project file could not be read")
-            self.assertTrue(project.validate(), "Project could not validate")
+            self.assertTrue(project.validate(options), "Project could not validate")
         finally:
             os.remove(projectFilePath)
 
@@ -375,8 +380,9 @@ class Test_mdProject(unittest.TestCase):
         try:
             projectFilePath = mdTestUtilities.makeTempFile(projectFileContents, ".md")
             project = mdProject.Project(projectFilePath)
+            options = mdOptions.Options()
             self.assertTrue(project.read(), "Project file could not be read")
-            self.assertTrue(project.validate(), "Project could not validate")
+            self.assertTrue(project.validate(options), "Project could not validate")
         finally:
             os.remove(projectFilePath)
 
@@ -396,8 +402,9 @@ class Test_mdProject(unittest.TestCase):
         try:
             projectFilePath = mdTestUtilities.makeTempFile(projectFileContents, ".md")
             project = mdProject.Project(projectFilePath)
+            options = mdOptions.Options()
             self.assertTrue(project.read(), "Project file could not be read")
-            self.assertTrue(project.validate(), "Project could not validate")
+            self.assertTrue(project.validate(options), "Project could not validate")
         finally:
             os.remove(projectFilePath)
 
@@ -418,8 +425,9 @@ class Test_mdProject(unittest.TestCase):
         try:
             projectFilePath = mdTestUtilities.makeTempFile(projectFileContents, ".md")
             project = mdProject.Project(projectFilePath)
+            options = mdOptions.Options()
             self.assertTrue(project.read(), "Project file could not be read")
-            self.assertFalse(project.validate(), "Project validated when it should not have due to cyclical dependancy graph")
+            self.assertFalse(project.validate(options), "Project validated when it should not have due to cyclical dependancy graph")
         finally:
             os.remove(projectFilePath)
 
@@ -440,8 +448,9 @@ class Test_mdProject(unittest.TestCase):
         try:
             projectFilePath = mdTestUtilities.makeTempFile(projectFileContents, ".md")
             project = mdProject.Project(projectFilePath)
+            options = mdOptions.Options()
             self.assertTrue(project.read(), "Project file could not be read")
-            self.assertFalse(project.validate(), "Project validated when it should not have due to cyclical dependancy graph")
+            self.assertFalse(project.validate(options), "Project validated when it should not have due to cyclical dependancy graph")
         finally:
             os.remove(projectFilePath)
 
@@ -488,8 +497,9 @@ class Test_mdProject(unittest.TestCase):
         try:
             projectFilePath = mdTestUtilities.makeTempFile(projectFileContents, ".md")
             project = mdProject.Project(projectFilePath)
+            options = mdOptions.Options()
             self.assertTrue(project.read(), "Project file could not be read")
-            self.assertFalse(project.validate(), "Project validated when it should not have due to non-existant dependancy")
+            self.assertFalse(project.validate(options), "Project validated when it should not have due to non-existant dependancy")
         finally:
             os.remove(projectFilePath)
 
