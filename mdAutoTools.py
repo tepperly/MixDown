@@ -38,7 +38,7 @@ def getInstallDir(command):
         prefix = match.group(1)
     return prefix
 
-def getDependancies(path, name=""):
+def getDependancies(path, name="", verbose=True):
     deps = []
     if not os.path.isdir(path):
         return None
@@ -46,12 +46,14 @@ def getDependancies(path, name=""):
         return None
 
     if os.path.exists(path + "/configure.ac"):
-        Logger().writeMessage("Running autoreconf to create build files...", name)
+        if verbose:
+            Logger().writeMessage("Running autoreconf to create build files...", name)
         returnCode = utilityFunctions.executeSubProcess("autoreconf -i", path)
         if returnCode != 0:
             return None
 
-    Logger().writeMessage("Analyzing 'configure --help' output", name)
+    if verbose:
+        Logger().writeMessage("Analyzing 'configure --help' output", name)
     helpFileName = path + "/configure_help.log"
     helpFile = open(helpFileName, "w")
     try:
