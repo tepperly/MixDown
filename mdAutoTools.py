@@ -32,7 +32,7 @@ def isAutoToolsProject(path):
 
 def getInstallDir(command):
     prefix = ""
-    regex = re.compile(r"--prefix=([A-Za-z0-9\/\.]+)")
+    regex = re.compile(r"[\.\/]?configure.*--prefix=([A-Za-z0-9\/\.]+)")
     match = regex.search(command)
     if match != None:
         prefix = match.group(1)
