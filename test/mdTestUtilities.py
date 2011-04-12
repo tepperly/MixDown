@@ -20,7 +20,7 @@
 # along with this program; if not, write to the Free Software Foundation,
 # Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 
-import os, sys, tempfile
+import os, shutil, sys, tempfile
 
 if not ".." in sys.path:
     sys.path.append("..")
@@ -90,6 +90,11 @@ def createSvnRepository():
     utilityFunctions.executeSubProcess("svn import --quiet --non-interactive " + projPath + " " + repoURL + " -m message", tempPath)
     return repoURL
 
+def createBlankFile(path):
+    f = open(path, 'w')
+    f.write("")
+    f.close()
+
 def makeTempDir():
     return utilityFunctions.includeTrailingPathDelimiter(tempfile.mkdtemp(prefix="mixdown-"))
 
@@ -100,4 +105,7 @@ def makeTempFile(contents="", suffix=""):
     os.close(fd)
     return name
 
-
+def copyDirToTempDir(source):
+    tempDir = tempfile.mktemp(prefix="mixdown-")
+    shutil.copytree(source, tempDir)
+    return tempDir
