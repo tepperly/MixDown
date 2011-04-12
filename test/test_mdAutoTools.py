@@ -58,37 +58,103 @@ class Test_mdAutoTools(unittest.TestCase):
         finally:
             utilityFunctions.removeDir(tempDir)
 
-    def test_getInstallDir(self):
+    def test_getInstallDir1(self):
         installDir = mdAutoTools.getInstallDir("configure --prefix=/usr/local")
         self.assertEquals(installDir, "/usr/local", "Wrong install directory returned.")
 
+    def test_getInstallDir2(self):
         installDir = mdAutoTools.getInstallDir("./configure --prefix=/usr/local")
         self.assertEquals(installDir, "/usr/local", "Wrong install directory returned.")
 
+    def test_getInstallDir3(self):
         installDir = mdAutoTools.getInstallDir("./configure --prefix=/usr/local --with-A=/usr/local/a")
         self.assertEquals(installDir, "/usr/local", "Wrong install directory returned.")
 
+    def test_getInstallDir4(self):
         installDir = mdAutoTools.getInstallDir("./configure --prefix=foobarbaz")
         self.assertEquals(installDir, "foobarbaz", "Wrong install directory returned.")
 
+    def test_getInstallDir5(self):
         installDir = mdAutoTools.getInstallDir("./configure --prefix=")
         self.assertEquals(installDir, "", "Wrong install directory returned.")
 
+    def test_getInstallDir6(self):
         installDir = mdAutoTools.getInstallDir("./configure --prefix= --with-A=/usr/local/a")
         self.assertEquals(installDir, "", "Wrong install directory returned.")
 
-        #Check for false positives
+    def test_getInstallDir7(self):
+        installDir = mdAutoTools.getInstallDir("test && ./configure --prefix= --with-A=/usr/local/a")
+        self.assertEquals(installDir, "", "Wrong install directory returned.")
+
+    def test_getInstallDir8(self):
+        #False positive
         installDir = mdAutoTools.getInstallDir("./cmake --prefix=foobarbaz")
         self.assertEquals(installDir, "", "Wrong install directory returned.")
 
+    def test_getInstallDir9(self):
+        #False positive
         installDir = mdAutoTools.getInstallDir("./configure --prefixasdf=temp/")
         self.assertEquals(installDir, "", "Wrong install directory returned.")
 
+    def test_getInstallDir10(self):
+        #False positive
         installDir = mdAutoTools.getInstallDir("./configure --with-prefix=temp/")
         self.assertEquals(installDir, "", "Wrong install directory returned.")
 
+    def test_getInstallDir11(self):
+        #False positive
         installDir = mdAutoTools.getInstallDir("--with-prefix=temp/")
         self.assertEquals(installDir, "", "Wrong install directory returned.")
+
+    def test_getDependancies1(self):
+        try:
+            tempDir = mdTestUtilities.copyDirToTempDir("cases/simpleGraphAutoTools/TestCaseA")
+            dependancies = mdAutoTools.getDependancies(tempDir, verbose=False)
+            self.assertEquals(dependancies, ['testcaseb', 'testcasec'], "Wrong dependancies found in AutoTools project")
+        finally:
+            utilityFunctions.removeDir(tempDir)
+
+    def test_getDependancies2(self):
+        try:
+            tempDir = mdTestUtilities.copyDirToTempDir("cases/simpleGraphAutoTools/TestCaseB")
+            dependancies = mdAutoTools.getDependancies(tempDir, verbose=False)
+            self.assertEquals(dependancies, ['testcasec'], "Wrong dependancies found in AutoTools project")
+        finally:
+            utilityFunctions.removeDir(tempDir)
+
+    def test_getDependancies3(self):
+        try:
+            tempDir = mdTestUtilities.copyDirToTempDir("cases/simpleGraphAutoTools/TestCaseC")
+            dependancies = mdAutoTools.getDependancies(tempDir, verbose=False)
+            self.assertEquals(dependancies, ['testcased'], "Wrong dependancies found in AutoTools project")
+        finally:
+            utilityFunctions.removeDir(tempDir)
+
+    def test_getDependancies4(self):
+        try:
+            tempDir = mdTestUtilities.copyDirToTempDir("cases/simpleGraphAutoTools/TestCaseD")
+            dependancies = mdAutoTools.getDependancies(tempDir, verbose=False)
+            self.assertEquals(dependancies, [], "Wrong dependancies found in AutoTools project")
+        finally:
+            utilityFunctions.removeDir(tempDir)
+
+    def test_getDependancies5(self):
+        #False positive
+        try:
+            tempDir = mdTestUtilities.copyDirToTempDir("cases/cmake/hello/main")
+            dependancies = mdAutoTools.getDependancies(tempDir, verbose=False)
+            self.assertEquals(dependancies, None, "Wrong dependancies found in AutoTools project")
+        finally:
+            utilityFunctions.removeDir(tempDir)
+
+    def test_getDependancies6(self):
+        #False positive
+        try:
+            tempDir = mdTestUtilities.copyDirToTempDir("cases/cmake/hello/library1")
+            dependancies = mdAutoTools.getDependancies(tempDir, verbose=False)
+            self.assertEquals(dependancies, None, "Wrong dependancies found in AutoTools project")
+        finally:
+            utilityFunctions.removeDir(tempDir)
 
 def suite():
     suite = unittest.TestSuite()
