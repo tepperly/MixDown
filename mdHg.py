@@ -58,6 +58,7 @@ def hgCheckout(repoLocation, outPath):
     if repoLocation == "" or outPath == "" or not isHgInstalled():
         return False
     outFile = open(os.devnull, "w")
+    #TODO: decide if i should check for username in .hgrc, if not put "-u <username>" in command
     returnCode = utilityFunctions.executeSubProcess("hg clone --noninteractive " + repoLocation + " " + outPath, outFileHandle = outFile)
     outFile.close()
     if returnCode == 0:
