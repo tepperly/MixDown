@@ -519,15 +519,15 @@ class Test_mdProject(unittest.TestCase):
             project = mdProject.Project(projectFilePath)
             self.assertTrue(project.read(), "Project file could not be read")
             #Targets that exist in project
-            self.assertIsNotNone(project.getTarget("a"), "Target 'a' could not be found in project")
-            self.assertIsNotNone(project.getTarget("b"), "Target 'b' could not be found in project")
-            self.assertIsNotNone(project.getTarget("c"), "Target 'c' could not be found in project")
-            self.assertIsNotNone(project.getTarget("A"), "Target 'a' could not be found in project")
-            self.assertIsNotNone(project.getTarget("B "), "Target 'b' could not be found in project")
-            self.assertIsNotNone(project.getTarget(" C"), "Target 'c' could not be found in project")
+            self.assertNotEquals(project.getTarget("a"), None, "Target 'a' could not be found in project")
+            self.assertNotEquals(project.getTarget("b"), None, "Target 'b' could not be found in project")
+            self.assertNotEquals(project.getTarget("c"), None, "Target 'c' could not be found in project")
+            self.assertNotEquals(project.getTarget("A"), None, "Target 'a' could not be found in project")
+            self.assertNotEquals(project.getTarget("B "), None, "Target 'b' could not be found in project")
+            self.assertNotEquals(project.getTarget(" C"), None, "Target 'c' could not be found in project")
             #Targets that do NOT exist in project
-            self.assertIsNone(project.getTarget("d"), "Target 'd' should not have been found in project")
-            self.assertIsNone(project.getTarget(""), "Target '' should not have been found in project")
+            self.assertEquals(project.getTarget("d"), None, "Target 'd' should not have been found in project")
+            self.assertEquals(project.getTarget(""), None, "Target '' should not have been found in project")
         finally:
             os.remove(projectFilePath)
 
