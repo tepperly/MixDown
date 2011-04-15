@@ -20,7 +20,7 @@
 # along with this program; if not, write to the Free Software Foundation,
 # Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 
-import os, re, mdMake, mdStrings, utilityFunctions
+import os, re, mdMake, mdStrings, mdTarget, utilityFunctions
 
 def isCMakeProject(path):
     path = utilityFunctions.includeTrailingPathDelimiter(path)
@@ -37,10 +37,11 @@ def getInstallDir(command):
     return prefix
 
 def _findAllCMakeFiles(path, listToBeFilled):
+    dirList = os.listdir(path)
     for name in dirList:
         fullPath = utilityFunctions.includeTrailingPathDelimiter(path) + name
         if os.path.isdir(fullPath):
-            _findAllCMakeFiles(path, listToBeFilled)
+            _findAllCMakeFiles(fullPath, listToBeFilled)
         elif name == "CMakeLists.txt":
             listToBeFilled.append(fullPath)
         elif name.endswith(".cmake"):
@@ -59,9 +60,16 @@ def getDependancies(path, name="", verbose=True):
     fileList = list()
     _findAllCMakeFiles(path, fileList)
 
-    packageRegExp = re.compile(r"find_package\(\s*([^\)]+\s)\)")
-    #TODO: look more into this... python regular expressions only return the last match it found
-    libraryRegExp = re.compile(r"find_library\(\s*[\w_]+(?:NAMES)?([^\)]+(?:HINTS|PATHS|PATH_SUFFIXES|DOC|NO_DEFAULT_PATH|NO_CMAKE_ENVIRONMENT_PATH|NO_CMAKE_PATH|NO_SYSTEM_ENVIRONMENT_PATH|NO_CMAKE_SYSTEM_PATH|CMAKE_FIND_ROOT_PATH_BOTH|ONLY_CMAKE_FIND_ROOT_PATH|NO_CMAKE_FIND_ROOT_PATH)*\)")
+    packageRegExp = re.compile(r"find_package\s*\((\s*[\w\.]+)\s*.*\)")
+    #find_library(...) starts with a output variable then has two options
+    # 1) the name of the library to search for
+    # 2) "NAMES" followed by a list of possible library names
+    #It can then be followed by possible paths and various tokens listed below
+    #By using the first name in the list I should be to avoid any extra paths that may or may not exist and get
+    #  the majority of library names right (since most examples I found were close to "OpenGL, OpenGL3.1, OpenGL, 3.2, etc"
+    libraryRegExp = re.compile(r"find_library\s*\(\s*([^\)]+)\s*\)")
+    libraryTokens = ['names', 'hints', 'paths', 'path_suffixes', 'doc', 'no_default_path', 'no_cmake_environment_path', 'no_cmake_path', 'no_system_environment_path', 'no_cmake_system_path', 'cmake_find_root_path_both', 'only_cmake_find_root_path',  'no_cmake_find_root_path']
+
     for name in fileList:
         try:
             cmakeFile = open(name, "r")
@@ -71,17 +79,27 @@ def getDependancies(path, name="", verbose=True):
                     foundDep = mdTarget.normalizeName(match.group(1))
                     if not foundDep in deps:
                         deps.append(foundDep)
-                    continue
-                #TODO: look at todo above
+
+                ignoredFirstParam = False
                 match = libraryRegExp.search(line)
                 if match != None:
-                    for item in match.group:
-                        print item
-                        
-                
+                    paramStr = match.group(1).strip()
+                    paramList = paramStr.split(" ")
+                    for param in paramList:
+                        param = mdTarget.normalizeName(param)
+                        if param != "":
+                            if not ignoredFirstParam:
+                                ignoredFirstParam = True
+                                continue
+                            if param in libraryTokens:
+                                continue
+                            foundDep = param
+                            break
+                    if not foundDep.startswith("${") and not foundDep in deps:
+                        deps.append(foundDep)
+                ignoredFirstParam = False
         finally:
             cmakeFile.close()
-
     return deps
 
 # Commands
