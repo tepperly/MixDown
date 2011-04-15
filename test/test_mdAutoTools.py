@@ -110,6 +110,7 @@ class Test_mdAutoTools(unittest.TestCase):
         try:
             tempDir = mdTestUtilities.copyDirToTempDir("cases/simpleGraphAutoTools/TestCaseA")
             dependancies = mdAutoTools.getDependancies(tempDir, verbose=False)
+            dependancies.sort()
             self.assertEquals(dependancies, ['testcaseb', 'testcasec'], "Wrong dependancies found in AutoTools project")
         finally:
             utilityFunctions.removeDir(tempDir)
@@ -150,7 +151,7 @@ class Test_mdAutoTools(unittest.TestCase):
     def test_getDependancies6(self):
         #False positive
         try:
-            tempDir = mdTestUtilities.copyDirToTempDir("cases/cmake/hello/library1")
+            tempDir = mdTestUtilities.copyDirToTempDir("cases/cmake/hello/hello1")
             dependancies = mdAutoTools.getDependancies(tempDir, verbose=False)
             self.assertEquals(dependancies, None, "Wrong dependancies found in AutoTools project")
         finally:
