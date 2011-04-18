@@ -22,6 +22,8 @@
 
 import os, re, mdMake, mdStrings, mdTarget, utilityFunctions
 
+from mdLogger import *
+
 def isCMakeProject(path):
     path = utilityFunctions.includeTrailingPathDelimiter(path)
     if os.path.exists(path + "CMakeLists.txt"):
