@@ -57,7 +57,7 @@ def getDependancies(path, name="", verbose=True):
     helpFileName = path + "/configure_help.log"
     helpFile = open(helpFileName, "w")
     try:
-        utilityFunctions.executeSubProcess("./configure --help", path, helpFile.fileno())
+        returnCode = utilityFunctions.executeSubProcess("./configure --help", path, helpFile.fileno())
     finally:
         helpFile.close()
     if returnCode != 0:
