@@ -23,7 +23,7 @@
 # Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 
 import os, re, shutil, sys, tarfile, tempfile, urllib
-import mdCommands, mdOptions, mdProject, mdStrings, mdTarget, utilityFunctions
+import mdAutoTools, mdCMake, mdCommands, mdOptions, mdProject, mdStrings, mdTarget, utilityFunctions
 
 from mdLogger import *
 
@@ -45,75 +45,73 @@ def main():
             target.main = True
             mainTargetFlagged = True
 
-        Logger().writeMessage("Analyzing target", target.name)
-        Logger().writeMessage("Extracting target", target.name)
+        Logger().writeMessage("Analyzing target...", target.name)
+        Logger().writeMessage("Extracting target...", target.name)
 
         target.output = tempDir + target.name
         target.extract(options)
 
-        if os.path.exists(target.path + "/CMakeLists.txt"):
-            configureCommand = "cmake -DCMAKE_PREFIX_PATH=testPrefix"
-            Logger().writeMessage("Running cmake to create build files...", target.name)
-            utilityFunctions.executeSubProcess("cmake -DCMAKE_PREFIX_PATH=testPrefix", target.path, exitOnError=True)
-        elif os.path.exists(target.path + "/configure.ac") or os.path.exists(target.path + "/configure"):
-            if os.path.exists(target.path + "/configure.ac"):
-                Logger().writeMessage("Running autoreconf to create build files...", target.name)
-                utilityFunctions.executeSubProcess("autoreconf -i", target.path, exitOnError=True)
+        #Generate build files and find possible dependancies
+        if mdCMake.isCMakeProject(target.path):
+            Logger().writeMessage("CMake project found...", target.name)
 
-            Logger().writeMessage("Analyzing 'configure --help' output", target.name)
-            helpFileName = target.path + "/configure_help.log"
-            helpFile = open(helpFileName, "w")
-            utilityFunctions.executeSubProcess("./configure --help", target.path, helpFile.fileno(), False, True)
-            helpFile.close()
+            Logger().writeMessage("Generating build files...", target.name)
+            utilityFunctions.executeSubProcess(mdCMake.getConfigureCommand(), target.path, exitOnError=True)
 
-            helpFile = open(helpFileName, "r")
-            targetRe = re.compile(r"--with-([a-zA-Z\-_]+)=(?:PREFIX|PATH|DIR)")
-            for line in helpFile:
-                match = targetRe.search(line)
-                if match != None:
-                    possibleDependancy = match.group(1)
-                    if getTarget(possibleDependancy, finalTargets + notReviewedTargets):
-                        Logger().writeMessage("Known dependancy found (" + possibleDependancy + ")", target.name)
-                        target.dependsOn.append(possibleDependancy)
-                        continue
-                    elif possibleDependancy in ignoredTargets:
-                        Logger().writeMessage("Previously ignored dependancy found (" + possibleDependancy + ")", target.name)
-                        continue
+            Logger().writeMessage("Analyzing for dependancies...", target.name)
+            possibleDeps = mdCMake.getDependancies(target.path, target.name)
+        elif mdAutoTools.isAutoToolsProject(target.path):
+            Logger().writeMessage("Auto Tools project found...", target.name)
 
-                    aliasTarget = searchForPossibleAliasInList(possibleDependancy, finalTargets + notReviewedTargets, options.interactive)
+            Logger().writeMessage("Generating build files...", target.name)
+            utilityFunctions.executeSubProcess(mdAutoTools.getPreconfigureCommand(), target.path, exitOnError=True)
+
+            Logger().writeMessage("Analyzing for dependancies...", target.name)
+            possibleDeps = mdAutoTools.getDependancies(target.path, target.name)
+
+        #Find actual dependancies
+        for possibleDependancy in possibleDeps:
+            if getTarget(possibleDependancy, finalTargets + notReviewedTargets):
+                Logger().writeMessage("Known dependancy found (" + possibleDependancy + ")", target.name)
+                target.dependsOn.append(possibleDependancy)
+                continue
+            elif options.interactive and possibleDependancy in ignoredTargets:
+                Logger().writeMessage("Previously ignored dependancy found (" + possibleDependancy + ")", target.name)
+                continue
+
+            if searchForPossibleAliasInList(possibleDependancy, finalTargets + notReviewedTargets, options.interactive):
+                target.dependsOn.append(possibleDependancy)
+            elif not options.interactive:
+                Logger().writeMessage("Ignoring unknown dependancy (" + possibleDependancy + ")", target.name)
+            else:
+                Logger().writeMessage("Unknown dependancy found (" + possibleDependancy + ")", target.name)
+                userInput = raw_input(possibleDependancy + ": Input location, target name, or blank to ignore:").strip()
+                if userInput == "":
+                    ignoredTargets.append(possibleDependancy)
+                elif os.path.isfile(userInput) or os.path.isdir(userInput) or utilityFunctions.isURL(userInput):
+                    name = mdTarget.targetPathToName(userInput)
+                    newTarget = mdTarget.Target(name, userInput)
+                    notReviewedTargets.append(newTarget)
+                    if mdTarget.normalizeName(possibleDependancy) != mdTarget.normalizeName(userInput):
+                        newTarget.aliases.append(possibleDependancy)
+                    target.dependsOn.append(possibleDependancy)
+                else:
+                    aliasTarget = getTarget(userInput, finalTargets + notReviewedTargets, possibleDependancy)
                     if aliasTarget != None:
+                        Logger().writeMessage("Alias added (" + userInput + ")", aliasTarget.name)
                         target.dependsOn.append(possibleDependancy)
-                    elif options.interactive:
-                        Logger().writeMessage("Unknown dependancy found (" + possibleDependancy + ")", target.name)
-                        userInput = raw_input(possibleDependancy + ": Input location, target name, or blank to ignore:").strip()
-                        if userInput == "":
-                            ignoredTargets.append(possibleDependancy)
-                        elif os.path.isfile(userInput) or os.path.isdir(userInput) or utilityFunctions.isURL(userInput):
-                            name = mdTarget.targetPathToName(userInput)
-                            newTarget = mdTarget.Target(name, userInput)
+                    else:
+                        aliasLocation = raw_input(userInput + ": Target name not found in any known targets.  Location of new target:").strip()
+                        if os.path.isfile(aliasLocation) or os.path.isdir(aliasLocation) or utilityFunctions.isURL(aliasLocation):
+                            name = mdTarget.targetPathToName(aliasLocation)
+                            newTarget = mdTarget.Target(name, aliasLocation)
                             notReviewedTargets.append(newTarget)
-                            if mdTarget.normalizeName(possibleDependancy) != mdTarget.normalizeName(userInput):
+                            if mdTarget.normalizeName(possibleDependancy) != mdTarget.normalizeName(aliasLocation):
                                 newTarget.aliases.append(possibleDependancy)
                             target.dependsOn.append(possibleDependancy)
                         else:
-                            aliasTarget = getTarget(userInput, finalTargets + notReviewedTargets, possibleDependancy)
-                            if aliasTarget != None:
-                                Logger().writeMessage("Alias added (" + userInput + ")", aliasTarget.name)
-                                target.dependsOn.append(possibleDependancy)
-                            else:
-                                aliasLocation = raw_input(userInput + ": Target name not found in any known targets.  Location of new target:").strip()
-                                if os.path.isfile(aliasLocation) or os.path.isdir(aliasLocation) or utilityFunctions.isURL(aliasLocation):
-                                    name = mdTarget.targetPathToName(aliasLocation)
-                                    newTarget = mdTarget.Target(name, aliasLocation)
-                                    notReviewedTargets.append(newTarget)
-                                    if mdTarget.normalizeName(possibleDependancy) != mdTarget.normalizeName(aliasLocation):
-                                        newTarget.aliases.append(possibleDependancy)
-                                    target.dependsOn.append(possibleDependancy)
-                                else:
-                                    printErrorAndExit(userInput + ": Alias location not understood.")
-                    else:
-                        Logger().writeMessage("Ignoring unknown dependancy (" + possibleDependancy + ")", target.name)
-            helpFile.close()
+                            printErrorAndExit(userInput + ": Alias location not understood.")
+
         finalTargets.append(target)
 
     #Create project for targets
