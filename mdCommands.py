@@ -25,7 +25,7 @@ import os, utilityFunctions, mdAutoTools, mdCMake, mdMake, mdStrings, mdTarget, 
 from mdLogger import *
 
 def getBuildStepList():
-    return ["preconfig", "config", "build", "install"]
+    return ["fetch", "unpack", "preconfig", "config", "build", "install", "clean"]
 
 def getCommand(stepName, target, options):
     command = ""
@@ -39,6 +39,10 @@ def getCommand(stepName, target, options):
         command = __getBuildCommand(target)
     elif stepName == "install":
         command = __getInstallCommand(target)
+    elif stepName == "clean" and (options.clean or options.importer):
+        #Do not return a clean command unless we are importing or specifying we are cleaning targets
+        command = __getCleanCommand(target)
+    #Do not try to determine fetch and unpack, these are for overwriting default behavior only
 
     if options.importer:
         return command
@@ -80,4 +84,11 @@ def __getInstallCommand(target):
     path = utilityFunctions.includeTrailingPathDelimiter(target.path)
     if mdMake.isMakeProject(path):
         command = mdMake.getInstallCommand()
+    return command
+
+def __getCleanCommand(target):
+    command = ""
+    path = utilityFunctions.includeTrailingPathDelimiter(target.path)
+    if mdMake.isMakeProject(path):
+        command = mdMake.getCleanCommand()
     return command
