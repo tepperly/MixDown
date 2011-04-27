@@ -571,9 +571,9 @@ class Test_mdProject(unittest.TestCase):
             self.assertEquals(project.getTarget("TestCaseB").dependancyDepth, 1, "TestCaseB had wrong dependancy depth")
             self.assertEquals(project.getTarget("TestCaseC").dependancyDepth, 2, "TestCaseC had wrong dependancy depth")
             self.assertEquals(len(project.targets), 3, "Number of Targets in project is wrong")
-            self.assertEquals(project.targets[0].name, "TestCaseC", "Sorting failed. TestCaseC should have been the first target.")
+            self.assertEquals(project.targets[0].name, "TestCaseA", "Sorting failed. TestCaseA should have been the first target.")
             self.assertEquals(project.targets[1].name, "TestCaseB", "Sorting failed. TestCaseB should have been the first target.")
-            self.assertEquals(project.targets[2].name, "TestCaseA", "Sorting failed. TestCaseA should have been the first target.")
+            self.assertEquals(project.targets[2].name, "TestCaseC", "Sorting failed. TestCaseC should have been the first target.")
         finally:
             os.remove(projectFilePath)
 
@@ -600,9 +600,9 @@ class Test_mdProject(unittest.TestCase):
             self.assertEquals(project.getTarget("TestCaseB").dependancyDepth, 1, "TestCaseB had wrong dependancy depth")
             self.assertEquals(project.getTarget("TestCaseC").dependancyDepth, 2, "TestCaseC had wrong dependancy depth")
             self.assertEquals(len(project.targets), 3, "Number of Targets in project is wrong")
-            self.assertEquals(project.targets[0].name, "TestCaseC", "Sorting failed. TestCaseC should have been the first target.")
+            self.assertEquals(project.targets[0].name, "TestCaseA", "Sorting failed. TestCaseA should have been the first target.")
             self.assertEquals(project.targets[1].name, "TestCaseB", "Sorting failed. TestCaseB should have been the first target.")
-            self.assertEquals(project.targets[2].name, "TestCaseA", "Sorting failed. TestCaseA should have been the first target.")
+            self.assertEquals(project.targets[2].name, "TestCaseC", "Sorting failed. TestCaseC should have been the first target.")
         finally:
             os.remove(projectFilePath)
 
@@ -634,10 +634,10 @@ class Test_mdProject(unittest.TestCase):
             self.assertEquals(project.getTarget("C").dependancyDepth, 2, "C had wrong dependancy depth")
             self.assertEquals(project.getTarget("D").dependancyDepth, 3, "D had wrong dependancy depth")
             self.assertEquals(len(project.targets), 4, "Number of Targets in project is wrong")
-            self.assertEquals(project.targets[0].name, "D", "Sorting failed. D should have been the first target.")
-            self.assertEquals(project.targets[1].name, "C", "Sorting failed. C should have been the first target.")
-            self.assertEquals(project.targets[2].name, "B", "Sorting failed. B should have been the first target.")
-            self.assertEquals(project.targets[3].name, "A", "Sorting failed. A should have been the first target.")
+            self.assertEquals(project.targets[0].name, "A", "Sorting failed. A should have been the first target.")
+            self.assertEquals(project.targets[1].name, "B", "Sorting failed. B should have been the first target.")
+            self.assertEquals(project.targets[2].name, "C", "Sorting failed. C should have been the first target.")
+            self.assertEquals(project.targets[3].name, "D", "Sorting failed. D should have been the first target.")
         finally:
             os.remove(projectFilePath)
 
@@ -663,9 +663,9 @@ class Test_mdProject(unittest.TestCase):
             self.assertEquals(project.getTarget("B").dependancyDepth, 1, "B had wrong dependancy depth")
             self.assertEquals(project.getTarget("C").dependancyDepth, 1, "C had wrong dependancy depth")
             self.assertEquals(len(project.targets), 3, "Number of Targets in project is wrong")
-            self.assertEquals(project.targets[0].name, "C", "Sorting failed. C should have been the first target.")
+            self.assertEquals(project.targets[0].name, "A", "Sorting failed. A should have been the first target.")
             self.assertEquals(project.targets[1].name, "B", "Sorting failed. B should have been the first target.")
-            self.assertEquals(project.targets[2].name, "A", "Sorting failed. A should have been the first target.")
+            self.assertEquals(project.targets[2].name, "C", "Sorting failed. C should have been the first target.")
         finally:
             os.remove(projectFilePath)
 
@@ -696,10 +696,10 @@ class Test_mdProject(unittest.TestCase):
             self.assertEquals(project.getTarget("C").dependancyDepth, 1, "C had wrong dependancy depth")
             self.assertEquals(project.getTarget("D").dependancyDepth, 2, "D had wrong dependancy depth")
             self.assertEquals(len(project.targets), 4, "Number of Targets in project is wrong")
-            self.assertEquals(project.targets[0].name, "D", "Sorting failed. D should have been the first target.")
-            self.assertEquals(project.targets[1].name, "C", "Sorting failed. C should have been the first target.")
-            self.assertEquals(project.targets[2].name, "B", "Sorting failed. B should have been the first target.")
-            self.assertEquals(project.targets[3].name, "A", "Sorting failed. A should have been the first target.")
+            self.assertEquals(project.targets[0].name, "A", "Sorting failed. A should have been the first target.")
+            self.assertEquals(project.targets[1].name, "B", "Sorting failed. B should have been the first target.")
+            self.assertEquals(project.targets[2].name, "C", "Sorting failed. C should have been the first target.")
+            self.assertEquals(project.targets[3].name, "D", "Sorting failed. D should have been the first target.")
         finally:
             os.remove(projectFilePath)
 
