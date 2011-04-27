@@ -58,7 +58,7 @@ class Project:
                 return False
             self.__assignDepthToTargetList()
             self.targets = self.__sortTargetList(self.targets)
-            for target in reversed(self.targets):
+            for target in self.targets:
                 if not target.examine(options):
                     return False
             self.__examined = True
@@ -171,26 +171,15 @@ class Project:
             outFile = open(fileName, "w")
         else:
             outFile = open(self.path, "w")
-        if self.__examined == True:
-            for target in reversed(self.targets):
-                outFile.write(str(target) + "\n")
-        else:
-            for target in self.targets:
-                outFile.write(str(target) + "\n")
+        outFile.write(str(self) + "\n")
         outFile.close()
 
     def __str__(self):
         retStr = ""
-        if self.__examined == True:
-            for target in reversed(self.targets):
-                if len(retStr) != 0:
-                    retStr += "\n"
-                retStr += str(target)
-        else:
-            for target in self.targets:
-                if len(retStr) != 0:
-                    retStr += "\n"
-                retStr += str(target)
+        for target in self.targets:
+            if len(retStr) != 0:
+                retStr += "\n"
+            retStr += str(target)
         return retStr
 
     def __validateDependsOnLists(self):
@@ -230,21 +219,22 @@ class Project:
 
     def __assignDepthToTargetList(self):
         q = Queue.Queue()
-        q.put(self.targets[0].name)
-        while not q.empty():
-            currName = q.get()
-            currTarget = self.getTarget(currName)
-            for currChildName in currTarget.dependsOn:
-                currChildTarget = self.getTarget(currChildName)
-                if currChildTarget.dependancyDepth < (currTarget.dependancyDepth + 1):
-                    currChildTarget.dependancyDepth = currTarget.dependancyDepth + 1
-                    q.put(currChildName)
+        for target in self.targets:
+            q.put(target.name)
+            while not q.empty():
+                currName = q.get()
+                currTarget = self.getTarget(currName)
+                for currChildName in currTarget.dependsOn:
+                    currChildTarget = self.getTarget(currChildName)
+                    if currChildTarget.dependancyDepth < (currTarget.dependancyDepth + 1):
+                        currChildTarget.dependancyDepth = currTarget.dependancyDepth + 1
+                        q.put(currChildName)
 
     def __sortTargetList(self, targetList):
         if targetList == []:
             return []
         else:
             pivot = targetList[0]
-            lesser = self.__sortTargetList([x for x in targetList[1:] if x.dependancyDepth >= pivot.dependancyDepth])
-            greater = self.__sortTargetList([x for x in targetList[1:] if x.dependancyDepth < pivot.dependancyDepth])
+            greater = self.__sortTargetList([x for x in targetList[1:] if x.dependancyDepth >= pivot.dependancyDepth])
+            lesser = self.__sortTargetList([x for x in targetList[1:] if x.dependancyDepth < pivot.dependancyDepth])
             return lesser + [pivot] + greater
