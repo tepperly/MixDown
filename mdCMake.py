@@ -117,3 +117,6 @@ def getBuildCommand():
 
 def getInstallCommand():
     return mdMake.getInstallCommand()
+
+def getCleanCommand():
+    return mdMake.getCleanCommand()

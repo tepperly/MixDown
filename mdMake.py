@@ -43,3 +43,6 @@ def getBuildCommand():
 
 def getInstallCommand():
     return "make $(" + mdStrings.mdMakeJobSlotsDefineName + ") install"
+
+def getCleanCommand():
+    return "make $(" + mdStrings.mdMakeJobSlotsDefineName + ") clean"
