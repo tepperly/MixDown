@@ -20,7 +20,7 @@
 # along with this program; if not, write to the Free Software Foundation,
 # Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 
-import os, mdStrings, utilityFunctions
+import os, mdStrings, mdTarget, utilityFunctions
 
 from mdLogger import *
 
@@ -30,6 +30,8 @@ class Options:
         self.buildDir = "mdBuild/"
         self.downloadDir = "mdDownload/"
         self.logDir = "mdLogFiles/"
+        self.tempDir = "/tmp"
+        self.clean = False
         self.cleanBefore = False
         self.cleanAfter = False
         self.verbose = False
@@ -47,6 +49,8 @@ class Options:
   Build Dir:    " + self.buildDir + "\n\
   Download Dir: " + self.downloadDir + "\n\
   Defines:      " + str(self._defines) + "\n\
+  Import:       " + str(self.importer) + "\n\
+  Clean:        " + str(self.clean) + "\n\
   Clean Before: " + str(self.cleanBefore) + "\n\
   Clean After:  " + str(self.cleanAfter) + "\n\
   Verbose:      " + str(self.verbose) + "\n\
@@ -116,11 +120,42 @@ class Options:
         expandedString = expandedString.replace("  ", " ").strip()
         return expandedString
 
-    def processCommandline(self, commandLine=[]):
-        if len(commandLine) < 2:
-            printUsageAndExit()
+    def __processImportCommandline(self, commandline):
+        if len(commandline) < 3:
+            self.printUsageAndExit()
 
-        for currArg in commandLine[1:]: #skip script name
+        targetsToImport = []
+        self.verbose = True
+        self.importer = True
+        self.downloadDir = utilityFunctions.includeTrailingPathDelimiter(self.tempDir + "mdDownloads")
+        self.setDefine(mdStrings.mdDefinePrefix, "$(" + mdStrings.mdDefinePrefix + ")")
+        for currArg in commandline[1:]:
+            if currArg == "--import":
+                continue
+            elif currArg.lower() == "-i":
+                self.interactive = True
+            elif currArg.lower() == "-v":
+                self.verbose = True
+            elif utilityFunctions.isURL(currArg) or os.path.isfile(currArg) or os.path.isdir(currArg):
+                name = mdTarget.targetPathToName(currArg)
+                currTarget = mdTarget.Target(name, currArg)
+                targetsToImport.append(currTarget)
+            else:
+                Logger().writeError("Could not understand given commandline option: " + currArg, exitProgram=True)
+
+        if len(targetsToImport) == 0:
+            self.printUsageAndExit()
+
+        return targetsToImport
+
+    def processCommandline(self, commandline=[]):
+        if len(commandline) < 2:
+            self.printUsageAndExit()
+
+        if "--import" in commandline:
+            return self.__processImportCommandline(commandline)
+
+        for currArg in commandline[1:]: #skip script name
             currFlag = str.lower(currArg[:2])
             currValue = currArg[2:]
 
@@ -168,7 +203,9 @@ class Options:
                 validateOption(currFlag, currValue)
                 self.verbose = True
             elif currArg.lower() in ("/help", "/h", "-help", "--help", "-h"):
-                printUsageAndExit()
+                self.printUsageAndExit()
+            elif currArg.lower() == "--clean":
+                self.clean = True
             elif os.path.splitext(currArg)[1] == ".md":
                 if not os.path.isfile(currArg):
                     Logger().writeError("File " + currArg + " does not exist", exitProgram=True)
@@ -176,6 +213,31 @@ class Options:
                     self.projectFile = currArg
             else:
                 Logger().writeError("Command line argument '" + currArg + "' not understood", exitProgram=True)
+
+        def printUsageAndExit(self, errorStr = ""):
+            self.printUsage(errorStr)
+            sys.exit()
+
+        def printUsage(self, errorStr = ""):
+            if errorStr != "":
+                print "Error: " + errorStr + "\n"
+
+            print "    Example Usage: ./MixDown.py foo.md\\\n\
+        \n\
+            Required:\n\
+            <path to .md file>   Path to MixDown project file\n\
+        \n\
+            Optional:\n\
+            -p<path>      Override prefix directory\n\
+            -b<path>      Override build directory\n\
+            -o<path>      Override download directory\n\
+            -l<logger>    Override default logger (Console, File, Html)\n\
+            -cb           Cleanup before running (deletes build and download directories)\n\
+            -ca           Cleanup after deploy (deletes build and download directories)\n\
+        \n\
+            Default Directories:\n\
+            build: mdBuild/\n\
+            download: mdDownload/\n"
 
 def validateOptionPair(flag, value):
     if value == "":
