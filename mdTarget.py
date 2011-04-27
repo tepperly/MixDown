@@ -69,10 +69,8 @@ class Target:
         self.dependsOn = []
         self.skipSteps = []
         self.commands = dict()
-        self.commands["preconfig"] = ""
-        self.commands["config"] = ""
-        self.commands["build"] = ""
-        self.commands["install"] = ""
+        for step in mdCommands.getBuildStepList():
+            self.commands[step] = ""
 
     def validate(self, options):
         normalizedName = normalizeName(self.name)
