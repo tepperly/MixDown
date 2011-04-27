@@ -1,5 +1,3 @@
-#! /usr/bin/env python
-
 # Copyright (c) 2010, Lawrence Livermore National Security, LLC
 # Produced at Lawrence Livermore National Laboratory
 # LLNL-CODE-462894
@@ -27,28 +25,21 @@ import mdAutoTools, mdCMake, mdCommands, mdOptions, mdProject, mdStrings, mdTarg
 
 from mdLogger import *
 
-def main():
+def importTargets(options, targetsToImport):
     SetLogger("console")
 
-    tempDir = utilityFunctions.includeTrailingPathDelimiter(tempfile.mkdtemp(prefix="mixdown-"))
     finalTargets = []
     ignoredTargets = []
-    mainTargetFlagged = False
 
-    printProgramHeader()
+    options.tempDir = utilityFunctions.includeTrailingPathDelimiter(tempfile.mkdtemp(prefix="mixdown-"))
 
-    options, notReviewedTargets = processCommandlineOptions(tempDir)
-
-    while len(notReviewedTargets) != 0:
-        target = notReviewedTargets.pop(0)
-        if not mainTargetFlagged:
-            target.main = True
-            mainTargetFlagged = True
+    while len(targetsToImport) != 0:
+        target = targetsToImport.pop(0)
 
         Logger().writeMessage("Analyzing target...", target.name)
         Logger().writeMessage("Extracting target...", target.name)
 
-        target.output = tempDir + target.name
+        target.output = options.tempDir + target.name
         target.extract(options)
 
         #Generate build files and find possible dependancies
@@ -71,7 +62,7 @@ def main():
 
         #Find actual dependancies
         for possibleDependancy in possibleDeps:
-            if getTarget(possibleDependancy, finalTargets + notReviewedTargets):
+            if getTarget(possibleDependancy, finalTargets + targetsToImport):
                 Logger().writeMessage("Known dependancy found (" + possibleDependancy + ")", target.name)
                 target.dependsOn.append(possibleDependancy)
                 continue
@@ -79,7 +70,7 @@ def main():
                 Logger().writeMessage("Previously ignored dependancy found (" + possibleDependancy + ")", target.name)
                 continue
 
-            if searchForPossibleAliasInList(possibleDependancy, finalTargets + notReviewedTargets, options.interactive):
+            if searchForPossibleAliasInList(possibleDependancy, finalTargets + targetsToImport, options.interactive):
                 target.dependsOn.append(possibleDependancy)
             elif not options.interactive:
                 Logger().writeMessage("Ignoring unknown dependancy (" + possibleDependancy + ")", target.name)
@@ -91,12 +82,12 @@ def main():
                 elif os.path.isfile(userInput) or os.path.isdir(userInput) or utilityFunctions.isURL(userInput):
                     name = mdTarget.targetPathToName(userInput)
                     newTarget = mdTarget.Target(name, userInput)
-                    notReviewedTargets.append(newTarget)
+                    targetsToImport.append(newTarget)
                     if mdTarget.normalizeName(possibleDependancy) != mdTarget.normalizeName(userInput):
                         newTarget.aliases.append(possibleDependancy)
                     target.dependsOn.append(possibleDependancy)
                 else:
-                    aliasTarget = getTarget(userInput, finalTargets + notReviewedTargets, possibleDependancy)
+                    aliasTarget = getTarget(userInput, finalTargets + targetsToImport, possibleDependancy)
                     if aliasTarget != None:
                         Logger().writeMessage("Alias added (" + userInput + ")", aliasTarget.name)
                         target.dependsOn.append(possibleDependancy)
@@ -110,26 +101,33 @@ def main():
                                 newTarget.aliases.append(possibleDependancy)
                             target.dependsOn.append(possibleDependancy)
                         else:
-                            printErrorAndExit(userInput + ": Alias location not understood.")
+                            Logger().writeError(userInput + ": Alias location not understood.", exitProgram=True)
 
         finalTargets.append(target)
 
     #Create project for targets
-    mainTargetName, mainTargetVersion = utilityFunctions.splitFileName(finalTargets[0].origPath)
+    project = mdProject.Project("ProjectNameNotDetermined", finalTargets)
+
+    if not project.examine(options):
+        Logger().writeError("Project failed examination", exitProgram=True)
+    if not project.validate(options):
+        Logger().writeError("Project failed validation", exitProgram=True)
+
+    mainTargetName, mainTargetVersion = utilityFunctions.splitFileName(project.targets[0].origPath)
     if mainTargetVersion != "":
-        outFileName = mainTargetName + "-" + mainTargetVersion + ".md"
+        project.name = mainTargetName + "-" + mainTargetVersion
     else:
-        outFileName = mainTargetName + ".md"
-    project = mdProject.Project(outFileName, finalTargets)
+        project.name = mainTargetName
+    project.path = project.name + ".md"
 
     for target in project.targets:
         target.output = ""
 
     if project.examine(options):
         Logger().writeMessage("\nFinal targets...\n" + str(project))
-        project.write(outFileName)
+        project.write()
 
-    utilityFunctions.removeDir(tempDir)
+    utilityFunctions.removeDir(options.tempDir)
 
 def searchForPossibleAliasInList(possibleAlias, targetList, interactive=False):
     for target in targetList:
@@ -170,44 +168,3 @@ def targetPathInList(path, targetList):
         if path == target.path:
             return True
     return False
-
-def printUsageAndExit(errorStr = ""):
-    print "MixDownImporter.py <location of root project (required)> <list of dependancy locations separated by spaces (optional)>"
-    if errorStr != "":
-        print "Error: " + errorStr + "\n"
-    sys.exit()
-
-def printProgramHeader():
-    print "MixDown Importer\n"
-
-def processCommandlineOptions(tempDir):
-    if len(sys.argv) < 2:
-        printUsageAndExit()
-
-    targetList = []
-    options = mdOptions.Options()
-    options.verbose = True
-    options.importer = True
-    options.downloadDir = utilityFunctions.includeTrailingPathDelimiter(tempDir + "mdDownloads")
-    options.setDefine(mdStrings.mdDefinePrefix, "$(" + mdStrings.mdDefinePrefix + ")")
-    for currArg in sys.argv[1:]:
-        if currArg.lower() == "-i":
-            options.interactive = True
-        if currArg.lower() == "-q":
-            options.verbose = False
-        elif utilityFunctions.isURL(currArg) or os.path.isfile(currArg) or os.path.isdir(currArg):
-            name = mdTarget.targetPathToName(currArg)
-            currTarget = mdTarget.Target(name, currArg)
-            targetList.append(currTarget)
-        else:
-            Logger().writeError("Could not understand given commandline option: " + currArg, exitProgram=True)
-
-    if len(targetList) == 0:
-        printUsageAndExit()
-    else:
-        Logger().writeMessage("Root Project: " + targetList[0].name)
-
-    return options, targetList
-
-if __name__ == "__main__":
-    main()
