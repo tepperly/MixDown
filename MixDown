@@ -22,7 +22,7 @@
 # along with this program; if not, write to the Free Software Foundation,
 # Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 
-import mdStrings, os, sys, tarfile, time, urllib
+import os, sys, tarfile, time, urllib, mdStrings, mdImporter
 
 from mdCommands import *
 from mdOptions import *
@@ -31,36 +31,53 @@ from mdTarget import *
 from utilityFunctions import *
 from mdLogger import *
 
-originalLibraryPath = ""
-
 #--------------------------------Main---------------------------------
 def main():
-    printProgramHeader()
-    try:
-        timeStart = time.time()
+    #if os.path.exists("foo.py"):
+        #print "importing foo"
+        #sys.path.append(".")
+        #import foo
+    #else:
+        #print "foo not found"
+        #sys.exit()
 
-        project, options = setup()
-        if project != None or options != None:
-            for target in project.targets:
-                for step in getBuildStepList():
-                    succeeded = buildStepActor(step, target, options)
+    #result = getattr(foo, 'bar')()
+    #print result
+    #sys.exit()
+
+
+    SetLogger("console")
+    Logger().writeMessage("MixDown - A tool to simplify building\n")
+    try:
+        options = Options()
+        targetsToImport = options.processCommandline(sys.argv)
+
+        if options.importer:
+            mdImporter.importTargets(options, targetsToImport)
+        else:
+            timeStarted = time.time()
+            project = setupForBuilding(options)
+            if project != None:
+                for target in reversed(project.targets):
+                    for step in getBuildStepList():
+                        succeeded = buildStepActor(step, target, options)
+                        if not succeeded:
+                            break
                     if not succeeded:
                         break
-                if not succeeded:
-                    break
-        if options != None:
-            cleanup(options)
+            if options != None:
+                cleanup(options)
 
-        if project != None:
-            timeFinished = time.time()
-            timeElapsed = timeFinished - timeStart
-            message = "\nProject " + project.name
-            if succeeded:
-                message += " succeeded.\n"
-            else:
-                message += " failed.\n"
-            message += "Total time " + secondsToHMS(timeElapsed)
-            Logger().writeMessage(message)
+            if project != None:
+                timeFinished = time.time()
+                timeElapsed = timeFinished - timeStarted
+                message = "\nProject " + project.name
+                if succeeded:
+                    message += " succeeded.\n"
+                else:
+                    message += " failed.\n"
+                message += "Total time " + secondsToHMS(timeElapsed)
+                Logger().writeMessage(message)
     finally:
         Logger().close()
     sys.exit()
@@ -94,10 +111,7 @@ def buildStepActor(stepName, target, options):
     return True
 
 #--------------------------------Setup---------------------------------
-def setup():
-    options = Options()
-    print "Processing commandline options..."
-    options.processCommandline(sys.argv)
+def setupForBuilding(options):
     removeDir(options.logDir)
     SetLogger(options.logger, options.logDir)
     if options.verbose:
@@ -107,7 +121,7 @@ def setup():
 
     project = Project(options.projectFile)
     if not project.read():
-        return None, None
+        return None
 
     #Clean workspaces if told to clean before
     if options.cleanBefore:
@@ -117,7 +131,7 @@ def setup():
             removeDir(options.downloadDir)
         except IOError, e:
             print e
-            return None, None
+            return None
         for currTarget in project.targets:
             if currTarget.output != "" and os.path.exists(currTarget.output):
                 removeDir(currTarget.output)
@@ -127,9 +141,9 @@ def setup():
         currTarget.extract(options)
 
     if not project.examine(options):
-        return None, None
+        return None
     if not project.validate(options):
-        return None, None
+        return None
 
     prefixDefine = options.getDefine(mdStrings.mdDefinePrefix)
     if prefixDefine != "":
@@ -142,7 +156,7 @@ def setup():
                 libraryPaths += ":" + originalLibraryPath
         os.environ["LD_LIBRARY_PATH"] = libraryPaths
 
-    return project, options
+    return project
 
 #-----------------------------Clean up--------------------------------
 def cleanup(options):
@@ -154,43 +168,7 @@ def cleanup(options):
         except IOError, e:
             Logger().writeError(e, exitProgram=True)
 
-    prefixDefine = options.getDefine(mdStrings.mdDefinePrefix)
-    if prefixDefine != "":
-        #TODO: should this not clean up or maybe warn user to add it to their permament environment variable?
-        os.environ["LD_LIBRARY_PATH"] = originalLibraryPath
-
 #----------------------------------------------------------------------
-def printProgramHeader():
-    print "MixDown - A tool to simplify building\n"
-
-def printUsageAndExit(errorStr = ""):
-    printUsage(errorStr)
-    sys.exit()
-
-def printUsage(errorStr = ""):
-    if errorStr != "":
-        print "Error: " + errorStr + "\n"
-
-    printProgramHeader()
-
-    print "    Example Usage: ./MixDown.py foo.md\\\n\
-\n\
-    Required:\n\
-    <path to .md file>   Path to MixDown project file\n\
-\n\
-    Optional:\n\
-    -p<path>      Override prefix directory\n\
-    -b<path>      Override build directory\n\
-    -o<path>      Override download directory\n\
-    -l<logger>    Override default logger (Console, File, Html)\n\
-    -cb           Cleanup before running (deletes build and download directories)\n\
-    -ca           Cleanup after deploy (deletes build and download directories)\n\
-\n\
-    Default Directories:\n\
-    build: mdBuild/\n\
-    download: mdDownload/\n"
-
-#---------------------------------------------------------------------
 
 if __name__ == "__main__":
     main()
