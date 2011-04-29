@@ -20,7 +20,8 @@
 # along with this program; if not, write to the Free Software Foundation,
 # Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 
-import os, re, tarfile, urllib, mdAutoTools, mdCMake, mdCommands, mdGit, mdHg, mdOptions, mdSvn, utilityFunctions
+import distutils, os, re, tarfile, urllib
+import mdAutoTools, mdCMake, mdCommands, mdGit, mdHg, mdOptions, mdSvn, utilityFunctions
 
 from mdLogger import *
 
@@ -84,74 +85,83 @@ class Target:
                 return False
 
         #Check for write access to install directories used in commands.
-        for step in mdCommands.getBuildStepList():
-            installDir = ""
-            command = self.commands[step]
-            installDir = mdAutoTools.getInstallDir(command)
-            if installDir == "":
-                installDir = mdCMake.getInstallDir(command)
+        if not options.cleanTargets:
+            for step in mdCommands.getBuildStepList():
+                installDir = ""
+                command = self.commands[step]
+                installDir = mdAutoTools.getInstallDir(command)
+                if installDir == "":
+                    installDir = mdCMake.getInstallDir(command)
 
-            installDir = options.expandDefines(installDir)
-            if installDir != "" and not utilityFunctions.haveWriteAccess(installDir):
-                Logger().writeError("No write access to used install directory: " + installDir, self.name, step, options.projectFile)
-                return False
+                installDir = options.expandDefines(installDir)
+                if installDir != "" and not utilityFunctions.haveWriteAccess(installDir):
+                    Logger().writeError("No write access to used install directory: " + installDir, self.name, step, options.projectFile)
+                    return False
         return True
+
+    def determineOutputDirectory(self, options):
+        if self.output != "":
+            return self.output
+        else:
+            targetsBuildDir = utilityFunctions.includeTrailingPathDelimiter(options.buildDir + self.name)
+            if options.cleanTargets:
+                if os.path.exists(targetsBuildDir) and os.path.isdir(targetsBuildDir):
+                    return targetsBuildDir
+                elif os.path.isdir(self.path):
+                    return self.path
+                else:
+                    Logger().writeError("Output path could not be located, define in project file with \"output=<path>\"", self.name, "clean", exitProgram=True)
+            else:
+                options.validateBuildDir()
+                return targetsBuildDir
 
     def extract(self, options, exitOnFailure=True):
         extracted = False
-        if self.output == "":
-            if not os.path.isdir(options.buildDir):
-                os.makedirs(options.buildDir)
-                options.buildDir = utilityFunctions.includeTrailingPathDelimiter(options.buildDir)
-            outPath = utilityFunctions.includeTrailingPathDelimiter(options.buildDir + self.name)
-        else:
-            outPath = self.output
+        outputDir = self.determineOutputDirectory(options)
 
         #Check if it is a repository (CVS, SVN, Git, Hg)
         if mdGit.isGitRepo(self.path):
-            if not mdGit.gitCheckout(self.path, outPath):
-                Logger().writeError("Given Git repo '" + currPath +"' was unable to be checked out", exitProgram=exitOnFailure)
+            if not mdGit.gitCheckout(self.path, outputDir):
+                Logger().writeError("Given Git repo '" + self.path +"' was unable to be checked out", exitProgram=exitOnFailure)
             else:
+                self.path = outputDir
                 extracted = True
         elif mdHg.isHgRepo(self.path):
-            if not mdHg.hgCheckout(self.path, outPath):
-                Logger().writeError("Given Hg repo '" + currPath +"' was unable to be checked out", exitProgram=exitOnFailure)
+            if not mdHg.hgCheckout(self.path, outputDir):
+                Logger().writeError("Given Hg repo '" + self.path +"' was unable to be checked out", exitProgram=exitOnFailure)
             else:
+                self.path = outputDir
                 extracted = True
         elif mdSvn.isSvnRepo(self.path):
-            if not mdSvn.svnCheckout(self.path, outPath):
-                Logger().writeError("Given Svn repo '" + currPath +"' was unable to be checked out", exitProgram=exitOnFailure)
+            if not mdSvn.svnCheckout(self.path, outputDir):
+                Logger().writeError("Given Svn repo '" + self.path +"' was unable to be checked out", exitProgram=exitOnFailure)
             else:
+                self.path = outputDir
                 extracted = True
-        else:
-            #Download if necessary
-            currPath = self.path
-            if (not os.path.isdir(currPath)) and (not os.path.isfile(currPath)) and utilityFunctions.isURL(currPath):
-                if not os.path.isdir(options.downloadDir):
-                    os.makedirs(options.downloadDir)
-                filenamePath = options.downloadDir + utilityFunctions.URLToFilename(currPath)
-                urllib.urlretrieve(currPath, filenamePath)
-                self.path = filenamePath
+        elif os.path.isdir(self.path):
+            if self.output != "":
+                distutils.dir_util.copy_tree(self.path, self.output)
+                self.path = self.output
+            extracted = True
+        elif not os.path.isfile(self.path) and utilityFunctions.isURL(self.path):
+            options.validateDownloadDir()
+            filenamePath = options.downloadDir + utilityFunctions.URLToFilename(self.path)
+            urllib.urlretrieve(self.path, filenamePath)
+            self.path = filenamePath
 
-            #Untar and add trailing path delimiter to any folders
-            currPath = self.path
-            if os.path.isdir(currPath):
-                outPath = utilityFunctions.includeTrailingPathDelimiter(currPath)
+        if os.path.isfile(self.path):
+            if tarfile.is_tarfile(self.path):
+                utilityFunctions.untar(self.path, outputDir, True)
+                self.path = outputDir
                 extracted = True
-            elif os.path.isfile(currPath):
-                if tarfile.is_tarfile(currPath):
-                    utilityFunctions.untar(currPath, outPath, True)
-                    extracted = True
+            else:
+                if self.path.endswith(".tar.gz") or self.path.endswith(".tar.bz2")\
+                   or self.path.endswith(".tar") or self.path.endswith(".tgz")\
+                   or self.path.endswith(".tbz") or self.path.endswith(".tb2"):
+                    Logger().writeError("Given tar file '" + self.path +"' not understood by python's tarfile package", exitProgram=exitOnFailure)
                 else:
-                    if currPath.endswith(".tar.gz") or currPath.endswith(".tar.bz2") or currPath.endswith(".tar") or currPath.endswith(".tgz") or currPath.endswith(".tbz") or currPath.endswith(".tb2"):
-                        Logger().writeError("Given tar file '" + currPath +"' not understood by python's tarfile package", exitProgram=exitOnFailure)
-                    else:
-                        Logger().writeError("Given target '" + currPath + "' not understood (Folders, URLs, Repositories, and Tar files are acceptable)", exitProgram=exitOnFailure)
-            else:
-                Logger().writeError("Given target '" + currPath + "' does not exist", exitProgram=exitOnFailure)
+                    Logger().writeError("Given target '" + self.path + "' not understood (Folders, URLs, Repositories, and Tar files are acceptable)", exitProgram=exitOnFailure)
 
-        if extracted:
-            self.path = outPath
         return extracted
 
     def examine(self, options):
@@ -176,10 +186,10 @@ class Target:
             retStr += "DependsOn: " + ",".join(self.dependsOn) + "\n"
         if len(self.skipSteps) != 0:
             retStr += "SkipSteps: " + ",".join(self.skipSteps) + "\n"
-        for key in self.commands.keys():
-            command = self.commands[key]
+        for stepName in mdCommands.getBuildStepList():
+            command = self.commands[stepName]
             if command != "":
-                retStr += key.capitalize() + ": " + command + "\n"
+                retStr += stepName.capitalize() + ": " + command + "\n"
         return retStr
 
     @property
