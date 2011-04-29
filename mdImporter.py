@@ -128,6 +128,7 @@ def importTargets(options, targetsToImport):
         project.write()
 
     utilityFunctions.removeDir(options.tempDir)
+    return project
 
 def searchForPossibleAliasInList(possibleAlias, targetList, interactive=False):
     for target in targetList:
