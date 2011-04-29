@@ -52,32 +52,41 @@ def main():
         options = Options()
         targetsToImport = options.processCommandline(sys.argv)
 
+        timeStarted = time.time()
         if options.importer:
-            mdImporter.importTargets(options, targetsToImport)
+            project = mdImporter.importTargets(options, targetsToImport)
+            succeeded = True
         else:
-            timeStarted = time.time()
-            project = setupForBuilding(options)
+            if options.cleanMixDown:
+                cleanMixDown(options)
+            project = setup(options)
             if project != None:
                 for target in reversed(project.targets):
-                    for step in getBuildStepList():
-                        succeeded = buildStepActor(step, target, options)
-                        if not succeeded:
-                            break
+                    if options.cleanTargets:
+                        succeeded = buildStepActor("clean", target, options)
+                    else:
+                        for step in getBuildStepList():
+                            if step == "clean":
+                                continue
+                            succeeded = buildStepActor(step, target, options)
+                            if not succeeded:
+                                break
                     if not succeeded:
                         break
-            if options != None:
-                cleanup(options)
 
-            if project != None:
-                timeFinished = time.time()
-                timeElapsed = timeFinished - timeStarted
+        if project != None:
+            timeFinished = time.time()
+            timeElapsed = timeFinished - timeStarted
+            if options.importer:
+                message = "Importing project " + project.name
+            else:
                 message = "\nProject " + project.name
-                if succeeded:
-                    message += " succeeded.\n"
-                else:
-                    message += " failed.\n"
-                message += "Total time " + secondsToHMS(timeElapsed)
-                Logger().writeMessage(message)
+            if succeeded:
+                message += " succeeded.\n"
+            else:
+                message += " failed.\n"
+            message += "Total time " + secondsToHMS(timeElapsed)
+            Logger().writeMessage(message)
     finally:
         Logger().close()
     sys.exit()
@@ -111,62 +120,59 @@ def buildStepActor(stepName, target, options):
     return True
 
 #--------------------------------Setup---------------------------------
-def setupForBuilding(options):
-    removeDir(options.logDir)
+def setup(options):
     SetLogger(options.logger, options.logDir)
     if options.verbose:
         Logger().writeMessage(str(options))
-        if not options.prefixDefined:
+        if not options.prefixDefined and not options.cleanTargets:
             Logger().writeMessage("No prefix defined, defaulting to '" + options.getDefine(mdStrings.mdDefinePrefix) + "'")
 
     project = Project(options.projectFile)
     if not project.read():
         return None
 
-    #Clean workspaces if told to clean before
-    if options.cleanBefore:
-        Logger().writeMessage("Cleaning MixDown and Target output directories...")
-        try:
-            removeDir(options.buildDir)
-            removeDir(options.downloadDir)
-        except IOError, e:
-            print e
-            return None
-        for currTarget in project.targets:
-            if currTarget.output != "" and os.path.exists(currTarget.output):
-                removeDir(currTarget.output)
-
-    Logger().writeMessage("Converting all targets to local directories...")
-    for currTarget in project.targets:
-        currTarget.extract(options)
-
     if not project.examine(options):
         return None
     if not project.validate(options):
         return None
 
-    prefixDefine = options.getDefine(mdStrings.mdDefinePrefix)
-    if prefixDefine != "":
-        strippedPrefix = stripTrailingPathDelimiter(prefixDefine)
-        #TODO: only add lib64 if on 64bit machines
-        libraryPaths = strippedPrefix + "/lib:" + strippedPrefix + "/lib64"
-        if os.environ.has_key("LD_LIBRARY_PATH"):
-            originalLibraryPath = str.strip(os.environ["LD_LIBRARY_PATH"])
-            if originalLibraryPath != "":
-                libraryPaths += ":" + originalLibraryPath
-        os.environ["LD_LIBRARY_PATH"] = libraryPaths
+    if options.cleanTargets:
+        for currTarget in project.targets:
+            currTarget.path = currTarget.determineOutputDirectory(options)
+    else:
+        cleaningOutputReported = False
+        for currTarget in project.targets:
+            if currTarget.output != "" and os.path.exists(currTarget.output):
+                if cleaningOutputReported:
+                    Logger().writeMessage("Cleaning MixDown and Target output directories...")
+                    cleaningOutputReported = True
+                removeDir(currTarget.output)
+
+        Logger().writeMessage("Converting all targets to local directories...")
+        for currTarget in project.targets:
+            currTarget.extract(options)
+
+        prefixDefine = options.getDefine(mdStrings.mdDefinePrefix)
+        if prefixDefine != "":
+            strippedPrefix = stripTrailingPathDelimiter(prefixDefine)
+            #TODO: only add lib64 if on 64bit machines
+            libraryPaths = strippedPrefix + "/lib:" + strippedPrefix + "/lib64"
+            if os.environ.has_key("LD_LIBRARY_PATH"):
+                originalLibraryPath = str.strip(os.environ["LD_LIBRARY_PATH"])
+                if originalLibraryPath != "":
+                    libraryPaths += ":" + originalLibraryPath
+            os.environ["LD_LIBRARY_PATH"] = libraryPaths
 
     return project
 
-#-----------------------------Clean up--------------------------------
-def cleanup(options):
-    if options.cleanAfter:
-        Logger().writeMessage("Cleaning MixDown Build and Download directories...")
-        try:
-            removeDir(options.buildDir)
-            removeDir(options.downloadDir)
-        except IOError, e:
-            Logger().writeError(e, exitProgram=True)
+def cleanMixDown(options):
+    try:
+        Logger().writeMessage("Cleaning MixDown directories...")
+        removeDir(options.buildDir)
+        removeDir(options.downloadDir)
+        removeDir(options.logDir)
+    except IOError, e:
+        Logger().writeError(e, exitProgram=True)
 
 #----------------------------------------------------------------------
 
