@@ -39,7 +39,7 @@ def getCommand(stepName, target, options):
         command = __getBuildCommand(target)
     elif stepName == "install":
         command = __getInstallCommand(target)
-    elif stepName == "clean" and (options.clean or options.importer):
+    elif stepName == "clean" and (options.cleanTargets or options.importer):
         #Do not return a clean command unless we are importing or specifying we are cleaning targets
         command = __getCleanCommand(target)
     #Do not try to determine fetch and unpack, these are for overwriting default behavior only
