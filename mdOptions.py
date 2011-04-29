@@ -20,7 +20,7 @@
 # along with this program; if not, write to the Free Software Foundation,
 # Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 
-import os, mdStrings, mdTarget, utilityFunctions
+import os, sys, mdStrings, mdTarget, utilityFunctions
 
 from mdLogger import *
 
@@ -31,9 +31,8 @@ class Options:
         self.downloadDir = "mdDownload/"
         self.logDir = "mdLogFiles/"
         self.tempDir = "/tmp"
-        self.clean = False
-        self.cleanBefore = False
-        self.cleanAfter = False
+        self.cleanTargets = False
+        self.cleanMixDown = True
         self.verbose = False
         self.logger = "file"
         self.importer = False
@@ -45,16 +44,16 @@ class Options:
 
     def __str__(self):
         return "Options:\n\
-  Project File: " + self.projectFile + "\n\
-  Build Dir:    " + self.buildDir + "\n\
-  Download Dir: " + self.downloadDir + "\n\
-  Defines:      " + str(self._defines) + "\n\
-  Import:       " + str(self.importer) + "\n\
-  Clean:        " + str(self.clean) + "\n\
-  Clean Before: " + str(self.cleanBefore) + "\n\
-  Clean After:  " + str(self.cleanAfter) + "\n\
-  Verbose:      " + str(self.verbose) + "\n\
-  Logger:       " + self.logger.capitalize() + "\n"
+  Project File:  " + self.projectFile + "\n\
+  Build Dir:     " + self.buildDir + "\n\
+  Download Dir:  " + self.downloadDir + "\n\
+  Log Dir:       " + self.logDir + "\n\
+  Defines:       " + str(self._defines) + "\n\
+  Import:        " + str(self.importer) + "\n\
+  Clean Targets: " + str(self.cleanTargets) + "\n\
+  Clean MixDown: " + str(self.cleanMixDown) + "\n\
+  Verbose:       " + str(self.verbose) + "\n\
+  Logger:        " + self.logger.capitalize() + "\n"
 
     def _normalizeKey(self, key, lower=True):
         normalizedKey = key.strip()
@@ -119,6 +118,20 @@ class Options:
             loopCount += 1
         expandedString = expandedString.replace("  ", " ").strip()
         return expandedString
+
+    def validateBuildDir(self):
+        if os.path.isfile(self.buildDir):
+            Logger().writeError("Cannot create build directory, a file by the same name already exists", exitProgram=True)
+        elif not os.path.isdir(self.buildDir):
+            os.makedirs(self.buildDir)
+        self.buildDir = utilityFunctions.includeTrailingPathDelimiter(self.buildDir)
+
+    def validateDownloadDir(self):
+        if os.path.isfile(self.downloadDir):
+            Logger().writeError("Cannot create download directory, a file by the same name already exists", exitProgram=True)
+        elif not os.path.isdir(self.downloadDir):
+            os.makedirs(self.downloadDir)
+        self.downloadDir = utilityFunctions.includeTrailingPathDelimiter(self.downloadDir)
 
     def __processImportCommandline(self, commandline):
         if len(commandline) < 3:
@@ -186,26 +199,23 @@ class Options:
             elif currFlag == "-o":
                 validateOptionPair(currFlag, currValue)
                 self.downloadDir = currValue
-            elif currFlag == "-c":
+            elif currFlag == "-k":
                 validateOptionPair(currFlag, currValue)
-                lowerCurrValue = str.lower(currValue)
-                valueLength = len(currValue)
-                if valueLength == 0:
-                    Logger().writeError("Value, 'a' or 'b', expected after -c option", exitProgram=True)
-
-                if currValue == 'a':
-                    self.cleanAfter = True
-                elif currValue == 'b':
-                    self.cleanBefore = True
-                else:
-                    Logger().writeError("Unexpected value '" + currValue + "' given with -c option", exitProgram=True)
+                if self.cleanTargets == True:
+                    Logger().writeError("Command line arguments '--clean' and '-k' cannot both be used", exitProgram=True)
+                self.cleanMixDown = False
             elif currFlag == "-v":
                 validateOption(currFlag, currValue)
                 self.verbose = True
             elif currArg.lower() in ("/help", "/h", "-help", "--help", "-h"):
                 self.printUsageAndExit()
-            elif currArg.lower() == "--clean":
-                self.clean = True
+            elif currFlag == "-c" or currArg.lower() == "--clean":
+                if currFlag == "-c":
+                    validateOption(currFlag, currValue)
+                if self.cleanMixDown == False:
+                    Logger().writeError("Command line arguments '--clean' and '-k' cannot both be used", exitProgram=True)
+                self.cleanTargets = True
+                self.cleanMixDown = False
             elif os.path.splitext(currArg)[1] == ".md":
                 if not os.path.isfile(currArg):
                     Logger().writeError("File " + currArg + " does not exist", exitProgram=True)
@@ -214,35 +224,56 @@ class Options:
             else:
                 Logger().writeError("Command line argument '" + currArg + "' not understood", exitProgram=True)
 
-        def printUsageAndExit(self, errorStr = ""):
-            self.printUsage(errorStr)
-            sys.exit()
+    def printUsageAndExit(self, errorStr=""):
+        self.printUsage(errorStr)
+        sys.exit()
 
-        def printUsage(self, errorStr = ""):
-            if errorStr != "":
-                print "Error: " + errorStr + "\n"
+    def printUsage(self, errorStr=""):
+        if errorStr != "":
+            print "Error: " + errorStr + "\n"
 
-            print "    Example Usage: ./MixDown.py foo.md\\\n\
-        \n\
-            Required:\n\
-            <path to .md file>   Path to MixDown project file\n\
-        \n\
-            Optional:\n\
-            -p<path>      Override prefix directory\n\
-            -b<path>      Override build directory\n\
-            -o<path>      Override download directory\n\
-            -l<logger>    Override default logger (Console, File, Html)\n\
-            -cb           Cleanup before running (deletes build and download directories)\n\
-            -ca           Cleanup after deploy (deletes build and download directories)\n\
-        \n\
-            Default Directories:\n\
-            build: mdBuild/\n\
-            download: mdDownload/\n"
+        print "\
+    Import Mode: \n\
+        Example Usage: MixDown --import foo.tar.gz http://path/to/bar\n\
+    \n\
+        Required:\n\
+        --import                  Toggle Import mode\n\
+        <package location list>   Space delimited list of package locations\n\
+    \n\
+    Build Mode (Default): \n\
+        Example Usage: MixDown foo.md\n\
+    \n\
+        Required:\n\
+        <path to .md file>   Path to MixDown project file\n\
+    \n\
+        Optional:\n\
+        -p<path>      Override prefix directory\n\
+        -b<path>      Override build directory\n\
+        -o<path>      Override download directory\n\
+        -l<logger>    Override default logger (Console, File, Html)\n\
+        -k            Keeps previously existing MixDown directories\n\
+    \n\
+    Clean Mode: \n\
+        Example Usage: MixDown --clean foo.md\n\
+    \n\
+        Required:\n\
+        --clean              Toggle Clean mode\n\
+        <path to .md file>   Path to MixDown project file\n\
+    \n\
+        Optional:\n\
+        -b<path>      Override build directory\n\
+        -o<path>      Override download directory\n\
+        -l<logger>    Override default logger (Console, File, Html)\n\
+    \n\
+    Default Directories:\n\
+    Builds:       mdBuild/\n\
+    Downloads:    mdDownload/\n\
+    Logs:         mdLogFiles/\n"
 
 def validateOptionPair(flag, value):
     if value == "":
-        Logger().writeError(Flag + " option requires a following value", exitProgram=True)
+        Logger().writeError(flag + " option requires a following value", exitProgram=True)
 
 def validateOption(flag, value):
     if value != "":
-        Logger().writeError(Flag + " option does not require a following value", exitProgram=True)
+        Logger().writeError(flag + " option does not require a following value", exitProgram=True)
