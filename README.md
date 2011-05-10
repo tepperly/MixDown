@@ -7,12 +7,12 @@ MixDown is a meta-build tool that makes it easier to build software packages tha
 Example
 -------
 
-Here's how you would use MixDown to build subversion. First, create an initial MixDown build file using information from the source tarballs of subversion and its dependencies:
+Here's how you would use MixDown to build subversion. First, create an initial MixDown build file using information from the source tarballs of subversion and its dependencies (the order doesn't matter):
 
     MixDown --import \
     http://subversion.tigris.org/downloads/subversion-1.6.12.tar.bz2 \
-    http://www.eng.lsu.edu/mirrors/apache//apr/apr-1.3.12.tar.bz2 \
-    http://www.eng.lsu.edu/mirrors/apache//apr/apr-util-1.3.10.tar.bz2 \
+    http://www.eng.lsu.edu/mirrors/apache/apr/apr-1.3.12.tar.bz2 \
+    http://www.eng.lsu.edu/mirrors/apache/apr/apr-util-1.3.10.tar.bz2 \
     http://www.webdav.org/neon/neon-0.29.5.tar.gz \
     http://www.sqlite.org/sqlite-autoconf-3070500.tar.gz
 
