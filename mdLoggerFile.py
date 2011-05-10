@@ -25,7 +25,7 @@ import mdLogger, os, sys, utilityFunctions
 class LoggerFile(mdLogger.LoggerBase):
     def __init__(self, logOutputDir=""):
         self.logOutputDir = logOutputDir
-        if not os.path.isdir(self.logOutputDir):
+        if self.logOutputDir != "" and not os.path.isdir(self.logOutputDir):
             os.makedirs(self.logOutputDir)
         self.errorFds = dict()
         self.outFds = dict()
