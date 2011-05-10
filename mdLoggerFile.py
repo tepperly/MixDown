@@ -111,6 +111,7 @@ class LoggerFile(mdLogger.LoggerBase):
             message += messagePrefix + "Time " + mdLogger.secondsToHMS(timeInSeconds) + "\n"
         message += self.__formatErrorMessage(messagePrefix + "Failed with error code " + str(returnCode) + ".")
         message += "Look at following log file for failure reason:\n  " + self.__lookupOutFileName(targetName, targetStep)
+        message += "\n"
         sys.stdout.flush()
         sys.stderr.write(message)
         self.__lookupOutFile(targetName, targetStep).write(message)
