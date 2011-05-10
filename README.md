@@ -1,35 +1,65 @@
 MixDown
 =======
 
-MixDown is a meta-build tool that makes it easier to build software packages which have multiple dependencies.
+MixDown is a meta-build tool that makes it easier to build software packages that have multiple dependencies. It uses a simple input file format to describe package information, and uses a series of heuristics to automatically generate an initial problem input file from a collection of tar, zip files, or download URLs. 
 
 
-Example: building subversion
-----------------------------
+Example
+-------
 
-Here's how you would use MixDown to build subversion.
+Here's how you would use MixDown to build subversion. First, create an initial MixDown build file using information from the source tarballs of subversion and its dependencies:
 
-1. Run the MixDown Importer to create initial MixDown build file for subversion:
-
-    MixDownImporter.py  http://subversion.tigris.org/downloads/subversion-1.6.12.tar.bz2 \
+    MixDown --import \
+    http://subversion.tigris.org/downloads/subversion-1.6.12.tar.bz2 \
     http://www.eng.lsu.edu/mirrors/apache//apr/apr-1.3.12.tar.bz2 \
     http://www.eng.lsu.edu/mirrors/apache//apr/apr-util-1.3.10.tar.bz2 \
     http://www.webdav.org/neon/neon-0.29.5.tar.gz \
     http://www.sqlite.org/sqlite-autoconf-3070500.tar.gz
 
+This will create a MixDown build file called subversion-1.6.12.md.
 
-2. Run MixDown with the following command to execute the build:
+Next, execute the build:
 
-    MixDown.py -v -cb -j4 -ptestPrefix subversion-1.6.12.md
+    MixDown subversion-1.6.12.md
 
 
-Flags
+Usage
 -----
 
-
-    -v    verbose
-    -j4   have 4 job slots for make
-    -cb   clean before (this helps if MixDown fails to build and you want to start from scratch)
-    -ptestPrefix  set where MixDown will look for libraries and install everything to
-
+    Import Mode: 
+        Example Usage: MixDown --import foo.tar.gz http://path/to/bar
+    
+        Required:
+        --import                  Toggle Import mode
+        <package location list>   Space delimited list of package locations
+    
+    Build Mode (Default): 
+        Example Usage: MixDown foo.md
+    
+        Required:
+        <path to .md file>   Path to MixDown project file
+    
+        Optional:
+        -p<path>      Override prefix directory
+        -b<path>      Override build directory
+        -o<path>      Override download directory
+        -l<logger>    Override default logger (Console, File, Html)
+        -k            Keeps previously existing MixDown directories
+    
+    Clean Mode: 
+        Example Usage: MixDown --clean foo.md
+    
+        Required:
+        --clean              Toggle Clean mode
+        <path to .md file>   Path to MixDown project file
+    
+        Optional:
+        -b<path>      Override build directory
+        -o<path>      Override download directory
+        -l<logger>    Override default logger (Console, File, Html)
+    
+    Default Directories:
+    Builds:       mdBuild/
+    Downloads:    mdDownload/
+    Logs:         mdLogFiles/
 
