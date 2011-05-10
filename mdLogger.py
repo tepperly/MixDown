@@ -39,12 +39,12 @@ def SetLogger(loggerName="", logOutputDir=""):
     loggerName = loggerName.lower()
     if loggerName == "file" or loggerName == "":
         import mdLoggerFile
-        if logOutputDir != "":
+        if logOutputDir != "" and not os.path.isdir(logOutputDir):
             os.makedirs(logOutputDir)
         __loggerInstance = mdLoggerFile.LoggerFile(logOutputDir)
     elif loggerName == "html":
         import mdLoggerHtml
-        if logOutputDir != "":
+        if logOutputDir != "" and not os.path.isdir(logOutputDir):
             os.makedirs(logOutputDir)
         __loggerInstance = mdLoggerHtml.LoggerHtml(logOutputDir)
     elif loggerName == "console":
