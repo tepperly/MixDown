@@ -140,7 +140,7 @@ class Options:
         targetsToImport = []
         self.verbose = True
         self.importer = True
-        self.downloadDir = utilityFunctions.includeTrailingPathDelimiter(self.tempDir, "mdDownloads")
+        self.downloadDir = utilityFunctions.includeTrailingPathDelimiter(self.tempDir + "mdDownloads")
         self.setDefine(mdStrings.mdDefinePrefix, "$(" + mdStrings.mdDefinePrefix + ")")
         for currArg in commandline[1:]:
             if currArg == "--import":
