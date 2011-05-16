@@ -37,6 +37,7 @@ def main():
     #suite.addTest(test_mdCvs.suite())
     suite.addTest(test_mdGit.suite())
     suite.addTest(test_mdHg.suite())
+    #suite.addTest(test_mdSteps.suite())
     suite.addTest(test_mdSvn.suite())
     suite.addTest(test_mdProject.suite())
     suite.addTest(test_mdTarget.suite())
