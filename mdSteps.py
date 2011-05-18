@@ -45,6 +45,8 @@ def fetch(pythonCallInfo):
             pythonCallInfo.success = True
     elif utilityFunctions.isURL(pythonCallInfo.currentPath):
         filenamePath = pythonCallInfo.downloadDir + utilityFunctions.URLToFilename(pythonCallInfo.currentPath)
+        if not os.path.exists(pythonCallInfo.downloadDir):
+            os.mkdir(pythonCallInfo.downloadDir)
         urllib.urlretrieve(pythonCallInfo.currentPath, filenamePath)
         pythonCallInfo.currentPath = filenamePath
         pythonCallInfo.success = True
