@@ -39,8 +39,11 @@ def importTargets(options, targetsToImport):
         Logger().writeMessage("Analyzing target...", target.name)
         Logger().writeMessage("Extracting target...", target.name)
 
-        target.output = options.tempDir + target.name
-        target.extract(options)
+        target.outputPath = options.tempDir + target.name
+        if not mdCommands.buildStepActor("fetch", target, options):
+            return None
+        if not mdCommands.buildStepActor("unpack", target, options):
+            return None
 
         #Generate build files and find possible dependancies
         if mdCMake.isCMakeProject(target.path):
@@ -121,7 +124,7 @@ def importTargets(options, targetsToImport):
     project.path = project.name + ".md"
 
     for target in project.targets:
-        target.output = ""
+        target.outputPath = ""
 
     if project.examine(options):
         Logger().writeMessage("\nFinal targets...\n" + str(project))

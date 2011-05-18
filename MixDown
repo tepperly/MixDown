@@ -22,40 +22,26 @@
 # along with this program; if not, write to the Free Software Foundation,
 # Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 
-import os, sys, tarfile, time, urllib, mdStrings, mdImporter
+import os, sys, tarfile, time, urllib
+import mdCommands, mdImporter, mdOptions, mdProject, mdStrings, utilityFunctions
 
-from mdCommands import *
-from mdOptions import *
-from mdProject import *
-from mdTarget import *
-from utilityFunctions import *
 from mdLogger import *
 
 #--------------------------------Main---------------------------------
 def main():
-    #if os.path.exists("foo.py"):
-        #print "importing foo"
-        #sys.path.append(".")
-        #import foo
-    #else:
-        #print "foo not found"
-        #sys.exit()
-
-    #result = getattr(foo, 'bar')()
-    #print result
-    #sys.exit()
-
-
     SetLogger("console")
     Logger().writeMessage("MixDown - A tool to simplify building\n")
     try:
-        options = Options()
+        options = mdOptions.Options()
         targetsToImport = options.processCommandline(sys.argv)
 
         timeStarted = time.time()
         if options.importer:
             project = mdImporter.importTargets(options, targetsToImport)
-            succeeded = True
+            if project != None:
+                succeeded = True
+            else:
+                suceeded = False
         else:
             if options.cleanMixDown:
                 cleanMixDown(options)
@@ -63,61 +49,38 @@ def main():
             if project != None:
                 for target in reversed(project.targets):
                     if options.cleanTargets:
-                        succeeded = buildStepActor("clean", target, options)
+                        succeeded = mdCommands.buildStepActor("clean", target, options)
                     else:
-                        for step in getBuildStepList():
+                        for step in mdCommands.getBuildStepList():
                             if step == "clean":
                                 continue
-                            succeeded = buildStepActor(step, target, options)
+                            succeeded = mdCommands.buildStepActor(step, target, options)
                             if not succeeded:
                                 break
                     if not succeeded:
                         break
 
-        if project != None:
-            timeFinished = time.time()
-            timeElapsed = timeFinished - timeStarted
+        timeFinished = time.time()
+        timeElapsed = timeFinished - timeStarted
+        if project == None:
+            if options.importer:
+                message = "Importing failed."
+            else:
+                message = "Project failed."
+        else:
             if options.importer:
                 message = "Importing project " + project.name
             else:
-                message = "\nProject " + project.name
+                message = "Project " + project.name
             if succeeded:
-                message += " succeeded.\n"
+                message += " succeeded."
             else:
-                message += " failed.\n"
-            message += "Total time " + secondsToHMS(timeElapsed)
-            Logger().writeMessage(message)
+                message += " failed."
+        message = "Total time " + secondsToHMS(timeElapsed) + "\n" + message + "\n"
+        Logger().writeMessage(message)
     finally:
         Logger().close()
     sys.exit()
-
-def buildStepActor(stepName, target, options):
-    Logger().reportStart(target.name, stepName)
-    returnCode = None
-
-    timeStart = time.time()
-
-    if target.hasStep(stepName):
-        outFd = Logger().getOutFd(target.name, stepName)
-        command = getCommand(stepName, target, options)
-        if command != "":
-            returnCode = executeSubProcess(command, target.path, outFd, options.verbose)
-        else:
-            skipReason = "Command could not be determined by MixDown"
-    else:
-        skipReason = "Target specified to skip step"
-
-    timeFinished = time.time()
-    timeElapsed = timeFinished - timeStart
-
-    if returnCode == None:
-        Logger().reportSkipped(target.name, stepName, skipReason)
-    elif returnCode != 0:
-        Logger().reportFailure(target.name, stepName, timeElapsed, returnCode)
-        return False
-    else:
-        Logger().reportSuccess(target.name, stepName, timeElapsed)
-    return True
 
 #--------------------------------Setup---------------------------------
 def setup(options):
@@ -127,7 +90,7 @@ def setup(options):
         if not options.prefixDefined and not options.cleanTargets:
             Logger().writeMessage("No prefix defined, defaulting to '" + options.getDefine(mdStrings.mdDefinePrefix) + "'")
 
-    project = Project(options.projectFile)
+    project = mdProject.Project(options.projectFile)
     if not project.read():
         return None
 
@@ -138,23 +101,19 @@ def setup(options):
 
     if options.cleanTargets:
         for currTarget in project.targets:
-            currTarget.path = currTarget.determineOutputDirectory(options)
+            currTarget.path = currTarget.determineOutputPath(options)
     else:
         cleaningOutputReported = False
         for currTarget in project.targets:
-            if currTarget.output != "" and os.path.exists(currTarget.output):
+            if currTarget.outputPath != "" and os.path.exists(currTarget.outputPath):
                 if cleaningOutputReported:
                     Logger().writeMessage("Cleaning MixDown and Target output directories...")
                     cleaningOutputReported = True
-                removeDir(currTarget.output)
-
-        Logger().writeMessage("Converting all targets to local directories...")
-        for currTarget in project.targets:
-            currTarget.extract(options)
+                utilityFunctions.removeDir(currTarget.outputPath)
 
         prefixDefine = options.getDefine(mdStrings.mdDefinePrefix)
         if prefixDefine != "":
-            strippedPrefix = stripTrailingPathDelimiter(prefixDefine)
+            strippedPrefix = utilityFunctions.stripTrailingPathDelimiter(prefixDefine)
             #TODO: only add lib64 if on 64bit machines
             libraryPaths = strippedPrefix + "/lib:" + strippedPrefix + "/lib64"
             if os.environ.has_key("LD_LIBRARY_PATH"):
@@ -163,14 +122,17 @@ def setup(options):
                     libraryPaths += ":" + originalLibraryPath
             os.environ["LD_LIBRARY_PATH"] = libraryPaths
 
+    #Add MixDown's directory to path so mdSteps can be found
+    sys.path.append(os.path.dirname(sys.argv[0]))
+
     return project
 
 def cleanMixDown(options):
     try:
         Logger().writeMessage("Cleaning MixDown directories...")
-        removeDir(options.buildDir)
-        removeDir(options.downloadDir)
-        removeDir(options.logDir)
+        utilityFunctions.removeDir(options.buildDir)
+        utilityFunctions.removeDir(options.downloadDir)
+        utilityFunctions.removeDir(options.logDir)
     except IOError, e:
         Logger().writeError(e, exitProgram=True)
 

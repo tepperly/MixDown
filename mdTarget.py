@@ -20,8 +20,8 @@
 # along with this program; if not, write to the Free Software Foundation,
 # Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 
-import distutils, os, re, tarfile, urllib
-import mdAutoTools, mdCMake, mdCommands, mdGit, mdHg, mdOptions, mdSvn, utilityFunctions
+import os, re, tarfile
+import mdAutoTools, mdCMake, mdCommands, mdGit, mdHg, mdOptions, mdPython, mdSvn, utilityFunctions
 
 from mdLogger import *
 
@@ -65,10 +65,12 @@ class Target:
         self.aliases = []
         self.origPath = path
         self.path = path
-        self.output = ""
+        self.outputPath = ""
+        self.outputPathSpecified = False
         self.dependancyDepth = 0
         self.dependsOn = []
         self.skipSteps = []
+        self.pythonCallInfo = mdPython.PythonCallInfo()
         self.commands = dict()
         for step in mdCommands.getBuildStepList():
             self.commands[step] = ""
@@ -99,9 +101,9 @@ class Target:
                     return False
         return True
 
-    def determineOutputDirectory(self, options):
-        if self.output != "":
-            return self.output
+    def determineOutputPath(self, options):
+        if self.outputPath != "":
+            return self.outputPath
         else:
             targetsBuildDir = utilityFunctions.includeTrailingPathDelimiter(options.buildDir + self.name)
             if options.cleanTargets:
@@ -115,57 +117,9 @@ class Target:
                 options.validateBuildDir()
                 return targetsBuildDir
 
-    def extract(self, options, exitOnFailure=True):
-        extracted = False
-        outputDir = self.determineOutputDirectory(options)
-
-        #Check if it is a repository (CVS, SVN, Git, Hg)
-        if mdGit.isGitRepo(self.path):
-            if not mdGit.gitCheckout(self.path, outputDir):
-                Logger().writeError("Given Git repo '" + self.path +"' was unable to be checked out", exitProgram=exitOnFailure)
-            else:
-                self.path = outputDir
-                extracted = True
-        elif mdHg.isHgRepo(self.path):
-            if not mdHg.hgCheckout(self.path, outputDir):
-                Logger().writeError("Given Hg repo '" + self.path +"' was unable to be checked out", exitProgram=exitOnFailure)
-            else:
-                self.path = outputDir
-                extracted = True
-        elif mdSvn.isSvnRepo(self.path):
-            if not mdSvn.svnCheckout(self.path, outputDir):
-                Logger().writeError("Given Svn repo '" + self.path +"' was unable to be checked out", exitProgram=exitOnFailure)
-            else:
-                self.path = outputDir
-                extracted = True
-        elif os.path.isdir(self.path):
-            if self.output != "":
-                distutils.dir_util.copy_tree(self.path, self.output)
-                self.path = self.output
-            extracted = True
-        elif not os.path.isfile(self.path) and utilityFunctions.isURL(self.path):
-            options.validateDownloadDir()
-            filenamePath = options.downloadDir + utilityFunctions.URLToFilename(self.path)
-            urllib.urlretrieve(self.path, filenamePath)
-            self.path = filenamePath
-
-        if os.path.isfile(self.path):
-            if tarfile.is_tarfile(self.path):
-                utilityFunctions.untar(self.path, outputDir, True)
-                self.path = outputDir
-                extracted = True
-            else:
-                if self.path.endswith(".tar.gz") or self.path.endswith(".tar.bz2")\
-                   or self.path.endswith(".tar") or self.path.endswith(".tgz")\
-                   or self.path.endswith(".tbz") or self.path.endswith(".tb2"):
-                    Logger().writeError("Given tar file '" + self.path +"' not understood by python's tarfile package", exitProgram=exitOnFailure)
-                else:
-                    Logger().writeError("Given target '" + self.path + "' not understood (Folders, URLs, Repositories, and Tar files are acceptable)", exitProgram=exitOnFailure)
-
-        return extracted
-
     def examine(self, options):
         self.__determineCommands(options)
+        self.outputPath = self.determineOutputPath(options)
         return True
 
     def __determineCommands(self, options):
@@ -180,8 +134,8 @@ class Target:
             retStr += "Path: " + self.path + "\n"
         if len(self.aliases) != 0:
             retStr += "Aliases: " + ",".join(self.aliases) + "\n"
-        if self.output != "":
-            retStr += "Output: " + self.output + "\n"
+        if self.outputPathSpecified:
+            retStr += "Output: " + self.outputPath + "\n"
         if len(self.dependsOn) != 0:
             retStr += "DependsOn: " + ",".join(self.dependsOn) + "\n"
         if len(self.skipSteps) != 0:

@@ -20,17 +20,64 @@
 # along with this program; if not, write to the Free Software Foundation,
 # Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 
-import os, utilityFunctions, mdAutoTools, mdCMake, mdMake, mdStrings, mdTarget, mdOptions
+import os, time, utilityFunctions
+import mdAutoTools, mdCMake, mdMake, mdOptions, mdPython, mdStrings, mdTarget, utilityFunctions
 
 from mdLogger import *
 
 def getBuildStepList():
-    return ["fetch", "unpack", "preconfig", "config", "build", "install", "clean"]
+    return ["fetch", "unpack", "patch", "preconfig", "config", "build", "install", "clean"]
+
+def buildStepActor(stepName, target, options, verbose=True):
+    if verbose:
+        Logger().reportStart(target.name, stepName)
+    returnCode = None
+
+    timeStart = time.time()
+
+    if target.hasStep(stepName):
+        command = getCommand(stepName, target, options)
+        if command != "":
+            isPythonCommand, namespace, function = mdPython.parsePythonCommand(command)
+            if isPythonCommand:
+                success = mdPython.callPythonCommand(namespace, function, target, options)
+                if not success:
+                    returnCode = 1
+                else:
+                    returnCode = 0
+            else:
+                outFd = Logger().getOutFd(target.name, stepName)
+                returnCode = utilityFunctions.executeSubProcess(command, target.path, outFd, options.verbose)
+        else:
+            skipReason = "Command could not be determined by MixDown"
+    else:
+        skipReason = "Target specified to skip step"
+
+    timeFinished = time.time()
+    timeElapsed = timeFinished - timeStart
+
+    if returnCode == None:
+        if verbose:
+            Logger().reportSkipped(target.name, stepName, skipReason)
+    elif returnCode != 0:
+        if verbose:
+            Logger().reportFailure(target.name, stepName, timeElapsed, returnCode)
+        return False
+    else:
+        if verbose:
+            Logger().reportSuccess(target.name, stepName, timeElapsed)
+    return True
 
 def getCommand(stepName, target, options):
     command = ""
     if target.commands.has_key(stepName) and target.commands[stepName] != "":
         command = target.commands[stepName]
+    elif stepName == "fetch":
+        command = __getFetchCommand(target)
+    elif stepName == "unpack":
+        command = __getUnpackCommand(target)
+    elif stepName == "patch":
+        command = __getPatchCommand(target)
     elif stepName == "preconfig":
         command = __getPreconfigureCommand(target)
     elif stepName == "config":
@@ -39,14 +86,21 @@ def getCommand(stepName, target, options):
         command = __getBuildCommand(target)
     elif stepName == "install":
         command = __getInstallCommand(target)
-    elif stepName == "clean" and (options.cleanTargets or options.importer):
-        #Do not return a clean command unless we are importing or specifying we are cleaning targets
+    elif stepName == "clean":
         command = __getCleanCommand(target)
-    #Do not try to determine fetch and unpack, these are for overwriting default behavior only
 
     if options.importer:
         return command
     return options.expandDefines(command)
+
+def __getFetchCommand(target):
+    return "mdSteps.fetch(pythonCallInfo)"
+
+def __getUnpackCommand(target):
+    return "mdSteps.unpack(pythonCallInfo)"
+
+def __getPatchCommand(target):
+    return ""
 
 def __getPreconfigureCommand(target):
     command = ""

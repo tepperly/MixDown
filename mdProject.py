@@ -118,10 +118,11 @@ class Project:
                             return False
                         currTarget.path = currPair[1]
                     elif currName == "output":
-                        if currTarget.output != "":
+                        if currTarget.outputPathSpecified:
                             Logger().writeError("Project targets can only have one 'Output' defined", "", "", self.path, lineCount)
                             return False
-                        currTarget.output = utilityFunctions.includeTrailingPathDelimiter(currPair[1])
+                        currTarget.outputPath = utilityFunctions.includeTrailingPathDelimiter(currPair[1])
+                        currTarget.outputPathSpecified = True
                     elif currName == "dependson":
                         if currTarget.dependsOn != []:
                             Logger().writeError("Project targets can only have one 'DependsOn' defined (use a comma delimited list for multiple dependancies)", "", "", self.path, lineCount)
