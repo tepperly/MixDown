@@ -30,16 +30,15 @@ class Test_mdTarget(unittest.TestCase):
     def setUpTargetDirectory(self, filesInTarget=[]):
         self.testDir = mdTestUtilities.makeTempDir()
         for fileName in filesInTarget:
-            open(self.testDir + fileName, 'w').close() #Create blank file
+            open(os.path.join(self.testDir, fileName), 'w').close() #Create blank file
         self.options = mdOptions.Options()
-        self.options.buildDir = self.testDir + "mdBuild"
+        self.options.buildDir = os.path.join(self.testDir, "mdBuild")
 
     def tearDownTargetDirectory(self):
         if os.path.exists(self.testDir):
             utilityFunctions.removeDir(self.testDir)
         self.testDir = ""
         self.options = None
-
 
     def test_validate(self):
         options = mdOptions.Options()

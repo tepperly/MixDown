@@ -36,11 +36,12 @@ class Test_mdGit(unittest.TestCase):
         if not mdGit.isGitInstalled():
             self.fail("Git is not installed on your system.  All Git tests will fail.")
         #Create repository and test if is git repo
-        path = mdTestUtilities.createGitRepository()
+        tempDir = mdTestUtilities.makeTempDir()
+        tempRepo = mdTestUtilities.createGitRepository(tempDir)
         try:
-            self.assertTrue(mdGit.isGitRepo(path), "mdGit.isGitRepo(" + path + ") should have returned true.")
+            self.assertTrue(mdGit.isGitRepo(tempRepo), "mdGit.isGitRepo(" + tempRepo + ") should have returned true.")
         finally:
-            utilityFunctions.removeDir(path)
+            utilityFunctions.removeDir(tempDir)
         #Test if wrong path returns false
         falsePath = "/foo/wrong/path"
         self.assertFalse(mdGit.isGitRepo(falsePath), "mdGit.isGitRepo(" + falsePath + ") should have returned false.")
@@ -64,10 +65,11 @@ class Test_mdGit(unittest.TestCase):
 
         #Local file
         try:
-            tarDir, path = mdTestUtilities.createBzipFile()
+            tempDir = mdTestUtilities.makeTempDir()
+            tarDir, path = mdTestUtilities.createBzipFile(tempDir)
             self.assertFalse(mdGit.isGitRepo(path), "mdGit.isGitRepo(" + path + ") should have returned false.")
         finally:
-            utilityFunctions.removeDir(tarDir)
+            utilityFunctions.removeDir(tempDir)
 
         #Remote file
         path = "http://www.eng.lsu.edu/mirrors/apache//apr/apr-util-1.3.10.tar.bz2"
@@ -80,10 +82,11 @@ class Test_mdGit(unittest.TestCase):
 
         #Local file
         try:
-            tarDir, path = mdTestUtilities.createGzipFile()
+            tempDir = mdTestUtilities.makeTempDir()
+            tarDir, path = mdTestUtilities.createGzipFile(tempDir)
             self.assertFalse(mdGit.isGitRepo(path), "mdGit.isGitRepo(" + path + ") should have returned false.")
         finally:
-            utilityFunctions.removeDir(tarDir)
+            utilityFunctions.removeDir(tempDir)
 
         #Remote file
         path = "http://www.eng.lsu.edu/mirrors/apache//apr/apr-util-1.3.10.tar.gz"
@@ -93,14 +96,14 @@ class Test_mdGit(unittest.TestCase):
         if not mdGit.isGitInstalled():
             self.fail("Git is not installed on your system.  All Git tests will fail.")
         tempDir = mdTestUtilities.makeTempDir()
-        tempRepo = mdTestUtilities.createGitRepository()
+        tempRepo = mdTestUtilities.createGitRepository(tempDir)
+        checkedOutRepo = os.path.join(tempDir, "checkedOut")
         try:
-            mdGit.gitCheckout(tempRepo, tempDir)
-            returnValue = os.path.exists(tempDir + mdTestUtilities.testFileName)
+            mdGit.gitCheckout(tempRepo, checkedOutRepo)
+            returnValue = os.path.exists(os.path.join(checkedOutRepo, mdTestUtilities.testFileName))
             self.assertEqual(returnValue, True, "'" + mdTestUtilities.testFileName + "' did not exist after mdGit.gitCheckout(" + tempRepo + ") was called.")
         finally:
             utilityFunctions.removeDir(tempDir)
-            utilityFunctions.removeDir(tempRepo)
 
 def suite():
     suite = unittest.TestSuite()

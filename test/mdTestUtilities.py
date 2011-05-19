@@ -28,66 +28,66 @@ import utilityFunctions
 
 testFileName = "testFile"
 
-def createTarFile():
-    tempPath = utilityFunctions.includeTrailingPathDelimiter(tempfile.mkdtemp(prefix="mixdown-"))
-    os.mkdir(tempPath + "test")
-    utilityFunctions.executeSubProcess("touch test/" + testFileName, tempPath)
-    utilityFunctions.executeSubProcess("tar -cf test.tar test", tempPath)
-    return tempPath, "test.tar"
+def createTarFile(tempDir):
+    tarDir = os.path.join(tempDir, "tar")
+    os.mkdir(tarDir)
+    utilityFunctions.executeSubProcess("touch tar/" + testFileName, tempDir)
+    utilityFunctions.executeSubProcess("tar -cf test.tar tar", tempDir)
+    return tarDir, "test.tar"
 
-def createGzipFile():
-    tempPath = utilityFunctions.includeTrailingPathDelimiter(tempfile.mkdtemp(prefix="mixdown-"))
-    os.mkdir(tempPath + "test")
-    utilityFunctions.executeSubProcess("touch test/" + testFileName, tempPath)
-    utilityFunctions.executeSubProcess("tar -czf test.tgz test", tempPath)
-    return tempPath, "test.tgz"
+def createGzipFile(tempDir):
+    tarDir = os.path.join(tempDir, "tar")
+    os.mkdir(tarDir)
+    utilityFunctions.executeSubProcess("touch tar/" + testFileName, tempDir)
+    utilityFunctions.executeSubProcess("tar -czf test.tgz tar", tempDir)
+    return tarDir, "test.tgz"
 
-def createBzipFile():
-    tempPath = utilityFunctions.includeTrailingPathDelimiter(tempfile.mkdtemp(prefix="mixdown-"))
-    os.mkdir(tempPath + "test")
-    utilityFunctions.executeSubProcess("touch test/" + testFileName, tempPath)
-    utilityFunctions.executeSubProcess("tar -cjf test.tar.bz2 test", tempPath)
-    return tempPath, "test.tar.bz2"
+def createBzipFile(tempDir):
+    tarDir = os.path.join(tempDir, "tar")
+    os.mkdir(tarDir)
+    utilityFunctions.executeSubProcess("touch tar/" + testFileName, tempDir)
+    utilityFunctions.executeSubProcess("tar -cjf test.tar.bz2 tar", tempDir)
+    return tarDir, "test.tar.bz2"
 
-def createCvsRepository():
-    tempPath = utilityFunctions.includeTrailingPathDelimiter(tempfile.mkdtemp(prefix="mixdown-"))
-    repoPath = tempPath + "repo"
-    projPath = tempPath + "project"
+def createCvsRepository(tempDir):
+    repoPath = os.path.join(tempDir, "repo")
+    projPath = os.path.join(tempDir, "project")
     os.mkdir(repoPath)
     os.mkdir(projPath)
 
-    utilityFunctions.executeSubProcess("cvs -d " + repoPath + " init", tempPath)
+    utilityFunctions.executeSubProcess("cvs -d " + repoPath + " init", tempDir)
     utilityFunctions.executeSubProcess("touch " + testFileName, projPath)
     utilityFunctions.executeSubProcess("cvs -d " + repoPath + " -Q import -m message project vendor start", projPath)
     return repoPath
 
-def createGitRepository():
-    repoPath = utilityFunctions.includeTrailingPathDelimiter(tempfile.mkdtemp(prefix="mixdown-"))
+def createGitRepository(tempDir):
+    repoPath = os.path.join(tempDir, "repo")
+    os.mkdir(repoPath)
     utilityFunctions.executeSubProcess("git init --quiet", repoPath)
     utilityFunctions.executeSubProcess("touch " + testFileName, repoPath)
     utilityFunctions.executeSubProcess("git add " + testFileName, repoPath)
     utilityFunctions.executeSubProcess("git commit -m message --quiet", repoPath)
     return repoPath
 
-def createHgRepository():
-    repoPath = utilityFunctions.includeTrailingPathDelimiter(tempfile.mkdtemp(prefix="mixdown-"))
+def createHgRepository(tempDir):
+    repoPath = os.path.join(tempDir, "repo")
+    os.mkdir(repoPath)
     utilityFunctions.executeSubProcess("hg init --quiet", repoPath)
     utilityFunctions.executeSubProcess("touch " + testFileName, repoPath)
     utilityFunctions.executeSubProcess("hg add --quiet " + testFileName, repoPath)
     utilityFunctions.executeSubProcess("hg commit -m message --quiet", repoPath)
     return repoPath
 
-def createSvnRepository():
-    tempPath = utilityFunctions.includeTrailingPathDelimiter(tempfile.mkdtemp(prefix="mixdown-"))
-    repoPath = tempPath + "repo"
-    repoURL = "file://" + repoPath + "/trunk"
-    projPath = tempPath + "project"
+def createSvnRepository(tempDir):
+    repoPath = os.path.join(tempDir, "repo")
     os.mkdir(repoPath)
+    repoURL = "file://" + repoPath + "/trunk"
+    projPath = os.path.join(tempDir, "project")
     os.mkdir(projPath)
 
-    utilityFunctions.executeSubProcess("svnadmin create " + repoPath, tempPath)
+    utilityFunctions.executeSubProcess("svnadmin create " + repoPath, tempDir)
     utilityFunctions.executeSubProcess("touch testFile", projPath)
-    utilityFunctions.executeSubProcess("svn import --quiet --non-interactive " + projPath + " " + repoURL + " -m message", tempPath)
+    utilityFunctions.executeSubProcess("svn import --quiet --non-interactive " + projPath + " " + repoURL + " -m message", tempDir)
     return repoURL
 
 def createBlankFile(path):
@@ -96,7 +96,7 @@ def createBlankFile(path):
     f.close()
 
 def makeTempDir():
-    return utilityFunctions.includeTrailingPathDelimiter(tempfile.mkdtemp(prefix="mixdown-"))
+    return tempfile.mkdtemp(prefix="mixdown-")
 
 def makeTempFile(contents="", suffix=""):
     fd, name = tempfile.mkstemp(suffix, "mixdown-", text=True)
@@ -109,3 +109,13 @@ def copyDirToTempDir(source):
     tempDir = tempfile.mktemp(prefix="mixdown-")
     shutil.copytree(source, tempDir)
     return tempDir
+
+def setUpTargetDirectory(filesInTarget=[]):
+    path = makeTempDir()
+    for fileName in filesInTarget:
+        open(path + fileName, 'w').close() #Create blank file
+    options = mdOptions.Options()
+    options.buildDir = self.testDir + "mdBuild"
+    return path, options
+
+

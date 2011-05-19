@@ -20,117 +20,133 @@
 # along with this program; if not, write to the Free Software Foundation,
 # Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 
-import os, sys, unittest, mdTestUtilities
+import os, sys, tarfile, unittest, mdTestUtilities
 
 if not ".." in sys.path:
     sys.path.append("..")
-import mdLogger, mdSvn, utilityFunctions
+import mdGit, mdHg, mdLogger, mdPython, mdSteps, mdSvn, utilityFunctions
 
-class Test_mdSvn(unittest.TestCase):
-    def _test_extractCvs(self):
+def createPythonCallInfo(currentPath="", outputPath="", downloadDir=""):
+    pci = mdPython.PythonCallInfo()
+    pci.success = False
+    pci.currentPath = currentPath
+    pci.outputPath = outputPath
+    pci.downloadDir = downloadDir
+    pci.logger = mdLogger.Logger()
+    return pci
+
+class Test_mdSteps(unittest.TestCase):
+    def _test_fetchCvs(self):
         if not mdCvs.isCvsInstalled():
             self.fail("Cvs is not installed on your system.  All Cvs tests will fail.")
         try:
-            self.setUpTargetDirectory()
-            repoPath = mdTestUtilities.createCvsRepository()
-            target = mdTarget.Target("CvsTarget", repoPath)
-            extracted = target.extract(self.options, False)
-            exists = os.path.exists(target.path + mdTestUtilities.testFileName)
+            tempDir = mdTestUtilities.makeTempDir()
+            repoPath = mdTestUtilities.createCvsRepository(tempDir)
+            pci = createPythonCallInfo(repoPath, os.path.join(tempDir, "output"), os.path.join(tempDir, "download"))
+            pci = mdSteps.fetch(pci)
+            testFilePath = os.path.join(pci.outputPath, mdTestUtilities.testFileName)
+            self.assertEqual(pci.success, True, "Cvs repository failed to fetch.")
+            self.assertEqual(os.path.exists(testFilePath), True, "'" + mdTestUtilities.testFileName + "' did not exist after fetching a Cvs repository.")
         finally:
-            self.tearDownTargetDirectory()
-            utilityFunctions.removeDir(repoPath[:len(repoPath)-4])
-        self.assertEqual(extracted, True, "Cvs repository failed to extract.")
-        self.assertEqual(exists, True, "'" + mdTestUtilities.testFileName + "' did not exist after extracting a target with a Cvs repository as its path.")
+            utilityFunctions.removeDir(tempDir)
 
-    def test_extractGit(self):
+    def test_fetchGit(self):
         if not mdGit.isGitInstalled():
             self.fail("Git is not installed on your system.  All Git tests will fail.")
         try:
-            self.setUpTargetDirectory()
-            repoPath = mdTestUtilities.createGitRepository()
-            target = mdTarget.Target("GitTarget", repoPath)
-            extracted = target.extract(self.options, False)
-            exists = os.path.exists(target.path + mdTestUtilities.testFileName)
+            tempDir = mdTestUtilities.makeTempDir()
+            repoPath = mdTestUtilities.createGitRepository(tempDir)
+            pci = createPythonCallInfo(repoPath, os.path.join(tempDir, "output"), os.path.join(tempDir, "download"))
+            pci = mdSteps.fetch(pci)
+            testFilePath = os.path.join(pci.outputPath, mdTestUtilities.testFileName)
+            self.assertEqual(pci.success, True, "Hg repository failed to fetch.")
+            self.assertEqual(os.path.exists(testFilePath), True, "'" + mdTestUtilities.testFileName + "' did not exist after fetching a Git repository.")
         finally:
-            self.tearDownTargetDirectory()
-            utilityFunctions.removeDir(repoPath)
-        self.assertEqual(extracted, True, "Git repository failed to extract.")
-        self.assertEqual(exists, True, "'" + mdTestUtilities.testFileName + "' did not exist after extracting a target with a Git repository as its path.")
+            utilityFunctions.removeDir(tempDir)
 
-    def test_extractHg(self):
+    def test_fetchHg(self):
         if not mdHg.isHgInstalled():
             self.fail("Hg is not installed on your system.  All Hg tests will fail.")
         try:
-            self.setUpTargetDirectory()
-            repoPath = mdTestUtilities.createHgRepository()
-            target = mdTarget.Target("HgTarget", repoPath)
-            extracted = target.extract(self.options, False)
-            exists = os.path.exists(target.path + mdTestUtilities.testFileName)
+            tempDir = mdTestUtilities.makeTempDir()
+            repoPath = mdTestUtilities.createHgRepository(tempDir)
+            pci = createPythonCallInfo(repoPath, os.path.join(tempDir, "output"), os.path.join(tempDir, "download"))
+            pci = mdSteps.fetch(pci)
+            testFilePath = os.path.join(pci.outputPath, mdTestUtilities.testFileName)
+            self.assertEqual(pci.success, True, "Hg repository failed to fetch.")
+            self.assertEqual(os.path.exists(testFilePath), True, "'" + mdTestUtilities.testFileName + "' did not exist after fetching a Hg repository.")
         finally:
-            self.tearDownTargetDirectory()
-            utilityFunctions.removeDir(repoPath)
-        self.assertEqual(extracted, True, "Hg repository failed to extract.")
-        self.assertEqual(exists, True, "'" + mdTestUtilities.testFileName + "' did not exist after extracting a target with a Hg repository as its path.")
+            utilityFunctions.removeDir(tempDir)
 
-    def test_extractSvn(self):
+    def test_fetchSvn(self):
         if not mdSvn.isSvnInstalled():
             self.fail("Svn is not installed on your system.  All Svn tests will fail.")
         try:
-            self.setUpTargetDirectory()
-            repoPath = mdTestUtilities.createSvnRepository()
-            target = mdTarget.Target("SvnTarget", repoPath)
-            extracted = target.extract(self.options, False)
-            exists = os.path.exists(target.path + mdTestUtilities.testFileName)
+            tempDir = mdTestUtilities.makeTempDir()
+            repoPath = mdTestUtilities.createSvnRepository(tempDir)
+            pci = createPythonCallInfo(repoPath, os.path.join(tempDir, "output"), os.path.join(tempDir, "download"))
+            pci = mdSteps.fetch(pci)
+            testFilePath = os.path.join(pci.outputPath, mdTestUtilities.testFileName)
+            self.assertEqual(pci.success, True, "Svn repository failed to fetch.")
+            self.assertEqual(os.path.exists(testFilePath), True, "'" + mdTestUtilities.testFileName + "' did not exist after fetching a Svn repository.")
         finally:
-            self.tearDownTargetDirectory()
-            utilityFunctions.removeDir(repoPath[7:len(repoPath)-10])
-        self.assertEqual(exists, True, "'" + mdTestUtilities.testFileName + "' did not exist after extracting a target with a Svn repository as its path.")
+            utilityFunctions.removeDir(tempDir)
 
-    def test_extractTar(self):
+    def test_fetchTar(self):
         try:
-            self.setUpTargetDirectory()
-            tarDir, tarName = mdTestUtilities.createTarFile()
-            tarPath = tarDir + tarName
-            target = mdTarget.Target("TarTarget", tarPath)
-            extracted = target.extract(self.options, False)
-            exists = os.path.exists(target.path + mdTestUtilities.testFileName)
+            tempDir = mdTestUtilities.makeTempDir()
+            tarDir, tarName = mdTestUtilities.createTarFile(tempDir)
+            tarPath = os.path.join(tempDir, tarName)
+            pci = createPythonCallInfo(tarPath, os.path.join(tempDir, "output"), os.path.join(tempDir, "download"))
+            pci = mdSteps.fetch(pci)
+            self.assertEqual(pci.success, True, "Local tar file failed to fetch.")
+            self.assertEqual(os.path.exists(pci.currentPath), True, "Tar file did not exist after fetching.")
+            self.assertEqual(tarfile.is_tarfile(pci.currentPath), True, "Tar file was not a tar file after fetching.")
         finally:
-            self.tearDownTargetDirectory()
-            utilityFunctions.removeDir(tarDir)
-        self.assertEqual(extracted, True, "Tar file failed to extract.")
-        self.assertEqual(exists, True, "'" + mdTestUtilities.testFileName + "' did not exist after extracting a target with a Tar file as its path.")
+            utilityFunctions.removeDir(tempDir)
 
-    def test_extractBzip(self):
+    def test_fetchBzip(self):
         try:
-            self.setUpTargetDirectory()
-            tarDir, tarName = mdTestUtilities.createBzipFile()
-            tarPath = tarDir + tarName
-            target = mdTarget.Target("BzipTarget", tarPath)
-            extracted = target.extract(self.options, False)
-            exists = os.path.exists(target.path + mdTestUtilities.testFileName)
+            tempDir = mdTestUtilities.makeTempDir()
+            tarDir, tarName = mdTestUtilities.createBzipFile(tempDir)
+            tarPath = os.path.join(tempDir, tarName)
+            pci = createPythonCallInfo(tarPath, os.path.join(tempDir, "output"), os.path.join(tempDir, "download"))
+            pci = mdSteps.fetch(pci)
+            self.assertEqual(pci.success, True, "Local Bzip file failed to fetch.")
+            self.assertEqual(os.path.exists(pci.currentPath), True, "Bzip file did not exist after fetching.")
+            self.assertEqual(tarfile.is_tarfile(pci.currentPath), True, "Bzip file was not a tar file after fetching.")
         finally:
-            self.tearDownTargetDirectory()
-            utilityFunctions.removeDir(tarDir)
-        self.assertEqual(extracted, True, "BZip file failed to extract.")
-        self.assertEqual(exists, True, "'" + mdTestUtilities.testFileName + "' did not exist after extracting a target with a Bzip file as its path.")
+            utilityFunctions.removeDir(tempDir)
 
-    def test_extractGzip(self):
+    def test_fetchGzip(self):
         try:
-            self.setUpTargetDirectory()
-            tarDir, tarName = mdTestUtilities.createGzipFile()
-            tarPath = tarDir + tarName
-            target = mdTarget.Target("GzipTarget", tarPath)
-            extracted = target.extract(self.options, False)
-            exists = os.path.exists(target.path + mdTestUtilities.testFileName)
+            tempDir = mdTestUtilities.makeTempDir()
+            tarDir, tarName = mdTestUtilities.createGzipFile(tempDir)
+            tarPath = os.path.join(tempDir, tarName)
+            pci = createPythonCallInfo(tarPath, os.path.join(tempDir, "output"), os.path.join(tempDir, "download"))
+            pci = mdSteps.fetch(pci)
+            self.assertEqual(pci.success, True, "Local Gzip file failed to fetch.")
+            self.assertEqual(os.path.exists(pci.currentPath), True, "Gzip file did not exist after fetching.")
+            self.assertEqual(tarfile.is_tarfile(pci.currentPath), True, "Gzip file was not a tar file after fetching.")
         finally:
-            self.tearDownTargetDirectory()
-            utilityFunctions.removeDir(tarDir)
-        self.assertEqual(extracted, True, "Gzip file failed to extract.")
-        self.assertEqual(exists, True, "'" + mdTestUtilities.testFileName + "' did not exist after extracting a target with a Gzip file as its path.")
+            utilityFunctions.removeDir(tempDir)
+
+    def test_fetchURL(self):
+        try:
+            tempDir = mdTestUtilities.makeTempDir()
+            tarDir, tarName = mdTestUtilities.createGzipFile(tempDir)
+            urlPath = "http://ftp.gnu.org/gnu/autoconf/autoconf-2.68.tar.gz"
+            pci = createPythonCallInfo(urlPath, os.path.join(tempDir, "output"), os.path.join(tempDir, "download"))
+            pci = mdSteps.fetch(pci)
+            self.assertEqual(pci.success, True, "Gzip file failed to fetch from URL.")
+            self.assertEqual(os.path.exists(pci.currentPath), True, "Gzip file did not exist after fetching.")
+            self.assertEqual(tarfile.is_tarfile(pci.currentPath), True, "Gzip file was not a tar file after fetching.")
+        finally:
+            utilityFunctions.removeDir(tempDir)
 
 def suite():
     suite = unittest.TestSuite()
-    suite.addTest(unittest.makeSuite(Test_mdSvn))
+    suite.addTest(unittest.makeSuite(Test_mdSteps))
     return suite
 
 if __name__ == "__main__":

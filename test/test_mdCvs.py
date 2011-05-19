@@ -35,12 +35,13 @@ class Test_mdCvs(unittest.TestCase):
         if not mdCvs.isCvsInstalled():
             self.fail("Cvs is not installed on your system.  All Cvs tests will fail.")
         #Create repository and test if is cvs repo
-        tempRepo = mdTestUtilities.createCvsRepository()
+        tempDir = mdTestUtilities.makeTempDir()
+        tempRepo = mdTestUtilities.createCvsRepository(tempDir)
         try:
             returnValue = mdCvs.isCvsRepo(tempRepo)
             self.assertEqual(returnValue, True, "mdCvs.isCvsRepo(" + tempRepo + ") should have returned true.")
         finally:
-            utilityFunctions.removeDir(tempRepo)
+            utilityFunctions.removeDir(tempDir)
         #Test if wrong path returns false
         falsePath = "http://foo/wrong/path"
         returnValue = mdCvs.isCvsRepo(falsePath)
@@ -50,14 +51,15 @@ class Test_mdCvs(unittest.TestCase):
         if not mdCvs.isCvsInstalled():
             self.fail("Cvs is not installed on your system.  All Cvs tests will fail.")
         tempDir = mdTestUtilities.makeTempDir()
-        tempRepo = mdTestUtilities.createCvsRepository()
+        tempRepo = mdTestUtilities.createCvsRepository(tempDir)
+        checkedOutRepo = os.path.join(tempDir, "checkedOut")
         try:
-            mdCvs.cvsCheckout(tempRepo, tempDir)
-            returnValue = os.path.exists(tempDir + mdTestUtilities.testFileName)
+            mdCvs.cvsCheckout(tempRepo, checkedOutRepo)
+            returnValue = os.path.exists(os.path.join(checkedOutRepo, mdTestUtilities.testFileName))
             self.assertEqual(returnValue, True, "'" + mdTestUtilities.testFileName + "' did not exist after mdCvs.cvsCheckout(" + tempRepo + ") was called.")
         finally:
             utilityFunctions.removeDir(tempDir)
-            utilityFunctions.removeDir(tempRepo)
+
 
 def suite():
     suite = unittest.TestSuite()

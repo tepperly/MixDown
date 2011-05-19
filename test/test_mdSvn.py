@@ -35,12 +35,13 @@ class Test_mdSvn(unittest.TestCase):
         if not mdSvn.isSvnInstalled():
             self.fail("Svn is not installed on your system.  All Svn tests will fail.")
         #Create repository and test if is svn repo
-        tempRepo = mdTestUtilities.createSvnRepository()
+        tempDir = mdTestUtilities.makeTempDir()
+        tempRepo = mdTestUtilities.createSvnRepository(tempDir)
         try:
             returnValue = mdSvn.isSvnRepo(tempRepo)
             self.assertEqual(returnValue, True, "mdSvn.isSvnRepo(" + tempRepo + ") should have returned true.")
         finally:
-            utilityFunctions.removeDir(tempRepo[6:len(tempRepo)-11]) #"file://tmp/mixdown-*/repo/trunk" -> "//tmp/mixdown-*/"
+            utilityFunctions.removeDir(tempRepo)
         #Test if wrong path returns false
         falsePath = "http://foo/wrong/path"
         returnValue = mdSvn.isSvnRepo(falsePath)
@@ -50,14 +51,14 @@ class Test_mdSvn(unittest.TestCase):
         if not mdSvn.isSvnInstalled():
             self.fail("Svn is not installed on your system.  All Svn tests will fail.")
         tempDir = mdTestUtilities.makeTempDir()
-        tempRepo = mdTestUtilities.createSvnRepository()
+        tempRepo = mdTestUtilities.createSvnRepository(tempDir)
+        checkedOutRepo = os.path.join(tempDir, "checkedOut")
         try:
-            mdSvn.svnCheckout(tempRepo, tempDir)
-            returnValue = os.path.exists(tempDir + mdTestUtilities.testFileName)
+            mdSvn.svnCheckout(tempRepo, checkedOutRepo)
+            returnValue = os.path.exists(os.path.join(checkedOutRepo, mdTestUtilities.testFileName))
             self.assertEqual(returnValue, True, "'" + mdTestUtilities.testFileName + "' did not exist after mdSvn.svnCheckout(" + tempRepo + ") was called.")
         finally:
             utilityFunctions.removeDir(tempDir)
-            utilityFunctions.removeDir(tempRepo[6:len(tempRepo)-11]) #"file://tmp/mixdown-*/repo/trunk" -> "//tmp/mixdown-*/"
 
 def suite():
     suite = unittest.TestSuite()

@@ -36,11 +36,12 @@ class Test_mdHg(unittest.TestCase):
         if not mdHg.isHgInstalled():
             self.fail("Hg is not installed on your system.  All Hg tests will fail.")
         #Create repository and test if is Hg repo
-        path = mdTestUtilities.createHgRepository()
+        tempDir = mdTestUtilities.makeTempDir()
+        path = mdTestUtilities.createHgRepository(tempDir)
         try:
             self.assertTrue(mdHg.isHgRepo(path), "mdHg.isHgRepo(" + path + ") should have returned true.")
         finally:
-            utilityFunctions.removeDir(path)
+            utilityFunctions.removeDir(tempDir)
         #Test if wrong path returns false
         falsePath = "/foo/wrong/path"
         self.assertFalse(mdHg.isHgRepo(falsePath), "mdHg.isHgRepo(" + falsePath + ") should have returned false.")
@@ -64,10 +65,11 @@ class Test_mdHg(unittest.TestCase):
 
         #Local file
         try:
-            tarDir, path = mdTestUtilities.createBzipFile()
+            tempDir = mdTestUtilities.makeTempDir()
+            tarDir, path = mdTestUtilities.createBzipFile(tempDir)
             self.assertFalse(mdHg.isHgRepo(path), "mdHg.isHgRepo(" + path + ") should have returned false.")
         finally:
-            utilityFunctions.removeDir(tarDir)
+            utilityFunctions.removeDir(tempDir)
 
         #Remote file
         path = "http://www.eng.lsu.edu/mirrors/apache//apr/apr-util-1.3.10.tar.bz2"
@@ -80,10 +82,11 @@ class Test_mdHg(unittest.TestCase):
 
         #Local file
         try:
-            tarDir, path = mdTestUtilities.createGzipFile()
+            tempDir = mdTestUtilities.makeTempDir()
+            tarDir, path = mdTestUtilities.createGzipFile(tempDir)
             self.assertFalse(mdHg.isHgRepo(path), "mdHg.isHgRepo(" + path + ") should have returned false.")
         finally:
-            utilityFunctions.removeDir(tarDir)
+            utilityFunctions.removeDir(tempDir)
 
         #Remote file
         path = "http://www.eng.lsu.edu/mirrors/apache//apr/apr-util-1.3.10.tar.gz"
@@ -93,12 +96,13 @@ class Test_mdHg(unittest.TestCase):
         if not mdHg.isHgInstalled():
             self.fail("Hg is not installed on your system.  All Hg tests will fail.")
         #Create repository and test if is hg repo
-        tempRepo = mdTestUtilities.createHgRepository()
+        tempDir = mdTestUtilities.makeTempDir()
+        tempRepo = mdTestUtilities.createHgRepository(tempDir)
         try:
             returnValue = mdHg.isHgRepo(tempRepo)
             self.assertEqual(returnValue, True, "mdHg.isHgRepo(" + tempRepo + ") should have returned true.")
         finally:
-            utilityFunctions.removeDir(tempRepo)
+            utilityFunctions.removeDir(tempDir)
         #Test if wrong path returns false
         falsePath = "http://foo/wrong/path"
         returnValue = mdHg.isHgRepo(falsePath)
@@ -108,14 +112,14 @@ class Test_mdHg(unittest.TestCase):
         if not mdHg.isHgInstalled():
             self.fail("Hg is not installed on your system.  All Hg tests will fail.")
         tempDir = mdTestUtilities.makeTempDir()
-        tempRepo = mdTestUtilities.createHgRepository()
+        tempRepo = mdTestUtilities.createHgRepository(tempDir)
+        checkedOutRepo = os.path.join(tempDir, "checkedOut")
         try:
-            mdHg.hgCheckout(tempRepo, tempDir)
-            returnValue = os.path.exists(tempDir + "testFile")
+            mdHg.hgCheckout(tempRepo, checkedOutRepo)
+            returnValue = os.path.exists(os.path.join(checkedOutRepo, "testFile"))
             self.assertEqual(returnValue, True, "'testFile' did not exist after mdHg.hgCheckout(" + tempRepo + ") was called.")
         finally:
             utilityFunctions.removeDir(tempDir)
-            utilityFunctions.removeDir(tempRepo)
 
 def suite():
     suite = unittest.TestSuite()

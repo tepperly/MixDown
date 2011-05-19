@@ -23,7 +23,7 @@
 # Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 
 import sys, unittest
-import test_mdAutoTools, test_mdCMake, test_mdCvs, test_mdGit, test_mdHg, test_mdSvn, test_mdProject, test_mdTarget
+import test_mdAutoTools, test_mdCMake, test_mdCvs, test_mdGit, test_mdHg, test_mdSteps, test_mdSvn, test_mdProject, test_mdTarget
 
 if not ".." in sys.path:
     sys.path.append("..")
@@ -37,7 +37,7 @@ def main():
     #suite.addTest(test_mdCvs.suite())
     suite.addTest(test_mdGit.suite())
     suite.addTest(test_mdHg.suite())
-    #suite.addTest(test_mdSteps.suite())
+    suite.addTest(test_mdSteps.suite())
     suite.addTest(test_mdSvn.suite())
     suite.addTest(test_mdProject.suite())
     suite.addTest(test_mdTarget.suite())
