@@ -36,7 +36,6 @@ def main():
         targetsToImport = options.processCommandline(sys.argv)
 
         timeStarted = time.time()
-	print options.importer
 
         if options.importer:
             project = mdImporter.importTargets(options, targetsToImport)
