@@ -4,8 +4,11 @@ MixDown
 MixDown is a meta-build tool that makes it easier to build software packages that have multiple dependencies. It uses a simple input file format to describe package information, and uses a series of heuristics to automatically generate an initial problem input file from a collection of tar, zip files, or download URLs. 
 
 
-Example
--------
+Examples
+--------
+
+Subversion
+----------
 
 Here's how you would use MixDown to build subversion. First, create an initial MixDown build file using information from the source tarballs of subversion and its dependencies (the order doesn't matter):
 
@@ -22,6 +25,19 @@ Next, execute the build:
 
     MixDown subversion-1.6.12.md
 
+Git
+---
+
+Here's how you can use MixDown to build Git.
+
+     MixDown --import \
+     http://kernel.org/pub/software/scm/git/git-1.7.5.1.tar.bz2
+
+This will create a MixDown build file called git-1.7.5.1.md.
+
+Next, execute the build:
+
+     MixDown git-1.7.5.1.md
 
 Usage
 -----
