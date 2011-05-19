@@ -75,8 +75,8 @@ def main():
                 message = "Project " + project.name
             if succeeded:
                 message += " succeeded."
-		if not options.importer:
-			Logger().writeMessage("\n" + project.name + " has been built in " + os.getcwd() + "/" + options.buildDir + "\n")
+	        if not options.importer:
+	            Logger().writeMessage("\n" + project.name + " has been built in " + os.getcwd() + "/" + options.buildDir + "\n")
             else:
                 message += " failed."
         message = "Total time " + secondsToHMS(timeElapsed) + "\n" + message + "\n"
