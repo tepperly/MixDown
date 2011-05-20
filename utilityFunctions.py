@@ -20,7 +20,7 @@
 # along with this program; if not, write to the Free Software Foundation,
 # Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 
-import os, Queue, shutil, sys, tarfile, tempfile, urllib2, subprocess
+import os, Queue, re, shutil, sys, tarfile, tempfile, urllib2, subprocess
 
 def executeCommand(command, args="", workingDirectory="", verbose=False, exitOnError=False):
     try:
@@ -181,8 +181,18 @@ def untar(tarPath, outPath = "", stripDir=False):
         shutil.move(src, outPath)
 
 def URLToFilename(url):
-    filename = url[(str.rfind(url, "/")+1):]
+    if url.endswith("/"):
+        url = url[:1]
+    #This works around sourceforge not having the filename last in the url
+    pattern = r"https?://(www\.)?((sf)|(sourceforge))\.net/.*/(?P<filename>.+((\.tar.gz)|(\.tar)|(\.tar.bz2)|(\.tgz)|(\.tbz)|(\.tb2)))/download"
+    regex = re.compile(pattern)
+    match = regex.search(url)
+    if match != None:
+        fileName = match.group("filename")
+        if fileName != None and fileName != "":
+            return fileName
+
+    fileName = url[(url.rfind("/")+1):]
     if url == "" or file == "":
         return "_"
-    return filename
-
+    return fileName

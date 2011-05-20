@@ -24,6 +24,7 @@
 
 import sys, unittest
 import test_mdAutoTools, test_mdCMake, test_mdCvs, test_mdGit, test_mdHg, test_mdSteps, test_mdSvn, test_mdProject, test_mdTarget
+import test_utilityFunctions
 
 if not ".." in sys.path:
     sys.path.append("..")
@@ -41,6 +42,7 @@ def main():
     suite.addTest(test_mdSvn.suite())
     suite.addTest(test_mdProject.suite())
     suite.addTest(test_mdTarget.suite())
+    suite.addTest(test_utilityFunctions.suite())
 
     unittest.TextTestRunner(verbosity=2).run(suite)
 
