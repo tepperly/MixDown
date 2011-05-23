@@ -21,7 +21,7 @@
 # Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 
 import os, re, shutil, sys, tarfile, tempfile, urllib
-import mdAutoTools, mdCMake, mdCommands, mdOptions, mdProject, mdStrings, mdTarget, utilityFunctions
+import mdAutoTools, mdCMake, mdCommands, mdMake, mdOptions, mdProject, mdStrings, mdTarget, utilityFunctions
 
 from mdLogger import *
 
@@ -58,11 +58,21 @@ def importTargets(options, targetsToImport):
         elif mdAutoTools.isAutoToolsProject(target.path):
             Logger().writeMessage("Auto Tools project found...", target.name)
 
-            Logger().writeMessage("Generating build files...", target.name)
-            utilityFunctions.executeSubProcess(mdAutoTools.getPreconfigureCommand(), target.path, exitOnError=True)
+            command = mdAutoTools.getPreconfigureCommand(target.path)
+            if command != "":
+                Logger().writeMessage("Generating build files...", target.name)
+                utilityFunctions.executeSubProcess(command, target.path, exitOnError=True)
 
             Logger().writeMessage("Analyzing for dependancies...", target.name)
             possibleDeps = mdAutoTools.getDependancies(target.path, target.name)
+        elif mdMake.isMakeProject(target.path):
+            Logger().writeMessage("Make project found...", target.name)
+
+            Logger().writeMessage("Cannot determine dependancies from Make projects.", target.name)
+            possibleDeps = []
+        else:
+            Logger().writeMessage("Unknown build system found.  Cannot determine dependancies or build commands.")
+            possibleDeps = []
 
         #Find actual dependancies
         for possibleDependancy in possibleDeps:
