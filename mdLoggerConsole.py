@@ -55,11 +55,11 @@ class LoggerConsole(mdLogger.LoggerBase):
 
     def reportSkipped(self, targetName="", targetStep="", reason=""):
         sys.stderr.flush()
-        sys.stdout.write(self.__formatMessagePrefix(targetName, targetStep) + reason + ": Skipped...\n")
+        sys.stdout.write(self.__formatMessagePrefix(targetName, targetStep) + reason + "Skipped...\n")
 
     def reportStart(self, targetName="", targetStep=""):
         sys.stderr.flush()
-        sys.stdout.write(self.__formatMessagePrefix(targetName, targetStep) + ": Starting...\n")
+        sys.stdout.write(self.__formatMessagePrefix(targetName, targetStep) + "Starting...\n")
 
     def reportSuccess(self, targetName="", targetStep="", timeInSeconds=0):
         sys.stderr.flush()

@@ -84,7 +84,7 @@ class LoggerFile(mdLogger.LoggerBase):
             sys.exit()
 
     def reportSkipped(self, targetName="", targetStep="", reason=""):
-        message = self.__formatMessagePrefix(targetName, targetStep) + reason + ": Skipped.\n"
+        message = self.__formatMessagePrefix(targetName, targetStep) + reason + "Skipped.\n"
         sys.stderr.flush()
         sys.stdout.write(message)
         self.__lookupOutFile(targetName, targetStep).write(message)
