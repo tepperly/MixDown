@@ -25,8 +25,9 @@ import os, re, mdMake, mdStrings, mdTarget, utilityFunctions
 from mdLogger import *
 
 def isAutoToolsProject(path):
-    path = utilityFunctions.includeTrailingPathDelimiter(path)
-    if os.path.exists(path + "configure") or os.path.exists(path + "configure.ac") or os.path.exists(path + "configure.in"):
+    if os.path.exists(os.path.join(path, "configure")) or\
+       os.path.exists(os.path.join(path, "configure.ac")) or\
+       os.path.exists(os.path.join(path, "configure.in")):
         return True
     return False
 
@@ -40,21 +41,12 @@ def getInstallDir(command):
 
 def getDependancies(path, name="", verbose=True):
     deps = []
-    if not os.path.isdir(path):
+    if not os.path.isdir(path) or not os.path.exists(os.path.join(path, "configure")):
         return None
-    if not os.path.exists(path + "/configure.ac") and not os.path.exists(path + "/configure"):
-        return None
-
-    if os.path.exists(path + "/configure.ac"):
-        if verbose:
-            Logger().writeMessage("Running autoreconf to create build files...", name)
-        returnCode = utilityFunctions.executeSubProcess("autoreconf -i", path)
-        if returnCode != 0:
-            return None
 
     if verbose:
         Logger().writeMessage("Analyzing 'configure --help' output", name)
-    helpFileName = path + "/configure_help.log"
+    helpFileName = os.path.join(path, "configure_help.log")
     helpFile = open(helpFileName, "w")
     try:
         returnCode = utilityFunctions.executeSubProcess("./configure --help", path, helpFile.fileno())
@@ -79,8 +71,11 @@ def getDependancies(path, name="", verbose=True):
     return deps
 
 # Commands
-def getPreconfigureCommand():
-    return "autoreconf -i"
+def getPreconfigureCommand(path):
+    if os.path.exists(os.path.join(path, "configure.ac")) or os.path.exists(os.path.join(path, "configure.in")):
+        return "autoreconf -i"
+    else:
+        return ""
 
 def getConfigureCommand(target):
     command = "./configure --prefix=$(" + mdStrings.mdDefinePrefix + ")"
