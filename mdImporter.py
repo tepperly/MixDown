@@ -45,6 +45,8 @@ def importTargets(options, targetsToImport):
             return None
         if not mdCommands.buildStepActor("unpack", target, options):
             return None
+            
+        possibleDeps = []
 
         #Generate build files and find possible dependancies
         if mdCMake.isCMakeProject(target.path):
