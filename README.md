@@ -35,9 +35,9 @@ Here's how you can use MixDown to build Git.
 
 This will create a MixDown build file called git-1.7.5.1.md.
 
-Next, execute the build:
+Next, execute the build. By default, git will try to install itself in /usr/local, but this can be overridden with the -p flag. Here we install it into ./testPrefix instead.
 
-     MixDown git-1.7.5.1.md
+     MixDown git-1.7.5.1.md -ptestPrefix
 
 Usage
 -----
