@@ -71,17 +71,18 @@ def callPythonCommand(namespace, function, target, options):
         target.pythonCallInfo.success = False
         target.pythonCallInfo.currentPath = target.path
         target.pythonCallInfo.outputPath = target.outputPath
+        target.pythonCallInfo.outputPathSpecified = target.outputPathSpecified
         target.pythonCallInfo.downloadDir = options.downloadDir
         pythonCallInfo = getattr(importedNamespace, function)(target.pythonCallInfo)
     except AttributeError as e:
-        Logger().writeError(namespace + " does not have a function called '" + function + "'")
-        Logger().writeError(e)
+        Logger().writeError(str(e))
         return False
 
     if not pythonCallInfo.success:
         return False
     target.path = pythonCallInfo.currentPath
     target.outputPath = pythonCallInfo.outputPath
+    target.outputPathSpecified = pythonCallInfo.outputPathSpecified
     options.downloadDir = pythonCallInfo.downloadDir
     target.pythonCallInfo = pythonCallInfo
     return True
@@ -91,5 +92,6 @@ class PythonCallInfo:
         self.success = False
         self.currentPath = ""
         self.outputPath = ""
+        self.outputPathSpecified = False
         self.downloadDir = ""
         self.logger = Logger()
