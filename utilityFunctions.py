@@ -184,7 +184,7 @@ def URLToFilename(url):
     if url.endswith("/"):
         url = url[:1]
     #This works around sourceforge not having the filename last in the url
-    pattern = r"https?://(www\.)?((sf)|(sourceforge))\.net/.*/(?P<filename>.+((\.tar.gz)|(\.tar)|(\.tar.bz2)|(\.tgz)|(\.tbz)|(\.tb2)))/download"
+    pattern = r"https?://(www\.)?((sf)|(sourceforge))\.net/.*/(?P<filename>[^/]+((\.tar.gz)|(\.tar)|(\.tar.bz2)|(\.tgz)|(\.tbz)|(\.tb2)|(\.zip)))/download"
     regex = re.compile(pattern)
     match = regex.search(url)
     if match != None:
