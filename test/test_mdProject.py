@@ -540,6 +540,7 @@ class Test_mdProject(unittest.TestCase):
             projectFilePath = mdTestUtilities.makeTempFile(projectFileContents, ".md")
             project = mdProject.Project(projectFilePath)
             options = mdOptions.Options()
+            options.buildDir = "." #Prevent test from making a mdBuild in the test directory
             self.assertTrue(project.read(), "Project file could not be read")
             self.assertTrue(project.examine(options), "Project failed to examine")
             self.assertEquals(project.getTarget("TestCaseA").dependancyDepth, 0, "TestCaseA had wrong dependancy depth")
@@ -565,6 +566,7 @@ class Test_mdProject(unittest.TestCase):
             projectFilePath = mdTestUtilities.makeTempFile(projectFileContents, ".md")
             project = mdProject.Project(projectFilePath)
             options = mdOptions.Options()
+            options.buildDir = "." #Prevent test from making a mdBuild in the test directory
             self.assertTrue(project.read(), "Project file could not be read")
             self.assertTrue(project.examine(options), "Project failed to examine")
             self.assertEquals(project.getTarget("TestCaseA").dependancyDepth, 0, "TestCaseA had wrong dependancy depth")
@@ -594,6 +596,7 @@ class Test_mdProject(unittest.TestCase):
             projectFilePath = mdTestUtilities.makeTempFile(projectFileContents, ".md")
             project = mdProject.Project(projectFilePath)
             options = mdOptions.Options()
+            options.buildDir = "." #Prevent test from making a mdBuild in the test directory
             self.assertTrue(project.read(), "Project file could not be read")
             self.assertTrue(project.examine(options), "Project failed to examine")
             self.assertEquals(project.getTarget("TestCaseA").dependancyDepth, 0, "TestCaseA had wrong dependancy depth")
@@ -627,6 +630,7 @@ class Test_mdProject(unittest.TestCase):
             projectFilePath = mdTestUtilities.makeTempFile(projectFileContents, ".md")
             project = mdProject.Project(projectFilePath)
             options = mdOptions.Options()
+            options.buildDir = "." #Prevent test from making a mdBuild in the test directory
             self.assertTrue(project.read(), "Project file could not be read")
             self.assertTrue(project.examine(options), "Project failed to examine")
             self.assertEquals(project.getTarget("A").dependancyDepth, 0, "A had wrong dependancy depth")
@@ -657,6 +661,7 @@ class Test_mdProject(unittest.TestCase):
             projectFilePath = mdTestUtilities.makeTempFile(projectFileContents, ".md")
             project = mdProject.Project(projectFilePath)
             options = mdOptions.Options()
+            options.buildDir = "." #Prevent test from making a mdBuild in the test directory
             self.assertTrue(project.read(), "Project file could not be read")
             self.assertTrue(project.examine(options), "Project failed to examine")
             self.assertEquals(project.getTarget("A").dependancyDepth, 0, "A had wrong dependancy depth")
@@ -689,6 +694,7 @@ class Test_mdProject(unittest.TestCase):
             projectFilePath = mdTestUtilities.makeTempFile(projectFileContents, ".md")
             project = mdProject.Project(projectFilePath)
             options = mdOptions.Options()
+            options.buildDir = "." #Prevent test from making a mdBuild in the test directory
             self.assertTrue(project.read(), "Project file could not be read")
             self.assertTrue(project.examine(options), "Project failed to examine")
             self.assertEquals(project.getTarget("A").dependancyDepth, 0, "A had wrong dependancy depth")
