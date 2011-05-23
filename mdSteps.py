@@ -51,7 +51,7 @@ def fetch(pythonCallInfo):
         pythonCallInfo.currentPath = filenamePath
         pythonCallInfo.success = True
     elif os.path.isdir(pythonCallInfo.currentPath):
-        if pythonCallInfo.outputSpecified:
+        if pythonCallInfo.outputPathSpecified:
             distutils.dir_util.copy_tree(pythonCallInfo.currentPath, pythonCallInfo.outputPath)
             pythonCallInfo.currentPath = self.pythonCallInfo.outputPath
         pythonCallInfo.success = True
