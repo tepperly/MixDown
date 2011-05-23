@@ -104,45 +104,40 @@ def __getPatchCommand(target):
 
 def __getPreconfigureCommand(target):
     command = ""
-    path = utilityFunctions.includeTrailingPathDelimiter(target.path)
-    if mdCMake.isCMakeProject(path):
+    if mdCMake.isCMakeProject(target.path):
         command = mdCMake.getPreconfigureCommand()
-    elif os.path.exists(path + "autogen.sh"):
+    elif os.path.exists(os.path.join(target.path, "autogen.sh")):
         command = "./autogen.sh"
-    elif os.path.exists(path + "buildconf"):
+    elif os.path.exists(os.path.join(target.path, "buildconf")):
         command = "./buildconf"
-    elif mdAutoTools.isAutoToolsProject(path):
-        command = mdAutoTools.getPreconfigureCommand()
+    elif mdAutoTools.isAutoToolsProject(target.path):
+        command = mdAutoTools.getPreconfigureCommand(target.path)
     return command
 
 def __getConfigureCommand(target):
     command = ""
-    path = utilityFunctions.includeTrailingPathDelimiter(target.path)
-    if mdCMake.isCMakeProject(path):
+    if mdCMake.isCMakeProject(target.path):
         command = mdCMake.getConfigureCommand()
-    elif os.path.exists(path + "Configure"):
+    elif os.path.exists(os.path.join(target.path, "Configure")):
         command = "./Configure"
-    elif mdAutoTools.isAutoToolsProject(path):
+    elif mdAutoTools.isAutoToolsProject(target.path):
         command = mdAutoTools.getConfigureCommand(target)
     return command
 
 def __getBuildCommand(target):
     command = ""
-    path = utilityFunctions.includeTrailingPathDelimiter(target.path)
-    if mdMake.isMakeProject(path):
+    if mdMake.isMakeProject(target.path):
         command = mdMake.getBuildCommand()
     return command
 
 def __getInstallCommand(target):
     command = ""
-    path = utilityFunctions.includeTrailingPathDelimiter(target.path)
-    if mdMake.isMakeProject(path):
+    if mdMake.isMakeProject(target.path):
         command = mdMake.getInstallCommand()
     return command
 
 def __getCleanCommand(target):
     command = ""
-    path = utilityFunctions.includeTrailingPathDelimiter(target.path)
-    if mdMake.isMakeProject(path):
+    if mdMake.isMakeProject(target.path):
         command = mdMake.getCleanCommand()
     return command
