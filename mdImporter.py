@@ -49,25 +49,16 @@ def importTargets(options, targetsToImport):
         #Generate build files and find possible dependancies
         if mdCMake.isCMakeProject(target.path):
             Logger().writeMessage("CMake project found...", target.name)
-
-            Logger().writeMessage("Generating build files...", target.name)
-            utilityFunctions.executeSubProcess(mdCMake.getConfigureCommand(), target.path, exitOnError=True)
-
             Logger().writeMessage("Analyzing for dependancies...", target.name)
             possibleDeps = mdCMake.getDependancies(target.path, target.name)
         elif mdAutoTools.isAutoToolsProject(target.path):
             Logger().writeMessage("Auto Tools project found...", target.name)
-
-            command = mdAutoTools.getPreconfigureCommand(target.path)
-            if command != "":
-                Logger().writeMessage("Generating build files...", target.name)
-                utilityFunctions.executeSubProcess(command, target.path, exitOnError=True)
-
+            if not mdAutoTools.generateBuildFiles(target.path, target.name):
+                return None
             Logger().writeMessage("Analyzing for dependancies...", target.name)
             possibleDeps = mdAutoTools.getDependancies(target.path, target.name)
         elif mdMake.isMakeProject(target.path):
             Logger().writeMessage("Make project found...", target.name)
-
             Logger().writeMessage("Cannot determine dependancies from Make projects.", target.name)
             possibleDeps = []
         else:
