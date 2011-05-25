@@ -27,29 +27,77 @@ if not ".." in sys.path:
 import mdCvs, mdSvn, mdGit, mdHg, mdLogger, mdOptions, mdTarget, utilityFunctions
 
 class Test_mdTarget(unittest.TestCase):
-    def test_validate(self):
+    def test_determineOutputPath1(self):
         options = mdOptions.Options()
+        target = mdTarget.Target("foo", "/bar/paz")
+        target.outputPathSpecified = True
+        target.outputPath = "/outputPath"
+        target.outputPath = target.determineOutputPath(options)
+        self.assertEquals(target.outputPath, "/outputPath", "Specified output path was overwritten by determineOutputPath.")
 
+    def test_determineOutputPath2(self):
+        options = mdOptions.Options()
+        target = mdTarget.Target("foo", "/bar/paz")
+        target.outputPathSpecified = False
+        target.outputPath = "/outputPath/"
+        target.outputPath = target.determineOutputPath(options)
+        self.assertEquals(target.outputPath, "mdBuild/foo", "Unspecified output path was not overwritten by determineOutputPath.")
+
+    def test_determineOutputPath3(self):
+        try:
+            tempDir = mdTestUtilities.makeTempDir()
+            targetDir = os.path.join(tempDir, "targetDir")
+            os.makedirs(targetDir)
+            options = mdOptions.Options()
+            options.cleanTargets = True
+            target = mdTarget.Target("foo", targetDir)
+            target.outputPath = target.determineOutputPath(options)
+            self.assertEquals(target.outputPath, targetDir, "During cleaning found target path should not be overwritten.")
+        finally:
+            utilityFunctions.removeDir(tempDir)
+
+    def test_determineOutputPath4(self):
+        try:
+            tempDir = mdTestUtilities.makeTempDir()
+            targetDir = os.path.join(tempDir, "foo")
+            os.makedirs(targetDir)
+            options = mdOptions.Options()
+            options.cleanTargets = True
+            options.buildDir = tempDir
+            target = mdTarget.Target("foo", targetDir)
+            target.outputPath = target.determineOutputPath(options)
+            self.assertEquals(target.outputPath, targetDir, "During cleaning found target path should not be overwritten.")
+        finally:
+            utilityFunctions.removeDir(tempDir)
+
+    def test_validate1(self):
+        options = mdOptions.Options()
         target = mdTarget.Target("", "")
-        self.assertFalse(target.validate(options), "False positive returned when trying to validate target.")
+        self.assertEquals(target.validate(options), False, "False positive returned when trying to validate target.")
 
+    def test_validate2(self):
+        options = mdOptions.Options()
         target.name = "foo"
         target.path = ""
-        self.assertFalse(target.validate(options), "False positive returned when trying to validate target.")
+        self.assertEquals(target.validate(options), False, "False positive returned when trying to validate target.")
 
+    def test_validate3(self):
+        options = mdOptions.Options()
         target.name = ""
         target.path = "/some/path"
-        self.assertFalse(target.validate(options), "False positive returned when trying to validate target.")
+        self.assertEquals(target.validate(options), False, "False positive returned when trying to validate target.")
 
+    def test_validate4(self):
+        options = mdOptions.Options()
         target.name = "foo"
         target.path = "/some/path"
-        self.assertTrue(target.validate(options), "Target should have validated.")
+        self.assertEquals(target.validate(options), True, "Target should have validated.")
 
     def test_steps(self):
         target = mdTarget.Target("foo", "/some/path")
         target.skipSteps = ["b"]
-        self.assertFalse(target.hasStep("b"), "Specified skipped step was not skipped")
-        self.assertTrue(target.hasStep("a"), "Specified skipped step was not skipped")
+        self.assertEquals(target.hasStep("b"), False, "Specified skipped step was not skipped")
+        self.assertEquals(target.hasStep("a"), True, "Specified skipped step was not skipped")
 
     def test_examine(self):
         options = mdOptions.Options()
