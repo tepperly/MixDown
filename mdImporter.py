@@ -53,7 +53,7 @@ def importTargets(options, targetsToImport):
             possibleDeps = mdCMake.getDependancies(target.path, target.name)
         elif mdAutoTools.isAutoToolsProject(target.path):
             Logger().writeMessage("Auto Tools project found...", target.name)
-            if not mdAutoTools.generateBuildFiles(target.path, target.name):
+            if not mdAutoTools.generateConfigureFiles(target.path, target.name):
                 return None
             Logger().writeMessage("Analyzing for dependancies...", target.name)
             possibleDeps = mdAutoTools.getDependancies(target.path, target.name)
