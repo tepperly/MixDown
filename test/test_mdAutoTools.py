@@ -43,7 +43,7 @@ class Test_mdAutoTools(unittest.TestCase):
     def test_isAutoToolsProject2(self):
         try:
             tempDir = mdTestUtilities.makeTempDir()
-            tempFile = utilityFunctions.includeTrailingPathDelimiter(tempDir) + "configure"
+            tempFile = os.path.join(tempDir, "configure")
             mdTestUtilities.createBlankFile(tempFile)
             self.assertTrue(mdAutoTools.isAutoToolsProject(tempDir), "Failed to detect AutoTools project.")
         finally:
