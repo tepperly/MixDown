@@ -80,14 +80,6 @@ class Options:
             value = ""
         return value
 
-    @property
-    def buildDir(self, value):
-        self.buildDir = utilityFunctions.includeTrailingPathDelimiter(value)
-
-    @property
-    def downloadDir(self, value):
-        self.downloadDir = utilityFunctions.includeTrailingPathDelimiter(value)
-
     def expandDefines(self, inString):
         expandedString = inString
         loopCount = 0
@@ -124,14 +116,12 @@ class Options:
             Logger().writeError("Cannot create build directory, a file by the same name already exists", exitProgram=True)
         elif not os.path.isdir(self.buildDir):
             os.makedirs(self.buildDir)
-        self.buildDir = utilityFunctions.includeTrailingPathDelimiter(self.buildDir)
 
     def validateDownloadDir(self):
         if os.path.isfile(self.downloadDir):
             Logger().writeError("Cannot create download directory, a file by the same name already exists", exitProgram=True)
         elif not os.path.isdir(self.downloadDir):
             os.makedirs(self.downloadDir)
-        self.downloadDir = utilityFunctions.includeTrailingPathDelimiter(self.downloadDir)
 
     def __processImportCommandline(self, commandline):
         if len(commandline) < 3:

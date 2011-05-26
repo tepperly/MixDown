@@ -75,7 +75,7 @@ def getBasename(path):
     return basename
 
 def haveWriteAccess(path):
-    highestExistingDir = includeTrailingPathDelimiter(path)
+    highestExistingDir = path
     while highestExistingDir != "/":
         if os.path.exists(highestExistingDir):
             break
@@ -85,11 +85,6 @@ def haveWriteAccess(path):
     if os.access(highestExistingDir, os.W_OK):
         return True
     return False
-
-def includeTrailingPathDelimiter(path):
-    if (not path[len(path)-1:] == '/') and (not os.path.isfile(path)):
-        return path + '/'
-    return path
 
 def isURL(url):
     try:
@@ -156,11 +151,6 @@ def stripItemsInList(value):
         retList.append(str.strip(item))
     return retList
 
-def stripTrailingPathDelimiter(path):
-    if (path[len(path)-1:] == '/'):
-        return path[:len(path)-1]
-    return path
-
 def untar(tarPath, outPath = "", stripDir=False):
     if stripDir:
         unTarOutpath = tempfile.mkdtemp()
@@ -175,9 +165,9 @@ def untar(tarPath, outPath = "", stripDir=False):
     if stripDir:
         dirList = os.listdir(unTarOutpath)
         if len(dirList) == 1:
-            src = includeTrailingPathDelimiter(unTarOutpath) + dirList[0]
+            src = os.path.join(unTarOutpath, dirList[0])
         else:
-            src = includeTrailingPathDelimiter(unTarOutpath)
+            src = unTarOutpath
         shutil.move(src, outPath)
 
 def URLToFilename(url):

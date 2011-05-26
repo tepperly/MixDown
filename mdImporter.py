@@ -31,8 +31,8 @@ def importTargets(options, targetsToImport):
     finalTargets = []
     ignoredTargets = []
 
-    options.tempDir = utilityFunctions.includeTrailingPathDelimiter(tempfile.mkdtemp(prefix="mixdown-"))
-    options.downloadDir = utilityFunctions.includeTrailingPathDelimiter(options.tempDir + "mdDownloads")
+    options.tempDir = tempfile.mkdtemp(prefix="mixdown-")
+    options.downloadDir = os.path.join(options.tempDir, "mdDownloads")
 
     while len(targetsToImport) != 0:
         target = targetsToImport.pop(0)
