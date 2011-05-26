@@ -35,12 +35,13 @@ class LoggerConsole(mdLogger.LoggerBase):
             return "Error: %s (line %d): %s\n" % (filePath, lineNumber, message)
 
     def __formatMessagePrefix(self, targetName="", targetStep=""):
-        messagePrefix = ""
-        if targetName != "":
-            messagePrefix = targetName + ": "
-        if targetStep != "":
-            messagePrefix += targetStep + ": "
-        return messagePrefix
+        if targetName == "" and targetStep == "":
+            return ""
+        if targetName != "" and targetStep != "":
+            return "%s: %s: " % (targetName, targetStep.capitalize())
+        elif targetStep == "":
+            return "%s: " % (targetName)
+        return ""
 
     def writeMessage(self, message, targetName="", targetStep=""):
         sys.stderr.flush()
@@ -48,14 +49,14 @@ class LoggerConsole(mdLogger.LoggerBase):
 
     def writeError(self, message, targetName="", targetStep="", filePath="", lineNumber=0, exitProgram=False):
         sys.stdout.flush()
-        sys.stderr.write(self.__formatErrorMessage(self.__formatMessagePrefix(targetName, targetStep) + message, filePath, lineNumber))
+        sys.stderr.write(self.__formatErrorMessage(self.__formatMessagePrefix(targetName, targetStep) + message , filePath, lineNumber))
         sys.stderr.flush()
         if exitProgram:
             sys.exit()
 
     def reportSkipped(self, targetName="", targetStep="", reason=""):
         sys.stderr.flush()
-        sys.stdout.write(self.__formatMessagePrefix(targetName, targetStep) + reason + "Skipped...\n")
+        sys.stdout.write(self.__formatMessagePrefix(targetName, targetStep) + reason + "Skipped.\n")
 
     def reportStart(self, targetName="", targetStep=""):
         sys.stderr.flush()
@@ -64,9 +65,9 @@ class LoggerConsole(mdLogger.LoggerBase):
     def reportSuccess(self, targetName="", targetStep="", timeInSeconds=0):
         sys.stderr.flush()
         messagePrefix = self.__formatMessagePrefix(targetName, targetStep)
-        message = messagePrefix + ": Succeeded\n"
+        message = messagePrefix + "Succeeded\n"
         if timeInSeconds != 0:
-            message += messagePrefix + ": Time " + mdLogger.secondsToHMS(timeInSeconds) + "\n"
+            message += messagePrefix + "Time " + mdLogger.secondsToHMS(timeInSeconds) + "\n"
         sys.stdout.write(message)
 
     def reportFailure(self, targetName="", targetStep="", timeInSeconds=0, returnCode=0, exitProgram=False):
@@ -74,7 +75,7 @@ class LoggerConsole(mdLogger.LoggerBase):
         messagePrefix = self.__formatMessagePrefix(targetName, targetStep)
         message = self.__formatErrorMessage(messagePrefix + "Failed with error code " + str(returnCode) + ".")
         if timeInSeconds != 0:
-            message += messagePrefix + ": Time " + mdLogger.secondsToHMS(timeInSeconds) + "\n"
+            message += messagePrefix + "Time " + mdLogger.secondsToHMS(timeInSeconds) + "\n"
         sys.stderr.write(message)
         sys.stderr.flush()
         if exitProgram:

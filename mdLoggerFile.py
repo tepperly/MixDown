@@ -20,7 +20,7 @@
 # along with this program; if not, write to the Free Software Foundation,
 # Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 
-import mdLogger, os, sys, utilityFunctions
+import mdLogger, os, sys
 
 class LoggerFile(mdLogger.LoggerBase):
     def __init__(self, logOutputDir=""):
@@ -39,12 +39,13 @@ class LoggerFile(mdLogger.LoggerBase):
             return "\nError: %s (line %d): %s\n" % (filePath, lineNumber, message)
 
     def __formatMessagePrefix(self, targetName="", targetStep=""):
-        messagePrefix = ""
-        if targetName != "":
-            messagePrefix = targetName + ": "
-        if targetStep != "":
-            messagePrefix += targetStep.capitalize() + ": "
-        return messagePrefix
+        if targetName == "" and targetStep == "":
+            return ""
+        if targetName != "" and targetStep != "":
+            return "%s: %s: " % (targetName, targetStep.capitalize())
+        elif targetStep == "":
+            return "%s: " % (targetName)
+        return ""
 
     def close(self):
         for key in self.errorFds.keys():
@@ -53,7 +54,7 @@ class LoggerFile(mdLogger.LoggerBase):
             self.outFds[key].close()
 
     def __lookupOutFileName(self, targetName, targetStep):
-        return utilityFunctions.includeTrailingPathDelimiter(self.logOutputDir) + targetName + "_" + targetStep + ".log"
+        return os.path.join(self.logOutputDir, targetName + "_" + targetStep + ".log")
 
     def __lookupOutFile(self, targetName, targetStep):
         key = str.lower(targetName + targetStep)
@@ -84,7 +85,11 @@ class LoggerFile(mdLogger.LoggerBase):
             sys.exit()
 
     def reportSkipped(self, targetName="", targetStep="", reason=""):
-        message = self.__formatMessagePrefix(targetName, targetStep) + reason + "Skipped.\n"
+        messagePrefix = self.__formatMessagePrefix(targetName, targetStep)
+        if reason != "":
+            message = messagePrefix + reason + ": Skipped.\n"
+        else:
+            message = messagePrefix + "Skipped.\n"
         sys.stderr.flush()
         sys.stdout.write(message)
         self.__lookupOutFile(targetName, targetStep).write(message)
