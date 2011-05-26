@@ -39,7 +39,7 @@ def getInstallDir(command):
         prefix = match.group(1)
     return prefix
 
-def generateBuildFiles(path, name, verbose=True):
+def generateConfigureFiles(path, name, verbose=True):
     command = getPreconfigureCommand(path)
     if command != "":
         if verbose:
