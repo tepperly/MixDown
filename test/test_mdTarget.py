@@ -29,6 +29,7 @@ import mdCvs, mdSvn, mdGit, mdHg, mdLogger, mdOptions, mdTarget, utilityFunction
 class Test_mdTarget(unittest.TestCase):
     def test_determineOutputPath1(self):
         options = mdOptions.Options()
+        options.buildDir = "."
         target = mdTarget.Target("foo", "/bar/paz")
         target.outputPathSpecified = True
         target.outputPath = "/outputPath"
@@ -37,11 +38,12 @@ class Test_mdTarget(unittest.TestCase):
 
     def test_determineOutputPath2(self):
         options = mdOptions.Options()
+        options.buildDir = "."
         target = mdTarget.Target("foo", "/bar/paz")
         target.outputPathSpecified = False
         target.outputPath = "/outputPath/"
         target.outputPath = target.determineOutputPath(options)
-        self.assertEquals(target.outputPath, "mdBuild/foo", "Unspecified output path was not overwritten by determineOutputPath.")
+        self.assertEquals(target.outputPath, "./foo", "Unspecified output path was not overwritten by determineOutputPath.")
 
     def test_determineOutputPath3(self):
         try:
@@ -49,6 +51,7 @@ class Test_mdTarget(unittest.TestCase):
             targetDir = os.path.join(tempDir, "targetDir")
             os.makedirs(targetDir)
             options = mdOptions.Options()
+            options.buildDir = "."
             options.cleanTargets = True
             target = mdTarget.Target("foo", targetDir)
             target.outputPath = target.determineOutputPath(options)
@@ -62,6 +65,7 @@ class Test_mdTarget(unittest.TestCase):
             targetDir = os.path.join(tempDir, "foo")
             os.makedirs(targetDir)
             options = mdOptions.Options()
+            options.buildDir = "."
             options.cleanTargets = True
             options.buildDir = tempDir
             target = mdTarget.Target("foo", targetDir)
@@ -77,20 +81,17 @@ class Test_mdTarget(unittest.TestCase):
 
     def test_validate2(self):
         options = mdOptions.Options()
-        target.name = "foo"
-        target.path = ""
+        target = mdTarget.Target("foo", "")
         self.assertEquals(target.validate(options), False, "False positive returned when trying to validate target.")
 
     def test_validate3(self):
         options = mdOptions.Options()
-        target.name = ""
-        target.path = "/some/path"
+        target = mdTarget.Target("", "/some/path")
         self.assertEquals(target.validate(options), False, "False positive returned when trying to validate target.")
 
     def test_validate4(self):
         options = mdOptions.Options()
-        target.name = "foo"
-        target.path = "/some/path"
+        target = mdTarget.Target("foo", "/some/path")
         self.assertEquals(target.validate(options), True, "Target should have validated.")
 
     def test_steps(self):
