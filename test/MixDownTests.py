@@ -24,13 +24,14 @@
 
 import sys, unittest
 import test_mdAutoTools, test_mdCMake, test_mdCvs, test_mdGit, test_mdHg, test_mdSteps, test_mdSvn, test_mdProject, test_mdTarget
-import test_utilityFunctions
+import test_MixDownLong, test_utilityFunctions
 
 if not ".." in sys.path:
     sys.path.append("..")
 import mdLogger
 
 def main():
+    longTests = False
     suite = unittest.TestSuite()
 
     suite.addTest(test_mdAutoTools.suite())
@@ -44,7 +45,14 @@ def main():
     suite.addTest(test_mdTarget.suite())
     suite.addTest(test_utilityFunctions.suite())
 
+    if "--long" in sys.argv:
+        suite.addTest(test_MixDownLong.suite())
+        longTests = True
+
     unittest.TextTestRunner(verbosity=2).run(suite)
+
+    if not longTests:
+        print "\nNote: Long tests not run to enable add '--long' to command line"
 
 if __name__ == "__main__":
     mdLogger.SetLogger("Console")
