@@ -40,7 +40,7 @@ def importTargets(options, targetsToImport):
         Logger().writeMessage("Analyzing target...", target.name)
         Logger().writeMessage("Extracting target...", target.name)
 
-        target.outputPath = options.tempDir + target.name
+        target.outputPath = os.path.join(options.tempDir, target.name)
         if not mdCommands.buildStepActor("fetch", target, options):
             return None
         if not mdCommands.buildStepActor("unpack", target, options):
