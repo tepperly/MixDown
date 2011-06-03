@@ -20,7 +20,16 @@
 # along with this program; if not, write to the Free Software Foundation,
 # Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 
-import os, Queue, re, shutil, sys, tarfile, tempfile, urllib2, subprocess
+import os, Queue, re, shutil, sys, tarfile, tempfile, urllib, urllib2, subprocess
+
+def downloadFile(URL, downloadDir):
+    filePath = os.path.join(downloadDir, URLToFilename(URL))
+    if not os.path.exists(downloadDir):
+        os.mkdir(downloadDir)
+    urllib.urlretrieve(URL, filePath)
+    if not os.path.exists(filePath):
+        filePath = ""
+    return filePath
 
 def executeCommand(command, args="", workingDirectory="", verbose=False, exitOnError=False):
     try:
