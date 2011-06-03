@@ -43,11 +43,6 @@ class Test_MixDownShort(unittest.TestCase):
         finally:
             utilityFunctions.removeDir(tempDir)
 
-    def test_subversion(self):
-        if socket.gethostname() == "tux316.llnl.gov":
-            pass
-
-
 def suite():
     suite = unittest.TestSuite()
     suite.addTest(unittest.makeSuite(Test_MixDownShort))
