@@ -91,15 +91,17 @@ def createSvnRepository(tempDir):
     return repoURL
 
 def createBlankFile(path):
-    f = open(path, 'w')
-    f.write("")
-    f.close()
+    open(path, 'w').close()
+
+def createBlankFiles(path, fileList):
+    for fileName in fileList:
+        open(os.path.join(path, fileName), 'w').close()
 
 def makeTempDir():
     return tempfile.mkdtemp(prefix="mixdown-")
 
-def makeTempFile(contents="", suffix=""):
-    fd, name = tempfile.mkstemp(suffix, "mixdown-", text=True)
+def makeTempFile(directory, contents="", suffix=""):
+    fd, name = tempfile.mkstemp(suffix, "mixdown-", directory, text=True)
     if contents != "":
         os.write(fd, contents)
     os.close(fd)
@@ -109,13 +111,3 @@ def copyDirToTempDir(source):
     tempDir = tempfile.mktemp(prefix="mixdown-")
     shutil.copytree(source, tempDir)
     return tempDir
-
-def setUpTargetDirectory(filesInTarget=[]):
-    path = makeTempDir()
-    for fileName in filesInTarget:
-        open(path + fileName, 'w').close() #Create blank file
-    options = mdOptions.Options()
-    options.buildDir = self.testDir + "mdBuild"
-    return path, options
-
-

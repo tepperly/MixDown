@@ -121,7 +121,7 @@ class Project:
                         if currTarget.outputPathSpecified:
                             Logger().writeError("Project targets can only have one 'Output' defined", "", "", self.path, lineCount)
                             return False
-                        currTarget.outputPath = utilityFunctions.includeTrailingPathDelimiter(currPair[1])
+                        currTarget.outputPath = currPair[1]
                         currTarget.outputPathSpecified = True
                     elif currName == "dependson":
                         if currTarget.dependsOn != []:

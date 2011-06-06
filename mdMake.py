@@ -20,13 +20,18 @@
 # along with this program; if not, write to the Free Software Foundation,
 # Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 
-import os, mdStrings, utilityFunctions
+import os, mdStrings
 
 def isMakeProject(path):
-    path = utilityFunctions.includeTrailingPathDelimiter(path)
-    if os.path.exists(path + "GNUmakefile") or os.path.exists(path + "GNUmakefile.am") or os.path.exists(path + "GNUmakefile.in") or \
-       os.path.exists(path + "makefile") or os.path.exists(path + "makefile.am") or os.path.exists(path + "makefile.in") or \
-       os.path.exists(path + "Makefile") or os.path.exists(path + "Makefile.am") or os.path.exists(path + "Makefile.in"):
+    if os.path.exists(os.path.join(path, "GNUmakefile")) or\
+       os.path.exists(os.path.join(path, "GNUmakefile.am")) or\
+       os.path.exists(os.path.join(path, "GNUmakefile.in")) or\
+       os.path.exists(os.path.join(path, "makefile")) or\
+       os.path.exists(os.path.join(path, "makefile.am")) or\
+       os.path.exists(os.path.join(path, "makefile.in")) or\
+       os.path.exists(os.path.join(path, "Makefile")) or\
+       os.path.exists(os.path.join(path, "Makefile.am")) or\
+       os.path.exists(os.path.join(path, "Makefile.in")):
         return True
     return False
 

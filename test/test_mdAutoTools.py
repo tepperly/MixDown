@@ -27,6 +27,15 @@ if not ".." in sys.path:
 import mdAutoTools, mdLogger, utilityFunctions
 
 class Test_mdAutoTools(unittest.TestCase):
+    def test_generateConfigureFiles(self):
+        try:
+            tempDir = mdTestUtilities.copyDirToTempDir("cases/simpleGraphAutoTools/TestCaseA")
+            success = mdAutoTools.generateConfigureFiles(tempDir, "testCaseTarget", False)
+            self.assertEquals(success, True, "Unable to generate configure files.")
+            self.assertEquals(os.path.exists(os.path.join(tempDir, "configure")), True, "Configure files did not exist after calling generateConfigureFiles.")
+        finally:
+            utilityFunctions.removeDir(tempDir)
+
     def test_isAutoToolsProject1(self):
         self.assertTrue(mdAutoTools.isAutoToolsProject("cases/simpleGraphAutoTools/TestCaseA"), "Failed to detect AutoTools project.")
         self.assertFalse(mdAutoTools.isAutoToolsProject("cases/cmake/hello/main"), "False positive when given CMake project.")
@@ -34,7 +43,7 @@ class Test_mdAutoTools(unittest.TestCase):
     def test_isAutoToolsProject2(self):
         try:
             tempDir = mdTestUtilities.makeTempDir()
-            tempFile = utilityFunctions.includeTrailingPathDelimiter(tempDir) + "configure"
+            tempFile = os.path.join(tempDir, "configure")
             mdTestUtilities.createBlankFile(tempFile)
             self.assertTrue(mdAutoTools.isAutoToolsProject(tempDir), "Failed to detect AutoTools project.")
         finally:
@@ -43,7 +52,7 @@ class Test_mdAutoTools(unittest.TestCase):
     def test_isAutoToolsProject3(self):
         try:
             tempDir = mdTestUtilities.makeTempDir()
-            tempFile = utilityFunctions.includeTrailingPathDelimiter(tempDir) + "configure.in"
+            tempFile = os.path.join(tempDir, "configure.in")
             mdTestUtilities.createBlankFile(tempFile)
             self.assertTrue(mdAutoTools.isAutoToolsProject(tempDir), "Failed to detect AutoTools project.")
         finally:
@@ -52,7 +61,7 @@ class Test_mdAutoTools(unittest.TestCase):
     def test_isAutoToolsProject4(self):
         try:
             tempDir = mdTestUtilities.makeTempDir()
-            tempFile = utilityFunctions.includeTrailingPathDelimiter(tempDir) + "configure.ac"
+            tempFile = os.path.join(tempDir, "configure.ac")
             mdTestUtilities.createBlankFile(tempFile)
             self.assertTrue(mdAutoTools.isAutoToolsProject(tempDir), "Failed to detect AutoTools project.")
         finally:
@@ -109,6 +118,8 @@ class Test_mdAutoTools(unittest.TestCase):
     def test_getDependancies1(self):
         try:
             tempDir = mdTestUtilities.copyDirToTempDir("cases/simpleGraphAutoTools/TestCaseA")
+            success = mdAutoTools.generateConfigureFiles(tempDir, "testCaseTarget", False)
+            self.assertEquals(success, True, "Unable to generate build files.")
             dependancies = mdAutoTools.getDependancies(tempDir, verbose=False)
             dependancies.sort()
             self.assertEquals(dependancies, ['testcaseb', 'testcasec'], "Wrong dependancies found in AutoTools project")
@@ -118,6 +129,8 @@ class Test_mdAutoTools(unittest.TestCase):
     def test_getDependancies2(self):
         try:
             tempDir = mdTestUtilities.copyDirToTempDir("cases/simpleGraphAutoTools/TestCaseB")
+            success = mdAutoTools.generateConfigureFiles(tempDir, "testCaseTarget", False)
+            self.assertEquals(success, True, "Unable to generate build files.")
             dependancies = mdAutoTools.getDependancies(tempDir, verbose=False)
             self.assertEquals(dependancies, ['testcasec'], "Wrong dependancies found in AutoTools project")
         finally:
@@ -126,6 +139,8 @@ class Test_mdAutoTools(unittest.TestCase):
     def test_getDependancies3(self):
         try:
             tempDir = mdTestUtilities.copyDirToTempDir("cases/simpleGraphAutoTools/TestCaseC")
+            success = mdAutoTools.generateConfigureFiles(tempDir, "testCaseTarget", False)
+            self.assertEquals(success, True, "Unable to generate build files.")
             dependancies = mdAutoTools.getDependancies(tempDir, verbose=False)
             self.assertEquals(dependancies, ['testcased'], "Wrong dependancies found in AutoTools project")
         finally:
@@ -134,6 +149,8 @@ class Test_mdAutoTools(unittest.TestCase):
     def test_getDependancies4(self):
         try:
             tempDir = mdTestUtilities.copyDirToTempDir("cases/simpleGraphAutoTools/TestCaseD")
+            success = mdAutoTools.generateConfigureFiles(tempDir, "testCaseTarget", False)
+            self.assertEquals(success, True, "Unable to generate build files.")
             dependancies = mdAutoTools.getDependancies(tempDir, verbose=False)
             self.assertEquals(dependancies, [], "Wrong dependancies found in AutoTools project")
         finally:

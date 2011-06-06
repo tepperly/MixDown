@@ -20,7 +20,16 @@
 # along with this program; if not, write to the Free Software Foundation,
 # Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 
-import os, Queue, re, shutil, sys, tarfile, tempfile, urllib2, subprocess
+import os, Queue, re, shutil, sys, tarfile, tempfile, urllib, urllib2, subprocess
+
+def downloadFile(URL, downloadDir):
+    filePath = os.path.join(downloadDir, URLToFilename(URL))
+    if not os.path.exists(downloadDir):
+        os.mkdir(downloadDir)
+    urllib.urlretrieve(URL, filePath)
+    if not os.path.exists(filePath):
+        filePath = ""
+    return filePath
 
 def executeCommand(command, args="", workingDirectory="", verbose=False, exitOnError=False):
     try:
@@ -75,7 +84,7 @@ def getBasename(path):
     return basename
 
 def haveWriteAccess(path):
-    highestExistingDir = includeTrailingPathDelimiter(path)
+    highestExistingDir = path
     while highestExistingDir != "/":
         if os.path.exists(highestExistingDir):
             break
@@ -85,11 +94,6 @@ def haveWriteAccess(path):
     if os.access(highestExistingDir, os.W_OK):
         return True
     return False
-
-def includeTrailingPathDelimiter(path):
-    if (not path[len(path)-1:] == '/') and (not os.path.isfile(path)):
-        return path + '/'
-    return path
 
 def isURL(url):
     try:
@@ -156,11 +160,6 @@ def stripItemsInList(value):
         retList.append(str.strip(item))
     return retList
 
-def stripTrailingPathDelimiter(path):
-    if (path[len(path)-1:] == '/'):
-        return path[:len(path)-1]
-    return path
-
 def untar(tarPath, outPath = "", stripDir=False):
     if stripDir:
         unTarOutpath = tempfile.mkdtemp()
@@ -175,9 +174,9 @@ def untar(tarPath, outPath = "", stripDir=False):
     if stripDir:
         dirList = os.listdir(unTarOutpath)
         if len(dirList) == 1:
-            src = includeTrailingPathDelimiter(unTarOutpath) + dirList[0]
+            src = os.path.join(unTarOutpath, dirList[0])
         else:
-            src = includeTrailingPathDelimiter(unTarOutpath)
+            src = unTarOutpath
         shutil.move(src, outPath)
 
 def URLToFilename(url):

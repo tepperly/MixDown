@@ -35,7 +35,7 @@ class Test_mdCMake(unittest.TestCase):
     def test_isCMakeProject2(self):
         try:
             tempDir = mdTestUtilities.makeTempDir()
-            tempFile = utilityFunctions.includeTrailingPathDelimiter(tempDir) + "CMakeLists.txt"
+            tempFile = os.path.join(tempDir, "CMakeLists.txt")
             mdTestUtilities.createBlankFile(tempFile)
             self.assertTrue(mdCMake.isCMakeProject(tempDir), "Failed to detect CMake project.")
         finally:

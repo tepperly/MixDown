@@ -39,6 +39,16 @@ def getInstallDir(command):
         prefix = match.group(1)
     return prefix
 
+def generateConfigureFiles(path, name, verbose=True):
+    command = getPreconfigureCommand(path)
+    if command != "":
+        if verbose:
+            Logger().writeMessage("Generating build files...", name)
+        returnCode = utilityFunctions.executeSubProcess(command, path)
+        if returnCode != 0:
+            return False
+    return True
+
 def getDependancies(path, name="", verbose=True):
     deps = []
     if not os.path.isdir(path) or not os.path.exists(os.path.join(path, "configure")):

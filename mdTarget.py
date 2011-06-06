@@ -102,17 +102,18 @@ class Target:
         return True
 
     def determineOutputPath(self, options):
-        if self.outputPath != "":
+        if self.outputPathSpecified and self.outputPath != "":
             return self.outputPath
         else:
-            targetsBuildDir = utilityFunctions.includeTrailingPathDelimiter(options.buildDir + self.name)
+            targetsBuildDir = os.path.join(options.buildDir, self.name)
             if options.cleanTargets:
                 if os.path.exists(targetsBuildDir) and os.path.isdir(targetsBuildDir):
                     return targetsBuildDir
                 elif os.path.isdir(self.path):
                     return self.path
                 else:
-                    Logger().writeError("Output path could not be located, define in project file with \"output=<path>\"", self.name, "clean", exitProgram=True)
+                    Logger().writeError("Output path could not be located, define in project file with \"output=<path>\"", self.name, "clean")
+                    return ""
             else:
                 options.validateBuildDir()
                 return targetsBuildDir

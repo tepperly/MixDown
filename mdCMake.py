@@ -20,13 +20,12 @@
 # along with this program; if not, write to the Free Software Foundation,
 # Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 
-import os, re, mdMake, mdStrings, mdTarget, utilityFunctions
+import os, re, mdMake, mdStrings, mdTarget
 
 from mdLogger import *
 
 def isCMakeProject(path):
-    path = utilityFunctions.includeTrailingPathDelimiter(path)
-    if os.path.exists(path + "CMakeLists.txt"):
+    if os.path.exists(os.path.join(path, "CMakeLists.txt")):
         return True
     return False
 
@@ -41,7 +40,7 @@ def getInstallDir(command):
 def _findAllCMakeFiles(path, listToBeFilled):
     dirList = os.listdir(path)
     for name in dirList:
-        fullPath = utilityFunctions.includeTrailingPathDelimiter(path) + name
+        fullPath = os.path.join(path, name)
         if os.path.isdir(fullPath):
             _findAllCMakeFiles(fullPath, listToBeFilled)
         elif name == "CMakeLists.txt":

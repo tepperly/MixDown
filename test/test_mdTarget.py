@@ -27,132 +27,174 @@ if not ".." in sys.path:
 import mdCvs, mdSvn, mdGit, mdHg, mdLogger, mdOptions, mdTarget, utilityFunctions
 
 class Test_mdTarget(unittest.TestCase):
-    def setUpTargetDirectory(self, filesInTarget=[]):
-        self.testDir = mdTestUtilities.makeTempDir()
-        for fileName in filesInTarget:
-            open(os.path.join(self.testDir, fileName), 'w').close() #Create blank file
-        self.options = mdOptions.Options()
-        self.options.buildDir = os.path.join(self.testDir, "mdBuild")
-
-    def tearDownTargetDirectory(self):
-        if os.path.exists(self.testDir):
-            utilityFunctions.removeDir(self.testDir)
-        self.testDir = ""
-        self.options = None
-
-    def test_validate(self):
+    def test_determineOutputPath1(self):
         options = mdOptions.Options()
+        options.buildDir = "."
+        target = mdTarget.Target("foo", "/bar/paz")
+        target.outputPathSpecified = True
+        target.outputPath = "/outputPath"
+        target.outputPath = target.determineOutputPath(options)
+        self.assertEquals(target.outputPath, "/outputPath", "Specified output path was overwritten by determineOutputPath.")
 
+    def test_determineOutputPath2(self):
+        options = mdOptions.Options()
+        options.buildDir = "."
+        target = mdTarget.Target("foo", "/bar/paz")
+        target.outputPathSpecified = False
+        target.outputPath = "/outputPath/"
+        target.outputPath = target.determineOutputPath(options)
+        self.assertEquals(target.outputPath, "./foo", "Unspecified output path was not overwritten by determineOutputPath.")
+
+    def test_determineOutputPath3(self):
+        try:
+            tempDir = mdTestUtilities.makeTempDir()
+            targetDir = os.path.join(tempDir, "targetDir")
+            os.makedirs(targetDir)
+            options = mdOptions.Options()
+            options.buildDir = "."
+            options.cleanTargets = True
+            target = mdTarget.Target("foo", targetDir)
+            target.outputPath = target.determineOutputPath(options)
+            self.assertEquals(target.outputPath, targetDir, "During cleaning found target path should not be overwritten.")
+        finally:
+            utilityFunctions.removeDir(tempDir)
+
+    def test_determineOutputPath4(self):
+        try:
+            tempDir = mdTestUtilities.makeTempDir()
+            targetDir = os.path.join(tempDir, "foo")
+            os.makedirs(targetDir)
+            options = mdOptions.Options()
+            options.buildDir = "."
+            options.cleanTargets = True
+            options.buildDir = tempDir
+            target = mdTarget.Target("foo", targetDir)
+            target.outputPath = target.determineOutputPath(options)
+            self.assertEquals(target.outputPath, targetDir, "During cleaning found target path should not be overwritten.")
+        finally:
+            utilityFunctions.removeDir(tempDir)
+
+    def test_validate1(self):
+        options = mdOptions.Options()
         target = mdTarget.Target("", "")
-        self.assertFalse(target.validate(options), "False positive returned when trying to validate target.")
+        self.assertEquals(target.validate(options), False, "False positive returned when trying to validate target.")
 
-        target.name = "foo"
-        target.path = ""
-        self.assertFalse(target.validate(options), "False positive returned when trying to validate target.")
+    def test_validate2(self):
+        options = mdOptions.Options()
+        target = mdTarget.Target("foo", "")
+        self.assertEquals(target.validate(options), False, "False positive returned when trying to validate target.")
 
-        target.name = ""
-        target.path = "/some/path"
-        self.assertFalse(target.validate(options), "False positive returned when trying to validate target.")
+    def test_validate3(self):
+        options = mdOptions.Options()
+        target = mdTarget.Target("", "/some/path")
+        self.assertEquals(target.validate(options), False, "False positive returned when trying to validate target.")
 
-        target.name = "foo"
-        target.path = "/some/path"
-        self.assertTrue(target.validate(options), "Target should have validated.")
+    def test_validate4(self):
+        options = mdOptions.Options()
+        target = mdTarget.Target("foo", "/some/path")
+        self.assertEquals(target.validate(options), True, "Target should have validated.")
 
     def test_steps(self):
         target = mdTarget.Target("foo", "/some/path")
         target.skipSteps = ["b"]
-        self.assertFalse(target.hasStep("b"), "Specified skipped step was not skipped")
-        self.assertTrue(target.hasStep("a"), "Specified skipped step was not skipped")
+        self.assertEquals(target.hasStep("b"), False, "Specified skipped step was not skipped")
+        self.assertEquals(target.hasStep("a"), True, "Specified skipped step was not skipped")
 
     def test_examine(self):
         options = mdOptions.Options()
+        options.buildDir = "."
         target = mdTarget.Target("TestCaseA", "cases/simpleGraphAutoTools/TestCaseA")
         target.examine(options)
-        returnValue = target.commands["preconfig"] == "autoreconf -i"
-        self.assertTrue(returnValue, "'cases/simpleGraphAutoTools/TestCaseA' returned wrong preconfig command")
-        returnValue = target.commands["config"] == "./configure --prefix=/usr/local"
-        self.assertTrue(returnValue, "'cases/simpleGraphAutoTools/TestCaseA' returned wrong config command")
-        returnValue = target.commands["build"] == "make"
-        self.assertTrue(returnValue, "'cases/simpleGraphAutoTools/TestCaseA' returned wrong build command")
-        returnValue = target.commands["install"] == "make install"
-        self.assertTrue(returnValue, "'cases/simpleGraphAutoTools/TestCaseA' returned wrong install command")
+        self.assertEquals(target.commands["preconfig"], "autoreconf -i", "'cases/simpleGraphAutoTools/TestCaseA' returned wrong preconfig command")
+        self.assertEquals(target.commands["config"], "./configure --prefix=/usr/local", "'cases/simpleGraphAutoTools/TestCaseA' returned wrong config command")
+        self.assertEquals(target.commands["build"], "make", "'cases/simpleGraphAutoTools/TestCaseA' returned wrong build command")
+        self.assertEquals(target.commands["install"], "make install", "'cases/simpleGraphAutoTools/TestCaseA' returned wrong install command")
 
     def test_examineWithJobSlots(self):
         options = mdOptions.Options()
+        options.buildDir = "."
         options.processCommandline(["test", "-j4"])
         target = mdTarget.Target("TestCaseA", "cases/simpleGraphAutoTools/TestCaseA")
         target.examine(options)
-        returnValue = target.commands["preconfig"] == "autoreconf -i"
-        self.assertTrue(returnValue, "'cases/simpleGraphAutoTools/TestCaseA' returned wrong preconfig command")
-        returnValue = target.commands["config"] == "./configure --prefix=/usr/local"
-        self.assertTrue(returnValue, "'cases/simpleGraphAutoTools/TestCaseA' returned wrong config command")
-        returnValue = target.commands["build"] == "make -j4"
-        self.assertTrue(returnValue, "'cases/simpleGraphAutoTools/TestCaseA' returned wrong build command")
-        returnValue = target.commands["install"] == "make -j4 install"
-        self.assertTrue(returnValue, "'cases/simpleGraphAutoTools/TestCaseA' returned wrong install command")
+        self.assertEquals(target.commands["preconfig"], "autoreconf -i", "'cases/simpleGraphAutoTools/TestCaseA' returned wrong preconfig command")
+        self.assertEquals(target.commands["config"], "./configure --prefix=/usr/local", "'cases/simpleGraphAutoTools/TestCaseA' returned wrong config command")
+        self.assertEquals(target.commands["build"], "make -j4", "'cases/simpleGraphAutoTools/TestCaseA' returned wrong build command")
+        self.assertEquals(target.commands["install"], "make -j4 install", "'cases/simpleGraphAutoTools/TestCaseA' returned wrong install command")
 
     def test_examineWithDependancies(self):
         options = mdOptions.Options()
+        options.buildDir = "."
         target = mdTarget.Target("TestCaseA", "cases/simpleGraphAutoTools/TestCaseA")
         target.dependsOn = ["TestCaseB", "TestCaseC"]
         target.examine(options)
-        returnValue = target.commands["preconfig"] == "autoreconf -i"
-        self.assertTrue(returnValue, "'cases/simpleGraphAutoTools/TestCaseA' returned wrong preconfig command")
-        returnValue = target.commands["config"] == "./configure --prefix=/usr/local --with-TestCaseB=/usr/local --with-TestCaseC=/usr/local"
-        self.assertTrue(returnValue, "'cases/simpleGraphAutoTools/TestCaseA' returned wrong config command")
-        returnValue = target.commands["build"] == "make"
-        self.assertTrue(returnValue, "'cases/simpleGraphAutoTools/TestCaseA' returned wrong build command")
-        returnValue = target.commands["install"] == "make install"
-        self.assertTrue(returnValue, "'cases/simpleGraphAutoTools/TestCaseA' returned wrong install command")
+        self.assertEquals(target.commands["preconfig"], "autoreconf -i", "'cases/simpleGraphAutoTools/TestCaseA' returned wrong preconfig command")
+        self.assertEquals(target.commands["config"], "./configure --prefix=/usr/local --with-TestCaseB=/usr/local --with-TestCaseC=/usr/local", "'cases/simpleGraphAutoTools/TestCaseA' returned wrong config command")
+        self.assertEquals(target.commands["build"], "make", "'cases/simpleGraphAutoTools/TestCaseA' returned wrong build command")
+        self.assertEquals(target.commands["install"], "make install", "'cases/simpleGraphAutoTools/TestCaseA' returned wrong install command")
 
     def test_examineWithDependanciesWithPrefix(self):
         options = mdOptions.Options()
+        options.buildDir = "."
         options.processCommandline(["test", "-p/test/path"])
         target = mdTarget.Target("TestCaseA", "cases/simpleGraphAutoTools/TestCaseA")
         target.dependsOn = ["TestCaseB", "TestCaseC"]
         target.examine(options)
-        returnValue = target.commands["preconfig"] == "autoreconf -i"
-        self.assertTrue(returnValue, "'cases/simpleGraphAutoTools/TestCaseA' returned wrong preconfig command")
-        returnValue = target.commands["config"] == "./configure --prefix=/test/path --with-TestCaseB=/test/path --with-TestCaseC=/test/path"
-        self.assertTrue(returnValue, "'cases/simpleGraphAutoTools/TestCaseA' returned wrong config command")
-        returnValue = target.commands["build"] == "make"
-        self.assertTrue(returnValue, "'cases/simpleGraphAutoTools/TestCaseA' returned wrong build command")
-        returnValue = target.commands["install"] == "make install"
-        self.assertTrue(returnValue, "'cases/simpleGraphAutoTools/TestCaseA' returned wrong install command")
+        self.assertEquals(target.commands["preconfig"], "autoreconf -i", "'cases/simpleGraphAutoTools/TestCaseA' returned wrong preconfig command")
+        self.assertEquals(target.commands["config"], "./configure --prefix=/test/path --with-TestCaseB=/test/path --with-TestCaseC=/test/path", "'cases/simpleGraphAutoTools/TestCaseA' returned wrong config command")
+        self.assertEquals(target.commands["build"], "make", "'cases/simpleGraphAutoTools/TestCaseA' returned wrong build command")
+        self.assertEquals(target.commands["install"], "make install", "'cases/simpleGraphAutoTools/TestCaseA' returned wrong install command")
 
     def test_examineWithOnlyMakefile(self):
         try:
-            self.setUpTargetDirectory(["Makefile"])
-            self.options.processCommandline(["test", "-p/test/path"])
-            target = mdTarget.Target("OnlyMakefile", self.testDir)
-            target.examine(self.options)
+            tempDir = mdTestUtilities.makeTempDir()
+            targetDir = os.path.join(tempDir, "targetDir")
+            os.makedirs(targetDir)
+            mdTestUtilities.createBlankFile(os.path.join(targetDir, "Makefile"))
+            options = mdOptions.Options()
+            options.buildDir = os.path.join(tempDir, options.buildDir)
+            target = mdTarget.Target("OnlyMakefile", targetDir)
+            target.examine(options)
+            self.assertEquals(target.commands["preconfig"], "", "Target with only Makefile returned a preconfig command when it should not have")
+            self.assertEquals(target.commands["config"], "", "Target with only Makefile returned a config command when it should not have")
+            self.assertEquals(target.commands["build"], "make", "Target with only Makefile returned wrong build command")
+            self.assertEquals(target.commands["install"], "make install", "Target with only Makefile returned wrong install command")
         finally:
-            self.tearDownTargetDirectory()
-        returnValue = target.commands["preconfig"] == ""
-        self.assertTrue(returnValue, "Target with only Makefile returned a preconfig command when it should not have")
-        returnValue = target.commands["config"] == ""
-        self.assertTrue(returnValue, "Target with only Makefile returned a config command when it should not have")
-        returnValue = target.commands["build"] == "make"
-        self.assertTrue(returnValue, "Target with only Makefile returned wrong build command")
-        returnValue = target.commands["install"] == "make install"
-        self.assertTrue(returnValue, "Target with only Makefile returned wrong install command")
+            utilityFunctions.removeDir(tempDir)
 
     def test_examineWithAutoTools(self):
         try:
-            self.setUpTargetDirectory(["Makefile.am", "configure.ac"])
-            self.options.processCommandline(["test", "-p/test/path"])
-            target = mdTarget.Target("AutoTools", self.testDir)
-            target.examine(self.options)
+            tempDir = mdTestUtilities.makeTempDir()
+            targetDir = os.path.join(tempDir, "targetDir")
+            os.makedirs(targetDir)
+            mdTestUtilities.createBlankFiles(targetDir, ["Makefile.am", "configure.ac"])
+            options = mdOptions.Options()
+            options.buildDir = os.path.join(tempDir, options.buildDir)
+            target = mdTarget.Target("AutoTools", targetDir)
+            target.examine(options)
+            self.assertEquals(target.commands["preconfig"], "autoreconf -i", "Target with autotool files returned wrong preconfig command")
+            self.assertEquals(target.commands["config"], "./configure --prefix=/usr/local", "Target with autotool files returned wrong config command")
+            self.assertEquals(target.commands["build"], "make", "Target with autotool files returned wrong build command")
+            self.assertEquals(target.commands["install"], "make install", "Target with autotool files returned wrong install command")
         finally:
-            self.tearDownTargetDirectory()
-        returnValue = target.commands["preconfig"] == "autoreconf -i"
-        self.assertTrue(returnValue, "Target with autotool files returned wrong preconfig command")
-        returnValue = target.commands["config"] == "./configure --prefix=/test/path"
-        self.assertTrue(returnValue, "Target with autotool files returned wrong config command")
-        returnValue = target.commands["build"] == "make"
-        self.assertTrue(returnValue, "Target with autotool files returned wrong build command")
-        returnValue = target.commands["install"] == "make install"
-        self.assertTrue(returnValue, "Target with autotool files returned wrong install command")
+            utilityFunctions.removeDir(tempDir)
+
+    def test_examineWithAutoToolsWithPrefix(self):
+        try:
+            tempDir = mdTestUtilities.makeTempDir()
+            targetDir = os.path.join(tempDir, "targetDir")
+            os.makedirs(targetDir)
+            mdTestUtilities.createBlankFiles(targetDir, ["Makefile.am", "configure.ac"])
+            options = mdOptions.Options()
+            options.processCommandline(["test", "-p/test/prefix"])
+            options.buildDir = os.path.join(tempDir, options.buildDir)
+            target = mdTarget.Target("AutoTools", targetDir)
+            target.examine(options)
+            self.assertEquals(target.commands["preconfig"], "autoreconf -i", "Target with autotool files returned wrong preconfig command")
+            self.assertEquals(target.commands["config"], "./configure --prefix=/test/prefix", "Target with autotool files returned wrong config command")
+            self.assertEquals(target.commands["build"], "make", "Target with autotool files returned wrong build command")
+            self.assertEquals(target.commands["install"], "make install", "Target with autotool files returned wrong install command")
+        finally:
+            utilityFunctions.removeDir(tempDir)
 
 def suite():
     suite = unittest.TestSuite()
