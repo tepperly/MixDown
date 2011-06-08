@@ -3,6 +3,15 @@ MixDown
 
 MixDown is a meta-build tool that makes it easier to build software packages that have multiple dependencies. It uses a simple input file format to describe package information, and uses a series of heuristics to automatically generate an initial problem input file from a collection of tar, zip files, or download URLs. 
 
+MixDown supports the following targets: 
+
+ * Local tarballs and zipfiles (e.g., /tmp/foo-1.2.3.tar.gz)
+ * Download URLs for tarballs and zipfiles (e.g., http://www.example.com/download/foo-1.2.3.tar.gz)
+ * Local directories that contain the source code to be built (e.g., /tmp/foo-1.2.3/)
+ * Subversion repositories
+ * Mercurial (hg) repositories
+ * Git repositories
+
 
 Examples
 --------
