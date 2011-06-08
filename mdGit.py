@@ -46,7 +46,8 @@ def isGitRepo(location):
     if location == "" or not isGitInstalled():
         return False
     #This corrects various false positives
-    if location.endswith(".bz2") or location.endswith(".gz"):
+    filename = utilityFunctions.URLToFilename(location)
+    if filename.endswith(".bz2") or filename.endswith(".gz"):
         return False
     outFile = open(os.devnull, "w")
     returnCode = utilityFunctions.executeSubProcess("git ls-remote " + location, outFileHandle = outFile)
