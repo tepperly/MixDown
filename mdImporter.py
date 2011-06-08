@@ -62,7 +62,7 @@ def importTargets(options, targetsToImport):
             Logger().writeMessage("Cannot determine dependancies from Make projects.", target.name)
             possibleDeps = []
         else:
-            Logger().writeMessage("Unknown build system found.  Cannot determine dependancies or build commands.")
+            Logger().writeMessage("Warning: Unknown build system found.  Cannot determine dependancies or build commands.", target.name)
             possibleDeps = []
 
         #Find actual dependancies
@@ -129,7 +129,7 @@ def importTargets(options, targetsToImport):
         target.outputPath = ""
 
     if project.examine(options):
-        Logger().writeMessage("\nFinal targets...\n" + str(project))
+        Logger().writeMessage("\nFinal targets...\n\n" + str(project))
         project.write()
 
     utilityFunctions.removeDir(options.tempDir)
