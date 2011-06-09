@@ -3,6 +3,8 @@
 
 AC_PREREQ(2.59)
 AC_INIT([TestCaseA], [1.0], [white238@llnl.gov])
+AC_CONFIG_SRCDIR([../main.c])
+AM_INIT_AUTOMAKE
 
 # Checks for programs.
 AC_PROG_CC
@@ -15,5 +17,7 @@ AC_ARG_WITH([TestCaseB],
 AC_ARG_WITH([TestCaseC],
 	AS_HELP_STRING([--with-TestCaseC=PATH],
 	[Location of TestCaseC]),,)
+
+AC_CONFIG_FILES([Makefile])
 
 AC_OUTPUT

@@ -24,7 +24,7 @@
 
 import sys, unittest
 import test_mdAutoTools, test_mdCMake, test_mdCvs, test_mdGit, test_mdHg, test_mdSteps, test_mdSvn, test_mdProject, test_mdTarget
-import test_MixDownLong, test_utilityFunctions
+import test_MixDownLong, test_MixDownShort, test_utilityFunctions
 
 if not ".." in sys.path:
     sys.path.append("..")
@@ -43,6 +43,7 @@ def main():
     suite.addTest(test_mdSvn.suite())
     suite.addTest(test_mdProject.suite())
     suite.addTest(test_mdTarget.suite())
+    suite.addTest(test_MixDownShort.suite())
     suite.addTest(test_utilityFunctions.suite())
 
     if "--long" in sys.argv:
