@@ -47,6 +47,7 @@ def importTargets(options, targetsToImport):
             return None
 
         #Generate build files and find possible dependancies
+        possibleDeps = []
         if mdCMake.isCMakeProject(target.path):
             Logger().writeMessage("CMake project found...", target.name)
             Logger().writeMessage("Analyzing for dependancies...", target.name)
@@ -59,11 +60,9 @@ def importTargets(options, targetsToImport):
             possibleDeps = mdAutoTools.getDependancies(target.path, target.name)
         elif mdMake.isMakeProject(target.path):
             Logger().writeMessage("Make project found...", target.name)
-            Logger().writeMessage("Cannot determine dependancies from Make projects.", target.name)
-            possibleDeps = []
+            Logger().writeMessage("MixDown cannot determine dependancies from Make projects.", target.name)
         else:
-            Logger().writeMessage("Warning: Unknown build system found.  Cannot determine dependancies or build commands.", target.name)
-            possibleDeps = []
+            Logger().writeError("Unknown build system found.  MixDown cannot determine dependancies or build commands.", target.name)
 
         #Find actual dependancies
         for possibleDependancy in possibleDeps:
