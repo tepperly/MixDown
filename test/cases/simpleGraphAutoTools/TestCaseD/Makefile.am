@@ -1,2 +1,2 @@
 bin_PROGRAMS = TestCaseD
-TestCaseD_SOURCES = ../main.c
+TestCaseD_SOURCES = main.c
