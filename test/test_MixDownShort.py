@@ -44,7 +44,6 @@ class Test_MixDownShort(unittest.TestCase):
         finally:
             utilityFunctions.removeDir(tempDir)
 
-class Test_MixDownShort(unittest.TestCase):
     def test_AutoToolsSimpleGraph(self):
         try:
             tempDir = mdTestUtilities.copyDirToTempDir("cases/simpleGraphAutoTools")
