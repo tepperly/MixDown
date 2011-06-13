@@ -20,7 +20,7 @@
 # along with this program; if not, write to the Free Software Foundation,
 # Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 
-import os, Queue, re, shutil, sys, tarfile, tempfile, urllib, urllib2, subprocess
+import os, Queue, re, shutil, subprocess, sys, tarfile, tempfile, urllib, urllib2, zipfile
 
 def downloadFile(URL, downloadDir):
     filePath = os.path.join(downloadDir, URLToFilename(URL))
@@ -137,7 +137,9 @@ def splitFileName(fileName):
         basename = basename[:-7]
     elif basename.endswith(".tar.bz2"):
         basename = basename[:-8]
-    elif basename.endswith(".tar") or basename.endswith(".tgz") or basename.endswith(".tbz") or basename.endswith(".tb2"):
+    elif basename.endswith(".zip") or basename.endswith(".tar") or\
+         basename.endswith(".tgz") or basename.endswith(".tbz") or\
+         basename.endswith(".tb2"):
         basename = basename[:-4]
 
     basename = os.path.basename(basename)
@@ -160,7 +162,7 @@ def stripItemsInList(value):
         retList.append(str.strip(item))
     return retList
 
-def untar(tarPath, outPath = "", stripDir=False):
+def untar(tarPath, outPath="", stripDir=False):
     if stripDir:
         unTarOutpath = tempfile.mkdtemp()
     else:
@@ -177,6 +179,25 @@ def untar(tarPath, outPath = "", stripDir=False):
             src = os.path.join(unTarOutpath, dirList[0])
         else:
             src = unTarOutpath
+        shutil.move(src, outPath)
+
+def unzip(zipPath, outPath="", stripDir=False):
+    if stripDir:
+        unZipOutpath = tempfile.mkdtemp()
+    else:
+        unZipOutpath = outPath
+
+    z = zipfile.ZipFile(zipPath)
+    for item in z:
+        #TODO: check for relative path's
+        tar.extract(item, unZipOutpath)
+
+    if stripDir:
+        dirList = os.listdir(unZipOutpath)
+        if len(dirList) == 1:
+            src = os.path.join(unZipOutpath, dirList[0])
+        else:
+            src = unZipOutpath
         shutil.move(src, outPath)
 
 def URLToFilename(url):

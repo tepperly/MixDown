@@ -20,7 +20,8 @@
 # along with this program; if not, write to the Free Software Foundation,
 # Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 
-import os, tarfile, urllib, mdGit, mdHg, mdSvn, utilityFunctions
+import os, tarfile, urllib, zipfile
+import mdGit, mdHg, mdSvn, utilityFunctions
 
 from mdLogger import *
 
@@ -66,11 +67,17 @@ def unpack(pythonCallInfo):
             utilityFunctions.untar(pythonCallInfo.currentPath, pythonCallInfo.outputPath, True)
             pythonCallInfo.currentPath = pythonCallInfo.outputPath
             pythonCallInfo.success = True
+        elif zipfile.is_zipfile(pythonCallInfo.currentPath):
+            utilityFunctions.unzip(pythonCallInfo.currentPath, pythonCallInfo.outputPath, True)
+            pythonCallInfo.currentPath = pythonCallInfo.outputPath
+            pythonCallInfo.success = True
         else:
             if pythonCallInfo.currentPath.endswith(".tar.gz") or pythonCallInfo.currentPath.endswith(".tar.bz2")\
                or pythonCallInfo.currentPath.endswith(".tar") or pythonCallInfo.currentPath.endswith(".tgz")\
                or pythonCallInfo.currentPath.endswith(".tbz") or pythonCallInfo.currentPath.endswith(".tb2"):
                 pythonCallInfo.logger.writeError("Given tar file '" + pythonCallInfo.currentPath +"' not understood by python's tarfile package and possibly corrupt")
+            elif pythonCallInfo.currentPath.endswith(".zip"):
+                pythonCallInfo.logger.writeError("Given zip file '" + pythonCallInfo.currentPath +"' not understood by python's zipfile package and possibly corrupt")
             else:
                 pythonCallInfo.logger.writeError("Given file '" + pythonCallInfo.currentPath + "' cannot be unpacked")
     elif os.path.isdir(pythonCallInfo.currentPath):
