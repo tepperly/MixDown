@@ -20,7 +20,7 @@
 # along with this program; if not, write to the Free Software Foundation,
 # Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 
-import os, sys, tarfile, unittest, mdTestUtilities
+import os, sys, tarfile, unittest, zipfile, mdTestUtilities
 
 if not ".." in sys.path:
     sys.path.append("..")
@@ -128,6 +128,19 @@ class Test_mdSteps(unittest.TestCase):
             self.assertEqual(pci.success, True, "Local Gzip file failed to fetch.")
             self.assertEqual(os.path.exists(pci.currentPath), True, "Gzip file did not exist after fetching.")
             self.assertEqual(tarfile.is_tarfile(pci.currentPath), True, "Gzip file was not a tar file after fetching.")
+        finally:
+            utilityFunctions.removeDir(tempDir)
+
+    def test_fetchZip(self):
+        try:
+            tempDir = mdTestUtilities.makeTempDir()
+            zipDir, zipName = mdTestUtilities.createZipFile(tempDir)
+            zipPath = os.path.join(tempDir, zipName)
+            pci = createPythonCallInfo(zipPath, os.path.join(tempDir, "output"), os.path.join(tempDir, "download"))
+            pci = mdSteps.fetch(pci)
+            self.assertEqual(pci.success, True, "Local Zip file failed to fetch.")
+            self.assertEqual(os.path.exists(pci.currentPath), True, "Zip file did not exist after fetching.")
+            self.assertEqual(zipfile.is_zipfile(pci.currentPath), True, "Zip file was not a tar file after fetching.")
         finally:
             utilityFunctions.removeDir(tempDir)
 
@@ -263,6 +276,23 @@ class Test_mdSteps(unittest.TestCase):
             pci = mdSteps.unpack(pci)
             self.assertEqual(pci.success, True, "Gzip file failed to unpack.")
             self.assertEqual(os.path.isdir(pci.currentPath), True, "Gzip file was not a directory after unpacking.")
+            self.assertEqual(os.path.exists(os.path.join(pci.currentPath, mdTestUtilities.testFileName)), True, "testFile did not exist after unpacking.")
+        finally:
+            utilityFunctions.removeDir(tempDir)
+
+    def test_unpackZip(self):
+        try:
+            tempDir = mdTestUtilities.makeTempDir()
+            zipDir, zipName = mdTestUtilities.createZipFile(tempDir)
+            zipPath = os.path.join(tempDir, zipName)
+            pci = createPythonCallInfo(zipPath, os.path.join(tempDir, "output"), os.path.join(tempDir, "download"))
+            pci = mdSteps.fetch(pci)
+            self.assertEqual(pci.success, True, "Local Zip file failed to fetch.")
+            self.assertEqual(os.path.exists(pci.currentPath), True, "Zip file did not exist after fetching.")
+            self.assertEqual(zipfile.is_zipfile(pci.currentPath), True, "Zip file was not a tar file after fetching.")
+            pci = mdSteps.unpack(pci)
+            self.assertEqual(pci.success, True, "Zip file failed to unpack.")
+            self.assertEqual(os.path.isdir(pci.currentPath), True, "Zip file was not a directory after unpacking.")
             self.assertEqual(os.path.exists(os.path.join(pci.currentPath, mdTestUtilities.testFileName)), True, "testFile did not exist after unpacking.")
         finally:
             utilityFunctions.removeDir(tempDir)
