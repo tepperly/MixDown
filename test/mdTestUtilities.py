@@ -49,6 +49,13 @@ def createBzipFile(tempDir):
     utilityFunctions.executeSubProcess("tar -cjf test.tar.bz2 tar", tempDir)
     return tarDir, "test.tar.bz2"
 
+def createZipFile(tempDir):
+    zipDir = os.path.join(tempDir, "zip")
+    os.mkdir(zipDir)
+    utilityFunctions.executeSubProcess("touch zip/" + testFileName, tempDir)
+    utilityFunctions.executeSubProcess("zip -q -r test.zip ./zip", tempDir)
+    return zipDir, "test.zip"
+
 def createCvsRepository(tempDir):
     repoPath = os.path.join(tempDir, "repo")
     projPath = os.path.join(tempDir, "project")
