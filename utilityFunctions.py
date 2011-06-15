@@ -188,9 +188,7 @@ def unzip(zipPath, outPath="", stripDir=False):
         unZipOutpath = outPath
 
     z = zipfile.ZipFile(zipPath)
-    for item in z:
-        #TODO: check for relative path's
-        tar.extract(item, unZipOutpath)
+    z.extractall(unZipOutpath)
 
     if stripDir:
         dirList = os.listdir(unZipOutpath)
