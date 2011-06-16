@@ -24,7 +24,7 @@ import os, sys, mdStrings, mdTarget, utilityFunctions
 
 from mdLogger import *
 
-class Options:
+class Options(object):
     def __init__(self):
         self.projectFile = ""
         self.buildDir = "mdBuild/"
@@ -38,6 +38,7 @@ class Options:
         self.importer = False
         self.interactive = False
         self.prefixDefined = False
+        self.skipSteps = ""
         self._defines = dict()
         self._defines.setdefault("")
         self.setDefine(mdStrings.mdDefinePrefix, '/usr/local')
@@ -196,6 +197,8 @@ class Options:
             elif currFlag == "-v":
                 validateOption(currFlag, currValue)
                 self.verbose = True
+            elif currFlag == "-s":
+                self.skipSteps = currValue
             elif currArg.lower() in ("/help", "/h", "-help", "--help", "-h"):
                 self.printUsageAndExit()
             elif currFlag == "-c" or currArg.lower() == "--clean":
@@ -236,6 +239,8 @@ class Options:
         <path to .md file>   Path to MixDown project file\n\
     \n\
         Optional:\n\
+        -s<list>      Add steps to skip for individual targets\
+           Example: -starget1:preconfig;target2:config\
         -p<path>      Override prefix directory\n\
         -b<path>      Override build directory\n\
         -o<path>      Override download directory\n\

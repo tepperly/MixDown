@@ -59,7 +59,7 @@ def targetPathToName(path, exitOnFailure=True):
         Logger().writeError("Could not convert given target path to name: " + path, exitProgram=exitOnFailure)
     return name
 
-class Target:
+class Target(object):
     def __init__(self, targetName, path=""):
         self.name = targetName
         self.aliases = []
@@ -69,7 +69,7 @@ class Target:
         self.outputPathSpecified = False
         self.dependancyDepth = 0
         self.dependsOn = []
-        self.skipSteps = []
+        self._skipSteps = []
         self.pythonCallInfo = mdPython.PythonCallInfo()
         self.commands = dict()
         for step in mdCommands.getBuildStepList():
@@ -139,8 +139,8 @@ class Target:
             retStr += "Output: " + self.outputPath + "\n"
         if len(self.dependsOn) != 0:
             retStr += "DependsOn: " + ",".join(self.dependsOn) + "\n"
-        if len(self.skipSteps) != 0:
-            retStr += "SkipSteps: " + ",".join(self.skipSteps) + "\n"
+        if len(self._skipSteps) != 0:
+            retStr += "SkipSteps: " + ",".join(self._skipSteps) + "\n"
         for stepName in mdCommands.getBuildStepList():
             command = self.commands[stepName]
             if command != "":
@@ -148,16 +148,20 @@ class Target:
         return retStr
 
     @property
+    def skipSteps(self):
+        return self._skipSteps
+
+    @skipSteps.setter
     def skipSteps(self, value):
         loweredList = []
         for step in value[:]:
             loweredList.append(str.lower(step))
-        self.skipSteps = loweredList
+        self._skipSteps += loweredList
 
     def hasStep(self, stepName):
-        if len(self.skipSteps) == 0: #no steps were specified, do all steps
+        if len(self._skipSteps) == 0: #no steps were specified, do all steps
             return True
-        for step in self.skipSteps:
+        for step in self._skipSteps:
             if step.startswith(stepName):
                 return False
         return True

@@ -51,7 +51,7 @@ def SetLogger(loggerName="", logOutputDir=""):
         __loggerInstance = mdLoggerFile.LoggerFile()
         __loggerInstance.writeMessage(loggerName + " logger not found, falling back on file logger")
 
-class LoggerBase:
+class LoggerBase(object):
     def close(self):
         pass
 

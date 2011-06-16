@@ -20,11 +20,12 @@
 # along with this program; if not, write to the Free Software Foundation,
 # Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 
-import os, collections, Queue, mdCommands, mdTarget, utilityFunctions
+import os, collections, Queue
+import mdCommands, mdOptions, mdTarget, utilityFunctions
 
 from mdLogger import *
 
-class Project:
+class Project(object):
     def __init__(self, projectFilePath, targets=[]):
         self.path = projectFilePath
         if self.path.endswith(".md"):
@@ -34,6 +35,22 @@ class Project:
         self.targets = targets[:] #Use copy to prevent list instance to be used between project instances
         self.__validated = False
         self.__examined = False
+
+    def addSkipStepFromOptions(self, options):
+        skipSteps = options.skipSteps
+        for item in skipSteps.split(";"):
+            pair = item.split(":")
+            if len(pair) != 2 or pair[0] == "" or pair[1] == "":
+                Logger().writeError("Invalid commandline -s pair found: " + item)
+                Logger().writeMessage("Proper use: -s[Semi-colon delimited list of Skip Step pairs]")
+                Logger().writeMessage("Skip Step Pair: [targetName]:[Steps to skip, comma delimited]")
+                return False
+            target = self.getTarget(pair[0])
+            if target == None:
+                Logger().writeError("Target not found in -s commandline option: " + pair[0])
+                return False
+            target.skipSteps = pair[1].split(",")
+        return True
 
     def validate(self, options):
         if self.__validated:

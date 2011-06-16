@@ -87,7 +87,7 @@ def callPythonCommand(namespace, function, target, options):
     target.pythonCallInfo = pythonCallInfo
     return True
 
-class PythonCallInfo:
+class PythonCallInfo(object):
     def __init__(self):
         self.success = False
         self.currentPath = ""
