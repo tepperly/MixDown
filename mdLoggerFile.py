@@ -73,7 +73,7 @@ class LoggerFile(mdLogger.LoggerBase):
             self.__lookupOutFile(targetName, targetStep).write(message + "\n")
 
     def writeError(self, message, targetName="", targetStep="", filePath="", lineNumber=0, exitProgram=False):
-        sys.stdin.flush()
+        sys.stderr.flush()
         errorMessage = self.__formatErrorMessage(message, filePath, lineNumber)
         if targetName == "":
             sys.stderr.write(errorMessage + "\n")
