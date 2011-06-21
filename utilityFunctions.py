@@ -113,7 +113,7 @@ def prettyPrintList(list, header="", headerIndent="", itemIndent=""):
     return retStr
 
 def printErrorAndExit(errorStr, filePath="", lineNumber=0):
-    sys.stdin.flush()
+    sys.stdout.flush()
     if filePath == "" and lineNumber == 0:
         sys.stderr.write("Error: %s\n" % (errorStr))
     elif lineNumber == 0:

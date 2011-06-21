@@ -44,10 +44,10 @@ class LoggerHtml(mdLogger.LoggerBase):
 
     def writeMessage(self, message, targetName="", targetStep=""):
         sys.stderr.flush()
-        sys.stdin.write(message)
+        sys.stdout.write(message)
 
     def writeError(self, message, targetName="", targetStep="", filePath="", lineNumber=0, exitProgram=False):
-        sys.stdin.flush()
+        sys.stdout.flush()
         sys.stderr.write(self.__FormatErrorMessage(message, filePath, lineNumber))
         sys.stderr.flush()
 
