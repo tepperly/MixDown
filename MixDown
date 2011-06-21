@@ -35,7 +35,8 @@ def main():
         options = mdOptions.Options()
         targetsToImport = options.processCommandline(sys.argv)
 
-        if not options.importer and not targetsToImport and not options.cleanTargets:
+        if (not options.importer or not targetsToImport) and not\
+           options.cleanTargets and options.projectFile == "":
             options.printUsageAndExit("MixDown's mode could not be determined")
         timeStarted = time.time()
 
