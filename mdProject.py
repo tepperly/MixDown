@@ -37,6 +37,8 @@ class Project(object):
         self.__examined = False
 
     def addSkipStepFromOptions(self, options):
+        if options.skipSteps == '' or options.skipSteps == None:
+            return True
         skipSteps = options.skipSteps
         for item in skipSteps.split(";"):
             pair = item.split(":")
