@@ -239,8 +239,8 @@ class Options(object):
         <path to .md file>   Path to MixDown project file\n\
     \n\
         Optional:\n\
-        -s<list>      Add steps to skip for individual targets\
-           Example: -starget1:preconfig;target2:config\
+        -s<list>      Add steps to skip for individual targets\n\
+           Example: -starget1:preconfig;target2:config\n\
         -p<path>      Override prefix directory\n\
         -b<path>      Override build directory\n\
         -o<path>      Override download directory\n\
