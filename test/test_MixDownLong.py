@@ -26,15 +26,48 @@ if not ".." in sys.path:
 import mdLogger, utilityFunctions
 
 class Test_MixDownLong(unittest.TestCase):
-    def test_cmakeHello(self):
+    def test_subversion(self):
+        svnURL = "http://subversion.tigris.org/downloads/subversion-1.6.12.tar.bz2"
+        aprURL = "http://mirror.candidhosting.com/pub/apache/apr/apr-1.4.5.tar.bz2"
+        aprUtilURL = "http://mirror.candidhosting.com/pub/apache//apr/apr-util-1.3.12.tar.gz"
+        neonURL = "http://www.webdav.org/neon/neon-0.29.5.tar.gz"
+        sqliteURL = "http://www.sqlite.org/sqlite-autoconf-3070500.tar.gz"
+
+        skipAPRPreconfig = False
+        if socket.gethostname() == "tux316.llnl.gov":
+            skipAPRPreconfig = True
         try:
-            tempDir = mdTestUtilities.copyDirToTempDir("cases/cmake/hello")
-            importRC = utilityFunctions.executeSubProcess("MixDown --import " + os.path.join(tempDir, "main") + " " + os.path.join(tempDir, "hello1"), tempDir)
-            buildRC = utilityFunctions.executeSubProcess("MixDown main.md -ptestPrefix", tempDir)
-            cleanRC = utilityFunctions.executeSubProcess("MixDown --clean main.md", tempDir)
-            self.assertEquals(importRC, 0, "CMake Hello test case failed import.")
-            self.assertEquals(buildRC, 0, "CMake Hello test case failed build.")
-            self.assertEquals(cleanRC, 0, "CMake Hello test case failed clean.")
+            mixDownPath = os.path.abspath("..")
+            origPath = os.environ["PATH"]
+            os.environ["PATH"] = mixDownPath + ":" + origPath
+
+            tempDir = mdTestUtilities.makeTempDir()
+            downloadDir = os.path.join(tempDir, "mdDownload")
+
+            svnPath = utilityFunctions.downloadFile(svnURL, downloadDir)
+            self.assertNotEquals(svnPath, "", "Svn failed to download")
+
+            aprPath = utilityFunctions.downloadFile(aprURL, downloadDir)
+            self.assertNotEquals(aprPath, "", "Apr failed to download")
+
+            aprUtilPath = utilityFunctions.downloadFile(aprUtilURL, downloadDir)
+            self.assertNotEquals(aprUtilPath, "", "Apr Util failed to download")
+
+            neonPath = utilityFunctions.downloadFile(neonURL, downloadDir)
+            self.assertNotEquals(neonPath, "", "Neon failed to download")
+
+            sqlitePath = utilityFunctions.downloadFile(sqliteURL, downloadDir)
+            self.assertNotEquals(sqlitePath, "", "Sqlite failed to download")
+
+            importRC = utilityFunctions.executeSubProcess("MixDown --import " + svnPath + " " + aprPath + " " + aprUtilPath + " " + neonPath + " " + sqlitePath, tempDir)
+            self.assertEquals(importRC, 0, "Subversion test case failed import.")
+
+            buildRC = utilityFunctions.executeSubProcess("MixDown subversion-1.6.12.md -ptestPrefix", tempDir)
+            self.assertEquals(buildRC, 0, "Subversion test case failed build.")
+
+            cleanRC = utilityFunctions.executeSubProcess("MixDown --clean subversion-1.6.12.md", tempDir)
+            self.assertEquals(cleanRC, 0, "Subversion test case failed clean.")
+
             prefix = os.path.join(tempDir, "testPrefix")
             binDir = os.path.join(prefix, "bin")
             libDir = os.path.join(prefix, "lib")
@@ -42,11 +75,7 @@ class Test_MixDownLong(unittest.TestCase):
             self.assertEquals(os.path.exists(os.path.join(libDir, "libhello1.a")), True, "Library does not exist after building CMake Hello test case.")
         finally:
             utilityFunctions.removeDir(tempDir)
-
-    def test_subversion(self):
-        if socket.gethostname() == "tux316.llnl.gov":
-            pass
-
+            os.environ["PATH"] = origPath
 
 def suite():
     suite = unittest.TestSuite()

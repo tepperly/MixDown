@@ -28,6 +28,10 @@ import mdLogger, utilityFunctions
 class Test_MixDownShort(unittest.TestCase):
     def test_cmakeHello(self):
         try:
+            mixDownPath = os.path.abspath("..")
+            origPath = os.environ["PATH"]
+            os.environ["PATH"] = mixDownPath + ":" + origPath
+
             tempDir = mdTestUtilities.copyDirToTempDir("cases/cmake/hello")
             importRC = utilityFunctions.executeSubProcess("MixDown --import " + os.path.join(tempDir, "main") + " " + os.path.join(tempDir, "hello1"), tempDir)
             self.assertEquals(os.path.exists(os.path.join(tempDir, "main.md")), True, "MixDown project file does not exist after importing CMake Hello test case.")
@@ -43,9 +47,14 @@ class Test_MixDownShort(unittest.TestCase):
             self.assertEquals(os.path.exists(os.path.join(libDir, "libhello1.a")), True, "Library does not exist after building CMake Hello test case.")
         finally:
             utilityFunctions.removeDir(tempDir)
+            os.environ["PATH"] = origPath
 
     def test_AutoToolsSimpleGraph(self):
         try:
+            mixDownPath = os.path.abspath("..")
+            origPath = os.environ["PATH"]
+            os.environ["PATH"] = mixDownPath + ":" + origPath
+
             tempDir = mdTestUtilities.copyDirToTempDir("cases/simpleGraphAutoTools")
             importRC = utilityFunctions.executeSubProcess("MixDown --import " + os.path.join(tempDir, "TestCaseA") + " " + os.path.join(tempDir, "TestCaseB") + " " + os.path.join(tempDir, "TestCaseC") + " " + os.path.join(tempDir, "TestCaseD"), tempDir)
             self.assertEquals(os.path.exists(os.path.join(tempDir, "TestCaseA.md")), True, "MixDown project file does not exist after importing AutoTools Simple Graph test case.")
@@ -62,6 +71,7 @@ class Test_MixDownShort(unittest.TestCase):
             self.assertEquals(os.path.exists(os.path.join(binDir, "TestCaseD")), True, "Executable D does not exist after building AutoTools Simple Graph test case.")
         finally:
             utilityFunctions.removeDir(tempDir)
+            os.environ["PATH"] = origPath
 
 def suite():
     suite = unittest.TestSuite()
