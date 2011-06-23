@@ -198,7 +198,7 @@ class Options(object):
                 validateOption(currFlag, currValue)
                 self.verbose = True
             elif currFlag == "-s":
-                ValidateOption(currFlag, currValue)
+                validateOption(currFlag, currValue)
                 self.skipSteps = currValue
             elif currArg.lower() in ("/help", "/h", "-help", "--help", "-h"):
                 self.printUsageAndExit()
