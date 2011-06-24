@@ -33,16 +33,16 @@ class Test_MixDownLong(unittest.TestCase):
         neonURL = "http://www.webdav.org/neon/neon-0.29.5.tar.gz"
         sqliteURL = "http://www.sqlite.org/sqlite-autoconf-3070500.tar.gz"
 
-        skipAPRPreconfig = False
+        skipAPRPreconfig = ""
         if socket.gethostname() == "tux316.llnl.gov":
-            skipAPRPreconfig = True
+            skipAPRPreconfig = " -sapr:preconfig"
         try:
             mixDownPath = os.path.abspath("..")
             origPath = os.environ["PATH"]
             os.environ["PATH"] = mixDownPath + ":" + origPath
 
             tempDir = mdTestUtilities.makeTempDir()
-            downloadDir = os.path.join(tempDir, "mdDownload")
+            downloadDir = os.path.join(tempDir, "testDownloadFiles")
 
             svnPath = utilityFunctions.downloadFile(svnURL, downloadDir)
             self.assertNotEquals(svnPath, "", "Svn failed to download")
@@ -62,7 +62,7 @@ class Test_MixDownLong(unittest.TestCase):
             importRC = utilityFunctions.executeSubProcess("MixDown --import " + svnPath + " " + aprPath + " " + aprUtilPath + " " + neonPath + " " + sqlitePath, tempDir)
             self.assertEquals(importRC, 0, "Subversion test case failed import.")
 
-            buildRC = utilityFunctions.executeSubProcess("MixDown subversion-1.6.12.md -ptestPrefix", tempDir)
+            buildRC = utilityFunctions.executeSubProcess("MixDown subversion-1.6.12.md -ptestPrefix" + skipAPRPreconfig, tempDir)
             self.assertEquals(buildRC, 0, "Subversion test case failed build.")
 
             cleanRC = utilityFunctions.executeSubProcess("MixDown --clean subversion-1.6.12.md", tempDir)
@@ -71,8 +71,7 @@ class Test_MixDownLong(unittest.TestCase):
             prefix = os.path.join(tempDir, "testPrefix")
             binDir = os.path.join(prefix, "bin")
             libDir = os.path.join(prefix, "lib")
-            self.assertEquals(os.path.exists(os.path.join(binDir, "hello")), True, "Executable does not exist after building CMake Hello test case.")
-            self.assertEquals(os.path.exists(os.path.join(libDir, "libhello1.a")), True, "Library does not exist after building CMake Hello test case.")
+            self.assertEquals(os.path.exists(os.path.join(binDir, "svn")), True, "Executable does not exist after building CMake Hello test case.")
         finally:
             utilityFunctions.removeDir(tempDir)
             os.environ["PATH"] = origPath
