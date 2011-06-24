@@ -90,7 +90,10 @@ def main():
         Logger().writeMessage(message)
     finally:
         Logger().close()
-    sys.exit()
+    if succeeded:
+        sys.exit()
+    else:
+        sys.exit(1)
 
 #--------------------------------Setup---------------------------------
 def setup(options):
