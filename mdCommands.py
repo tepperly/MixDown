@@ -126,18 +126,30 @@ def __getConfigureCommand(target):
 
 def __getBuildCommand(target):
     command = ""
-    if mdMake.isMakeProject(target.path):
+    if mdAutoTools.isAutoToolsProject(target.path):
+        command = mdAutoTools.getBuildCommand()
+    elif mdCMake.isCMakeProject(target.path):
+        command = mdCMake.getBuildCommand()
+    elif mdMake.isMakeProject(target.path):
         command = mdMake.getBuildCommand()
     return command
 
 def __getInstallCommand(target):
     command = ""
-    if mdMake.isMakeProject(target.path):
+    if mdAutoTools.isAutoToolsProject(target.path):
+        command = mdAutoTools.getInstallCommand()
+    elif mdCMake.isCMakeProject(target.path):
+        command = mdCMake.getInstallCommand()
+    elif mdMake.isMakeProject(target.path):
         command = mdMake.getInstallCommand()
     return command
 
 def __getCleanCommand(target):
     command = ""
-    if mdMake.isMakeProject(target.path):
+    if mdAutoTools.isAutoToolsProject(target.path):
+        command = mdAutoTools.getCleanCommand()
+    elif mdCMake.isCMakeProject(target.path):
+        command = mdCMake.getCleanCommand()
+    elif mdMake.isMakeProject(target.path):
         command = mdMake.getCleanCommand()
     return command
