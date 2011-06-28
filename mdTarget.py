@@ -61,6 +61,7 @@ def targetPathToName(path, exitOnFailure=True):
 
 class Target(object):
     def __init__(self, targetName, path=""):
+        self.comment = ""
         self.name = targetName
         self.aliases = []
         self.origPath = path
@@ -128,7 +129,10 @@ class Target(object):
             self.commands[stepName] = mdCommands.getCommand(stepName, self, options)
 
     def __str__(self):
-        retStr = "Name: " + self.name + "\n"
+        retStr = ""
+        if self.comment != "":
+            retStr += "#" + self.comment
+        retStr += "Name: " + self.name + "\n"
         if self.origPath != "":
             retStr += "Path: " + self.origPath + "\n"
         else:

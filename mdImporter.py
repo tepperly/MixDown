@@ -30,6 +30,7 @@ def importTargets(options, targetsToImport):
 
     finalTargets = []
     ignoredTargets = []
+    partialImport = False
 
     options.tempDir = tempfile.mkdtemp(prefix="mixdown-")
     options.downloadDir = os.path.join(options.tempDir, "mdDownloads")
@@ -59,10 +60,13 @@ def importTargets(options, targetsToImport):
             Logger().writeMessage("Analyzing for dependancies...", target.name)
             possibleDeps = mdAutoTools.getDependancies(target.path, target.name)
         elif mdMake.isMakeProject(target.path):
-            Logger().writeMessage("Make project found...", target.name)
-            Logger().writeMessage("MixDown cannot determine dependancies from Make projects.", target.name)
+            target.comment = "Make project found. MixDown cannot determine dependancies from Make projects."
+            Logger().writeError(target.comment, target.name)
+            partialImport = True
         else:
-            Logger().writeError("Unknown build system found.  MixDown cannot determine dependancies or build commands.", target.name)
+            target.comment = "Unknown build system found.  MixDown cannot determine dependancies or build commands."
+            Logger().writeError(target.comment, target.name)
+            partialImport = True
 
         #Find actual dependancies
         for possibleDependancy in possibleDeps:
@@ -117,7 +121,10 @@ def importTargets(options, targetsToImport):
     if not project.validate(options):
         Logger().writeError("Project failed validation", exitProgram=True)
 
-    mainTargetName, mainTargetVersion = utilityFunctions.splitFileName(project.targets[0].origPath)
+    mainTargetPath = project.targets[0].origPath
+    if utilityFunctions.isURL(mainTargetPath):
+        mainTargetPath = utilityFunctions.URLToFilename(mainTargetPath)
+    mainTargetName, mainTargetVersion = utilityFunctions.splitFileName(mainTargetPath)
     if mainTargetVersion != "":
         project.name = mainTargetName + "-" + mainTargetVersion
     else:
@@ -132,7 +139,7 @@ def importTargets(options, targetsToImport):
         project.write()
 
     utilityFunctions.removeDir(options.tempDir)
-    return project
+    return project, partialImport
 
 def searchForPossibleAliasInList(possibleAlias, targetList, interactive=False):
     for target in targetList:
