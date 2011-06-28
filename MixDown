@@ -32,6 +32,8 @@ def main():
     SetLogger("console")
     Logger().writeMessage("MixDown - A tool to simplify building\n")
     try:
+        succeeded = True
+        partialImport = False
         options = mdOptions.Options()
         targetsToImport = options.processCommandline(sys.argv)
 
@@ -41,11 +43,9 @@ def main():
         timeStarted = time.time()
 
         if options.importer:
-            project = mdImporter.importTargets(options, targetsToImport)
-            if project != None:
-                succeeded = True
-            else:
-                suceeded = False
+            project, partialImport = mdImporter.importTargets(options, targetsToImport)
+            if project == None or partialImport:
+                succeeded = False
         else:
             if options.cleanMixDown:
                 cleanMixDown(options)
@@ -66,28 +66,26 @@ def main():
 
         timeFinished = time.time()
         timeElapsed = timeFinished - timeStarted
-        if project == None:
-            if options.importer:
-                message = "Importing failed."
-            else:
-                message = "Project failed."
+
+        message = "Project "
+        if project != None:
+            message += project.name
+
+        if not succeeded:
+            message += " failed."
         else:
+            message += " succeeded."
             if options.importer:
-                message = "Importing project " + project.name
+                Logger().writeMessage("\nProject " + project.name + " has been imported to file " + project.path + "\n")
+            elif options.cleanTargets:
+                Logger().writeMessage("\n" + project.name + " has been cleaned in " + os.path.abspath(options.buildDir) + "\n")
             else:
-                message = "Project " + project.name
-            if succeeded:
-                message += " succeeded."
-                if not options.importer:
-                    if options.cleanTargets:
-                        Logger().writeMessage("\n" + project.name + " has been cleaned in " + os.path.abspath(options.buildDir) + "\n")
-                    else:
-                        Logger().writeMessage("\n" + project.name + " has been built in " + os.path.abspath(options.buildDir))
-                        Logger().writeMessage(project.name + " has been installed to " + os.path.abspath(options.getDefine(mdStrings.mdDefinePrefix)) + "\n")
-            else:
-                message += " failed."
+                Logger().writeMessage("\n" + project.name + " has been built in " + os.path.abspath(options.buildDir))
+                Logger().writeMessage(project.name + " has been installed to " + os.path.abspath(options.getDefine(mdStrings.mdDefinePrefix)) + "\n")
         message = "Total time " + secondsToHMS(timeElapsed) + "\n" + message + "\n"
         Logger().writeMessage(message)
+        if partialImport:
+            Logger().writeError("Project partially imported.  Please refer to comments in created MixDown project file to determine reason.")
     finally:
         Logger().close()
     if succeeded:
