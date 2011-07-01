@@ -54,7 +54,10 @@ def targetPathToName(path, exitOnFailure=True):
     elif os.path.isfile(path) and tarfile.is_tarfile(path):
         name = utilityFunctions.splitFileName(path)[0]
     elif os.path.isdir(path):
-        name = os.path.basename(path)
+        if path.endswith(os.sep):
+            name = os.path.basename(path[:-1])
+        else:
+            name = os.path.basename(path)
     else:
         Logger().writeError("Could not convert given target path to name: " + path, exitProgram=exitOnFailure)
     return name
