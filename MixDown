@@ -50,7 +50,9 @@ def main():
             if options.cleanMixDown:
                 cleanMixDown(options)
             project = setup(options)
-            if project != None:
+            if project == None:
+                succeeded = False
+            else:
                 for target in reversed(project.targets):
                     if options.cleanTargets:
                         succeeded = mdCommands.buildStepActor("clean", target, options)
@@ -76,16 +78,16 @@ def main():
         else:
             message += " succeeded."
             if options.importer:
-                Logger().writeMessage("\nProject " + project.name + " has been imported to file " + project.path + "\n")
+                Logger().writeMessage("\nProject " + project.name + " has been imported to file " + project.path)
             elif options.cleanTargets:
-                Logger().writeMessage("\n" + project.name + " has been cleaned in " + os.path.abspath(options.buildDir) + "\n")
+                Logger().writeMessage("\n" + project.name + " has been cleaned in " + os.path.abspath(options.buildDir))
             else:
                 Logger().writeMessage("\n" + project.name + " has been built in " + os.path.abspath(options.buildDir))
-                Logger().writeMessage(project.name + " has been installed to " + os.path.abspath(options.getDefine(mdStrings.mdDefinePrefix)) + "\n")
-        message = "Total time " + secondsToHMS(timeElapsed) + "\n" + message + "\n"
+                Logger().writeMessage(project.name + " has been installed to " + os.path.abspath(options.getDefine(mdStrings.mdDefinePrefix)))
+        message = "\nTotal time " + secondsToHMS(timeElapsed) + "\n" + message
         Logger().writeMessage(message)
         if partialImport:
-            Logger().writeError("Project partially imported.  Please refer to comments in created MixDown project file to determine reason.")
+            Logger().writeError("\nProject partially imported.  Please refer to comments in created MixDown project file to determine reason.")
     finally:
         Logger().close()
     if succeeded:
