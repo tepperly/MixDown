@@ -40,9 +40,9 @@ def targetPathToName(path, exitOnFailure=True):
             if name.endswith(".git"):
                 name = name[:-4]
     elif mdSvn.isSvnRepo(path):
-        if path.endswith("/"):
+        if path.endswith(os.sep):
             path = path[:-1]
-        if path.endswith("/trunk"):
+        if path.endswith("/trunk") or path.endswith("\trunk"):
             path = path[:-6]
         if os.path.isdir(path):
             name = os.path.basename(path)
@@ -102,6 +102,10 @@ class Target(object):
                 installDir = options.expandDefines(installDir)
                 if installDir != "" and not utilityFunctions.haveWriteAccess(installDir):
                     Logger().writeError("No write access to used install directory: " + installDir, self.name, step, options.projectFile)
+                    if not options.prefixDefined:
+                        Logger().writeMessage("Use commandline option '-p<install path>' or running MixDown with superuser privileges (sudo)")
+                    else:
+                        Logger().writeMessage("Choose a different install directory for commandline option '-p<install path>'")
                     return False
         return True
 
