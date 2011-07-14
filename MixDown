@@ -23,7 +23,7 @@
 # Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 
 import os, sys, tarfile, time, urllib
-import mdCommands, mdImporter, mdOptions, mdProject, mdStrings, utilityFunctions
+import mdCommands, mdImporter, mdOptions, mdProject, mdDefines, utilityFunctions
 
 from mdLogger import *
 
@@ -83,7 +83,7 @@ def main():
                 Logger().writeMessage("\n" + project.name + " has been cleaned in " + os.path.abspath(options.buildDir))
             else:
                 Logger().writeMessage("\n" + project.name + " has been built in " + os.path.abspath(options.buildDir))
-                Logger().writeMessage(project.name + " has been installed to " + os.path.abspath(options.getDefine(mdStrings.mdDefinePrefix)))
+                Logger().writeMessage(project.name + " has been installed to " + os.path.abspath(options.getDefine(mdDefines.mdPrefix[0])))
         message = "\nTotal time " + secondsToHMS(timeElapsed) + "\n" + message
         Logger().writeMessage(message)
         if partialImport:
@@ -101,7 +101,7 @@ def setup(options):
     if options.verbose:
         Logger().writeMessage(str(options))
         if not options.prefixDefined and not options.cleanTargets:
-            Logger().writeMessage("No prefix defined, defaulting to '" + options.getDefine(mdStrings.mdDefinePrefix) + "'")
+            Logger().writeMessage("No prefix defined, defaulting to '" + options.getDefine(mdDefines.mdPrefix[0]) + "'")
 
     project = mdProject.Project(options.projectFile)
     if not project.read():
@@ -126,7 +126,7 @@ def setup(options):
                     cleaningOutputReported = True
                 utilityFunctions.removeDir(currTarget.outputPath)
 
-        prefixDefine = options.getDefine(mdStrings.mdDefinePrefix)
+        prefixDefine = options.getDefine(mdDefines.mdPrefix[0])
         if prefixDefine != "":
             #TODO: only add lib64 if on 64bit machines
             libraryPaths = os.path.join(prefixDefine, "lib") + ":" + os.path.join(prefixDefine, "lib64")
