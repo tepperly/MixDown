@@ -21,7 +21,7 @@
 # Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 
 import os, re, shutil, sys, tarfile, tempfile, urllib
-import mdAutoTools, mdCMake, mdCommands, mdMake, mdOptions, mdProject, mdStrings, mdTarget, utilityFunctions
+import mdAutoTools, mdCMake, mdCommands, mdMake, mdOptions, mdProject, mdDefines, mdTarget, utilityFunctions
 
 from mdLogger import *
 
@@ -32,8 +32,8 @@ def importTargets(options, targetsToImport):
     ignoredTargets = []
     partialImport = False
 
-    options.tempDir = tempfile.mkdtemp(prefix="mixdown-")
-    options.downloadDir = os.path.join(options.tempDir, "mdDownloads")
+    tempDir = tempfile.mkdtemp(prefix="mixdown-")
+    options.downloadDir = os.path.join(tempDir, "mdDownloads")
 
     while len(targetsToImport) != 0:
         target = targetsToImport.pop(0)
@@ -41,7 +41,7 @@ def importTargets(options, targetsToImport):
         Logger().writeMessage("Analyzing target...", target.name)
         Logger().writeMessage("Extracting target...", target.name)
 
-        target.outputPath = os.path.join(options.tempDir, target.name)
+        target.outputPath = os.path.join(tempDir, target.name)
         if not mdCommands.buildStepActor("fetch", target, options):
             return None
         if not mdCommands.buildStepActor("unpack", target, options):
@@ -138,7 +138,7 @@ def importTargets(options, targetsToImport):
         Logger().writeMessage("\nFinal targets...\n\n" + str(project))
         project.write()
 
-    utilityFunctions.removeDir(options.tempDir)
+    utilityFunctions.removeDir(tempDir)
     return project, partialImport
 
 def searchForPossibleAliasInList(possibleAlias, targetList, interactive=False):
