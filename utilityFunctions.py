@@ -45,7 +45,7 @@ def executeCommand(command, args="", workingDirectory="", verbose=False, exitOnE
     finally:
         os.chdir(lastcwd)
 
-def executeSubProcess(command, workingDirectory="/tmp", outFileHandle=1, verbose=False, exitOnError=False):
+def executeSubProcess(command, workingDirectory=tempfile.gettempdir(), outFileHandle=1, verbose=False, exitOnError=False):
     if verbose:
         print "Executing: " + command + ": Working Directory: " + workingDirectory
     tempArgs = command.split(" ")
@@ -85,12 +85,12 @@ def getBasename(path):
 
 def haveWriteAccess(path):
     highestExistingDir = path
-    while highestExistingDir != "/":
+    while highestExistingDir != os.sep:
         if os.path.exists(highestExistingDir):
             break
-        if highestExistingDir[len(highestExistingDir)-1] == '/':
+        if highestExistingDir[len(highestExistingDir)-1] == os.sep:
             highestExistingDir = highestExistingDir[:-1]
-        highestExistingDir = highestExistingDir[:highestExistingDir.rfind('/')+1]
+        highestExistingDir = highestExistingDir[:highestExistingDir.rfind(os.sep)+1]
     if os.access(highestExistingDir, os.W_OK):
         return True
     return False
@@ -199,7 +199,7 @@ def unzip(zipPath, outPath="", stripDir=False):
         shutil.move(src, outPath)
 
 def URLToFilename(url):
-    if url.endswith("/"):
+    if url.endswith(os.sep):
         url = url[:1]
     #This works around sourceforge not having the filename last in the url
     pattern = r"https?://(www\.)?((sf)|(sourceforge))\.net/.*/(?P<filename>[^/]+((\.tar.gz)|(\.tar)|(\.tar.bz2)|(\.tgz)|(\.tbz)|(\.tb2)|(\.zip)))/download"
@@ -210,7 +210,7 @@ def URLToFilename(url):
         if fileName != None and fileName != "":
             return fileName
 
-    fileName = url[(url.rfind("/")+1):]
+    fileName = url[(url.rfind(os.sep)+1):]
     if url == "" or file == "":
         return "_"
     return fileName
