@@ -20,17 +20,16 @@
 # along with this program; if not, write to the Free Software Foundation,
 # Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 
-import os, sys, mdStrings, mdTarget, utilityFunctions
+import os, sys, mdDefines, mdTarget, utilityFunctions
 
 from mdLogger import *
 
 class Options(object):
     def __init__(self):
         self.projectFile = ""
-        self.buildDir = "mdBuild/"
-        self.downloadDir = "mdDownload/"
-        self.logDir = "mdLogFiles/"
-        self.tempDir = "/tmp/"
+        self.buildDir = "mdBuild"
+        self.downloadDir = "mdDownload"
+        self.logDir = "mdLogFiles"
         self.cleanTargets = False
         self.cleanMixDown = True
         self.verbose = False
@@ -41,7 +40,10 @@ class Options(object):
         self.skipSteps = ""
         self._defines = dict()
         self._defines.setdefault("")
-        self.setDefine(mdStrings.mdDefinePrefix, '/usr/local')
+        mdDefines.setPrefixDefines(self, '/usr/local')
+        #mdDefines.setCompilerDefines(self, '/usr/bin/gcc', '/usr/bin/g++')
+        #mdDefines.setCompilerDefines(self, '/home/white238/bin/gcc', '/home/white238/bin/g++')
+
 
     def __str__(self):
         return "Options:\n\
@@ -131,7 +133,6 @@ class Options(object):
         targetsToImport = []
         self.verbose = True
         self.importer = True
-        self.setDefine(mdStrings.mdDefinePrefix, "$(" + mdStrings.mdDefinePrefix + ")")
         for currArg in commandline[1:]:
             if currArg == "--import":
                 continue
@@ -173,13 +174,12 @@ class Options(object):
                     self.setDefine(splitPair[0], splitPair[1])
             elif currFlag == "-p":
                 validateOptionPair(currFlag, currValue)
-                self.setDefine(mdStrings.mdDefinePrefix, os.path.abspath(currValue))
+                mdDefines.setPrefixDefines(self, os.path.abspath(currValue))
                 self.prefixDefined = True
             elif currFlag == "-j":
                 validateOptionPair(currFlag, currValue)
-                self.setDefine(mdStrings.mdDefineJobSlots, currValue)
                 #Add "-j<jobSlots>" only if user defines -j on commandline
-                self.setDefine(mdStrings.mdMakeJobSlotsDefineName, mdStrings.mdMakeJobSlotsDefineValue)
+                mdDefines.setJobSlotsDefines(self, currValue)
             elif currFlag == "-l":
                 validateOptionPair(currFlag, currValue)
                 self.logger = str.lower(currValue)
