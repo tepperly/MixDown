@@ -20,7 +20,8 @@
 # along with this program; if not, write to the Free Software Foundation,
 # Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 
-import os, re, mdMake, mdStrings, mdTarget, utilityFunctions
+import os, re
+import mdMake, mdDefines, mdTarget, utilityFunctions
 
 from mdLogger import *
 
@@ -88,9 +89,9 @@ def getPreconfigureCommand(path):
         return ""
 
 def getConfigureCommand(target):
-    command = "./configure --prefix=$(" + mdStrings.mdDefinePrefix + ")"
+    command = "./configure " + surround(mdDefines.mdAutoToolsPrefix[0]) + " " + surround(mdDefines.mdAutoToolsCompilers[0])
     for dependancy in target.dependsOn:
-        command += " --with-" + dependancy + "=$(" + mdStrings.mdDefinePrefix + ")"
+        command += " --with-" + dependancy + "=" + mdDefines.surround(mdDefines.mdPrefix[0])
     return command
 
 def getBuildCommand():
