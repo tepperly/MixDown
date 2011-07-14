@@ -20,7 +20,8 @@
 # along with this program; if not, write to the Free Software Foundation,
 # Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 
-import os, re, mdMake, mdStrings, mdTarget
+import os, re
+import mdMake, mdDefines, mdTarget
 
 from mdLogger import *
 
@@ -109,7 +110,7 @@ def getPreconfigureCommand():
     return ""
 
 def getConfigureCommand():
-    return "cmake -DCMAKE_PREFIX_PATH=$(" + mdStrings.mdDefinePrefix + ") -DCMAKE_INSTALL_PREFIX=$(" + mdStrings.mdDefinePrefix + ")"
+    return "cmake " + surround(mdDefines.mdCMakePrefix[0]) + " " + surround(mdDefines.mdCMakeCompilers[0])
 
 def getBuildCommand():
     return mdMake.getBuildCommand()
