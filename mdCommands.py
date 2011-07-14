@@ -21,7 +21,7 @@
 # Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 
 import os, time
-import mdAutoTools, mdCMake, mdMake, mdOptions, mdPython, mdStrings, mdTarget, utilityFunctions
+import mdAutoTools, mdCMake, mdMake, mdOptions, mdPython, mdDefines, mdTarget, utilityFunctions
 
 from mdLogger import *
 
