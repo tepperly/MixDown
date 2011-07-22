@@ -82,9 +82,15 @@ Usage
         -b<path>      Override build directory
         -o<path>      Override download directory
         -l<logger>    Override default logger (Console, File, Html)
-    
+
+    Custom Build Mode:
+        1. Create a .md file manually with rules for Name, Path and Build.
+        2. In the Build rule, add the necessary steps before running the make.
+        3. Use MixDown in Build Mode.
+
     Default Directories:
     Builds:       mdBuild/
     Downloads:    mdDownload/
     Logs:         mdLogFiles/
 
+     
