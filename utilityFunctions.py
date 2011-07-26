@@ -48,13 +48,12 @@ def executeCommand(command, args="", workingDirectory="", verbose=False, exitOnE
 def executeSubProcess(command, workingDirectory=tempfile.gettempdir(), outFileHandle=1, verbose=False, exitOnError=False):
     if verbose:
         print "Executing: " + command + ": Working Directory: " + workingDirectory
-    tempArgs = command.split(" ")
-    args = []
-    for arg in tempArgs:
-        arg = arg.strip()
-        if arg != "":
-            args.append(arg)
-    process = subprocess.Popen(args, stdout=outFileHandle, stderr=outFileHandle, cwd=workingDirectory)
+    #***************************************************************************************************************
+    #Note: Even though python's documentation says that "shell=True" opens up a computer for malicious shell commands,
+    #  it is needed to allow users to fully utilize shell commands, such as cd.  Also it does not open up any additional
+    #  vulnerabilities that did not already exist by running any other build tools, such as Make or configure.
+    #***************************************************************************************************************
+    process = subprocess.Popen(command, stdout=outFileHandle, stderr=outFileHandle, shell=True, cwd=workingDirectory)
     process.wait()
     if exitOnError and process.returncode != 0:
         printErrorAndExit("Command '" + command + "': exited with error code " + str(process.returncode))
