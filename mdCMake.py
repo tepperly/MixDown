@@ -110,7 +110,7 @@ def getPreconfigureCommand():
     return ""
 
 def getConfigureCommand():
-    return "cmake " + surround(mdDefines.mdCMakePrefix[0]) + " " + surround(mdDefines.mdCMakeCompilers[0])
+    return "cmake " + mdDefines.surround(mdDefines.mdCMakePrefix[0]) + " " + mdDefines.surround(mdDefines.mdCMakeCompilers[0])
 
 def getBuildCommand():
     return mdMake.getBuildCommand()
