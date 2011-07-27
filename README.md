@@ -88,6 +88,13 @@ Usage
         2. In the Build rule, add the necessary steps before running the make.
         3. Use MixDown in Build Mode.
 
+    Sample .md file:
+        Name: <Name of Project>
+        Path: <Path of Project> 
+        Config: <Commands to be executed>; ./configure
+        Build: <Commands to be executed>; make
+        Install: <Commands to be executed>; make install
+
     Default Directories:
     Builds:       mdBuild/
     Downloads:    mdDownload/
