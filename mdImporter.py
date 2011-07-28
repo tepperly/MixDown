@@ -43,9 +43,11 @@ def importTargets(options, targetsToImport):
 
         target.outputPath = os.path.join(tempDir, target.name)
         if not mdCommands.buildStepActor("fetch", target, options):
-            return None
+            utilityFunctions.removeDir(tempDir)
+            return None, False
         if not mdCommands.buildStepActor("unpack", target, options):
-            return None
+            utilityFunctions.removeDir(tempDir)
+            return None, False
 
         #Generate build files and find possible dependancies
         possibleDeps = []
@@ -56,7 +58,8 @@ def importTargets(options, targetsToImport):
         elif mdAutoTools.isAutoToolsProject(target.path):
             Logger().writeMessage("Auto Tools project found...", target.name)
             if not mdAutoTools.generateConfigureFiles(target.path, target.name):
-                return None
+                utilityFunctions.removeDir(tempDir)
+                return None, False
             Logger().writeMessage("Analyzing for dependancies...", target.name)
             possibleDeps = mdAutoTools.getDependancies(target.path, target.name)
         elif mdMake.isMakeProject(target.path):
