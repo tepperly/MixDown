@@ -25,54 +25,58 @@ import mdAutoTools, mdCMake, mdMake, mdOptions, mdPython, mdDefines, mdTarget, u
 
 from mdLogger import *
 
-def getBuildStepList():
-    return ["fetch", "unpack", "patch", "preconfig", "config", "build", "install", "clean"]
+class BuildStep(object):
+    def __init__(self, name="", command=""):
+        self.name = name
+        self.command = command
 
-def buildStepActor(stepName, target, options, verbose=True):
-    if verbose:
-        Logger().reportStart(target.name, stepName)
+buildSteps = ["fetch", "unpack", "patch", "preconfig", "config", "build", "install", "clean"]
+
+def findBuildStepInList(buildStepList, name):
+    for buildStep in buildStepList:
+        if buildStep.name == name:
+            return buildStep
+    return None
+
+def buildStepActor(target, buildStep, options):
+    if options.verbose:
+        Logger().reportStart(target.name, buildStep.name)
     returnCode = None
 
     timeStart = time.time()
 
-    if target.hasStep(stepName):
-        command = getCommand(stepName, target, options)
-        if command != "":
-            isPythonCommand, namespace, function = mdPython.parsePythonCommand(command)
-            if isPythonCommand:
-                success = mdPython.callPythonCommand(namespace, function, target, options)
-                if not success:
-                    returnCode = 1
-                else:
-                    returnCode = 0
-            else:
-                outFd = Logger().getOutFd(target.name, stepName)
-                returnCode = utilityFunctions.executeSubProcess(command, target.path, outFd, options.verbose)
+    if target.isStepToBeSkipped(buildStep.name):
+        if options.verbose:
+            Logger().reportSkipped(target.name, buildStep.name, "Target specified to skip step")
+        return True
+        
+    command = options.expandDefines(buildStep.command)
+    isPythonCommand, namespace, function = mdPython.parsePythonCommand(command)
+    if isPythonCommand:
+        success = mdPython.callPythonCommand(namespace, function, target, options)
+        if not success:
+            returnCode = 1
         else:
-            skipReason = "Command could not be determined by MixDown"
+            returnCode = 0
     else:
-        skipReason = "Target specified to skip step"
+        outFd = Logger().getOutFd(target.name, buildStep.name)
+        returnCode = utilityFunctions.executeSubProcess(command, target.path, outFd, options.verbose)
 
     timeFinished = time.time()
     timeElapsed = timeFinished - timeStart
 
-    if returnCode == None:
-        if verbose:
-            Logger().reportSkipped(target.name, stepName, skipReason)
-    elif returnCode != 0:
-        if verbose:
-            Logger().reportFailure(target.name, stepName, timeElapsed, returnCode)
+    if returnCode != 0:
+        if options.verbose:
+            Logger().reportFailure(target.name, buildStep.name, timeElapsed, returnCode)
         return False
-    else:
-        if verbose:
-            Logger().reportSuccess(target.name, stepName, timeElapsed)
+
+    if options.verbose:
+        Logger().reportSuccess(target.name, buildStep.name, timeElapsed)
     return True
 
-def getCommand(stepName, target, options):
+def getCommand(stepName, target):
     command = ""
-    if target.commands.has_key(stepName) and target.commands[stepName] != "":
-        command = target.commands[stepName]
-    elif stepName == "fetch":
+    if stepName == "fetch":
         command = __getFetchCommand(target)
     elif stepName == "unpack":
         command = __getUnpackCommand(target)
@@ -89,9 +93,7 @@ def getCommand(stepName, target, options):
     elif stepName == "clean":
         command = __getCleanCommand(target)
 
-    if options.importer:
-        return command
-    return options.expandDefines(command)
+    return command
 
 def __getFetchCommand(target):
     return "mdSteps.fetch(pythonCallInfo)"

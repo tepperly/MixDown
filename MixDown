@@ -57,10 +57,10 @@ def main():
                     if options.cleanTargets:
                         succeeded = mdCommands.buildStepActor("clean", target, options)
                     else:
-                        for step in mdCommands.getBuildStepList():
-                            if step == "clean":
+                        for buildStep in target.buildSteps:
+                            if buildStep.name == "clean" or buildStep.command == "":
                                 continue
-                            succeeded = mdCommands.buildStepActor(step, target, options)
+                            succeeded = mdCommands.buildStepActor(target, buildStep, options)
                             if not succeeded:
                                 break
                     if not succeeded:

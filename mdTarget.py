@@ -75,9 +75,7 @@ class Target(object):
         self.dependsOn = []
         self._skipSteps = []
         self.pythonCallInfo = mdPython.PythonCallInfo()
-        self.commands = dict()
-        for step in mdCommands.getBuildStepList():
-            self.commands[step] = ""
+        self.buildSteps = []
 
     def validate(self, options):
         normalizedName = normalizeName(self.name)
@@ -92,12 +90,10 @@ class Target(object):
 
         #Check for write access to install directories used in commands.
         if not options.cleanTargets:
-            for step in mdCommands.getBuildStepList():
-                installDir = ""
-                command = self.commands[step]
-                installDir = mdAutoTools.getInstallDir(command)
+            for buildStep in self.buildSteps:
+                installDir = mdAutoTools.getInstallDir(buildStep.command)
                 if installDir == "":
-                    installDir = mdCMake.getInstallDir(command)
+                    installDir = mdCMake.getInstallDir(buildStep.command)
 
                 installDir = options.expandDefines(installDir)
                 if installDir != "" and not utilityFunctions.haveWriteAccess(installDir):
@@ -127,13 +123,15 @@ class Target(object):
                 return targetsBuildDir
 
     def examine(self, options):
-        self.__determineCommands(options)
+        if options.importer:
+            self.__determineCommands(options)
         self.outputPath = self.determineOutputPath(options)
         return True
 
     def __determineCommands(self, options):
-        for stepName in mdCommands.getBuildStepList():
-            self.commands[stepName] = mdCommands.getCommand(stepName, self, options)
+        for stepName in mdCommands.buildSteps:
+            buildStep = mdCommands.BuildStep(stepName, mdCommands.getCommand(stepName, self))
+            self.buildSteps.append(buildStep)
 
     def __str__(self):
         retStr = ""
@@ -152,10 +150,8 @@ class Target(object):
             retStr += "DependsOn: " + ",".join(self.dependsOn) + "\n"
         if len(self._skipSteps) != 0:
             retStr += "SkipSteps: " + ",".join(self._skipSteps) + "\n"
-        for stepName in mdCommands.getBuildStepList():
-            command = self.commands[stepName]
-            if command != "":
-                retStr += stepName.capitalize() + ": " + command + "\n"
+        for buildStep in self.buildSteps:
+            retStr += buildStep.name.capitalize() + ": " + buildStep.command + "\n"
         return retStr
 
     @property
@@ -163,16 +159,14 @@ class Target(object):
         return self._skipSteps
 
     @skipSteps.setter
-    def skipSteps(self, value):
+    def skipSteps(self, steps):
         loweredList = []
-        for step in value[:]:
+        for step in steps[:]:
             loweredList.append(str.lower(step))
         self._skipSteps += loweredList
 
-    def hasStep(self, stepName):
-        if len(self._skipSteps) == 0: #no steps were specified, do all steps
-            return True
+    def isStepToBeSkipped(self, stepName):
         for step in self._skipSteps:
             if step.startswith(stepName):
-                return False
-        return True
+                return True
+        return False

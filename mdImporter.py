@@ -31,6 +31,8 @@ def importTargets(options, targetsToImport):
     finalTargets = []
     ignoredTargets = []
     partialImport = False
+    fetchStep = mdCommands.BuildStep("fetch", mdCommands.__getFetchCommand(None))
+    unpackStep = mdCommands.BuildStep("unpack", mdCommands.__getUnpackCommand(None))
 
     tempDir = tempfile.mkdtemp(prefix="mixdown-")
     options.downloadDir = os.path.join(tempDir, "mdDownloads")
@@ -42,10 +44,10 @@ def importTargets(options, targetsToImport):
         Logger().writeMessage("Extracting target...", target.name)
 
         target.outputPath = os.path.join(tempDir, target.name)
-        if not mdCommands.buildStepActor("fetch", target, options):
+        if not mdCommands.buildStepActor(target, fetchStep, options):
             utilityFunctions.removeDir(tempDir)
             return None, False
-        if not mdCommands.buildStepActor("unpack", target, options):
+        if not mdCommands.buildStepActor(target, unpackStep, options):
             utilityFunctions.removeDir(tempDir)
             return None, False
 

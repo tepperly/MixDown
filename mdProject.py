@@ -171,11 +171,11 @@ class Project(object):
                             Logger().writeError("Project targets can only have one 'SkipSteps' defined (use a comma delimited list for multiple steps)", "", "", self.path, lineCount)
                             return False
                         currTarget.skipSteps = utilityFunctions.stripItemsInList(str.lower(currPair[1]).split(","))
-                    elif currName in mdCommands.getBuildStepList():
-                        if currTarget.commands[currName] != "":
+                    elif currName in mdCommands.buildSteps:
+                        if mdCommands.findBuildStepInList(currTarget.buildSteps, currName) != None:
                             Logger().writeError("Project targets can only have one '" + currName + "' defined", "", "", self.path, lineCount)
                             return False
-                        currTarget.commands[currName] = currPair[1]
+                        currTarget.buildSteps.append(mdCommands.BuildStep(currName, currPair[1]))
                     else:
                         Logger().writeError("Cannot understand given line: '" + currLine + "'", "", "", self.path, lineCount)
                         return False
