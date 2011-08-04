@@ -128,6 +128,10 @@ class Target(object):
         self.outputPath = self.determineOutputPath(options)
         return True
 
+    def expandDefines(self, options):
+        for buildStep in self.buildSteps:
+            buildStep.command = options.expandDefines(buildStep.command)
+
     def __determineCommands(self, options):
         for stepName in mdCommands.buildSteps:
             buildStep = mdCommands.BuildStep(stepName, mdCommands.getCommand(stepName, self))
@@ -153,6 +157,12 @@ class Target(object):
         for buildStep in self.buildSteps:
             retStr += buildStep.name.capitalize() + ": " + buildStep.command + "\n"
         return retStr
+
+    def findBuildStep(self, name):
+        for buildStep in self.buildSteps:
+            if buildStep.name == name:
+                return buildStep
+        return None
 
     @property
     def skipSteps(self):
