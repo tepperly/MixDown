@@ -41,9 +41,9 @@ class Options(object):
         self._defines = dict()
         self._defines.setdefault("")
         mdDefines.setPrefixDefines(self, '/usr/local')
-        #mdDefines.setCompilerDefines(self, '/usr/bin/gcc', '/usr/bin/g++')
+        #mdDefines.setCompilerDefines(self, '/usr/bin/gcc', '/usr/bin/g++', '/usr/bin/cpp')
         #mdDefines.setCompilerDefines(self, '/home/white238/bin/gcc', '/home/white238/bin/g++')
-
+        #mdDefines.setCompilerDefines(self, '/home/white238/projects/gcc4.6.1/testPrefix/bin/gcc', '/home/white238/projects/gcc4.6.1/testPrefix/bin/g++', '/home/white238/projects/gcc4.6.1/testPrefix/bin/cpp')
 
     def __str__(self):
         return "Options:\n\
