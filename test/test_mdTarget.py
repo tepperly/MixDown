@@ -97,52 +97,60 @@ class Test_mdTarget(unittest.TestCase):
     def test_steps(self):
         target = mdTarget.Target("foo", "/some/path")
         target.skipSteps = ["b"]
-        self.assertEquals(target.hasStep("b"), False, "Specified skipped step was not skipped")
-        self.assertEquals(target.hasStep("a"), True, "Specified skipped step was not skipped")
+        self.assertEquals(target.isStepToBeSkipped("b"), True, "Specified skipped step was not skipped")
+        self.assertEquals(target.isStepToBeSkipped("a"), False, "Specified step was skipped")
 
     def test_examine(self):
         options = mdOptions.Options()
         options.buildDir = "."
+        options.importer = True
         target = mdTarget.Target("TestCaseA", "cases/simpleGraphAutoTools/TestCaseA")
         target.examine(options)
-        self.assertEquals(target.commands["preconfig"], "autoreconf -i", "'cases/simpleGraphAutoTools/TestCaseA' returned wrong preconfig command")
-        self.assertEquals(target.commands["config"], "./configure --prefix=/usr/local", "'cases/simpleGraphAutoTools/TestCaseA' returned wrong config command")
-        self.assertEquals(target.commands["build"], "make", "'cases/simpleGraphAutoTools/TestCaseA' returned wrong build command")
-        self.assertEquals(target.commands["install"], "make install", "'cases/simpleGraphAutoTools/TestCaseA' returned wrong install command")
+        target.expandDefines(options)
+        self.assertEquals(target.findBuildStep("preconfig").command, "autoreconf -i", "'cases/simpleGraphAutoTools/TestCaseA' returned wrong preconfig command")
+        self.assertEquals(target.findBuildStep("config").command, "./configure --prefix=/usr/local", "'cases/simpleGraphAutoTools/TestCaseA' returned wrong config command")
+        self.assertEquals(target.findBuildStep("build").command, "make", "'cases/simpleGraphAutoTools/TestCaseA' returned wrong build command")
+        self.assertEquals(target.findBuildStep("install").command, "make install", "'cases/simpleGraphAutoTools/TestCaseA' returned wrong install command")
 
     def test_examineWithJobSlots(self):
         options = mdOptions.Options()
         options.buildDir = "."
+        options.importer = True
         options.processCommandline(["test", "-j4"])
         target = mdTarget.Target("TestCaseA", "cases/simpleGraphAutoTools/TestCaseA")
         target.examine(options)
-        self.assertEquals(target.commands["preconfig"], "autoreconf -i", "'cases/simpleGraphAutoTools/TestCaseA' returned wrong preconfig command")
-        self.assertEquals(target.commands["config"], "./configure --prefix=/usr/local", "'cases/simpleGraphAutoTools/TestCaseA' returned wrong config command")
-        self.assertEquals(target.commands["build"], "make -j4", "'cases/simpleGraphAutoTools/TestCaseA' returned wrong build command")
-        self.assertEquals(target.commands["install"], "make -j4 install", "'cases/simpleGraphAutoTools/TestCaseA' returned wrong install command")
+        target.expandDefines(options)
+        self.assertEquals(target.findBuildStep("preconfig").command, "autoreconf -i", "'cases/simpleGraphAutoTools/TestCaseA' returned wrong preconfig command")
+        self.assertEquals(target.findBuildStep("config").command, "./configure --prefix=/usr/local", "'cases/simpleGraphAutoTools/TestCaseA' returned wrong config command")
+        self.assertEquals(target.findBuildStep("build").command, "make -j4", "'cases/simpleGraphAutoTools/TestCaseA' returned wrong build command")
+        self.assertEquals(target.findBuildStep("install").command, "make -j4 install", "'cases/simpleGraphAutoTools/TestCaseA' returned wrong install command")
 
     def test_examineWithDependancies(self):
         options = mdOptions.Options()
         options.buildDir = "."
+        options.importer = True
         target = mdTarget.Target("TestCaseA", "cases/simpleGraphAutoTools/TestCaseA")
         target.dependsOn = ["TestCaseB", "TestCaseC"]
         target.examine(options)
-        self.assertEquals(target.commands["preconfig"], "autoreconf -i", "'cases/simpleGraphAutoTools/TestCaseA' returned wrong preconfig command")
-        self.assertEquals(target.commands["config"], "./configure --prefix=/usr/local --with-TestCaseB=/usr/local --with-TestCaseC=/usr/local", "'cases/simpleGraphAutoTools/TestCaseA' returned wrong config command")
-        self.assertEquals(target.commands["build"], "make", "'cases/simpleGraphAutoTools/TestCaseA' returned wrong build command")
-        self.assertEquals(target.commands["install"], "make install", "'cases/simpleGraphAutoTools/TestCaseA' returned wrong install command")
+        target.expandDefines(options)
+        self.assertEquals(target.findBuildStep("preconfig").command, "autoreconf -i", "'cases/simpleGraphAutoTools/TestCaseA' returned wrong preconfig command")
+        self.assertEquals(target.findBuildStep("config").command, "./configure --prefix=/usr/local --with-TestCaseB=/usr/local --with-TestCaseC=/usr/local", "'cases/simpleGraphAutoTools/TestCaseA' returned wrong config command")
+        self.assertEquals(target.findBuildStep("build").command, "make", "'cases/simpleGraphAutoTools/TestCaseA' returned wrong build command")
+        self.assertEquals(target.findBuildStep("install").command, "make install", "'cases/simpleGraphAutoTools/TestCaseA' returned wrong install command")
 
     def test_examineWithDependanciesWithPrefix(self):
         options = mdOptions.Options()
         options.buildDir = "."
+        options.importer = True
         options.processCommandline(["test", "-p/test/path"])
         target = mdTarget.Target("TestCaseA", "cases/simpleGraphAutoTools/TestCaseA")
         target.dependsOn = ["TestCaseB", "TestCaseC"]
         target.examine(options)
-        self.assertEquals(target.commands["preconfig"], "autoreconf -i", "'cases/simpleGraphAutoTools/TestCaseA' returned wrong preconfig command")
-        self.assertEquals(target.commands["config"], "./configure --prefix=/test/path --with-TestCaseB=/test/path --with-TestCaseC=/test/path", "'cases/simpleGraphAutoTools/TestCaseA' returned wrong config command")
-        self.assertEquals(target.commands["build"], "make", "'cases/simpleGraphAutoTools/TestCaseA' returned wrong build command")
-        self.assertEquals(target.commands["install"], "make install", "'cases/simpleGraphAutoTools/TestCaseA' returned wrong install command")
+        target.expandDefines(options)
+        self.assertEquals(target.findBuildStep("preconfig").command, "autoreconf -i", "'cases/simpleGraphAutoTools/TestCaseA' returned wrong preconfig command")
+        self.assertEquals(target.findBuildStep("config").command, "./configure --prefix=/test/path --with-TestCaseB=/test/path --with-TestCaseC=/test/path", "'cases/simpleGraphAutoTools/TestCaseA' returned wrong config command")
+        self.assertEquals(target.findBuildStep("build").command, "make", "'cases/simpleGraphAutoTools/TestCaseA' returned wrong build command")
+        self.assertEquals(target.findBuildStep("install").command, "make install", "'cases/simpleGraphAutoTools/TestCaseA' returned wrong install command")
 
     def test_examineWithOnlyMakefile(self):
         try:
@@ -152,12 +160,14 @@ class Test_mdTarget(unittest.TestCase):
             mdTestUtilities.createBlankFile(os.path.join(targetDir, "Makefile"))
             options = mdOptions.Options()
             options.buildDir = os.path.join(tempDir, options.buildDir)
+            options.importer = True
             target = mdTarget.Target("OnlyMakefile", targetDir)
             target.examine(options)
-            self.assertEquals(target.commands["preconfig"], "", "Target with only Makefile returned a preconfig command when it should not have")
-            self.assertEquals(target.commands["config"], "", "Target with only Makefile returned a config command when it should not have")
-            self.assertEquals(target.commands["build"], "make", "Target with only Makefile returned wrong build command")
-            self.assertEquals(target.commands["install"], "make install", "Target with only Makefile returned wrong install command")
+            target.expandDefines(options)
+            self.assertEquals(target.findBuildStep("preconfig").command, "", "Target with only Makefile returned a preconfig command when it should not have")
+            self.assertEquals(target.findBuildStep("config").command, "", "Target with only Makefile returned a config command when it should not have")
+            self.assertEquals(target.findBuildStep("build").command, "make", "Target with only Makefile returned wrong build command")
+            self.assertEquals(target.findBuildStep("install").command, "make install", "Target with only Makefile returned wrong install command")
         finally:
             utilityFunctions.removeDir(tempDir)
 
@@ -169,12 +179,14 @@ class Test_mdTarget(unittest.TestCase):
             mdTestUtilities.createBlankFiles(targetDir, ["Makefile.am", "configure.ac"])
             options = mdOptions.Options()
             options.buildDir = os.path.join(tempDir, options.buildDir)
+            options.importer = True
             target = mdTarget.Target("AutoTools", targetDir)
             target.examine(options)
-            self.assertEquals(target.commands["preconfig"], "autoreconf -i", "Target with autotool files returned wrong preconfig command")
-            self.assertEquals(target.commands["config"], "./configure --prefix=/usr/local", "Target with autotool files returned wrong config command")
-            self.assertEquals(target.commands["build"], "make", "Target with autotool files returned wrong build command")
-            self.assertEquals(target.commands["install"], "make install", "Target with autotool files returned wrong install command")
+            target.expandDefines(options)
+            self.assertEquals(target.findBuildStep("preconfig").command, "autoreconf -i", "Target with autotool files returned wrong preconfig command")
+            self.assertEquals(target.findBuildStep("config").command, "./configure --prefix=/usr/local", "Target with autotool files returned wrong config command")
+            self.assertEquals(target.findBuildStep("build").command, "make", "Target with autotool files returned wrong build command")
+            self.assertEquals(target.findBuildStep("install").command, "make install", "Target with autotool files returned wrong install command")
         finally:
             utilityFunctions.removeDir(tempDir)
 
@@ -187,12 +199,14 @@ class Test_mdTarget(unittest.TestCase):
             options = mdOptions.Options()
             options.processCommandline(["test", "-p/test/prefix"])
             options.buildDir = os.path.join(tempDir, options.buildDir)
+            options.importer = True
             target = mdTarget.Target("AutoTools", targetDir)
             target.examine(options)
-            self.assertEquals(target.commands["preconfig"], "autoreconf -i", "Target with autotool files returned wrong preconfig command")
-            self.assertEquals(target.commands["config"], "./configure --prefix=/test/prefix", "Target with autotool files returned wrong config command")
-            self.assertEquals(target.commands["build"], "make", "Target with autotool files returned wrong build command")
-            self.assertEquals(target.commands["install"], "make install", "Target with autotool files returned wrong install command")
+            target.expandDefines(options)
+            self.assertEquals(target.findBuildStep("preconfig").command, "autoreconf -i", "Target with autotool files returned wrong preconfig command")
+            self.assertEquals(target.findBuildStep("config").command, "./configure --prefix=/test/prefix", "Target with autotool files returned wrong config command")
+            self.assertEquals(target.findBuildStep("build").command, "make", "Target with autotool files returned wrong build command")
+            self.assertEquals(target.findBuildStep("install").command, "make install", "Target with autotool files returned wrong install command")
         finally:
             utilityFunctions.removeDir(tempDir)
 
