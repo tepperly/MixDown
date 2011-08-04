@@ -172,7 +172,7 @@ class Project(object):
                             return False
                         currTarget.skipSteps = utilityFunctions.stripItemsInList(str.lower(currPair[1]).split(","))
                     elif currName in mdCommands.buildSteps:
-                        if mdCommands.findBuildStepInList(currTarget.buildSteps, currName) != None:
+                        if currTarget.findBuildStep(currName) != None:
                             Logger().writeError("Project targets can only have one '" + currName + "' defined", "", "", self.path, lineCount)
                             return False
                         currTarget.buildSteps.append(mdCommands.BuildStep(currName, currPair[1]))
