@@ -87,11 +87,13 @@ Usage
         1. Create a .md file manually with rules for Name, Path and Build.
         2. The order of steps in the .md file will be respected while processing.
         3. In the Build rule, add the necessary steps before running the make.
-        4. Use MixDown in Build Mode.
+        4. Write custom methods in a new file called mySteps.py which may be used to patch auto-generated files.
+        5. Use MixDown in Build Mode.
 
     Sample .md file:
         Name: <Name of Project>
         Path: <Path of Project> 
+        Patch: <METHOD_CALL>
         Config: <Commands to be executed>; ./configure
         Build: <Commands to be executed>; make
         Install: <Commands to be executed>; make install
