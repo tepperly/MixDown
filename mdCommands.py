@@ -32,24 +32,16 @@ class BuildStep(object):
 
 buildSteps = ["fetch", "unpack", "patch", "preconfig", "config", "build", "install", "clean"]
 
-def findBuildStepInList(buildStepList, name):
-    for buildStep in buildStepList:
-        if buildStep.name == name:
-            return buildStep
-    return None
-
 def buildStepActor(target, buildStep, options):
-    if options.verbose:
-        Logger().reportStart(target.name, buildStep.name)
+    Logger().reportStart(target.name, buildStep.name)
     returnCode = None
 
     timeStart = time.time()
 
     if target.isStepToBeSkipped(buildStep.name):
-        if options.verbose:
-            Logger().reportSkipped(target.name, buildStep.name, "Target specified to skip step")
+        Logger().reportSkipped(target.name, buildStep.name, "Target specified to skip step")
         return True
-        
+
     command = options.expandDefines(buildStep.command)
     isPythonCommand, namespace, function = mdPython.parsePythonCommand(command)
     if isPythonCommand:
@@ -66,12 +58,10 @@ def buildStepActor(target, buildStep, options):
     timeElapsed = timeFinished - timeStart
 
     if returnCode != 0:
-        if options.verbose:
-            Logger().reportFailure(target.name, buildStep.name, timeElapsed, returnCode)
+        Logger().reportFailure(target.name, buildStep.name, timeElapsed, returnCode)
         return False
 
-    if options.verbose:
-        Logger().reportSuccess(target.name, buildStep.name, timeElapsed)
+    Logger().reportSuccess(target.name, buildStep.name, timeElapsed)
     return True
 
 def getCommand(stepName, target):
