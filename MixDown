@@ -55,7 +55,8 @@ def main():
             else:
                 for target in reversed(project.targets):
                     if options.cleanTargets:
-                        succeeded = mdCommands.buildStepActor("clean", target, options)
+                        cleanStep = target.findBuildStep("clean")
+                        succeeded = mdCommands.buildStepActor(target, cleanStep, options)
                     else:
                         for buildStep in target.buildSteps:
                             if buildStep.name == "clean" or buildStep.command == "":
@@ -129,7 +130,7 @@ def setup(options):
         prefixDefine = options.getDefine(mdDefines.mdPrefix[0])
         if prefixDefine != "":
             #TODO: only add lib64 if on 64bit machines
-            libraryPaths = os.path.join(prefixDefine, "lib") + ":" + os.path.join(prefixDefine, "lib64")
+            libraryPaths = os.path.join(prefixDefine, "lib64") + ":" + os.path.join(prefixDefine, "lib")
             if os.environ.has_key("LD_LIBRARY_PATH"):
                 originalLibraryPath = str.strip(os.environ["LD_LIBRARY_PATH"])
                 if originalLibraryPath != "":
