@@ -85,8 +85,9 @@ Usage
 
     Custom Build Mode:
         1. Create a .md file manually with rules for Name, Path and Build.
-        2. In the Build rule, add the necessary steps before running the make.
-        3. Use MixDown in Build Mode.
+        2. The order of steps in the .md file will be respected while processing.
+        3. In the Build rule, add the necessary steps before running the make.
+        4. Use MixDown in Build Mode.
 
     Sample .md file:
         Name: <Name of Project>
@@ -94,6 +95,7 @@ Usage
         Config: <Commands to be executed>; ./configure
         Build: <Commands to be executed>; make
         Install: <Commands to be executed>; make install
+
 
     Default Directories:
     Builds:       mdBuild/
