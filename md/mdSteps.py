@@ -21,31 +21,31 @@
 # Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 
 import os, tarfile, urllib, zipfile
-import mdGit, mdHg, mdSvn, utilityFunctions
+import md.mdGit, md.mdHg, md.mdSvn, md.utilityFunctions
 
-from mdLogger import *
+from md.mdLogger import *
 
 def fetch(pythonCallInfo):
-    if mdGit.isGitRepo(pythonCallInfo.currentPath):
-        if not mdGit.gitCheckout(pythonCallInfo.currentPath, pythonCallInfo.outputPath):
+    if md.mdGit.isGitRepo(pythonCallInfo.currentPath):
+        if not md.mdGit.gitCheckout(pythonCallInfo.currentPath, pythonCallInfo.outputPath):
             pythonCallInfo.logger.writeError("Given Git repo '" + pythonCallInfo.currentPath +"' was unable to be checked out")
         else:
             pythonCallInfo.currentPath = pythonCallInfo.outputPath
             pythonCallInfo.success = True
-    elif mdHg.isHgRepo(pythonCallInfo.currentPath):
-        if not mdHg.hgCheckout(pythonCallInfo.currentPath, pythonCallInfo.outputPath):
+    elif md.mdHg.isHgRepo(pythonCallInfo.currentPath):
+        if not md.mdHg.hgCheckout(pythonCallInfo.currentPath, pythonCallInfo.outputPath):
             pythonCallInfo.logger.writeError("Given Hg repo '" + pythonCallInfo.currentPath +"' was unable to be checked out")
         else:
             pythonCallInfo.currentPath = pythonCallInfo.outputPath
             pythonCallInfo.success = True
-    elif mdSvn.isSvnRepo(pythonCallInfo.currentPath):
-        if not mdSvn.svnCheckout(pythonCallInfo.currentPath, pythonCallInfo.outputPath):
+    elif md.mdSvn.isSvnRepo(pythonCallInfo.currentPath):
+        if not md.mdSvn.svnCheckout(pythonCallInfo.currentPath, pythonCallInfo.outputPath):
             pythonCallInfo.logger.writeError("Given Svn repo '" + pythonCallInfo.currentPath +"' was unable to be checked out")
         else:
             pythonCallInfo.currentPath = pythonCallInfo.outputPath
             pythonCallInfo.success = True
-    elif utilityFunctions.isURL(pythonCallInfo.currentPath):
-        filenamePath = os.path.join(pythonCallInfo.downloadDir, utilityFunctions.URLToFilename(pythonCallInfo.currentPath))
+    elif md.utilityFunctions.isURL(pythonCallInfo.currentPath):
+        filenamePath = os.path.join(pythonCallInfo.downloadDir, md.utilityFunctions.URLToFilename(pythonCallInfo.currentPath))
         if not os.path.exists(pythonCallInfo.downloadDir):
             os.mkdir(pythonCallInfo.downloadDir)
         urllib.urlretrieve(pythonCallInfo.currentPath, filenamePath)
@@ -64,11 +64,11 @@ def fetch(pythonCallInfo):
 def unpack(pythonCallInfo):
     if os.path.isfile(pythonCallInfo.currentPath):
         if tarfile.is_tarfile(pythonCallInfo.currentPath):
-            utilityFunctions.untar(pythonCallInfo.currentPath, pythonCallInfo.outputPath, True)
+            md.utilityFunctions.untar(pythonCallInfo.currentPath, pythonCallInfo.outputPath, True)
             pythonCallInfo.currentPath = pythonCallInfo.outputPath
             pythonCallInfo.success = True
         elif zipfile.is_zipfile(pythonCallInfo.currentPath):
-            utilityFunctions.unzip(pythonCallInfo.currentPath, pythonCallInfo.outputPath, True)
+            md.utilityFunctions.unzip(pythonCallInfo.currentPath, pythonCallInfo.outputPath, True)
             pythonCallInfo.currentPath = pythonCallInfo.outputPath
             pythonCallInfo.success = True
         else:

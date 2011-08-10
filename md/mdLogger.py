@@ -38,17 +38,17 @@ def SetLogger(loggerName="", logOutputDir=""):
     global __loggerInstance
     loggerName = loggerName.lower()
     if loggerName == "file" or loggerName == "":
-        import mdLoggerFile
-        __loggerInstance = mdLoggerFile.LoggerFile(logOutputDir)
+        import md.mdLoggerFile
+        __loggerInstance = md.mdLoggerFile.LoggerFile(logOutputDir)
     elif loggerName == "html":
-        import mdLoggerHtml
-        __loggerInstance = mdLoggerHtml.LoggerHtml(logOutputDir)
+        import md.mdLoggerHtml
+        __loggerInstance = md.mdLoggerHtml.LoggerHtml(logOutputDir)
     elif loggerName == "console":
-        import mdLoggerConsole
-        __loggerInstance = mdLoggerConsole.LoggerConsole()
+        import md.mdLoggerConsole
+        __loggerInstance = md.mdLoggerConsole.LoggerConsole()
     else:
-        import mdLoggerFile
-        __loggerInstance = mdLoggerFile.LoggerFile()
+        import md.mdLoggerFile
+        __loggerInstance = md.mdLoggerFile.LoggerFile()
         __loggerInstance.writeMessage(loggerName + " logger not found, falling back on file logger")
 
 class LoggerBase(object):

@@ -20,7 +20,7 @@
 # along with this program; if not, write to the Free Software Foundation,
 # Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 
-import os, mdLogger, utilityFunctions
+import os, md.mdLogger, md.utilityFunctions
 
 _isCvsInstalled = None
 
@@ -29,7 +29,7 @@ def isCvsInstalled():
     if _isCvsInstalled == None:
         outFile = open(os.devnull, "w")
         try:
-            returnCode = utilityFunctions.executeSubProcess("cvs --version", outFileHandle = outFile)
+            returnCode = md.utilityFunctions.executeSubProcess("cvs --version", outFileHandle = outFile)
         except:
             #Assume any exceptions means Cvs is not installed
             returnCode = 1
@@ -37,7 +37,7 @@ def isCvsInstalled():
         if returnCode == 0:
             _isCvsInstalled = True
         else:
-            mdLogger.Logger().writeMessage("Cvs is not installed, cvs repositories will fail to be checked out")
+            md.mdLogger.Logger().writeMessage("Cvs is not installed, cvs repositories will fail to be checked out")
             _isCvsInstalled = False
     return _isCvsInstalled
 
@@ -48,7 +48,7 @@ def isCvsRepo(location):
     if location == "" or not isCvsInstalled():
         return False
     outFile = open(os.devnull, "w")
-    returnCode = utilityFunctions.executeSubProcess("cvs -d " + location + " log", outFileHandle = outFile)
+    returnCode = md.utilityFunctions.executeSubProcess("cvs -d " + location + " log", outFileHandle = outFile)
     outFile.close()
     if returnCode == 0:
         return True
@@ -62,7 +62,7 @@ def cvsCheckout(repoLocation, project, outPath):
     if repoLocation == "" or outPath == "" or not isCvsInstalled():
         return False
     outFile = open(os.devnull, "w")
-    returnCode = utilityFunctions.executeSubProcess("cvs -d " + repoLocation + " -Q checkout", outFileHandle = outFile)
+    returnCode = md.utilityFunctions.executeSubProcess("cvs -d " + repoLocation + " -Q checkout", outFileHandle = outFile)
     outFile.close()
     if returnCode == 0:
         return True

@@ -21,9 +21,9 @@
 # Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 
 import os, re
-import mdMake, mdDefines, mdTarget, utilityFunctions
+import md.mdMake, md.mdDefines, md.mdTarget, md.utilityFunctions
 
-from mdLogger import *
+from md.mdLogger import *
 
 def isAutoToolsProject(path):
     if os.path.exists(os.path.join(path, "configure")) or\
@@ -45,7 +45,7 @@ def generateConfigureFiles(path, name, verbose=True):
     if command != "":
         if verbose:
             Logger().writeMessage("Generating build files...", name)
-        returnCode = utilityFunctions.executeSubProcess(command, path)
+        returnCode = md.utilityFunctions.executeSubProcess(command, path)
         if returnCode != 0:
             return False
     return True
@@ -60,7 +60,7 @@ def getDependancies(path, name="", verbose=True):
     helpFileName = os.path.join(path, "configure_help.log")
     helpFile = open(helpFileName, "w")
     try:
-        returnCode = utilityFunctions.executeSubProcess("./configure --help", path, helpFile.fileno())
+        returnCode = md.utilityFunctions.executeSubProcess("./configure --help", path, helpFile.fileno())
     finally:
         helpFile.close()
     if returnCode != 0:
@@ -73,7 +73,7 @@ def getDependancies(path, name="", verbose=True):
             match = regexp.search(line)
             if match != None:
                 foundDep = match.group(1)
-                foundDep = mdTarget.normalizeName(foundDep)
+                foundDep = md.mdTarget.normalizeName(foundDep)
                 if not foundDep in deps:
                     deps.append(foundDep)
     finally:
@@ -89,16 +89,16 @@ def getPreconfigureCommand(path):
         return ""
 
 def getConfigureCommand(target):
-    command = "./configure " + mdDefines.surround(mdDefines.mdAutoToolsPrefix[0]) + " " + mdDefines.surround(mdDefines.mdAutoToolsCompilers[0])
+    command = "./configure " + md.mdDefines.surround(md.mdDefines.mdAutoToolsPrefix[0]) + " " + md.mdDefines.surround(md.mdDefines.mdAutoToolsCompilers[0])
     for dependancy in target.dependsOn:
-        command += " --with-" + dependancy + "=" + mdDefines.surround(mdDefines.mdPrefix[0])
+        command += " --with-" + dependancy + "=" + md.mdDefines.surround(md.mdDefines.mdPrefix[0])
     return command
 
 def getBuildCommand():
-    return mdMake.getBuildCommand()
+    return md.mdMake.getBuildCommand()
 
 def getInstallCommand():
-    return mdMake.getInstallCommand()
+    return md.mdMake.getInstallCommand()
 
 def getCleanCommand():
-    return mdMake.getCleanCommand()
+    return md.mdMake.getCleanCommand()

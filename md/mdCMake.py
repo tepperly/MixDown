@@ -21,9 +21,9 @@
 # Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 
 import os, re
-import mdMake, mdDefines, mdTarget
+import md.mdMake, md.mdDefines, md.mdTarget
 
-from mdLogger import *
+from md.mdLogger import *
 
 def isCMakeProject(path):
     if os.path.exists(os.path.join(path, "CMakeLists.txt")):
@@ -78,7 +78,7 @@ def getDependancies(path, name="", verbose=True):
             for line in cmakeFile:
                 match = packageRegExp.search(line)
                 if match != None:
-                    foundDep = mdTarget.normalizeName(match.group(1))
+                    foundDep = md.mdTarget.normalizeName(match.group(1))
                     if not foundDep in deps:
                         deps.append(foundDep)
 
@@ -88,7 +88,7 @@ def getDependancies(path, name="", verbose=True):
                     paramStr = match.group(1).strip()
                     paramList = paramStr.split(" ")
                     for param in paramList:
-                        param = mdTarget.normalizeName(param)
+                        param = md.mdTarget.normalizeName(param)
                         if param != "":
                             if not ignoredFirstParam:
                                 ignoredFirstParam = True
@@ -110,13 +110,13 @@ def getPreconfigureCommand():
     return ""
 
 def getConfigureCommand():
-    return "cmake " + mdDefines.surround(mdDefines.mdCMakePrefix[0]) + " " + mdDefines.surround(mdDefines.mdCMakeCompilers[0])
+    return "cmake " + md.mdDefines.surround(md.mdDefines.mdCMakePrefix[0]) + " " + md.mdDefines.surround(md.mdDefines.mdCMakeCompilers[0])
 
 def getBuildCommand():
-    return mdMake.getBuildCommand()
+    return md.mdMake.getBuildCommand()
 
 def getInstallCommand():
-    return mdMake.getInstallCommand()
+    return md.mdMake.getInstallCommand()
 
 def getCleanCommand():
-    return mdMake.getCleanCommand()
+    return md.mdMake.getCleanCommand()

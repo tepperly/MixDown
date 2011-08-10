@@ -20,7 +20,7 @@
 # along with this program; if not, write to the Free Software Foundation,
 # Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 
-import os, mdLogger, utilityFunctions
+import os, md.mdLogger, md.utilityFunctions
 
 _isSvnInstalled = None
 
@@ -29,7 +29,7 @@ def isSvnInstalled():
     if _isSvnInstalled == None:
         outFile = open(os.devnull, "w")
         try:
-            returnCode = utilityFunctions.executeSubProcess("svn --help", outFileHandle = outFile)
+            returnCode = md.utilityFunctions.executeSubProcess("svn --help", outFileHandle = outFile)
         except:
             #Assume any exceptions means Svn is not installed
             returnCode = 1
@@ -37,7 +37,7 @@ def isSvnInstalled():
         if returnCode == 0:
             _isSvnInstalled = True
         else:
-            mdLogger.Logger().writeMessage("Svn is not installed, svn repositories will fail to be checked out")
+            md.mdLogger.Logger().writeMessage("Svn is not installed, svn repositories will fail to be checked out")
             _isSvnInstalled = False
     return _isSvnInstalled
 
@@ -46,7 +46,7 @@ def isSvnRepo(location):
     if location == "" or not isSvnInstalled():
         return False
     outFile = open(os.devnull, "w")
-    returnCode = utilityFunctions.executeSubProcess("svn ls " + location, outFileHandle = outFile)
+    returnCode = md.utilityFunctions.executeSubProcess("svn ls " + location, outFileHandle = outFile)
     outFile.close()
     if returnCode == 0:
         return True
@@ -58,7 +58,7 @@ def svnCheckout(repoLocation, outPath):
     if repoLocation == "" or outPath == "" or not isSvnInstalled():
         return False
     outFile = open(os.devnull, "w")
-    returnCode = utilityFunctions.executeSubProcess("svn co --non-interactive " + repoLocation + " " + outPath, outFileHandle = outFile)
+    returnCode = md.utilityFunctions.executeSubProcess("svn co --non-interactive " + repoLocation + " " + outPath, outFileHandle = outFile)
     outFile.close()
     if returnCode == 0:
         return True

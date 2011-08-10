@@ -20,9 +20,9 @@
 # along with this program; if not, write to the Free Software Foundation,
 # Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 
-import os, re, sys, mdTarget
+import os, re, sys, md.mdTarget
 
-from mdLogger import *
+from md.mdLogger import *
 
 def parsePythonCommand(command):
     remaining = command.strip()
@@ -34,8 +34,15 @@ def parsePythonCommand(command):
         return False, "", ""
 
     i = 0
+    dotSeen = False
+    j = 0
     while i < len(remaining):
-        if remaining[i] == ".":
+        if(remaining[i] == "." and dotSeen == False):
+            dotSeen = True
+            j=i
+            i  += 1
+            continue
+        if remaining[i] == "." and dotSeen == True:
             namespace = remaining[:i]
             remaining = remaining[i+1:]
             break
@@ -44,6 +51,7 @@ def parsePythonCommand(command):
     while i < len(remaining):
         if remaining[i] == "(":
             function = remaining[:i]
+            print function
             remaining = remaining[i+1:]
             break
         i += 1
@@ -56,7 +64,7 @@ def parsePythonCommand(command):
 
 def callPythonCommand(namespace, function, target, options):
     filename = namespace + ".py"
-    if not namespace == "mdSteps" and not os.path.exists(filename):
+    if not namespace == "md.mdSteps" and not os.path.exists(filename):
         Logger().writeError("Expected python file, " + filename + ", not found")
         return False
     else:
@@ -73,8 +81,12 @@ def callPythonCommand(namespace, function, target, options):
         target.pythonCallInfo.outputPath = target.outputPath
         target.pythonCallInfo.outputPathSpecified = target.outputPathSpecified
         target.pythonCallInfo.downloadDir = options.downloadDir
+        print "before get attr"
+        print "function is "+function
+        print "importedNamespace "+str(importedNamespace)
         pythonCallInfo = getattr(importedNamespace, function)(target.pythonCallInfo)
     except AttributeError as e:
+        print  "after attr"
         Logger().writeError(str(e))
         return False
 

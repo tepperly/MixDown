@@ -20,7 +20,7 @@
 # along with this program; if not, write to the Free Software Foundation,
 # Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 
-import os, mdLogger, utilityFunctions
+import os, md.mdLogger, md.utilityFunctions
 
 _isGitInstalled = None
 
@@ -29,7 +29,7 @@ def isGitInstalled():
     if _isGitInstalled == None:
         outFile = open(os.devnull, "w")
         try:
-            returnCode = utilityFunctions.executeSubProcess("git --help", outFileHandle = outFile)
+            returnCode = md.utilityFunctions.executeSubProcess("git --help", outFileHandle = outFile)
         except:
             #Assume any exceptions means Git is not installed
             returnCode = 1
@@ -37,7 +37,7 @@ def isGitInstalled():
         if returnCode == 0:
             _isGitInstalled = True
         else:
-            mdLogger.Logger().writeMessage("Git is not installed, git repositories will fail to be checked out")
+            md.mdLogger.Logger().writeMessage("Git is not installed, git repositories will fail to be checked out")
             _isGitInstalled = False
     return _isGitInstalled
 
@@ -46,11 +46,11 @@ def isGitRepo(location):
     if location == "" or not isGitInstalled():
         return False
     #This corrects various false positives
-    filename = utilityFunctions.URLToFilename(location)
+    filename = md.utilityFunctions.URLToFilename(location)
     if filename.endswith(".bz2") or filename.endswith(".gz"):
         return False
     outFile = open(os.devnull, "w")
-    returnCode = utilityFunctions.executeSubProcess("git ls-remote " + location, outFileHandle = outFile)
+    returnCode = md.utilityFunctions.executeSubProcess("git ls-remote " + location, outFileHandle = outFile)
     outFile.close()
     if returnCode == 0:
         return True
@@ -62,7 +62,7 @@ def gitCheckout(repoLocation, outPath):
     if repoLocation == "" or outPath == "" or not isGitInstalled():
         return False
     outFile = open(os.devnull, "w")
-    returnCode = utilityFunctions.executeSubProcess("git clone " + repoLocation + " " + outPath, outFileHandle = outFile)
+    returnCode = md.utilityFunctions.executeSubProcess("git clone " + repoLocation + " " + outPath, outFileHandle = outFile)
     outFile.close()
     if returnCode == 0:
         return True

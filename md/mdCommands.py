@@ -21,9 +21,9 @@
 # Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 
 import os, time
-import mdAutoTools, mdCMake, mdMake, mdOptions, mdPython, mdDefines, mdTarget, utilityFunctions
+import md.mdAutoTools, md.mdCMake, md.mdMake, md.mdOptions, md.mdPython, md.mdDefines, md.mdTarget, md.utilityFunctions
 
-from mdLogger import *
+from md.mdLogger import *
 
 class BuildStep(object):
     def __init__(self, name="", command=""):
@@ -43,16 +43,16 @@ def buildStepActor(target, buildStep, options):
         return True
 
     command = options.expandDefines(buildStep.command)
-    isPythonCommand, namespace, function = mdPython.parsePythonCommand(command)
+    isPythonCommand, namespace, function = md.mdPython.parsePythonCommand(command)
     if isPythonCommand:
-        success = mdPython.callPythonCommand(namespace, function, target, options)
+        success = md.mdPython.callPythonCommand(namespace, function, target, options)
         if not success:
             returnCode = 1
         else:
             returnCode = 0
     else:
         outFd = Logger().getOutFd(target.name, buildStep.name)
-        returnCode = utilityFunctions.executeSubProcess(command, target.path, outFd, options.verbose)
+        returnCode = md.utilityFunctions.executeSubProcess(command, target.path, outFd, options.verbose)
 
     timeFinished = time.time()
     timeElapsed = timeFinished - timeStart
@@ -86,62 +86,62 @@ def getCommand(stepName, target):
     return command
 
 def __getFetchCommand(target):
-    return "mdSteps.fetch(pythonCallInfo)"
+    return "md.mdSteps.fetch(pythonCallInfo)"
 
 def __getUnpackCommand(target):
-    return "mdSteps.unpack(pythonCallInfo)"
+    return "md.mdSteps.unpack(pythonCallInfo)"
 
 def __getPatchCommand(target):
     return ""
 
 def __getPreconfigureCommand(target):
     command = ""
-    if mdCMake.isCMakeProject(target.path):
-        command = mdCMake.getPreconfigureCommand()
+    if md.mdCMake.isCMakeProject(target.path):
+        command = md.mdCMake.getPreconfigureCommand()
     elif os.path.exists(os.path.join(target.path, "autogen.sh")):
         command = "./autogen.sh"
     elif os.path.exists(os.path.join(target.path, "buildconf")):
         command = "./buildconf"
-    elif mdAutoTools.isAutoToolsProject(target.path):
-        command = mdAutoTools.getPreconfigureCommand(target.path)
+    elif md.mdAutoTools.isAutoToolsProject(target.path):
+        command = md.mdAutoTools.getPreconfigureCommand(target.path)
     return command
 
 def __getConfigureCommand(target):
     command = ""
-    if mdCMake.isCMakeProject(target.path):
-        command = mdCMake.getConfigureCommand()
+    if md.mdCMake.isCMakeProject(target.path):
+        command = md.mdCMake.getConfigureCommand()
     elif os.path.exists(os.path.join(target.path, "Configure")):
         command = "./Configure"
-    elif mdAutoTools.isAutoToolsProject(target.path):
-        command = mdAutoTools.getConfigureCommand(target)
+    elif md.mdAutoTools.isAutoToolsProject(target.path):
+        command = md.mdAutoTools.getConfigureCommand(target)
     return command
 
 def __getBuildCommand(target):
     command = ""
-    if mdAutoTools.isAutoToolsProject(target.path):
-        command = mdAutoTools.getBuildCommand()
-    elif mdCMake.isCMakeProject(target.path):
-        command = mdCMake.getBuildCommand()
-    elif mdMake.isMakeProject(target.path):
-        command = mdMake.getBuildCommand()
+    if md.mdAutoTools.isAutoToolsProject(target.path):
+        command = md.mdAutoTools.getBuildCommand()
+    elif md.mdCMake.isCMakeProject(target.path):
+        command = md.mdCMake.getBuildCommand()
+    elif md.mdMake.isMakeProject(target.path):
+        command = md.mdMake.getBuildCommand()
     return command
 
 def __getInstallCommand(target):
     command = ""
-    if mdAutoTools.isAutoToolsProject(target.path):
-        command = mdAutoTools.getInstallCommand()
-    elif mdCMake.isCMakeProject(target.path):
-        command = mdCMake.getInstallCommand()
-    elif mdMake.isMakeProject(target.path):
-        command = mdMake.getInstallCommand()
+    if md.mdAutoTools.isAutoToolsProject(target.path):
+        command = md.mdAutoTools.getInstallCommand()
+    elif md.mdCMake.isCMakeProject(target.path):
+        command = md.mdCMake.getInstallCommand()
+    elif md.mdMake.isMakeProject(target.path):
+        command = md.mdMake.getInstallCommand()
     return command
 
 def __getCleanCommand(target):
     command = ""
-    if mdAutoTools.isAutoToolsProject(target.path):
-        command = mdAutoTools.getCleanCommand()
-    elif mdCMake.isCMakeProject(target.path):
-        command = mdCMake.getCleanCommand()
-    elif mdMake.isMakeProject(target.path):
-        command = mdMake.getCleanCommand()
+    if md.mdAutoTools.isAutoToolsProject(target.path):
+        command = md.mdAutoTools.getCleanCommand()
+    elif md.mdCMake.isCMakeProject(target.path):
+        command = md.mdCMake.getCleanCommand()
+    elif md.mdMake.isMakeProject(target.path):
+        command = md.mdMake.getCleanCommand()
     return command

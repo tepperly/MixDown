@@ -21,9 +21,9 @@
 # Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 
 import os, collections, Queue
-import mdCommands, mdOptions, mdTarget, utilityFunctions
+import md.mdCommands, md.mdOptions, md.mdTarget, md.utilityFunctions
 
-from mdLogger import *
+from md.mdLogger import *
 
 class Project(object):
     def __init__(self, projectFilePath, targets=[]):
@@ -31,7 +31,7 @@ class Project(object):
         if self.path.endswith(".md"):
             self.name = os.path.split(self.path)[1][:-3]
         else:
-            self.name = utilityFunctions.getBasename(self.path)
+            self.name = md.utilityFunctions.getBasename(self.path)
         self.targets = targets[:] #Use copy to prevent list instance to be used between project instances
         self.__validated = False
         self.__examined = False
@@ -89,19 +89,19 @@ class Project(object):
             return False
 
         for currTarget in self.targets:
-            if mdTarget.normalizeName(target.name) == mdTarget.normalizeName(currTarget.name):
+            if md.mdTarget.normalizeName(target.name) == md.mdTarget.normalizeName(currTarget.name):
                 Logger().writeError("Cannot have more than one project target by the same name", currTarget.name, "", self.path, lineCount)
                 return False
         self.targets.append(target)
         return True
 
     def getTarget(self, targetName):
-        normalizedTargetName = mdTarget.normalizeName(targetName)
+        normalizedTargetName = md.mdTarget.normalizeName(targetName)
         for currTarget in self.targets:
-            if normalizedTargetName == mdTarget.normalizeName(currTarget.name):
+            if normalizedTargetName == md.mdTarget.normalizeName(currTarget.name):
                 return currTarget
             for alias in currTarget.aliases:
-                if normalizedTargetName == mdTarget.normalizeName(alias):
+                if normalizedTargetName == md.mdTarget.normalizeName(alias):
                     return currTarget
         return None
 
@@ -130,7 +130,7 @@ class Project(object):
                         if currTarget != None:
                             if not self.__addTarget(currTarget, lastPackageLineNumber):
                                 return False
-                        currTarget = mdTarget.Target(currPair[1])
+                        currTarget = md.mdTarget.Target(currPair[1])
                     elif currName == "path":
                         if currTarget.path != "":
                             Logger().writeError("Project targets can only have one 'Path' defined", "", "", self.path, lineCount)
@@ -147,10 +147,10 @@ class Project(object):
                             Logger().writeError("Project targets can only have one 'DependsOn' defined (use a comma delimited list for multiple dependancies)", "", "", self.path, lineCount)
                             return False
                         if currPair[1] != "":
-                            dependsOnList = utilityFunctions.stripItemsInList(currPair[1].split(","))
-                            normalizedName = mdTarget.normalizeName(currTarget.name)
+                            dependsOnList = md.utilityFunctions.stripItemsInList(currPair[1].split(","))
+                            normalizedName = md.mdTarget.normalizeName(currTarget.name)
                             for dependancy in dependsOnList:
-                                if mdTarget.normalizeName(dependancy) == normalizedName:
+                                if md.mdTarget.normalizeName(dependancy) == normalizedName:
                                     Logger().writeError("Project targets cannot depend on themselves", currTarget.name, "", self.path, lineCount)
                                     return False
                             currTarget.dependsOn = dependsOnList
@@ -159,10 +159,10 @@ class Project(object):
                             Logger().writeError("Project targets can only have one 'Aliases' defined (use a comma delimited list for multiple aliases)", "", "", self.path, lineCount)
                             return False
                         if currPair[1] != "":
-                            aliases = utilityFunctions.stripItemsInList(currPair[1].split(","))
-                            noralizedName = mdTarget.normalizeName(currTarget.name)
+                            aliases = md.utilityFunctions.stripItemsInList(currPair[1].split(","))
+                            noralizedName = md.mdTarget.normalizeName(currTarget.name)
                             for alias in aliases:
-                                if mdTarget.normalizeName(alias) == normalizedName:
+                                if md.mdTarget.normalizeName(alias) == normalizedName:
                                     Logger().writeError("Project target alias cannot be same as its name", currTarget.name, "", self.path, lineCount)
                                     return False
                             currTarget.aliases = aliases
@@ -170,12 +170,12 @@ class Project(object):
                         if currTarget.skipSteps != []:
                             Logger().writeError("Project targets can only have one 'SkipSteps' defined (use a comma delimited list for multiple steps)", "", "", self.path, lineCount)
                             return False
-                        currTarget.skipSteps = utilityFunctions.stripItemsInList(str.lower(currPair[1]).split(","))
-                    elif currName in mdCommands.buildSteps:
+                        currTarget.skipSteps = md.utilityFunctions.stripItemsInList(str.lower(currPair[1]).split(","))
+                    elif currName in md.mdCommands.buildSteps:
                         if currTarget.findBuildStep(currName) != None:
                             Logger().writeError("Project targets can only have one '" + currName + "' defined", "", "", self.path, lineCount)
                             return False
-                        currTarget.buildSteps.append(mdCommands.BuildStep(currName, currPair[1]))
+                        currTarget.buildSteps.append(md.mdCommands.BuildStep(currName, currPair[1]))
                     else:
                         Logger().writeError("Cannot understand given line: '" + currLine + "'", "", "", self.path, lineCount)
                         return False
@@ -207,10 +207,10 @@ class Project(object):
             return True
 
         for currTarget in self.targets:
-            normalizedName = mdTarget.normalizeName(currTarget.name)
+            normalizedName = md.mdTarget.normalizeName(currTarget.name)
             checkedDependancies = []
             for dependancy in currTarget.dependsOn:
-                normalizedDepedancy = mdTarget.normalizeName(dependancy)
+                normalizedDepedancy = md.mdTarget.normalizeName(dependancy)
                 if normalizedDepedancy == normalizedName:
                     Logger().writeError("Target cannot depend on itself", currTarget.name, "", self.path)
                     return False
@@ -222,13 +222,13 @@ class Project(object):
                     return False
                 checkedDependancies.append(normalizedDepedancy)
 
-        path = [mdTarget.normalizeName(self.targets[0].name)]
+        path = [md.mdTarget.normalizeName(self.targets[0].name)]
         return self.__searchPathsForCycles(path)
 
     def __searchPathsForCycles(self, path):
         currTarget = self.getTarget(path[len(path)-1])
         for dependancy in currTarget.dependsOn:
-            normalizedDependancy = mdTarget.normalizeName(dependancy)
+            normalizedDependancy = md.mdTarget.normalizeName(dependancy)
             if normalizedDependancy in path:
                 return False
             path.append(normalizedDependancy)
