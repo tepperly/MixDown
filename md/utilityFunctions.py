@@ -46,7 +46,6 @@ def executeCommand(command, args="", workingDirectory="", verbose=False, exitOnE
         os.chdir(lastcwd)
 
 def executeSubProcess(command, workingDirectory=tempfile.gettempdir(), outFileHandle=1, verbose=False, exitOnError=False):
-    print command
     if verbose:
         print "Executing: " + command + ": Working Directory: " + workingDirectory
     #***************************************************************************************************************

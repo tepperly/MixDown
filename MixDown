@@ -43,7 +43,7 @@ def main():
         timeStarted = time.time()
 
         if options.importer:
-            project, partialImport = mdImporter.importTargets(options, targetsToImport)
+            project, partialImport = md.mdImporter.importTargets(options, targetsToImport)
             if project == None or partialImport:
                 succeeded = False
         else:
@@ -56,12 +56,12 @@ def main():
                 for target in reversed(project.targets):
                     if options.cleanTargets:
                         cleanStep = target.findBuildStep("clean")
-                        succeeded = mdCommands.buildStepActor(target, cleanStep, options)
+                        succeeded = md.mdCommands.buildStepActor(target, cleanStep, options)
                     else:
                         for buildStep in target.buildSteps:
                             if buildStep.name == "clean" or buildStep.command == "":
                                 continue
-                            succeeded = mdCommands.buildStepActor(target, buildStep, options)
+                            succeeded = md.mdCommands.buildStepActor(target, buildStep, options)
                             if not succeeded:
                                 break
                     if not succeeded:
@@ -84,7 +84,7 @@ def main():
                 Logger().writeMessage("\n" + project.name + " has been cleaned in " + os.path.abspath(options.buildDir))
             else:
                 Logger().writeMessage("\n" + project.name + " has been built in " + os.path.abspath(options.buildDir))
-                Logger().writeMessage(project.name + " has been installed to " + os.path.abspath(options.getDefine(mdDefines.mdPrefix[0])))
+                Logger().writeMessage(project.name + " has been installed to " + os.path.abspath(options.getDefine(md.mdDefines.mdPrefix[0])))
         message = "\nTotal time " + secondsToHMS(timeElapsed) + "\n" + message
         Logger().writeMessage(message)
         if partialImport:
@@ -102,9 +102,9 @@ def setup(options):
     if options.verbose:
         Logger().writeMessage(str(options))
         if not options.prefixDefined and not options.cleanTargets:
-            Logger().writeMessage("No prefix defined, defaulting to '" + options.getDefine(mdDefines.mdPrefix[0]) + "'")
+            Logger().writeMessage("No prefix defined, defaulting to '" + options.getDefine(md.mdDefines.mdPrefix[0]) + "'")
 
-    project = mdProject.Project(options.projectFile)
+    project = md.mdProject.Project(options.projectFile)
     if not project.read():
         return None
     if not project.addSkipStepFromOptions(options):
@@ -125,9 +125,9 @@ def setup(options):
                 if cleaningOutputReported:
                     Logger().writeMessage("Cleaning MixDown and Target output directories...")
                     cleaningOutputReported = True
-                utilityFunctions.removeDir(currTarget.outputPath)
+                md.utilityFunctions.removeDir(currTarget.outputPath)
 
-        prefixDefine = options.getDefine(mdDefines.mdPrefix[0])
+        prefixDefine = options.getDefine(md.mdDefines.mdPrefix[0])
         if prefixDefine != "":
             #TODO: only add lib64 if on 64bit machines
             libraryPaths = os.path.join(prefixDefine, "lib64") + ":" + os.path.join(prefixDefine, "lib")
@@ -138,16 +138,16 @@ def setup(options):
             os.environ["LD_LIBRARY_PATH"] = libraryPaths
 
     #Add MixDown's directory to path so mdSteps can be found
-    sys.path.append(os.path.dirname(sys.argv[0]))
+    sys.path.append(os.path.dirname(sys.argv[0])+"/md")
 
     return project
 
 def cleanMixDown(options):
     try:
         Logger().writeMessage("Cleaning MixDown directories...")
-        utilityFunctions.removeDir(options.buildDir)
-        utilityFunctions.removeDir(options.downloadDir)
-        utilityFunctions.removeDir(options.logDir)
+        md.utilityFunctions.removeDir(options.buildDir)
+        md.utilityFunctions.removeDir(options.downloadDir)
+        md.utilityFunctions.removeDir(options.logDir)
     except IOError, e:
         Logger().writeError(e, exitProgram=True)
 

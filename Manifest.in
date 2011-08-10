@@ -1,2 +1,2 @@
-include MixDown index.html 
+include MixDown index.html
 recursive-include md *

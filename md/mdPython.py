@@ -51,7 +51,6 @@ def parsePythonCommand(command):
     while i < len(remaining):
         if remaining[i] == "(":
             function = remaining[:i]
-            print function
             remaining = remaining[i+1:]
             break
         i += 1
@@ -81,12 +80,8 @@ def callPythonCommand(namespace, function, target, options):
         target.pythonCallInfo.outputPath = target.outputPath
         target.pythonCallInfo.outputPathSpecified = target.outputPathSpecified
         target.pythonCallInfo.downloadDir = options.downloadDir
-        print "before get attr"
-        print "function is "+function
-        print "importedNamespace "+str(importedNamespace)
         pythonCallInfo = getattr(importedNamespace, function)(target.pythonCallInfo)
     except AttributeError as e:
-        print  "after attr"
         Logger().writeError(str(e))
         return False
 
