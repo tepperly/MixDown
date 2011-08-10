@@ -24,7 +24,7 @@ import os, sys, textwrap, unittest, mdTestUtilities
 
 if not ".." in sys.path:
     sys.path.append("..")
-import mdLogger, mdOptions, mdProject, utilityFunctions
+import md.mdLogger, md.mdOptions, md.mdProject, md.utilityFunctions
 
 class Test_mdProject(unittest.TestCase):
     def test_readSingleTargetProject(self):
@@ -39,7 +39,7 @@ class Test_mdProject(unittest.TestCase):
         try:
             tempDir = mdTestUtilities.makeTempDir()
             projectFilePath = mdTestUtilities.makeTempFile(tempDir, projectFileContents, ".md")
-            project = mdProject.Project(projectFilePath)
+            project = md.mdProject.Project(projectFilePath)
             self.assertTrue(project.read(), "Project file could not be read")
             #Project
             self.assertEqual(project.name, os.path.split(projectFilePath)[1][:-3], "Project returned wrong name")
@@ -52,7 +52,7 @@ class Test_mdProject(unittest.TestCase):
             self.assertEqual(project.targets[0].findBuildStep("build").command, "make", "Project returned wrong target 'a' build command")
             self.assertEqual(project.targets[0].findBuildStep("install").command, "make install", "Project returned wrong target 'a' install command")
         finally:
-            utilityFunctions.removeDir(tempDir)
+            md.utilityFunctions.removeDir(tempDir)
 
     def test_readDetectDuplicateTarget(self):
         projectFileContents = textwrap.dedent("""
@@ -65,10 +65,10 @@ class Test_mdProject(unittest.TestCase):
         try:
             tempDir = mdTestUtilities.makeTempDir()
             projectFilePath = mdTestUtilities.makeTempFile(tempDir, projectFileContents, ".md")
-            project = mdProject.Project(projectFilePath)
+            project = md.mdProject.Project(projectFilePath)
             self.assertFalse(project.read(), "Project read should have detected duplicate target")
         finally:
-            utilityFunctions.removeDir(tempDir)
+            md.utilityFunctions.removeDir(tempDir)
 
     def test_readMultiTargetProject(self):
         projectFileContents = textwrap.dedent("""
@@ -98,7 +98,7 @@ class Test_mdProject(unittest.TestCase):
         try:
             tempDir = mdTestUtilities.makeTempDir()
             projectFilePath = mdTestUtilities.makeTempFile(tempDir, projectFileContents, ".md")
-            project = mdProject.Project(projectFilePath)
+            project = md.mdProject.Project(projectFilePath)
             self.assertTrue(project.read(), "Project file could not be read")
             #Project
             self.assertEqual(project.name, os.path.split(projectFilePath)[1][:-3], "Project returned wrong name")
@@ -127,7 +127,7 @@ class Test_mdProject(unittest.TestCase):
             self.assertEqual(project.targets[2].findBuildStep("build").command, "cmake", "Project returned wrong target 'c' build command")
             self.assertEqual(project.targets[2].findBuildStep("install").command, "cmake install", "Project returned wrong target 'c' install command")
         finally:
-            utilityFunctions.removeDir(tempDir)
+            md.utilityFunctions.removeDir(tempDir)
 
     def test_readWriteMultiTargetProject(self):
         projectFileContents = textwrap.dedent("""
@@ -158,7 +158,7 @@ class Test_mdProject(unittest.TestCase):
             #Read initial values
             tempDir = mdTestUtilities.makeTempDir()
             projectOrigFilePath = mdTestUtilities.makeTempFile(tempDir, projectFileContents, ".md")
-            projectOrig = mdProject.Project(projectOrigFilePath)
+            projectOrig = md.mdProject.Project(projectOrigFilePath)
             self.assertTrue(projectOrig.read(), "Initial project file could not be read")
 
             #Write values to new file
@@ -166,7 +166,7 @@ class Test_mdProject(unittest.TestCase):
             projectOrig.write(projectFilePath)
 
             #Read values from written file and test to make sure they are correct
-            project = mdProject.Project(projectFilePath)
+            project = md.mdProject.Project(projectFilePath)
             self.assertTrue(project.read(), "Project file could not be read")
             #Project
             self.assertEqual(project.name, os.path.split(projectFilePath)[1][:-3], "Project returned wrong name")
@@ -195,7 +195,7 @@ class Test_mdProject(unittest.TestCase):
             self.assertEqual(project.targets[2].findBuildStep("build").command, "cmake", "Project returned wrong target 'c' build command")
             self.assertEqual(project.targets[2].findBuildStep("install").command, "cmake install", "Project returned wrong target 'c' install command")
         finally:
-            utilityFunctions.removeDir(tempDir)
+            md.utilityFunctions.removeDir(tempDir)
 
     def test_validateSingleTargetProjectWithSteps(self):
         projectFileContents = textwrap.dedent("""
@@ -209,12 +209,12 @@ class Test_mdProject(unittest.TestCase):
         try:
             tempDir = mdTestUtilities.makeTempDir()
             projectFilePath = mdTestUtilities.makeTempFile(tempDir, projectFileContents, ".md")
-            project = mdProject.Project(projectFilePath)
-            options = mdOptions.Options()
+            project = md.mdProject.Project(projectFilePath)
+            options = md.mdOptions.Options()
             self.assertTrue(project.read(), "Project file could not be read")
             self.assertTrue(project.validate(options), "Project could not validate")
         finally:
-            utilityFunctions.removeDir(tempDir)
+            md.utilityFunctions.removeDir(tempDir)
 
     def test_validateMultiTargetProjectWithStepsAndDependancies(self):
         projectFileContents = textwrap.dedent("""
@@ -244,12 +244,12 @@ class Test_mdProject(unittest.TestCase):
         try:
             tempDir = mdTestUtilities.makeTempDir()
             projectFilePath = mdTestUtilities.makeTempFile(tempDir, projectFileContents, ".md")
-            project = mdProject.Project(projectFilePath)
-            options = mdOptions.Options()
+            project = md.mdProject.Project(projectFilePath)
+            options = md.mdOptions.Options()
             self.assertTrue(project.read(), "Project file could not be read")
             self.assertTrue(project.validate(options), "Project could not validate")
         finally:
-            utilityFunctions.removeDir(tempDir)
+            md.utilityFunctions.removeDir(tempDir)
 
     def test_validateSingleTargetProjectWithoutSteps(self):
         projectFileContents = textwrap.dedent("""
@@ -259,12 +259,12 @@ class Test_mdProject(unittest.TestCase):
         try:
             tempDir = mdTestUtilities.makeTempDir()
             projectFilePath = mdTestUtilities.makeTempFile(tempDir, projectFileContents, ".md")
-            project = mdProject.Project(projectFilePath)
-            options = mdOptions.Options()
+            project = md.mdProject.Project(projectFilePath)
+            options = md.mdOptions.Options()
             self.assertTrue(project.read(), "Project file could not be read")
             self.assertTrue(project.validate(options), "Project could not validate")
         finally:
-            utilityFunctions.removeDir(tempDir)
+            md.utilityFunctions.removeDir(tempDir)
 
     def test_validateMultiTargetProjectWithoutStepsOrDependancies(self):
         projectFileContents = textwrap.dedent("""
@@ -280,12 +280,12 @@ class Test_mdProject(unittest.TestCase):
         try:
             tempDir = mdTestUtilities.makeTempDir()
             projectFilePath = mdTestUtilities.makeTempFile(tempDir, projectFileContents, ".md")
-            project = mdProject.Project(projectFilePath)
-            options = mdOptions.Options()
+            project = md.mdProject.Project(projectFilePath)
+            options = md.mdOptions.Options()
             self.assertTrue(project.read(), "Project file could not be read")
             self.assertTrue(project.validate(options), "Project could not validate")
         finally:
-            utilityFunctions.removeDir(tempDir)
+            md.utilityFunctions.removeDir(tempDir)
 
     def test_validateNonCyclicalProjectCase1(self):
         projectFileContents = textwrap.dedent("""
@@ -303,12 +303,12 @@ class Test_mdProject(unittest.TestCase):
         try:
             tempDir = mdTestUtilities.makeTempDir()
             projectFilePath = mdTestUtilities.makeTempFile(tempDir, projectFileContents, ".md")
-            project = mdProject.Project(projectFilePath)
-            options = mdOptions.Options()
+            project = md.mdProject.Project(projectFilePath)
+            options = md.mdOptions.Options()
             self.assertTrue(project.read(), "Project file could not be read")
             self.assertTrue(project.validate(options), "Project could not validate")
         finally:
-            utilityFunctions.removeDir(tempDir)
+            md.utilityFunctions.removeDir(tempDir)
 
     def test_validateNonCyclicalProjectCase2(self):
         projectFileContents = textwrap.dedent("""
@@ -325,12 +325,12 @@ class Test_mdProject(unittest.TestCase):
         try:
             tempDir = mdTestUtilities.makeTempDir()
             projectFilePath = mdTestUtilities.makeTempFile(tempDir, projectFileContents, ".md")
-            project = mdProject.Project(projectFilePath)
-            options = mdOptions.Options()
+            project = md.mdProject.Project(projectFilePath)
+            options = md.mdOptions.Options()
             self.assertTrue(project.read(), "Project file could not be read")
             self.assertTrue(project.validate(options), "Project could not validate")
         finally:
-            utilityFunctions.removeDir(tempDir)
+            md.utilityFunctions.removeDir(tempDir)
 
     def test_validateNonCyclicalProjectCase3(self):
         projectFileContents = textwrap.dedent("""
@@ -346,12 +346,12 @@ class Test_mdProject(unittest.TestCase):
         try:
             tempDir = mdTestUtilities.makeTempDir()
             projectFilePath = mdTestUtilities.makeTempFile(tempDir, projectFileContents, ".md")
-            project = mdProject.Project(projectFilePath)
-            options = mdOptions.Options()
+            project = md.mdProject.Project(projectFilePath)
+            options = md.mdOptions.Options()
             self.assertTrue(project.read(), "Project file could not be read")
             self.assertTrue(project.validate(options), "Project could not validate")
         finally:
-            utilityFunctions.removeDir(tempDir)
+            md.utilityFunctions.removeDir(tempDir)
 
     def test_validateNonCyclicalProjectCase4(self):
         projectFileContents = textwrap.dedent("""
@@ -368,12 +368,12 @@ class Test_mdProject(unittest.TestCase):
         try:
             tempDir = mdTestUtilities.makeTempDir()
             projectFilePath = mdTestUtilities.makeTempFile(tempDir, projectFileContents, ".md")
-            project = mdProject.Project(projectFilePath)
-            options = mdOptions.Options()
+            project = md.mdProject.Project(projectFilePath)
+            options = md.mdOptions.Options()
             self.assertTrue(project.read(), "Project file could not be read")
             self.assertTrue(project.validate(options), "Project could not validate")
         finally:
-            utilityFunctions.removeDir(tempDir)
+            md.utilityFunctions.removeDir(tempDir)
 
     def test_validateNonCyclicalProjectCase5(self):
         projectFileContents = textwrap.dedent("""
@@ -391,12 +391,12 @@ class Test_mdProject(unittest.TestCase):
         try:
             tempDir = mdTestUtilities.makeTempDir()
             projectFilePath = mdTestUtilities.makeTempFile(tempDir, projectFileContents, ".md")
-            project = mdProject.Project(projectFilePath)
-            options = mdOptions.Options()
+            project = md.mdProject.Project(projectFilePath)
+            options = md.mdOptions.Options()
             self.assertTrue(project.read(), "Project file could not be read")
             self.assertTrue(project.validate(options), "Project could not validate")
         finally:
-            utilityFunctions.removeDir(tempDir)
+            md.utilityFunctions.removeDir(tempDir)
 
     def test_validateNonCyclicalProjectCase6(self):
         projectFileContents = textwrap.dedent("""
@@ -414,12 +414,12 @@ class Test_mdProject(unittest.TestCase):
         try:
             tempDir = mdTestUtilities.makeTempDir()
             projectFilePath = mdTestUtilities.makeTempFile(tempDir, projectFileContents, ".md")
-            project = mdProject.Project(projectFilePath)
-            options = mdOptions.Options()
+            project = md.mdProject.Project(projectFilePath)
+            options = md.mdOptions.Options()
             self.assertTrue(project.read(), "Project file could not be read")
             self.assertTrue(project.validate(options), "Project could not validate")
         finally:
-            utilityFunctions.removeDir(tempDir)
+            md.utilityFunctions.removeDir(tempDir)
 
     def test_detectCyclicalProjectCase1(self):
         projectFileContents = textwrap.dedent("""
@@ -438,12 +438,12 @@ class Test_mdProject(unittest.TestCase):
         try:
             tempDir = mdTestUtilities.makeTempDir()
             projectFilePath = mdTestUtilities.makeTempFile(tempDir, projectFileContents, ".md")
-            project = mdProject.Project(projectFilePath)
-            options = mdOptions.Options()
+            project = md.mdProject.Project(projectFilePath)
+            options = md.mdOptions.Options()
             self.assertTrue(project.read(), "Project file could not be read")
             self.assertFalse(project.validate(options), "Project validated when it should not have due to cyclical dependancy graph")
         finally:
-            utilityFunctions.removeDir(tempDir)
+            md.utilityFunctions.removeDir(tempDir)
 
     def test_detectCyclicalProjectCase2(self):
         projectFileContents = textwrap.dedent("""
@@ -462,12 +462,12 @@ class Test_mdProject(unittest.TestCase):
         try:
             tempDir = mdTestUtilities.makeTempDir()
             projectFilePath = mdTestUtilities.makeTempFile(tempDir, projectFileContents, ".md")
-            project = mdProject.Project(projectFilePath)
-            options = mdOptions.Options()
+            project = md.mdProject.Project(projectFilePath)
+            options = md.mdOptions.Options()
             self.assertTrue(project.read(), "Project file could not be read")
             self.assertFalse(project.validate(options), "Project validated when it should not have due to cyclical dependancy graph")
         finally:
-            utilityFunctions.removeDir(tempDir)
+            md.utilityFunctions.removeDir(tempDir)
 
     def test_detectCyclicalProjectCase3(self):
         projectFileContents = textwrap.dedent("""
@@ -478,10 +478,10 @@ class Test_mdProject(unittest.TestCase):
         try:
             tempDir = mdTestUtilities.makeTempDir()
             projectFilePath = mdTestUtilities.makeTempFile(tempDir, projectFileContents, ".md")
-            project = mdProject.Project(projectFilePath)
+            project = md.mdProject.Project(projectFilePath)
             self.assertFalse(project.read(), "Reading project file should have failed")
         finally:
-            utilityFunctions.removeDir(tempDir)
+            md.utilityFunctions.removeDir(tempDir)
 
     def test_detectCyclicalProjectCase4(self):
         projectFileContents = textwrap.dedent("""
@@ -500,10 +500,10 @@ class Test_mdProject(unittest.TestCase):
         try:
             tempDir = mdTestUtilities.makeTempDir()
             projectFilePath = mdTestUtilities.makeTempFile(tempDir, projectFileContents, ".md")
-            project = mdProject.Project(projectFilePath)
+            project = md.mdProject.Project(projectFilePath)
             self.assertFalse(project.read(), "Reading project file should have failed")
         finally:
-            utilityFunctions.removeDir(tempDir)
+            md.utilityFunctions.removeDir(tempDir)
 
     def test_detectProjectWithNonExistantDependancy(self):
         projectFileContents = textwrap.dedent("""
@@ -514,12 +514,12 @@ class Test_mdProject(unittest.TestCase):
         try:
             tempDir = mdTestUtilities.makeTempDir()
             projectFilePath = mdTestUtilities.makeTempFile(tempDir, projectFileContents, ".md")
-            project = mdProject.Project(projectFilePath)
-            options = mdOptions.Options()
+            project = md.mdProject.Project(projectFilePath)
+            options = md.mdOptions.Options()
             self.assertTrue(project.read(), "Project file could not be read")
             self.assertFalse(project.validate(options), "Project validated when it should not have due to non-existant dependancy")
         finally:
-            utilityFunctions.removeDir(tempDir)
+            md.utilityFunctions.removeDir(tempDir)
 
     def test_getTarget(self):
         projectFileContents = textwrap.dedent("""
@@ -535,7 +535,7 @@ class Test_mdProject(unittest.TestCase):
         try:
             tempDir = mdTestUtilities.makeTempDir()
             projectFilePath = mdTestUtilities.makeTempFile(tempDir, projectFileContents, ".md")
-            project = mdProject.Project(projectFilePath)
+            project = md.mdProject.Project(projectFilePath)
             self.assertTrue(project.read(), "Project file could not be read")
             #Targets that exist in project
             self.assertNotEquals(project.getTarget("a"), None, "Target 'a' could not be found in project")
@@ -548,7 +548,7 @@ class Test_mdProject(unittest.TestCase):
             self.assertEquals(project.getTarget("d"), None, "Target 'd' should not have been found in project")
             self.assertEquals(project.getTarget(""), None, "Target '' should not have been found in project")
         finally:
-            utilityFunctions.removeDir(tempDir)
+            md.utilityFunctions.removeDir(tempDir)
 
     def test_examineSingleTarget(self):
         projectFileContents = textwrap.dedent("""
@@ -558,8 +558,8 @@ class Test_mdProject(unittest.TestCase):
         try:
             tempDir = mdTestUtilities.makeTempDir()
             projectFilePath = mdTestUtilities.makeTempFile(tempDir, projectFileContents, ".md")
-            project = mdProject.Project(projectFilePath)
-            options = mdOptions.Options()
+            project = md.mdProject.Project(projectFilePath)
+            options = md.mdOptions.Options()
             options.buildDir = os.path.join(tempDir, options.buildDir)
             self.assertTrue(project.read(), "Project file could not be read")
             self.assertTrue(project.examine(options), "Project failed to examine")
@@ -567,7 +567,7 @@ class Test_mdProject(unittest.TestCase):
             self.assertEquals(len(project.targets), 1, "Number of Targets in project is wrong")
             self.assertEquals(project.targets[0].name, "TestCaseA", "Sorting failed. TestCaseA should have been the first target.")
         finally:
-            utilityFunctions.removeDir(tempDir)
+            md.utilityFunctions.removeDir(tempDir)
 
     def test_examineMultiTargetCase1(self):
         projectFileContents = textwrap.dedent("""
@@ -585,8 +585,8 @@ class Test_mdProject(unittest.TestCase):
         try:
             tempDir = mdTestUtilities.makeTempDir()
             projectFilePath = mdTestUtilities.makeTempFile(tempDir, projectFileContents, ".md")
-            project = mdProject.Project(projectFilePath)
-            options = mdOptions.Options()
+            project = md.mdProject.Project(projectFilePath)
+            options = md.mdOptions.Options()
             options.buildDir = os.path.join(tempDir, options.buildDir)
             self.assertTrue(project.read(), "Project file could not be read")
             self.assertTrue(project.examine(options), "Project failed to examine")
@@ -598,7 +598,7 @@ class Test_mdProject(unittest.TestCase):
             self.assertEquals(project.targets[1].name, "TestCaseB", "Sorting failed. TestCaseB should have been the first target.")
             self.assertEquals(project.targets[2].name, "TestCaseC", "Sorting failed. TestCaseC should have been the first target.")
         finally:
-            utilityFunctions.removeDir(tempDir)
+            md.utilityFunctions.removeDir(tempDir)
 
     def test_examineMultiTargetCase2(self):
         projectFileContents = textwrap.dedent("""
@@ -616,8 +616,8 @@ class Test_mdProject(unittest.TestCase):
         try:
             tempDir = mdTestUtilities.makeTempDir()
             projectFilePath = mdTestUtilities.makeTempFile(tempDir, projectFileContents, ".md")
-            project = mdProject.Project(projectFilePath)
-            options = mdOptions.Options()
+            project = md.mdProject.Project(projectFilePath)
+            options = md.mdOptions.Options()
             options.buildDir = os.path.join(tempDir, options.buildDir)
             self.assertTrue(project.read(), "Project file could not be read")
             self.assertTrue(project.examine(options), "Project failed to examine")
@@ -629,7 +629,7 @@ class Test_mdProject(unittest.TestCase):
             self.assertEquals(project.targets[1].name, "TestCaseB", "Sorting failed. TestCaseB should have been the first target.")
             self.assertEquals(project.targets[2].name, "TestCaseC", "Sorting failed. TestCaseC should have been the first target.")
         finally:
-            utilityFunctions.removeDir(tempDir)
+            md.utilityFunctions.removeDir(tempDir)
 
     def test_examineMultiTargetCase3(self):
         projectFileContents = textwrap.dedent("""
@@ -651,8 +651,8 @@ class Test_mdProject(unittest.TestCase):
         try:
             tempDir = mdTestUtilities.makeTempDir()
             projectFilePath = mdTestUtilities.makeTempFile(tempDir, projectFileContents, ".md")
-            project = mdProject.Project(projectFilePath)
-            options = mdOptions.Options()
+            project = md.mdProject.Project(projectFilePath)
+            options = md.mdOptions.Options()
             options.buildDir = os.path.join(tempDir, options.buildDir)
             self.assertTrue(project.read(), "Project file could not be read")
             self.assertTrue(project.examine(options), "Project failed to examine")
@@ -666,7 +666,7 @@ class Test_mdProject(unittest.TestCase):
             self.assertEquals(project.targets[2].name, "C", "Sorting failed. C should have been the first target.")
             self.assertEquals(project.targets[3].name, "D", "Sorting failed. D should have been the first target.")
         finally:
-            utilityFunctions.removeDir(tempDir)
+            md.utilityFunctions.removeDir(tempDir)
 
     def test_examineMultiTargetCase4(self):
         projectFileContents = textwrap.dedent("""
@@ -683,8 +683,8 @@ class Test_mdProject(unittest.TestCase):
         try:
             tempDir = mdTestUtilities.makeTempDir()
             projectFilePath = mdTestUtilities.makeTempFile(tempDir, projectFileContents, ".md")
-            project = mdProject.Project(projectFilePath)
-            options = mdOptions.Options()
+            project = md.mdProject.Project(projectFilePath)
+            options = md.mdOptions.Options()
             options.buildDir = os.path.join(tempDir, options.buildDir)
             self.assertTrue(project.read(), "Project file could not be read")
             self.assertTrue(project.examine(options), "Project failed to examine")
@@ -696,7 +696,7 @@ class Test_mdProject(unittest.TestCase):
             self.assertEquals(project.targets[1].name, "B", "Sorting failed. B should have been the first target.")
             self.assertEquals(project.targets[2].name, "C", "Sorting failed. C should have been the first target.")
         finally:
-            utilityFunctions.removeDir(tempDir)
+            md.utilityFunctions.removeDir(tempDir)
 
     def test_examineMultiTargetCase5(self):
         projectFileContents = textwrap.dedent("""
@@ -717,8 +717,8 @@ class Test_mdProject(unittest.TestCase):
         try:
             tempDir = mdTestUtilities.makeTempDir()
             projectFilePath = mdTestUtilities.makeTempFile(tempDir, projectFileContents, ".md")
-            project = mdProject.Project(projectFilePath)
-            options = mdOptions.Options()
+            project = md.mdProject.Project(projectFilePath)
+            options = md.mdOptions.Options()
             options.buildDir = os.path.join(tempDir, options.buildDir)
             self.assertTrue(project.read(), "Project file could not be read")
             self.assertTrue(project.examine(options), "Project failed to examine")
@@ -732,7 +732,7 @@ class Test_mdProject(unittest.TestCase):
             self.assertEquals(project.targets[2].name, "C", "Sorting failed. C should have been the first target.")
             self.assertEquals(project.targets[3].name, "D", "Sorting failed. D should have been the first target.")
         finally:
-            utilityFunctions.removeDir(tempDir)
+            md.utilityFunctions.removeDir(tempDir)
 
 def suite():
     suite = unittest.TestSuite()
@@ -740,5 +740,5 @@ def suite():
     return suite
 
 if __name__ == "__main__":
-    mdLogger.SetLogger("Console")
+    md.mdLogger.SetLogger("Console")
     unittest.main()
