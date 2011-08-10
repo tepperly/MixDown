@@ -28,7 +28,7 @@ import test_MixDownLong, test_MixDownShort, test_utilityFunctions
 
 if not ".." in sys.path:
     sys.path.append("..")
-import mdLogger
+import md.mdLogger
 
 def main():
     longTests = False
@@ -56,5 +56,5 @@ def main():
         print "\nNote: Long tests not run to enable add '--long' to command line"
 
 if __name__ == "__main__":
-    mdLogger.SetLogger("Console")
+    md.mdLogger.SetLogger("Console")
     main()
