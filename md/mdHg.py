@@ -20,7 +20,8 @@
 # along with this program; if not, write to the Free Software Foundation,
 # Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 
-import os, md.mdLogger, md.utilityFunctions
+import os
+from md import  mdLogger, utilityFunctions
 
 _isHgInstalled = None
 
@@ -29,7 +30,7 @@ def isHgInstalled():
     if _isHgInstalled == None:
         outFile = open(os.devnull, "w")
         try:
-            returnCode = md.utilityFunctions.executeSubProcess("hg --help", outFileHandle = outFile)
+            returnCode = utilityFunctions.executeSubProcess("hg --help", outFileHandle = outFile)
         except:
             #Assume any exceptions means Hg is not installed
             returnCode = 1
@@ -37,7 +38,7 @@ def isHgInstalled():
         if returnCode == 0:
             _isHgInstalled = True
         else:
-            md.mdLogger.Logger().writeMessage("Hg is not installed, hg repositories will fail to be checked out")
+            mdLogger.Logger().writeMessage("Hg is not installed, hg repositories will fail to be checked out")
             _isHgInstalled = False
     return _isHgInstalled
 
@@ -46,7 +47,7 @@ def isHgRepo(location):
     if location == "" or not isHgInstalled():
         return False
     outFile = open(os.devnull, "w")
-    returnCode = md.utilityFunctions.executeSubProcess("hg id " + location, outFileHandle = outFile)
+    returnCode = utilityFunctions.executeSubProcess("hg id " + location, outFileHandle = outFile)
     outFile.close()
     if returnCode == 0:
         return True
@@ -59,7 +60,7 @@ def hgCheckout(repoLocation, outPath):
         return False
     outFile = open(os.devnull, "w")
     #TODO: decide if i should check for username in .hgrc, if not put "-u <username>" in command
-    returnCode = md.utilityFunctions.executeSubProcess("hg clone --noninteractive " + repoLocation + " " + outPath, outFileHandle = outFile)
+    returnCode = utilityFunctions.executeSubProcess("hg clone --noninteractive " + repoLocation + " " + outPath, outFileHandle = outFile)
     outFile.close()
     if returnCode == 0:
         return True

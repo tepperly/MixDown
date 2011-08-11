@@ -20,9 +20,11 @@
 # along with this program; if not, write to the Free Software Foundation,
 # Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 
-import os, sys, md.mdDefines, md.mdTarget, md.utilityFunctions
+import os, sys
 
-from md.mdLogger import *
+from mdLogger import *
+
+from md import mdDefines,utilityFunctions,mdTarget
 
 class Options(object):
     def __init__(self):
@@ -40,7 +42,7 @@ class Options(object):
         self.skipSteps = ""
         self._defines = dict()
         self._defines.setdefault("")
-        md.mdDefines.setPrefixDefines(self, '/usr/local')
+        mdDefines.setPrefixDefines(self, '/usr/local')
         #mdDefines.setCompilerDefines(self, '/usr/bin/gcc', '/usr/bin/g++', '/usr/bin/cpp')
         #mdDefines.setCompilerDefines(self, '/home/white238/bin/gcc', '/home/white238/bin/g++')
         #mdDefines.setCompilerDefines(self, '/home/white238/projects/gcc4.6.1/testPrefix/bin/gcc', '/home/white238/projects/gcc4.6.1/testPrefix/bin/g++', '/home/white238/projects/gcc4.6.1/testPrefix/bin/cpp')
@@ -140,9 +142,9 @@ class Options(object):
                 self.interactive = True
             elif currArg.lower() == "-v":
                 self.verbose = True
-            elif md.utilityFunctions.isURL(currArg) or os.path.isfile(currArg) or os.path.isdir(currArg):
-                name = md.mdTarget.targetPathToName(currArg)
-                currTarget = md.mdTarget.Target(name, currArg)
+            elif utilityFunctions.isURL(currArg) or os.path.isfile(currArg) or os.path.isdir(currArg):
+                name = mdTarget.targetPathToName(currArg)
+                currTarget = mdTarget.Target(name, currArg)
                 targetsToImport.append(currTarget)
             else:
                 Logger().writeError("Could not understand given commandline option: " + currArg, exitProgram=True)
@@ -174,12 +176,12 @@ class Options(object):
                     self.setDefine(splitPair[0], splitPair[1])
             elif currFlag == "-p":
                 validateOptionPair(currFlag, currValue)
-                md.mdDefines.setPrefixDefines(self, os.path.abspath(currValue))
+                mdDefines.setPrefixDefines(self, os.path.abspath(currValue))
                 self.prefixDefined = True
             elif currFlag == "-j":
                 validateOptionPair(currFlag, currValue)
                 #Add "-j<jobSlots>" only if user defines -j on commandline
-                md.mdDefines.setJobSlotsDefines(self, currValue)
+                mdDefines.setJobSlotsDefines(self, currValue)
             elif currFlag == "-l":
                 validateOptionPair(currFlag, currValue)
                 self.logger = str.lower(currValue)

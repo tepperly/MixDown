@@ -20,9 +20,11 @@
 # along with this program; if not, write to the Free Software Foundation,
 # Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 
-import md.mdLogger, sys
+import sys
 
-class LoggerConsole(md.mdLogger.LoggerBase):
+from md import mdLogger
+
+class LoggerConsole(mdLogger.LoggerBase):
     def close(self):
         pass
 
@@ -67,7 +69,7 @@ class LoggerConsole(md.mdLogger.LoggerBase):
         messagePrefix = self.__formatMessagePrefix(targetName, targetStep)
         message = messagePrefix + "Succeeded\n"
         if timeInSeconds != 0:
-            message += messagePrefix + "Time " + md.mdLogger.secondsToHMS(timeInSeconds) + "\n"
+            message += messagePrefix + "Time " + mdLogger.secondsToHMS(timeInSeconds) + "\n"
         sys.stdout.write(message)
 
     def reportFailure(self, targetName="", targetStep="", timeInSeconds=0, returnCode=0, exitProgram=False):
@@ -75,7 +77,7 @@ class LoggerConsole(md.mdLogger.LoggerBase):
         messagePrefix = self.__formatMessagePrefix(targetName, targetStep)
         message = self.__formatErrorMessage(messagePrefix + "Failed with error code " + str(returnCode) + ".")
         if timeInSeconds != 0:
-            message += messagePrefix + "Time " + md.mdLogger.secondsToHMS(timeInSeconds) + "\n"
+            message += messagePrefix + "Time " + mdLogger.secondsToHMS(timeInSeconds) + "\n"
         sys.stderr.write(message)
         sys.stderr.flush()
         if exitProgram:

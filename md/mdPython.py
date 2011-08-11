@@ -20,9 +20,9 @@
 # along with this program; if not, write to the Free Software Foundation,
 # Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 
-import os, re, sys, md.mdTarget
+import os, re, sys
 
-from md.mdLogger import *
+from mdLogger import *
 
 def parsePythonCommand(command):
     remaining = command.strip()
@@ -35,12 +35,10 @@ def parsePythonCommand(command):
 
     i = 0
     dotSeen = False
-    j = 0
     while i < len(remaining):
-        if(remaining[i] == "." and dotSeen == False):
-            dotSeen = True
-            j=i
-            i  += 1
+        if remaining[i] == "." and dotSeen == False:
+            dotSeen  = True
+            i += 1
             continue
         if remaining[i] == "." and dotSeen == True:
             namespace = remaining[:i]

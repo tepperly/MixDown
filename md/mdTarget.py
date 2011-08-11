@@ -21,9 +21,9 @@
 # Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 
 import os, re, tarfile
-import md.mdAutoTools, md.mdCMake, md.mdCommands, md.mdGit, md.mdHg, md.mdOptions, md.mdPython, md.mdSvn, md.utilityFunctions
+import mdAutoTools, mdCMake, mdCommands, mdGit, mdHg, mdPython, mdSvn, utilityFunctions
 
-from md.mdLogger import *
+from mdLogger import *
 
 def normalizeName(name):
     return name.strip().lower()
@@ -32,27 +32,27 @@ def targetPathToName(path, exitOnFailure=True):
     name = ""
     path = path.strip()
 
-    if md.mdGit.isGitRepo(path):
+    if mdGit.isGitRepo(path):
         if os.path.isdir(path):
             name = os.path.basename(path)
-        elif md.utilityFunctions.isURL(path):
-            name = md.utilityFunctions.URLToFilename(path)
+        elif utilityFunctions.isURL(path):
+            name = utilityFunctions.URLToFilename(path)
             if name.endswith(".git"):
                 name = name[:-4]
-    elif md.mdSvn.isSvnRepo(path):
+    elif mdSvn.isSvnRepo(path):
         if path.endswith(os.sep):
             path = path[:-1]
         if path.endswith("/trunk") or path.endswith("\trunk"):
             path = path[:-6]
         if os.path.isdir(path):
             name = os.path.basename(path)
-        elif md.utilityFunctions.isURL(path):
-            name = md.utilityFunctions.URLToFilename(path)
-    elif md.utilityFunctions.isURL(path):
-        name = md.utilityFunctions.URLToFilename(path)
-        name = md.utilityFunctions.splitFileName(name)[0]
+        elif utilityFunctions.isURL(path):
+            name = utilityFunctions.URLToFilename(path)
+    elif utilityFunctions.isURL(path):
+        name = utilityFunctions.URLToFilename(path)
+        name = utilityFunctions.splitFileName(name)[0]
     elif os.path.isfile(path) and tarfile.is_tarfile(path):
-        name = md.utilityFunctions.splitFileName(path)[0]
+        name = utilityFunctions.splitFileName(path)[0]
     elif os.path.isdir(path):
         if path.endswith(os.sep):
             name = os.path.basename(path[:-1])
@@ -74,7 +74,7 @@ class Target(object):
         self.dependancyDepth = 0
         self.dependsOn = []
         self._skipSteps = []
-        self.pythonCallInfo = md.mdPython.PythonCallInfo()
+        self.pythonCallInfo = mdPython.PythonCallInfo()
         self.buildSteps = []
 
     def validate(self, options):
@@ -91,12 +91,12 @@ class Target(object):
         #Check for write access to install directories used in commands.
         if not options.cleanTargets:
             for buildStep in self.buildSteps:
-                installDir = md.mdAutoTools.getInstallDir(buildStep.command)
+                installDir = mdAutoTools.getInstallDir(buildStep.command)
                 if installDir == "":
-                    installDir = md.mdCMake.getInstallDir(buildStep.command)
+                    installDir = mdCMake.getInstallDir(buildStep.command)
 
                 installDir = options.expandDefines(installDir)
-                if installDir != "" and not md.utilityFunctions.haveWriteAccess(installDir):
+                if installDir != "" and not utilityFunctions.haveWriteAccess(installDir):
                     Logger().writeError("No write access to used install directory: " + installDir, self.name, step, options.projectFile)
                     if not options.prefixDefined:
                         Logger().writeMessage("Use commandline option '-p<install path>' or running MixDown with superuser privileges (sudo)")
@@ -133,8 +133,8 @@ class Target(object):
             buildStep.command = options.expandDefines(buildStep.command)
 
     def __determineCommands(self, options):
-        for stepName in md.mdCommands.buildSteps:
-            buildStep = md.mdCommands.BuildStep(stepName, md.mdCommands.getCommand(stepName, self))
+        for stepName in mdCommands.buildSteps:
+            buildStep = mdCommands.BuildStep(stepName, mdCommands.getCommand(stepName, self))
             self.buildSteps.append(buildStep)
 
     def __str__(self):

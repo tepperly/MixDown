@@ -21,9 +21,10 @@
 # Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 
 import os, re, shutil, sys, tarfile, tempfile, urllib
-import md.mdAutoTools, md.mdCMake, md.mdCommands, md.mdMake, md.mdOptions, md.mdProject, md.mdDefines, md.mdTarget, md.utilityFunctions
 
-from md.mdLogger import *
+from md import mdAutoTools, mdCMake, mdCommands, mdMake, mdOptions, mdProject, mdDefines, mdTarget, utilityFunctions
+
+from mdLogger import *
 
 def importTargets(options, targetsToImport):
     SetLogger("console")
@@ -31,8 +32,8 @@ def importTargets(options, targetsToImport):
     finalTargets = []
     ignoredTargets = []
     partialImport = False
-    fetchStep = md.mdCommands.BuildStep("fetch", md.mdCommands.__getFetchCommand(None))
-    unpackStep = md.mdCommands.BuildStep("unpack", md.mdCommands.__getUnpackCommand(None))
+    fetchStep = mdCommands.BuildStep("fetch", mdCommands.__getFetchCommand(None))
+    unpackStep = mdCommands.BuildStep("unpack", mdCommands.__getUnpackCommand(None))
 
     tempDir = tempfile.mkdtemp(prefix="mixdown-")
     options.downloadDir = os.path.join(tempDir, "mdDownloads")
@@ -44,28 +45,28 @@ def importTargets(options, targetsToImport):
         Logger().writeMessage("Extracting target...", target.name)
 
         target.outputPath = os.path.join(tempDir, target.name)
-        if not md.mdCommands.buildStepActor(target, fetchStep, options):
-            md.utilityFunctions.removeDir(tempDir)
+        if not mdCommands.buildStepActor(target, fetchStep, options):
+            utilityFunctions.removeDir(tempDir)
             return None, False
-        if not md.mdCommands.buildStepActor(target, unpackStep, options):
-            md.utilityFunctions.removeDir(tempDir)
+        if not mdCommands.buildStepActor(target, unpackStep, options):
+            utilityFunctions.removeDir(tempDir)
             return None, False
 
         #Generate build files and find possible dependancies
         possibleDeps = []
-        if md.mdCMake.isCMakeProject(target.path):
+        if mdCMake.isCMakeProject(target.path):
             Logger().writeMessage("CMake project found...", target.name)
             Logger().writeMessage("Analyzing for dependancies...", target.name)
-            possibleDeps = md.mdCMake.getDependancies(target.path, target.name)
-        elif md.mdAutoTools.isAutoToolsProject(target.path):
+            possibleDeps = mdCMake.getDependancies(target.path, target.name)
+        elif mdAutoTools.isAutoToolsProject(target.path):
             Logger().writeMessage("Auto Tools project found...", target.name)
             if not os.path.exists(os.path.join(target.path, "configure")):
-                if not md.mdAutoTools.generateConfigureFiles(target.path, target.name):
-                    md.utilityFunctions.removeDir(tempDir)
+                if not mdAutoTools.generateConfigureFiles(target.path, target.name):
+                    utilityFunctions.removeDir(tempDir)
                     return None, False
             Logger().writeMessage("Analyzing for dependancies...", target.name)
-            possibleDeps = md.mdAutoTools.getDependancies(target.path, target.name)
-        elif md.mdMake.isMakeProject(target.path):
+            possibleDeps = mdAutoTools.getDependancies(target.path, target.name)
+        elif mdMake.isMakeProject(target.path):
             target.comment = "Make project found. MixDown cannot determine dependancies from Make projects."
             Logger().writeError(target.comment, target.name)
             partialImport = True
@@ -93,11 +94,11 @@ def importTargets(options, targetsToImport):
                 userInput = raw_input(possibleDependancy + ": Input location, target name, or blank to ignore:").strip()
                 if userInput == "":
                     ignoredTargets.append(possibleDependancy)
-                elif os.path.isfile(userInput) or os.path.isdir(userInput) or md.utilityFunctions.isURL(userInput):
-                    name = md.mdTarget.targetPathToName(userInput)
-                    newTarget = md.mdTarget.Target(name, userInput)
+                elif os.path.isfile(userInput) or os.path.isdir(userInput) or utilityFunctions.isURL(userInput):
+                    name = mdTarget.targetPathToName(userInput)
+                    newTarget = mdTarget.Target(name, userInput)
                     targetsToImport.append(newTarget)
-                    if md.mdTarget.normalizeName(possibleDependancy) != md.mdTarget.normalizeName(userInput):
+                    if mdTarget.normalizeName(possibleDependancy) != mdTarget.normalizeName(userInput):
                         newTarget.aliases.append(possibleDependancy)
                     target.dependsOn.append(possibleDependancy)
                 else:
@@ -107,11 +108,11 @@ def importTargets(options, targetsToImport):
                         target.dependsOn.append(possibleDependancy)
                     else:
                         aliasLocation = raw_input(userInput + ": Target name not found in any known targets.  Location of new target:").strip()
-                        if os.path.isfile(aliasLocation) or os.path.isdir(aliasLocation) or md.utilityFunctions.isURL(aliasLocation):
-                            name = md.mdTarget.targetPathToName(aliasLocation)
-                            newTarget = md.mdTarget.Target(name, aliasLocation)
+                        if os.path.isfile(aliasLocation) or os.path.isdir(aliasLocation) or utilityFunctions.isURL(aliasLocation):
+                            name = mdTarget.targetPathToName(aliasLocation)
+                            newTarget = mdTarget.Target(name, aliasLocation)
                             notReviewedTargets.append(newTarget)
-                            if md.mdTarget.normalizeName(possibleDependancy) != md.mdTarget.normalizeName(aliasLocation):
+                            if mdTarget.normalizeName(possibleDependancy) != mdTarget.normalizeName(aliasLocation):
                                 newTarget.aliases.append(possibleDependancy)
                             target.dependsOn.append(possibleDependancy)
                         else:
@@ -120,7 +121,7 @@ def importTargets(options, targetsToImport):
         finalTargets.append(target)
 
     #Create project for targets
-    project = md.mdProject.Project("ProjectNameNotDetermined", finalTargets)
+    project = mdProject.Project("ProjectNameNotDetermined", finalTargets)
 
     if not project.examine(options):
         Logger().writeError("Project failed examination", exitProgram=True)
@@ -128,9 +129,9 @@ def importTargets(options, targetsToImport):
         Logger().writeError("Project failed validation", exitProgram=True)
 
     mainTargetPath = project.targets[0].origPath
-    if md.utilityFunctions.isURL(mainTargetPath):
-        mainTargetPath = md.utilityFunctions.URLToFilename(mainTargetPath)
-    mainTargetName, mainTargetVersion = md.utilityFunctions.splitFileName(mainTargetPath)
+    if utilityFunctions.isURL(mainTargetPath):
+        mainTargetPath = utilityFunctions.URLToFilename(mainTargetPath)
+    mainTargetName, mainTargetVersion = utilityFunctions.splitFileName(mainTargetPath)
     if mainTargetVersion != "":
         project.name = mainTargetName + "-" + mainTargetVersion
     else:
@@ -144,7 +145,7 @@ def importTargets(options, targetsToImport):
         Logger().writeMessage("\nFinal targets...\n\n" + str(project))
         project.write()
 
-    md.utilityFunctions.removeDir(tempDir)
+    utilityFunctions.removeDir(tempDir)
     return project, partialImport
 
 def searchForPossibleAliasInList(possibleAlias, targetList, interactive=False):
@@ -164,14 +165,14 @@ def searchForPossibleAliasInList(possibleAlias, targetList, interactive=False):
     return None
 
 def getTarget(name, targetList, aliasToAdd = ""):
-    normalizedTargetName = md.mdTarget.normalizeName(name)
+    normalizedTargetName = mdTarget.normalizeName(name)
     foundTarget = None
     for currTarget in targetList:
-        if normalizedTargetName == md.mdTarget.normalizeName(currTarget.name):
+        if normalizedTargetName == mdTarget.normalizeName(currTarget.name):
             foundTarget = currTarget
             break
         for alias in currTarget.aliases:
-            if normalizedTargetName == md.mdTarget.normalizeName(alias):
+            if normalizedTargetName == mdTarget.normalizeName(alias):
                 foundTarget = currTarget
                 break
 
