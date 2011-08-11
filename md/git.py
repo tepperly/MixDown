@@ -21,8 +21,7 @@
 # Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 
 import os
-
-from md import logger,utilityFunctions
+import logger, utilityFunctions
 
 _isGitInstalled = None
 
@@ -39,7 +38,7 @@ def isGitInstalled():
         if returnCode == 0:
             _isGitInstalled = True
         else:
-            logger.Logger().writeMessage("Git is not installed, git repositories will fail to be checked out")
+            logger.writeMessage("Git is not installed, git repositories will fail to be checked out")
             _isGitInstalled = False
     return _isGitInstalled
 

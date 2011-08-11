@@ -31,10 +31,10 @@ __loggerInstance = None
 
 def Logger():
     if __loggerInstance == None:
-        SetLogger()
+        setLogger()
     return __loggerInstance
 
-def SetLogger(loggerName="", logOutputDir=""):
+def setLogger(loggerName="", logOutputDir=""):
     global __loggerInstance
     loggerName = loggerName.lower()
     if loggerName == "file" or loggerName == "":
@@ -50,6 +50,36 @@ def SetLogger(loggerName="", logOutputDir=""):
         from md import loggerFile
         __loggerInstance = loggerFile.LoggerFile()
         __loggerInstance.writeMessage(loggerName + " logger not found, falling back on file logger")
+
+def close():
+    Logger().close()
+
+def writeMessage(message):
+    Logger().writeMessage(message)
+
+def writeMessage(message, targetName="", targetStep=""):
+    Logger().writeMessage(message, targetName, targetStep)
+
+def writeError(message, targetName="", targetStep="", filePath="", lineNumber=0, exitProgram=False):
+    Logger().writeError(message, targetName, targetStep, filePath, lineNumber, exitProgram)
+
+def reportSkipped(targetName="", targetStep="", reason=""):
+    Logger().reportSkipped(targetName, targetStep, reason)
+
+def reportStart(targetName="", targetStep=""):
+    Logger().reportStart(targetName, targetStep)
+
+def reportSuccess(targetName="", targetStep="", timeInSeconds=0):
+    Logger().reportSuccess(targetName, targetStep, timeInSeconds)
+
+def reportFailure(targetName="", targetStep="", timeInSeconds=0, returnCode=0, exitProgram=False):
+    Logger().reportFailure(targetName, targetStep, timeInSeconds, returnCode, exitProgram)
+
+def getOutFd(targetName="", targetStep=""):
+    return Logger().getOutFd(targetName, targetStep)
+
+def getErrorFd(targetName="", targetStep=""):
+    return Logger().getErrorFd(targetName, targetStep)
 
 class LoggerBase(object):
     def close(self):

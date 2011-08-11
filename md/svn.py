@@ -21,8 +21,7 @@
 # Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 
 import os
-
-from md import logger,utilityFunctions
+import logger, utilityFunctions
 
 _isSvnInstalled = None
 
@@ -39,7 +38,7 @@ def isSvnInstalled():
         if returnCode == 0:
             _isSvnInstalled = True
         else:
-            ogger.Logger().writeMessage("Svn is not installed, svn repositories will fail to be checked out")
+            logger.writeMessage("Svn is not installed, svn repositories will fail to be checked out")
             _isSvnInstalled = False
     return _isSvnInstalled
 

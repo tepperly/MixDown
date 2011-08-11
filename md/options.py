@@ -21,11 +21,7 @@
 # Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 
 import os, sys
-
-from logger import *
-
-from md import defines,utilityFunctions
-import md
+import defines, logger, target, utilityFunctions
 
 class Options(object):
     def __init__(self):
@@ -91,7 +87,7 @@ class Options(object):
         loopCount = 0
         while expandedString.find("$(") != -1:
             if loopCount > 10:
-                Logger().writeError("Define depth count (10) exceeded in string '" + inString + "'", exitProgram=True)
+                logger.writeError("Define depth count (10) exceeded in string '" + inString + "'", exitProgram=True)
 
             strLength = len(expandedString)
             startIndex = 0
@@ -100,9 +96,9 @@ class Options(object):
                 if expandedString[i] == "$":
                     if strLength - i < 4:
                         if inString == expandedString:
-                            Logger().writeError("Unterminated define found in '" + inString + "' at index " + str(i), exitProgram=True)
+                            logger.writeError("Unterminated define found in '" + inString + "' at index " + str(i), exitProgram=True)
                         else:
-                            Logger().writeError("Unterminated define found in original string '" + inString + "'\n After expanding defines, '" + expandedString + "'", exitProgram=True)
+                            logger.writeError("Unterminated define found in original string '" + inString + "'\n After expanding defines, '" + expandedString + "'", exitProgram=True)
                     startIndex = i
                     break
             if startIndex != 0:
@@ -119,13 +115,13 @@ class Options(object):
 
     def validateBuildDir(self):
         if os.path.isfile(self.buildDir):
-            Logger().writeError("Cannot create build directory, a file by the same name already exists", exitProgram=True)
+            logger.writeError("Cannot create build directory, a file by the same name already exists", exitProgram=True)
         elif not os.path.isdir(self.buildDir):
             os.makedirs(self.buildDir)
 
     def validateDownloadDir(self):
         if os.path.isfile(self.downloadDir):
-            Logger().writeError("Cannot create download directory, a file by the same name already exists", exitProgram=True)
+            logger.writeError("Cannot create download directory, a file by the same name already exists", exitProgram=True)
         elif not os.path.isdir(self.downloadDir):
             os.makedirs(self.downloadDir)
 
@@ -144,11 +140,11 @@ class Options(object):
             elif currArg.lower() == "-v":
                 self.verbose = True
             elif utilityFunctions.isURL(currArg) or os.path.isfile(currArg) or os.path.isdir(currArg):
-                name = md.target.targetPathToName(currArg)
-                currTarget = md.target.Target(name, currArg)
+                name = target.targetPathToName(currArg)
+                currTarget = target.Target(name, currArg)
                 targetsToImport.append(currTarget)
             else:
-                Logger().writeError("Could not understand given commandline option: " + currArg, exitProgram=True)
+                logger.writeError("Could not understand given commandline option: " + currArg, exitProgram=True)
 
         if len(targetsToImport) == 0:
             self.printUsageAndExit()
@@ -171,9 +167,9 @@ class Options(object):
                 for definePair in currValue.split(";"):
                     splitPair = definePair.split("=")
                     if len(splitPair) != 2:
-                        Logger().writeError("Invalid define pair given, " + definePair, exitProgram=True)
+                        logger.writeError("Invalid define pair given, " + definePair, exitProgram=True)
                     if splitPair[0].lower() in self._defines:
-                        Logger().writeError("Define pair already given, " + definePair, exitProgram=True)
+                        logger.writeError("Define pair already given, " + definePair, exitProgram=True)
                     self.setDefine(splitPair[0], splitPair[1])
             elif currFlag == "-p":
                 validateOptionPair(currFlag, currValue)
@@ -195,7 +191,7 @@ class Options(object):
             elif currFlag == "-k":
                 validateOptionPair(currFlag, currValue)
                 if self.cleanTargets == True:
-                    Logger().writeError("Command line arguments '--clean' and '-k' cannot both be used", exitProgram=True)
+                    logger.writeError("Command line arguments '--clean' and '-k' cannot both be used", exitProgram=True)
                 self.cleanMixDown = False
             elif currFlag == "-v":
                 validateOption(currFlag, currValue)
@@ -209,16 +205,16 @@ class Options(object):
                 if currFlag == "-c":
                     validateOption(currFlag, currValue)
                 if self.cleanMixDown == False:
-                    Logger().writeError("Command line arguments '--clean' and '-k' cannot both be used", exitProgram=True)
+                    logger.writeError("Command line arguments '--clean' and '-k' cannot both be used", exitProgram=True)
                 self.cleanTargets = True
                 self.cleanMixDown = False
             elif os.path.splitext(currArg)[1] == ".md":
                 if not os.path.isfile(currArg):
-                    Logger().writeError("File " + currArg + " does not exist", exitProgram=True)
+                    logger.writeError("File " + currArg + " does not exist", exitProgram=True)
                 else:
                     self.projectFile = currArg
             else:
-                Logger().writeError("Command line argument '" + currArg + "' not understood", exitProgram=True)
+                logger.writeError("Command line argument '" + currArg + "' not understood", exitProgram=True)
 
     def printUsageAndExit(self, errorStr=""):
         self.printUsage(errorStr)
@@ -270,8 +266,8 @@ class Options(object):
 
 def validateOptionPair(flag, value):
     if value == "":
-        Logger().writeError(flag + " option requires a following value", exitProgram=True)
+        logger.writeError(flag + " option requires a following value", exitProgram=True)
 
 def validateOption(flag, value):
     if value != "":
-        Logger().writeError(flag + " option does not require a following value", exitProgram=True)
+        logger.writeError(flag + " option does not require a following value", exitProgram=True)

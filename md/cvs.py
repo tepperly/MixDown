@@ -21,8 +21,7 @@
 # Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 
 import os
-
-from md import logger,utilityFunctions
+import logger, utilityFunctions
 
 _isCvsInstalled = None
 
@@ -39,7 +38,7 @@ def isCvsInstalled():
         if returnCode == 0:
             _isCvsInstalled = True
         else:
-            logger.Logger().writeMessage("Cvs is not installed, cvs repositories will fail to be checked out")
+            logger.writeMessage("Cvs is not installed, cvs repositories will fail to be checked out")
             _isCvsInstalled = False
     return _isCvsInstalled
 

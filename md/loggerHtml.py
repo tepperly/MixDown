@@ -20,9 +20,8 @@
 # along with this program; if not, write to the Free Software Foundation,
 # Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 
-import  sys
-
-from md import logger
+import sys
+import logger
 
 class LoggerHtml(logger.LoggerBase):
     def __init__(self, logOutputDir=""):

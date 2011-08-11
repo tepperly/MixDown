@@ -21,7 +21,7 @@
 # Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 
 import os
-from md import  logger, utilityFunctions
+import logger, utilityFunctions
 
 _isHgInstalled = None
 
@@ -38,7 +38,7 @@ def isHgInstalled():
         if returnCode == 0:
             _isHgInstalled = True
         else:
-            logger.Logger().writeMessage("Hg is not installed, hg repositories will fail to be checked out")
+            logger.writeMessage("Hg is not installed, hg repositories will fail to be checked out")
             _isHgInstalled = False
     return _isHgInstalled
 

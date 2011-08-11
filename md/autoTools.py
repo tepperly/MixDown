@@ -21,9 +21,7 @@
 # Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 
 import os, re
-
-from md import  make, defines, target, utilityFunctions
-from logger import *
+import make, defines, logger, target, utilityFunctions
 
 def isAutoToolsProject(path):
     if os.path.exists(os.path.join(path, "configure")) or\
@@ -44,7 +42,7 @@ def generateConfigureFiles(path, name, verbose=True):
     command = getPreconfigureCommand(path)
     if command != "":
         if verbose:
-            Logger().writeMessage("Generating build files...", name)
+            logger.writeMessage("Generating build files...", name)
         returnCode = utilityFunctions.executeSubProcess(command, path)
         if returnCode != 0:
             return False
@@ -56,7 +54,7 @@ def getDependancies(path, name="", verbose=True):
         return None
 
     if verbose:
-        Logger().writeMessage("Analyzing 'configure --help' output", name)
+        logger.writeMessage("Analyzing 'configure --help' output", name)
     helpFileName = os.path.join(path, "configure_help.log")
     helpFile = open(helpFileName, "w")
     try:

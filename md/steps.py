@@ -21,10 +21,7 @@
 # Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 
 import os, tarfile, urllib, zipfile
-
-from md import git, hg, svn, utilityFunctions
-
-from logger import *
+import git, hg, logger, svn, utilityFunctions
 
 def fetch(pythonCallInfo):
     if git.isGitRepo(pythonCallInfo.currentPath):

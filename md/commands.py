@@ -21,9 +21,7 @@
 # Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 
 import os, time
-from md import autoTools, cmake, make, python, defines, target, utilityFunctions, steps
-
-from logger import *
+import autoTools, cmake, logger, make, python, defines, target, utilityFunctions
 
 class BuildStep(object):
     def __init__(self, name="", command=""):
@@ -33,13 +31,13 @@ class BuildStep(object):
 buildSteps = ["fetch", "unpack", "patch", "preconfig", "config", "build", "install", "clean"]
 
 def buildStepActor(target, buildStep, options):
-    Logger().reportStart(target.name, buildStep.name)
+    logger.reportStart(target.name, buildStep.name)
     returnCode = None
 
     timeStart = time.time()
 
     if target.isStepToBeSkipped(buildStep.name):
-        Logger().reportSkipped(target.name, buildStep.name, "Target specified to skip step")
+        logger.reportSkipped(target.name, buildStep.name, "Target specified to skip step")
         return True
 
     command = options.expandDefines(buildStep.command)
@@ -51,17 +49,17 @@ def buildStepActor(target, buildStep, options):
         else:
             returnCode = 0
     else:
-        outFd = Logger().getOutFd(target.name, buildStep.name)
+        outFd = logger.getOutFd(target.name, buildStep.name)
         returnCode = utilityFunctions.executeSubProcess(command, target.path, outFd, options.verbose)
 
     timeFinished = time.time()
     timeElapsed = timeFinished - timeStart
 
     if returnCode != 0:
-        Logger().reportFailure(target.name, buildStep.name, timeElapsed, returnCode)
+        logger.reportFailure(target.name, buildStep.name, timeElapsed, returnCode)
         return False
 
-    Logger().reportSuccess(target.name, buildStep.name, timeElapsed)
+    logger.reportSuccess(target.name, buildStep.name, timeElapsed)
     return True
 
 def getCommand(stepName, target):

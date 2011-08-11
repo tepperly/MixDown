@@ -21,10 +21,7 @@
 # Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 
 import os, re
-
-from md import target, defines, make
-
-from logger import *
+import defines, logger, make, target
 
 def isCMakeProject(path):
     if os.path.exists(os.path.join(path, "CMakeLists.txt")):
@@ -58,7 +55,7 @@ def getDependancies(path, name="", verbose=True):
         return None
 
     if verbose:
-        Logger().writeMessage("Analyzing CMake files for dependancies...", name)
+        logger.writeMessage("Analyzing CMake files for dependancies...", name)
 
     fileList = list()
     _findAllCMakeFiles(path, fileList)

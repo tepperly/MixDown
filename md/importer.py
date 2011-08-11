@@ -21,13 +21,10 @@
 # Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 
 import os, re, shutil, sys, tarfile, tempfile, urllib
-
-from md import autoTools, cmake, commands, make, project,  target, utilityFunctions
-
-from logger import *
+import autoTools, cmake, commands, logger, make, project, target, utilityFunctions
 
 def importTargets(options, targetsToImport):
-    SetLogger("console")
+    logger.setLogger("console")
 
     finalTargets = []
     ignoredTargets = []
@@ -41,8 +38,8 @@ def importTargets(options, targetsToImport):
     while len(targetsToImport) != 0:
         target = targetsToImport.pop(0)
 
-        Logger().writeMessage("Analyzing target...", target.name)
-        Logger().writeMessage("Extracting target...", target.name)
+        logger.writeMessage("Analyzing target...", target.name)
+        logger.writeMessage("Extracting target...", target.name)
 
         target.outputPath = os.path.join(tempDir, target.name)
         if not commands.buildStepActor(target, fetchStep, options):
@@ -55,42 +52,42 @@ def importTargets(options, targetsToImport):
         #Generate build files and find possible dependancies
         possibleDeps = []
         if cmake.isCMakeProject(target.path):
-            Logger().writeMessage("CMake project found...", target.name)
-            Logger().writeMessage("Analyzing for dependancies...", target.name)
+            logger.writeMessage("CMake project found...", target.name)
+            logger.writeMessage("Analyzing for dependancies...", target.name)
             possibleDeps = cmake.getDependancies(target.path, target.name)
         elif autoTools.isAutoToolsProject(target.path):
-            Logger().writeMessage("Auto Tools project found...", target.name)
+            logger.writeMessage("Auto Tools project found...", target.name)
             if not os.path.exists(os.path.join(target.path, "configure")):
                 if not autoTools.generateConfigureFiles(target.path, target.name):
                     utilityFunctions.removeDir(tempDir)
                     return None, False
-            Logger().writeMessage("Analyzing for dependancies...", target.name)
+            logger.writeMessage("Analyzing for dependancies...", target.name)
             possibleDeps = autoTools.getDependancies(target.path, target.name)
         elif make.isMakeProject(target.path):
             target.comment = "Make project found. MixDown cannot determine dependancies from Make projects."
-            Logger().writeError(target.comment, target.name)
+            logger.writeError(target.comment, target.name)
             partialImport = True
         else:
             target.comment = "Unknown build system found.  MixDown cannot determine dependancies or build commands."
-            Logger().writeError(target.comment, target.name)
+            logger.writeError(target.comment, target.name)
             partialImport = True
 
         #Find actual dependancies
         for possibleDependancy in possibleDeps:
             if getTarget(possibleDependancy, finalTargets + targetsToImport):
-                Logger().writeMessage("Known dependancy found (" + possibleDependancy + ")", target.name)
+                logger.writeMessage("Known dependancy found (" + possibleDependancy + ")", target.name)
                 target.dependsOn.append(possibleDependancy)
                 continue
             elif options.interactive and possibleDependancy in ignoredTargets:
-                Logger().writeMessage("Previously ignored dependancy found (" + possibleDependancy + ")", target.name)
+                logger.writeMessage("Previously ignored dependancy found (" + possibleDependancy + ")", target.name)
                 continue
 
             if searchForPossibleAliasInList(possibleDependancy, finalTargets + targetsToImport, options.interactive):
                 target.dependsOn.append(possibleDependancy)
             elif not options.interactive:
-                Logger().writeMessage("Ignoring unknown dependancy (" + possibleDependancy + ")", target.name)
+                logger.writeMessage("Ignoring unknown dependancy (" + possibleDependancy + ")", target.name)
             else:
-                Logger().writeMessage("Unknown dependancy found (" + possibleDependancy + ")", target.name)
+                logger.writeMessage("Unknown dependancy found (" + possibleDependancy + ")", target.name)
                 userInput = raw_input(possibleDependancy + ": Input location, target name, or blank to ignore:").strip()
                 if userInput == "":
                     ignoredTargets.append(possibleDependancy)
@@ -104,7 +101,7 @@ def importTargets(options, targetsToImport):
                 else:
                     aliasTarget = getTarget(userInput, finalTargets + targetsToImport, possibleDependancy)
                     if aliasTarget != None:
-                        Logger().writeMessage("Alias added (" + userInput + ")", aliasTarget.name)
+                        logger.writeMessage("Alias added (" + userInput + ")", aliasTarget.name)
                         target.dependsOn.append(possibleDependancy)
                     else:
                         aliasLocation = raw_input(userInput + ": Target name not found in any known targets.  Location of new target:").strip()
@@ -116,7 +113,7 @@ def importTargets(options, targetsToImport):
                                 newTarget.aliases.append(possibleDependancy)
                             target.dependsOn.append(possibleDependancy)
                         else:
-                            Logger().writeError(userInput + ": Alias location not understood.", exitProgram=True)
+                            logger.writeError(userInput + ": Alias location not understood.", exitProgram=True)
 
         finalTargets.append(target)
 
@@ -124,9 +121,9 @@ def importTargets(options, targetsToImport):
     projects = project.Project("ProjectNameNotDetermined", finalTargets)
 
     if not projects.examine(options):
-        Logger().writeError("Project failed examination", exitProgram=True)
+        logger.writeError("Project failed examination", exitProgram=True)
     if not projects.validate(options):
-        Logger().writeError("Project failed validation", exitProgram=True)
+        logger.writeError("Project failed validation", exitProgram=True)
 
     mainTargetPath = projects.targets[0].origPath
     if utilityFunctions.isURL(mainTargetPath):
@@ -142,7 +139,7 @@ def importTargets(options, targetsToImport):
         target.outputPath = ""
 
     if projects.examine(options):
-        Logger().writeMessage("\nFinal targets...\n\n" + str(projects))
+        logger.writeMessage("\nFinal targets...\n\n" + str(projects))
         projects.write()
 
     utilityFunctions.removeDir(tempDir)
@@ -159,7 +156,7 @@ def searchForPossibleAliasInList(possibleAlias, targetList, interactive=False):
                     target.aliases.append(possibleAlias)
                     return target
             else:
-                Logger().writeMessage("Alias added (" + possibleAlias + ")", target.name)
+                logger.writeMessage("Alias added (" + possibleAlias + ")", target.name)
                 target.aliases.append(possibleAlias)
                 return target
     return None

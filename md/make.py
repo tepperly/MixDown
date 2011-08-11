@@ -21,8 +21,7 @@
 # Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 
 import os
-
-from md import  defines
+import defines
 
 def isMakeProject(path):
     if os.path.exists(os.path.join(path, "GNUmakefile")) or\

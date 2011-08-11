@@ -21,10 +21,7 @@
 # Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 
 import os, re, sys
-
-from md import steps
-
-from logger import *
+import logger, steps
 
 def parsePythonCommand(command):
     remaining = command.strip()
@@ -59,17 +56,17 @@ def parsePythonCommand(command):
 def callPythonCommand(namespace, function, target, options):
     filename = namespace + ".py"
     if not namespace == "steps" and not os.path.exists(filename):
-        Logger().writeError("Expected python file, " + filename + ", not found")
+        logger.writeError("Expected python file, " + filename + ", not found")
         return False
     else:
         if os.path.isdir(filename):
-            Logger().writeError("Expected python file, " + filename + ", found directory")
+            logger.writeError("Expected python file, " + filename + ", found directory")
             return False
         if not "." in sys.path:
             sys.path.append(".")
         if not "md" in sys.path:
             sys.path.append("md")
-        importedNamespace = __import__("md."+namespace)
+        importedNamespace = __import__("md." + namespace)
 
     try:
         target.pythonCallInfo.success = False
@@ -79,7 +76,7 @@ def callPythonCommand(namespace, function, target, options):
         target.pythonCallInfo.downloadDir = options.downloadDir
         pythonCallInfo = getattr(importedNamespace, function)(target.pythonCallInfo)
     except AttributeError as e:
-        Logger().writeError(str(e))
+        logger.writeError(str(e))
         return False
 
     if not pythonCallInfo.success:
@@ -98,4 +95,4 @@ class PythonCallInfo(object):
         self.outputPath = ""
         self.outputPathSpecified = False
         self.downloadDir = ""
-        self.logger = Logger()
+        self.logger = logger.Logger()
