@@ -82,5 +82,5 @@ def suite():
     return suite
 
 if __name__ == "__main__":
-    logger.SetLogger("Console")
+    logger.setLogger("Console")
     unittest.main()
