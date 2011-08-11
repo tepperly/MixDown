@@ -24,43 +24,43 @@
 
 import os, sys, tarfile, time, urllib
 
-from md import mdCommands, mdImporter, mdOptions, mdProject, mdDefines, utilityFunctions, mdLogger
+from md import commands, importer, options, project, defines, utilityFunctions, logger
 
 #--------------------------------Main---------------------------------
 def main():
-    mdLogger.SetLogger("console")
-    mdLogger.Logger().writeMessage("MixDown - A tool to simplify building\n")
+    logger.SetLogger("console")
+    logger.Logger().writeMessage("MixDown - A tool to simplify building\n")
     try:
         succeeded = True
         partialImport = False
-        options = mdOptions.Options()
-        targetsToImport = options.processCommandline(sys.argv)
+        option = options.Options()
+        targetsToImport = option.processCommandline(sys.argv)
 
-        if (not options.importer or not targetsToImport) and not\
-           options.cleanTargets and options.projectFile == "":
-            options.printUsageAndExit("MixDown's mode could not be determined")
+        if (not option.importer or not targetsToImport) and not\
+           option.cleanTargets and option.projectFile == "":
+            option.printUsageAndExit("MixDown's mode could not be determined")
         timeStarted = time.time()
 
-        if options.importer:
-            project, partialImport = mdImporter.importTargets(options, targetsToImport)
+        if option.importer:
+            project, partialImport = importer.importTargets(option, targetsToImport)
             if project == None or partialImport:
                 succeeded = False
         else:
-            if options.cleanMixDown:
-                cleanMixDown(options)
-            project = setup(options)
+            if option.cleanMixDown:
+                cleanMixDown(option)
+            project = setup(option)
             if project == None:
                 succeeded = False
             else:
                 for target in reversed(project.targets):
-                    if options.cleanTargets:
+                    if option.cleanTargets:
                         cleanStep = target.findBuildStep("clean")
-                        succeeded = mdCommands.buildStepActor(target, cleanStep, options)
+                        succeeded = commands.buildStepActor(target, cleanStep, option)
                     else:
                         for buildStep in target.buildSteps:
                             if buildStep.name == "clean" or buildStep.command == "":
                                 continue
-                            succeeded = mdCommands.buildStepActor(target, buildStep, options)
+                            succeeded = commands.buildStepActor(target, buildStep, option)
                             if not succeeded:
                                 break
                     if not succeeded:
@@ -77,56 +77,56 @@ def main():
             message += " failed."
         else:
             message += " succeeded."
-            if options.importer:
-                mdLogger.Logger().writeMessage("\nProject " + project.name + " has been imported to file " + project.path)
-            elif options.cleanTargets:
-                mdLogger.Logger().writeMessage("\n" + project.name + " has been cleaned in " + os.path.abspath(options.buildDir))
+            if option.importer:
+                logger.Logger().writeMessage("\nProject " + project.name + " has been imported to file " + project.path)
+            elif option.cleanTargets:
+                logger.Logger().writeMessage("\n" + project.name + " has been cleaned in " + os.path.abspath(option.buildDir))
             else:
-                mdLogger.Logger().writeMessage("\n" + project.name + " has been built in " + os.path.abspath(options.buildDir))
-                mdLogger.Logger().writeMessage(project.name + " has been installed to " + os.path.abspath(options.getDefine(mdDefines.mdPrefix[0])))
-        message = "\nTotal time " + mdLogger.secondsToHMS(timeElapsed) + "\n" + message
-        mdLogger.Logger().writeMessage(message)
+                logger.Logger().writeMessage("\n" + project.name + " has been built in " + os.path.abspath(option.buildDir))
+                logger.Logger().writeMessage(project.name + " has been installed to " + os.path.abspath(option.getDefine(defines.mdPrefix[0])))
+        message = "\nTotal time " + logger.secondsToHMS(timeElapsed) + "\n" + message
+        logger.Logger().writeMessage(message)
         if partialImport:
-            mdLogger.Logger().writeError("\nProject partially imported.  Please refer to comments in created MixDown project file to determine reason.")
+            logger.Logger().writeError("\nProject partially imported.  Please refer to comments in created MixDown project file to determine reason.")
     finally:
-        mdLogger.Logger().close()
+        logger.Logger().close()
     if succeeded:
         sys.exit()
     else:
         sys.exit(1)
 
 #--------------------------------Setup---------------------------------
-def setup(options):
-    mdLogger.SetLogger(options.logger, options.logDir)
-    if options.verbose:
-        mdLogger.Logger().writeMessage(str(options))
-        if not options.prefixDefined and not options.cleanTargets:
-            mdLogger.Logger().writeMessage("No prefix defined, defaulting to '" + options.getDefine(mdDefines.mdPrefix[0]) + "'")
+def setup(option):
+    logger.SetLogger(option.logger, option.logDir)
+    if option.verbose:
+        logger.Logger().writeMessage(str(option))
+        if not option.prefixDefined and not option.cleanTargets:
+            logger.Logger().writeMessage("No prefix defined, defaulting to '" + option.getDefine(defines.mdPrefix[0]) + "'")
 
-    project = mdProject.Project(options.projectFile)
-    if not project.read():
+    projects = project.Project(option.projectFile)
+    if not projects.read():
         return None
-    if not project.addSkipStepFromOptions(options):
-        return None
-
-    if not project.examine(options):
-        return None
-    if not project.validate(options):
+    if not projects.addSkipStepFromOptions(option):
         return None
 
-    if options.cleanTargets:
-        for currTarget in project.targets:
-            currTarget.path = currTarget.determineOutputPath(options)
+    if not projects.examine(option):
+        return None
+    if not projects.validate(option):
+        return None
+
+    if option.cleanTargets:
+        for currTarget in projects.targets:
+            currTarget.path = currTarget.determineOutputPath(option)
     else:
         cleaningOutputReported = False
-        for currTarget in project.targets:
+        for currTarget in projects.targets:
             if currTarget.outputPath != "" and os.path.exists(currTarget.outputPath):
                 if cleaningOutputReported:
-                    mdLogger.Logger().writeMessage("Cleaning MixDown and Target output directories...")
+                    logger.Logger().writeMessage("Cleaning MixDown and Target output directories...")
                     cleaningOutputReported = True
                 utilityFunctions.removeDir(currTarget.outputPath)
 
-        prefixDefine = options.getDefine(mdDefines.mdPrefix[0])
+        prefixDefine = option.getDefine(defines.mdPrefix[0])
         if prefixDefine != "":
             #TODO: only add lib64 if on 64bit machines
             libraryPaths = os.path.join(prefixDefine, "lib64") + ":" + os.path.join(prefixDefine, "lib")
@@ -142,14 +142,14 @@ def setup(options):
 
     return project
 
-def cleanMixDown(options):
+def cleanMixDown(option):
     try:
-        mdLogger.Logger().writeMessage("Cleaning MixDown directories...")
-        utilityFunctions.removeDir(options.buildDir)
-        utilityFunctions.removeDir(options.downloadDir)
-        utilityFunctions.removeDir(options.logDir)
+        logger.Logger().writeMessage("Cleaning MixDown directories...")
+        utilityFunctions.removeDir(option.buildDir)
+        utilityFunctions.removeDir(option.downloadDir)
+        utilityFunctions.removeDir(option.logDir)
     except IOError, e:
-        mdLogger.Logger().writeError(e, exitProgram=True)
+        logger.Logger().writeError(e, exitProgram=True)
 
 #----------------------------------------------------------------------
 
