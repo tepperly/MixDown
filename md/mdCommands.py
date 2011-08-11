@@ -21,7 +21,7 @@
 # Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 
 import os, time
-from md import mdAutoTools, mdCMake, mdMake, mdOptions, mdPython, mdDefines, mdTarget, utilityFunctions
+from md import mdAutoTools, mdCMake, mdMake, mdOptions, mdPython, mdDefines, mdTarget, utilityFunctions, mdSteps
 
 from mdLogger import *
 
@@ -86,10 +86,10 @@ def getCommand(stepName, target):
     return command
 
 def __getFetchCommand(target):
-    return "md.mdSteps.fetch(pythonCallInfo)"
+    return "mdSteps.fetch(pythonCallInfo)"
 
 def __getUnpackCommand(target):
-    return "md.mdSteps.unpack(pythonCallInfo)"
+    return "mdSteps.unpack(pythonCallInfo)"
 
 def __getPatchCommand(target):
     return ""

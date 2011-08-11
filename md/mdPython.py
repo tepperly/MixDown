@@ -22,6 +22,8 @@
 
 import os, re, sys
 
+from md import mdSteps
+
 from mdLogger import *
 
 def parsePythonCommand(command):
@@ -34,13 +36,8 @@ def parsePythonCommand(command):
         return False, "", ""
 
     i = 0
-    dotSeen = False
     while i < len(remaining):
-        if remaining[i] == "." and dotSeen == False:
-            dotSeen  = True
-            i += 1
-            continue
-        if remaining[i] == "." and dotSeen == True:
+        if remaining[i] == ".":
             namespace = remaining[:i]
             remaining = remaining[i+1:]
             break
@@ -61,7 +58,7 @@ def parsePythonCommand(command):
 
 def callPythonCommand(namespace, function, target, options):
     filename = namespace + ".py"
-    if not namespace == "md.mdSteps" and not os.path.exists(filename):
+    if not namespace == "mdSteps" and not os.path.exists(filename):
         Logger().writeError("Expected python file, " + filename + ", not found")
         return False
     else:
@@ -70,6 +67,7 @@ def callPythonCommand(namespace, function, target, options):
             return False
         if not "." in sys.path:
             sys.path.append(".")
+        sys.path.append("md")
         importedNamespace = __import__(namespace)
 
     try:
