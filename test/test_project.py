@@ -24,9 +24,10 @@ import os, sys, textwrap, unittest, mdTestUtilities
 
 if not ".." in sys.path:
     sys.path.append("..")
-import mdLogger, mdOptions, mdProject, utilityFunctions
 
-class Test_mdProject(unittest.TestCase):
+from md import logger, options, project, utilityFunctions
+
+class Test_project(unittest.TestCase):
     def test_readSingleTargetProject(self):
         projectFileContents = textwrap.dedent("""
                                             Name: a
@@ -39,18 +40,18 @@ class Test_mdProject(unittest.TestCase):
         try:
             tempDir = mdTestUtilities.makeTempDir()
             projectFilePath = mdTestUtilities.makeTempFile(tempDir, projectFileContents, ".md")
-            project = mdProject.Project(projectFilePath)
-            self.assertTrue(project.read(), "Project file could not be read")
+            projects = project.Project(projectFilePath)
+            self.assertTrue(projects.read(), "Project file could not be read")
             #Project
-            self.assertEqual(project.name, os.path.split(projectFilePath)[1][:-3], "Project returned wrong name")
-            self.assertEqual(project.path, projectFilePath, "Project returned wrong path")
+            self.assertEqual(projects.name, os.path.split(projectFilePath)[1][:-3], "Project returned wrong name")
+            self.assertEqual(projects.path, projectFilePath, "Project returned wrong path")
             #Target a
-            self.assertEqual(project.targets[0].name, "a", "Project returned wrong target 'a' name")
-            self.assertEqual(project.targets[0].path, "a-1.11.tar.gz", "Project returned wrong target 'a' path")
-            self.assertEqual(project.targets[0].findBuildStep("preconfig").command, "autoreconf -i", "Project returned wrong target 'a' preconfig command")
-            self.assertEqual(project.targets[0].findBuildStep("config").command, "./configure --prefix=$(_prefix)", "Project returned wrong target 'a' config command")
-            self.assertEqual(project.targets[0].findBuildStep("build").command, "make", "Project returned wrong target 'a' build command")
-            self.assertEqual(project.targets[0].findBuildStep("install").command, "make install", "Project returned wrong target 'a' install command")
+            self.assertEqual(projects.targets[0].name, "a", "Project returned wrong target 'a' name")
+            self.assertEqual(projects.targets[0].path, "a-1.11.tar.gz", "Project returned wrong target 'a' path")
+            self.assertEqual(projects.targets[0].findBuildStep("preconfig").command, "autoreconf -i", "Project returned wrong target 'a' preconfig command")
+            self.assertEqual(projects.targets[0].findBuildStep("config").command, "./configure --prefix=$(_prefix)", "Project returned wrong target 'a' config command")
+            self.assertEqual(projects.targets[0].findBuildStep("build").command, "make", "Project returned wrong target 'a' build command")
+            self.assertEqual(projects.targets[0].findBuildStep("install").command, "make install", "Project returned wrong target 'a' install command")
         finally:
             utilityFunctions.removeDir(tempDir)
 
@@ -65,8 +66,8 @@ class Test_mdProject(unittest.TestCase):
         try:
             tempDir = mdTestUtilities.makeTempDir()
             projectFilePath = mdTestUtilities.makeTempFile(tempDir, projectFileContents, ".md")
-            project = mdProject.Project(projectFilePath)
-            self.assertFalse(project.read(), "Project read should have detected duplicate target")
+            projects = project.Project(projectFilePath)
+            self.assertFalse(projects.read(), "Project read should have detected duplicate target")
         finally:
             utilityFunctions.removeDir(tempDir)
 
@@ -98,34 +99,34 @@ class Test_mdProject(unittest.TestCase):
         try:
             tempDir = mdTestUtilities.makeTempDir()
             projectFilePath = mdTestUtilities.makeTempFile(tempDir, projectFileContents, ".md")
-            project = mdProject.Project(projectFilePath)
-            self.assertTrue(project.read(), "Project file could not be read")
+            projects = project.Project(projectFilePath)
+            self.assertTrue(projects.read(), "Project file could not be read")
             #Project
-            self.assertEqual(project.name, os.path.split(projectFilePath)[1][:-3], "Project returned wrong name")
-            self.assertEqual(project.path, projectFilePath, "Project returned wrong path")
+            self.assertEqual(projects.name, os.path.split(projectFilePath)[1][:-3], "Project returned wrong name")
+            self.assertEqual(projects.path, projectFilePath, "Project returned wrong path")
             #Target a
-            self.assertEqual(project.targets[0].name, "a", "Project returned wrong target 'a' name")
-            self.assertEqual(project.targets[0].path, "a-1.11.tar.gz", "Project returned wrong target 'a' path")
-            self.assertEqual(project.targets[0].dependsOn, ['b', 'c'], "Project returned wrong target 'a' dependsOn")
-            self.assertEqual(project.targets[0].findBuildStep("preconfig").command, "autoreconf -i", "Project returned wrong target 'a' preconfig command")
-            self.assertEqual(project.targets[0].findBuildStep("config").command, "./configure --prefix=$(_prefix) --with-b=$(_prefix) --with-c=$(_prefix)", "Project returned wrong target 'a' config command")
-            self.assertEqual(project.targets[0].findBuildStep("build").command, "make", "Project returned wrong target build 'a' command")
-            self.assertEqual(project.targets[0].findBuildStep("install").command, "make install", "Project returned wrong target install 'a' command")
+            self.assertEqual(projects.targets[0].name, "a", "Project returned wrong target 'a' name")
+            self.assertEqual(projects.targets[0].path, "a-1.11.tar.gz", "Project returned wrong target 'a' path")
+            self.assertEqual(projects.targets[0].dependsOn, ['b', 'c'], "Project returned wrong target 'a' dependsOn")
+            self.assertEqual(projects.targets[0].findBuildStep("preconfig").command, "autoreconf -i", "Project returned wrong target 'a' preconfig command")
+            self.assertEqual(projects.targets[0].findBuildStep("config").command, "./configure --prefix=$(_prefix) --with-b=$(_prefix) --with-c=$(_prefix)", "Project returned wrong target 'a' config command")
+            self.assertEqual(projects.targets[0].findBuildStep("build").command, "make", "Project returned wrong target build 'a' command")
+            self.assertEqual(projects.targets[0].findBuildStep("install").command, "make install", "Project returned wrong target install 'a' command")
             #Target b
-            self.assertEqual(project.targets[1].name, "b", "Project returned wrong target 'b' name")
-            self.assertEqual(project.targets[1].path, "b-2.22.tar.gz", "Project returned wrong target 'b' path")
-            self.assertEqual(project.targets[1].dependsOn, ['c'], "Project returned wrong target 'b' dependsOn")
-            self.assertEqual(project.targets[1].findBuildStep("preconfig").command, "bautoreconf -i", "Project returned wrong target 'b' preconfig command")
-            self.assertEqual(project.targets[1].findBuildStep("config").command, "./configure --prefix=$(_prefix) --with-c=$(_prefix)", "Project returned wrong target 'b' config command")
-            self.assertEqual(project.targets[1].findBuildStep("build").command, "bmake", "Project returned wrong target 'b' build command")
-            self.assertEqual(project.targets[1].findBuildStep("install").command, "bmake install", "Project returned wrong target 'b' install command")
+            self.assertEqual(projects.targets[1].name, "b", "Project returned wrong target 'b' name")
+            self.assertEqual(projects.targets[1].path, "b-2.22.tar.gz", "Project returned wrong target 'b' path")
+            self.assertEqual(projects.targets[1].dependsOn, ['c'], "Project returned wrong target 'b' dependsOn")
+            self.assertEqual(projects.targets[1].findBuildStep("preconfig").command, "bautoreconf -i", "Project returned wrong target 'b' preconfig command")
+            self.assertEqual(projects.targets[1].findBuildStep("config").command, "./configure --prefix=$(_prefix) --with-c=$(_prefix)", "Project returned wrong target 'b' config command")
+            self.assertEqual(projects.targets[1].findBuildStep("build").command, "bmake", "Project returned wrong target 'b' build command")
+            self.assertEqual(projects.targets[1].findBuildStep("install").command, "bmake install", "Project returned wrong target 'b' install command")
             #Target c
-            self.assertEqual(project.targets[2].name, "c", "Project returned wrong target 'c' name")
-            self.assertEqual(project.targets[2].path, "c-3.33.tar.gz", "Project returned wrong target 'c' path")
-            self.assertEqual(project.targets[2].findBuildStep("preconfig").command, "cautoreconf -i", "Project returned wrong target 'c' preconfig command")
-            self.assertEqual(project.targets[2].findBuildStep("config").command, "./configure --prefix=$(_prefix)", "Project returned wrong target 'c' config command")
-            self.assertEqual(project.targets[2].findBuildStep("build").command, "cmake", "Project returned wrong target 'c' build command")
-            self.assertEqual(project.targets[2].findBuildStep("install").command, "cmake install", "Project returned wrong target 'c' install command")
+            self.assertEqual(projects.targets[2].name, "c", "Project returned wrong target 'c' name")
+            self.assertEqual(projects.targets[2].path, "c-3.33.tar.gz", "Project returned wrong target 'c' path")
+            self.assertEqual(projects.targets[2].findBuildStep("preconfig").command, "cautoreconf -i", "Project returned wrong target 'c' preconfig command")
+            self.assertEqual(projects.targets[2].findBuildStep("config").command, "./configure --prefix=$(_prefix)", "Project returned wrong target 'c' config command")
+            self.assertEqual(projects.targets[2].findBuildStep("build").command, "cmake", "Project returned wrong target 'c' build command")
+            self.assertEqual(projects.targets[2].findBuildStep("install").command, "cmake install", "Project returned wrong target 'c' install command")
         finally:
             utilityFunctions.removeDir(tempDir)
 
@@ -158,7 +159,7 @@ class Test_mdProject(unittest.TestCase):
             #Read initial values
             tempDir = mdTestUtilities.makeTempDir()
             projectOrigFilePath = mdTestUtilities.makeTempFile(tempDir, projectFileContents, ".md")
-            projectOrig = mdProject.Project(projectOrigFilePath)
+            projectOrig = project.Project(projectOrigFilePath)
             self.assertTrue(projectOrig.read(), "Initial project file could not be read")
 
             #Write values to new file
@@ -166,34 +167,34 @@ class Test_mdProject(unittest.TestCase):
             projectOrig.write(projectFilePath)
 
             #Read values from written file and test to make sure they are correct
-            project = mdProject.Project(projectFilePath)
-            self.assertTrue(project.read(), "Project file could not be read")
+            projects = project.Project(projectFilePath)
+            self.assertTrue(projects.read(), "Project file could not be read")
             #Project
-            self.assertEqual(project.name, os.path.split(projectFilePath)[1][:-3], "Project returned wrong name")
-            self.assertEqual(project.path, projectFilePath, "Project returned wrong path")
+            self.assertEqual(projects.name, os.path.split(projectFilePath)[1][:-3], "Project returned wrong name")
+            self.assertEqual(projects.path, projectFilePath, "Project returned wrong path")
             #Target a
-            self.assertEqual(project.targets[0].name, "a", "Project returned wrong target 'a' name")
-            self.assertEqual(project.targets[0].path, "a-1.11.tar.gz", "Project returned wrong target 'a' path")
-            self.assertEqual(project.targets[0].dependsOn, ['b', 'c'], "Project returned wrong target 'a' dependsOn")
-            self.assertEqual(project.targets[0].findBuildStep("preconfig").command, "autoreconf -i", "Project returned wrong target 'a' preconfig command")
-            self.assertEqual(project.targets[0].findBuildStep("config").command, "./configure --prefix=$(_prefix) --with-b=$(_prefix) --with-c=$(_prefix)", "Project returned wrong target 'a' config command")
-            self.assertEqual(project.targets[0].findBuildStep("build").command, "make", "Project returned wrong target build 'a' command")
-            self.assertEqual(project.targets[0].findBuildStep("install").command, "make install", "Project returned wrong target install 'a' command")
+            self.assertEqual(projects.targets[0].name, "a", "Project returned wrong target 'a' name")
+            self.assertEqual(projects.targets[0].path, "a-1.11.tar.gz", "Project returned wrong target 'a' path")
+            self.assertEqual(projects.targets[0].dependsOn, ['b', 'c'], "Project returned wrong target 'a' dependsOn")
+            self.assertEqual(projects.targets[0].findBuildStep("preconfig").command, "autoreconf -i", "Project returned wrong target 'a' preconfig command")
+            self.assertEqual(projects.targets[0].findBuildStep("config").command, "./configure --prefix=$(_prefix) --with-b=$(_prefix) --with-c=$(_prefix)", "Project returned wrong target 'a' config command")
+            self.assertEqual(projects.targets[0].findBuildStep("build").command, "make", "Project returned wrong target build 'a' command")
+            self.assertEqual(projects.targets[0].findBuildStep("install").command, "make install", "Project returned wrong target install 'a' command")
             #Target b
-            self.assertEqual(project.targets[1].name, "b", "Project returned wrong target 'b' name")
-            self.assertEqual(project.targets[1].path, "b-2.22.tar.gz", "Project returned wrong target 'b' path")
-            self.assertEqual(project.targets[1].dependsOn, ['c'], "Project returned wrong target 'b' dependsOn")
-            self.assertEqual(project.targets[1].findBuildStep("preconfig").command, "bautoreconf -i", "Project returned wrong target 'b' preconfig command")
-            self.assertEqual(project.targets[1].findBuildStep("config").command, "./configure --prefix=$(_prefix) --with-c=$(_prefix)", "Project returned wrong target 'b' config command")
-            self.assertEqual(project.targets[1].findBuildStep("build").command, "bmake", "Project returned wrong target 'b' build command")
-            self.assertEqual(project.targets[1].findBuildStep("install").command, "bmake install", "Project returned wrong target 'b' install command")
+            self.assertEqual(projects.targets[1].name, "b", "Project returned wrong target 'b' name")
+            self.assertEqual(projects.targets[1].path, "b-2.22.tar.gz", "Project returned wrong target 'b' path")
+            self.assertEqual(projects.targets[1].dependsOn, ['c'], "Project returned wrong target 'b' dependsOn")
+            self.assertEqual(projects.targets[1].findBuildStep("preconfig").command, "bautoreconf -i", "Project returned wrong target 'b' preconfig command")
+            self.assertEqual(projects.targets[1].findBuildStep("config").command, "./configure --prefix=$(_prefix) --with-c=$(_prefix)", "Project returned wrong target 'b' config command")
+            self.assertEqual(projects.targets[1].findBuildStep("build").command, "bmake", "Project returned wrong target 'b' build command")
+            self.assertEqual(projects.targets[1].findBuildStep("install").command, "bmake install", "Project returned wrong target 'b' install command")
             #Target c
-            self.assertEqual(project.targets[2].name, "c", "Project returned wrong target 'c' name")
-            self.assertEqual(project.targets[2].path, "c-3.33.tar.gz", "Project returned wrong target 'c' path")
-            self.assertEqual(project.targets[2].findBuildStep("preconfig").command, "cautoreconf -i", "Project returned wrong target 'c' preconfig command")
-            self.assertEqual(project.targets[2].findBuildStep("config").command, "./configure --prefix=$(_prefix)", "Project returned wrong target 'c' config command")
-            self.assertEqual(project.targets[2].findBuildStep("build").command, "cmake", "Project returned wrong target 'c' build command")
-            self.assertEqual(project.targets[2].findBuildStep("install").command, "cmake install", "Project returned wrong target 'c' install command")
+            self.assertEqual(projects.targets[2].name, "c", "Project returned wrong target 'c' name")
+            self.assertEqual(projects.targets[2].path, "c-3.33.tar.gz", "Project returned wrong target 'c' path")
+            self.assertEqual(projects.targets[2].findBuildStep("preconfig").command, "cautoreconf -i", "Project returned wrong target 'c' preconfig command")
+            self.assertEqual(projects.targets[2].findBuildStep("config").command, "./configure --prefix=$(_prefix)", "Project returned wrong target 'c' config command")
+            self.assertEqual(projects.targets[2].findBuildStep("build").command, "cmake", "Project returned wrong target 'c' build command")
+            self.assertEqual(projects.targets[2].findBuildStep("install").command, "cmake install", "Project returned wrong target 'c' install command")
         finally:
             utilityFunctions.removeDir(tempDir)
 
@@ -209,10 +210,10 @@ class Test_mdProject(unittest.TestCase):
         try:
             tempDir = mdTestUtilities.makeTempDir()
             projectFilePath = mdTestUtilities.makeTempFile(tempDir, projectFileContents, ".md")
-            project = mdProject.Project(projectFilePath)
-            options = mdOptions.Options()
-            self.assertTrue(project.read(), "Project file could not be read")
-            self.assertTrue(project.validate(options), "Project could not validate")
+            projects = project.Project(projectFilePath)
+            option = options.Options()
+            self.assertTrue(projects.read(), "Project file could not be read")
+            self.assertTrue(projects.validate(option), "Project could not validate")
         finally:
             utilityFunctions.removeDir(tempDir)
 
@@ -244,10 +245,12 @@ class Test_mdProject(unittest.TestCase):
         try:
             tempDir = mdTestUtilities.makeTempDir()
             projectFilePath = mdTestUtilities.makeTempFile(tempDir, projectFileContents, ".md")
-            project = mdProject.Project(projectFilePath)
-            options = mdOptions.Options()
-            self.assertTrue(project.read(), "Project file could not be read")
-            self.assertTrue(project.validate(options), "Project could not validate")
+            projects = project.Project(projectFilePath)
+            option = options.Options()
+
+
+            self.assertTrue(projects.read(), "Project file could not be read")
+            self.assertTrue(projects.validate(option), "Project could not validate")
         finally:
             utilityFunctions.removeDir(tempDir)
 
@@ -259,10 +262,10 @@ class Test_mdProject(unittest.TestCase):
         try:
             tempDir = mdTestUtilities.makeTempDir()
             projectFilePath = mdTestUtilities.makeTempFile(tempDir, projectFileContents, ".md")
-            project = mdProject.Project(projectFilePath)
-            options = mdOptions.Options()
-            self.assertTrue(project.read(), "Project file could not be read")
-            self.assertTrue(project.validate(options), "Project could not validate")
+            projects = project.Project(projectFilePath)
+            option = options.Options()
+            self.assertTrue(projects.read(), "Project file could not be read")
+            self.assertTrue(projects.validate(option), "Project could not validate")
         finally:
             utilityFunctions.removeDir(tempDir)
 
@@ -280,10 +283,10 @@ class Test_mdProject(unittest.TestCase):
         try:
             tempDir = mdTestUtilities.makeTempDir()
             projectFilePath = mdTestUtilities.makeTempFile(tempDir, projectFileContents, ".md")
-            project = mdProject.Project(projectFilePath)
-            options = mdOptions.Options()
-            self.assertTrue(project.read(), "Project file could not be read")
-            self.assertTrue(project.validate(options), "Project could not validate")
+            projects = project.Project(projectFilePath)
+            option = options.Options()
+            self.assertTrue(projects.read(), "Project file could not be read")
+            self.assertTrue(projects.validate(option), "Project could not validate")
         finally:
             utilityFunctions.removeDir(tempDir)
 
@@ -303,10 +306,10 @@ class Test_mdProject(unittest.TestCase):
         try:
             tempDir = mdTestUtilities.makeTempDir()
             projectFilePath = mdTestUtilities.makeTempFile(tempDir, projectFileContents, ".md")
-            project = mdProject.Project(projectFilePath)
-            options = mdOptions.Options()
-            self.assertTrue(project.read(), "Project file could not be read")
-            self.assertTrue(project.validate(options), "Project could not validate")
+            projects = project.Project(projectFilePath)
+            option = options.Options()
+            self.assertTrue(projects.read(), "Project file could not be read")
+            self.assertTrue(projects.validate(option), "Project could not validate")
         finally:
             utilityFunctions.removeDir(tempDir)
 
@@ -325,10 +328,10 @@ class Test_mdProject(unittest.TestCase):
         try:
             tempDir = mdTestUtilities.makeTempDir()
             projectFilePath = mdTestUtilities.makeTempFile(tempDir, projectFileContents, ".md")
-            project = mdProject.Project(projectFilePath)
-            options = mdOptions.Options()
-            self.assertTrue(project.read(), "Project file could not be read")
-            self.assertTrue(project.validate(options), "Project could not validate")
+            projects = project.Project(projectFilePath)
+            option = options.Options()
+            self.assertTrue(projects.read(), "Project file could not be read")
+            self.assertTrue(projects.validate(option), "Project could not validate")
         finally:
             utilityFunctions.removeDir(tempDir)
 
@@ -346,10 +349,10 @@ class Test_mdProject(unittest.TestCase):
         try:
             tempDir = mdTestUtilities.makeTempDir()
             projectFilePath = mdTestUtilities.makeTempFile(tempDir, projectFileContents, ".md")
-            project = mdProject.Project(projectFilePath)
-            options = mdOptions.Options()
-            self.assertTrue(project.read(), "Project file could not be read")
-            self.assertTrue(project.validate(options), "Project could not validate")
+            projects = project.Project(projectFilePath)
+            option = options.Options()
+            self.assertTrue(projects.read(), "Project file could not be read")
+            self.assertTrue(projects.validate(option), "Project could not validate")
         finally:
             utilityFunctions.removeDir(tempDir)
 
@@ -368,10 +371,10 @@ class Test_mdProject(unittest.TestCase):
         try:
             tempDir = mdTestUtilities.makeTempDir()
             projectFilePath = mdTestUtilities.makeTempFile(tempDir, projectFileContents, ".md")
-            project = mdProject.Project(projectFilePath)
-            options = mdOptions.Options()
-            self.assertTrue(project.read(), "Project file could not be read")
-            self.assertTrue(project.validate(options), "Project could not validate")
+            projects = project.Project(projectFilePath)
+            option = options.Options()
+            self.assertTrue(projects.read(), "Project file could not be read")
+            self.assertTrue(projects.validate(option), "Project could not validate")
         finally:
             utilityFunctions.removeDir(tempDir)
 
@@ -391,10 +394,10 @@ class Test_mdProject(unittest.TestCase):
         try:
             tempDir = mdTestUtilities.makeTempDir()
             projectFilePath = mdTestUtilities.makeTempFile(tempDir, projectFileContents, ".md")
-            project = mdProject.Project(projectFilePath)
-            options = mdOptions.Options()
-            self.assertTrue(project.read(), "Project file could not be read")
-            self.assertTrue(project.validate(options), "Project could not validate")
+            projects = project.Project(projectFilePath)
+            option = options.Options()
+            self.assertTrue(projects.read(), "Project file could not be read")
+            self.assertTrue(projects.validate(option), "Project could not validate")
         finally:
             utilityFunctions.removeDir(tempDir)
 
@@ -414,10 +417,10 @@ class Test_mdProject(unittest.TestCase):
         try:
             tempDir = mdTestUtilities.makeTempDir()
             projectFilePath = mdTestUtilities.makeTempFile(tempDir, projectFileContents, ".md")
-            project = mdProject.Project(projectFilePath)
-            options = mdOptions.Options()
-            self.assertTrue(project.read(), "Project file could not be read")
-            self.assertTrue(project.validate(options), "Project could not validate")
+            projects = project.Project(projectFilePath)
+            option = options.Options()
+            self.assertTrue(projects.read(), "Project file could not be read")
+            self.assertTrue(projects.validate(option), "Project could not validate")
         finally:
             utilityFunctions.removeDir(tempDir)
 
@@ -438,10 +441,10 @@ class Test_mdProject(unittest.TestCase):
         try:
             tempDir = mdTestUtilities.makeTempDir()
             projectFilePath = mdTestUtilities.makeTempFile(tempDir, projectFileContents, ".md")
-            project = mdProject.Project(projectFilePath)
-            options = mdOptions.Options()
-            self.assertTrue(project.read(), "Project file could not be read")
-            self.assertFalse(project.validate(options), "Project validated when it should not have due to cyclical dependancy graph")
+            projects = project.Project(projectFilePath)
+            option = options.Options()
+            self.assertTrue(projects.read(), "Project file could not be read")
+            self.assertFalse(projects.validate(option), "Project validated when it should not have due to cyclical dependancy graph")
         finally:
             utilityFunctions.removeDir(tempDir)
 
@@ -462,10 +465,10 @@ class Test_mdProject(unittest.TestCase):
         try:
             tempDir = mdTestUtilities.makeTempDir()
             projectFilePath = mdTestUtilities.makeTempFile(tempDir, projectFileContents, ".md")
-            project = mdProject.Project(projectFilePath)
-            options = mdOptions.Options()
-            self.assertTrue(project.read(), "Project file could not be read")
-            self.assertFalse(project.validate(options), "Project validated when it should not have due to cyclical dependancy graph")
+            projects = project.Project(projectFilePath)
+            option = options.Options()
+            self.assertTrue(projects.read(), "Project file could not be read")
+            self.assertFalse(projects.validate(option), "Project validated when it should not have due to cyclical dependancy graph")
         finally:
             utilityFunctions.removeDir(tempDir)
 
@@ -478,8 +481,8 @@ class Test_mdProject(unittest.TestCase):
         try:
             tempDir = mdTestUtilities.makeTempDir()
             projectFilePath = mdTestUtilities.makeTempFile(tempDir, projectFileContents, ".md")
-            project = mdProject.Project(projectFilePath)
-            self.assertFalse(project.read(), "Reading project file should have failed")
+            projects = project.Project(projectFilePath)
+            self.assertFalse(projects.read(), "Reading project file should have failed")
         finally:
             utilityFunctions.removeDir(tempDir)
 
@@ -500,8 +503,8 @@ class Test_mdProject(unittest.TestCase):
         try:
             tempDir = mdTestUtilities.makeTempDir()
             projectFilePath = mdTestUtilities.makeTempFile(tempDir, projectFileContents, ".md")
-            project = mdProject.Project(projectFilePath)
-            self.assertFalse(project.read(), "Reading project file should have failed")
+            projects = project.Project(projectFilePath)
+            self.assertFalse(projects.read(), "Reading project file should have failed")
         finally:
             utilityFunctions.removeDir(tempDir)
 
@@ -514,10 +517,10 @@ class Test_mdProject(unittest.TestCase):
         try:
             tempDir = mdTestUtilities.makeTempDir()
             projectFilePath = mdTestUtilities.makeTempFile(tempDir, projectFileContents, ".md")
-            project = mdProject.Project(projectFilePath)
-            options = mdOptions.Options()
-            self.assertTrue(project.read(), "Project file could not be read")
-            self.assertFalse(project.validate(options), "Project validated when it should not have due to non-existant dependancy")
+            projects = project.Project(projectFilePath)
+            option = options.Options()
+            self.assertTrue(projects.read(), "Project file could not be read")
+            self.assertFalse(projects.validate(option), "Project validated when it should not have due to non-existant dependancy")
         finally:
             utilityFunctions.removeDir(tempDir)
 
@@ -535,18 +538,18 @@ class Test_mdProject(unittest.TestCase):
         try:
             tempDir = mdTestUtilities.makeTempDir()
             projectFilePath = mdTestUtilities.makeTempFile(tempDir, projectFileContents, ".md")
-            project = mdProject.Project(projectFilePath)
-            self.assertTrue(project.read(), "Project file could not be read")
+            projects = project.Project(projectFilePath)
+            self.assertTrue(projects.read(), "Project file could not be read")
             #Targets that exist in project
-            self.assertNotEquals(project.getTarget("a"), None, "Target 'a' could not be found in project")
-            self.assertNotEquals(project.getTarget("b"), None, "Target 'b' could not be found in project")
-            self.assertNotEquals(project.getTarget("c"), None, "Target 'c' could not be found in project")
-            self.assertNotEquals(project.getTarget("A"), None, "Target 'a' could not be found in project")
-            self.assertNotEquals(project.getTarget("B "), None, "Target 'b' could not be found in project")
-            self.assertNotEquals(project.getTarget(" C"), None, "Target 'c' could not be found in project")
+            self.assertNotEquals(projects.getTarget("a"), None, "Target 'a' could not be found in project")
+            self.assertNotEquals(projects.getTarget("b"), None, "Target 'b' could not be found in project")
+            self.assertNotEquals(projects.getTarget("c"), None, "Target 'c' could not be found in project")
+            self.assertNotEquals(projects.getTarget("A"), None, "Target 'a' could not be found in project")
+            self.assertNotEquals(projects.getTarget("B "), None, "Target 'b' could not be found in project")
+            self.assertNotEquals(projects.getTarget(" C"), None, "Target 'c' could not be found in project")
             #Targets that do NOT exist in project
-            self.assertEquals(project.getTarget("d"), None, "Target 'd' should not have been found in project")
-            self.assertEquals(project.getTarget(""), None, "Target '' should not have been found in project")
+            self.assertEquals(projects.getTarget("d"), None, "Target 'd' should not have been found in project")
+            self.assertEquals(projects.getTarget(""), None, "Target '' should not have been found in project")
         finally:
             utilityFunctions.removeDir(tempDir)
 
@@ -558,14 +561,14 @@ class Test_mdProject(unittest.TestCase):
         try:
             tempDir = mdTestUtilities.makeTempDir()
             projectFilePath = mdTestUtilities.makeTempFile(tempDir, projectFileContents, ".md")
-            project = mdProject.Project(projectFilePath)
-            options = mdOptions.Options()
-            options.buildDir = os.path.join(tempDir, options.buildDir)
-            self.assertTrue(project.read(), "Project file could not be read")
-            self.assertTrue(project.examine(options), "Project failed to examine")
-            self.assertEquals(project.getTarget("TestCaseA").dependancyDepth, 0, "TestCaseA had wrong dependancy depth")
-            self.assertEquals(len(project.targets), 1, "Number of Targets in project is wrong")
-            self.assertEquals(project.targets[0].name, "TestCaseA", "Sorting failed. TestCaseA should have been the first target.")
+            projects = project.Project(projectFilePath)
+            option = options.Options()
+            option.buildDir = os.path.join(tempDir, option.buildDir)
+            self.assertTrue(projects.read(), "Project file could not be read")
+            self.assertTrue(projects.examine(option), "Project failed to examine")
+            self.assertEquals(projects.getTarget("TestCaseA").dependancyDepth, 0, "TestCaseA had wrong dependancy depth")
+            self.assertEquals(len(projects.targets), 1, "Number of Targets in project is wrong")
+            self.assertEquals(projects.targets[0].name, "TestCaseA", "Sorting failed. TestCaseA should have been the first target.")
         finally:
             utilityFunctions.removeDir(tempDir)
 
@@ -585,18 +588,18 @@ class Test_mdProject(unittest.TestCase):
         try:
             tempDir = mdTestUtilities.makeTempDir()
             projectFilePath = mdTestUtilities.makeTempFile(tempDir, projectFileContents, ".md")
-            project = mdProject.Project(projectFilePath)
-            options = mdOptions.Options()
-            options.buildDir = os.path.join(tempDir, options.buildDir)
-            self.assertTrue(project.read(), "Project file could not be read")
-            self.assertTrue(project.examine(options), "Project failed to examine")
-            self.assertEquals(project.getTarget("TestCaseA").dependancyDepth, 0, "TestCaseA had wrong dependancy depth")
-            self.assertEquals(project.getTarget("TestCaseB").dependancyDepth, 1, "TestCaseB had wrong dependancy depth")
-            self.assertEquals(project.getTarget("TestCaseC").dependancyDepth, 2, "TestCaseC had wrong dependancy depth")
-            self.assertEquals(len(project.targets), 3, "Number of Targets in project is wrong")
-            self.assertEquals(project.targets[0].name, "TestCaseA", "Sorting failed. TestCaseA should have been the first target.")
-            self.assertEquals(project.targets[1].name, "TestCaseB", "Sorting failed. TestCaseB should have been the first target.")
-            self.assertEquals(project.targets[2].name, "TestCaseC", "Sorting failed. TestCaseC should have been the first target.")
+            projects = project.Project(projectFilePath)
+            option = options.Options()
+            option.buildDir = os.path.join(tempDir, option.buildDir)
+            self.assertTrue(projects.read(), "Project file could not be read")
+            self.assertTrue(projects.examine(option), "Project failed to examine")
+            self.assertEquals(projects.getTarget("TestCaseA").dependancyDepth, 0, "TestCaseA had wrong dependancy depth")
+            self.assertEquals(projects.getTarget("TestCaseB").dependancyDepth, 1, "TestCaseB had wrong dependancy depth")
+            self.assertEquals(projects.getTarget("TestCaseC").dependancyDepth, 2, "TestCaseC had wrong dependancy depth")
+            self.assertEquals(len(projects.targets), 3, "Number of Targets in project is wrong")
+            self.assertEquals(projects.targets[0].name, "TestCaseA", "Sorting failed. TestCaseA should have been the first target.")
+            self.assertEquals(projects.targets[1].name, "TestCaseB", "Sorting failed. TestCaseB should have been the first target.")
+            self.assertEquals(projects.targets[2].name, "TestCaseC", "Sorting failed. TestCaseC should have been the first target.")
         finally:
             utilityFunctions.removeDir(tempDir)
 
@@ -616,18 +619,18 @@ class Test_mdProject(unittest.TestCase):
         try:
             tempDir = mdTestUtilities.makeTempDir()
             projectFilePath = mdTestUtilities.makeTempFile(tempDir, projectFileContents, ".md")
-            project = mdProject.Project(projectFilePath)
-            options = mdOptions.Options()
-            options.buildDir = os.path.join(tempDir, options.buildDir)
-            self.assertTrue(project.read(), "Project file could not be read")
-            self.assertTrue(project.examine(options), "Project failed to examine")
-            self.assertEquals(project.getTarget("TestCaseA").dependancyDepth, 0, "TestCaseA had wrong dependancy depth")
-            self.assertEquals(project.getTarget("TestCaseB").dependancyDepth, 1, "TestCaseB had wrong dependancy depth")
-            self.assertEquals(project.getTarget("TestCaseC").dependancyDepth, 2, "TestCaseC had wrong dependancy depth")
-            self.assertEquals(len(project.targets), 3, "Number of Targets in project is wrong")
-            self.assertEquals(project.targets[0].name, "TestCaseA", "Sorting failed. TestCaseA should have been the first target.")
-            self.assertEquals(project.targets[1].name, "TestCaseB", "Sorting failed. TestCaseB should have been the first target.")
-            self.assertEquals(project.targets[2].name, "TestCaseC", "Sorting failed. TestCaseC should have been the first target.")
+            projects = project.Project(projectFilePath)
+            option = options.Options()
+            option.buildDir = os.path.join(tempDir, option.buildDir)
+            self.assertTrue(projects.read(), "Project file could not be read")
+            self.assertTrue(projects.examine(option), "Project failed to examine")
+            self.assertEquals(projects.getTarget("TestCaseA").dependancyDepth, 0, "TestCaseA had wrong dependancy depth")
+            self.assertEquals(projects.getTarget("TestCaseB").dependancyDepth, 1, "TestCaseB had wrong dependancy depth")
+            self.assertEquals(projects.getTarget("TestCaseC").dependancyDepth, 2, "TestCaseC had wrong dependancy depth")
+            self.assertEquals(len(projects.targets), 3, "Number of Targets in project is wrong")
+            self.assertEquals(projects.targets[0].name, "TestCaseA", "Sorting failed. TestCaseA should have been the first target.")
+            self.assertEquals(projects.targets[1].name, "TestCaseB", "Sorting failed. TestCaseB should have been the first target.")
+            self.assertEquals(projects.targets[2].name, "TestCaseC", "Sorting failed. TestCaseC should have been the first target.")
         finally:
             utilityFunctions.removeDir(tempDir)
 
@@ -651,20 +654,20 @@ class Test_mdProject(unittest.TestCase):
         try:
             tempDir = mdTestUtilities.makeTempDir()
             projectFilePath = mdTestUtilities.makeTempFile(tempDir, projectFileContents, ".md")
-            project = mdProject.Project(projectFilePath)
-            options = mdOptions.Options()
-            options.buildDir = os.path.join(tempDir, options.buildDir)
-            self.assertTrue(project.read(), "Project file could not be read")
-            self.assertTrue(project.examine(options), "Project failed to examine")
-            self.assertEquals(project.getTarget("A").dependancyDepth, 0, "A had wrong dependancy depth")
-            self.assertEquals(project.getTarget("B").dependancyDepth, 1, "B had wrong dependancy depth")
-            self.assertEquals(project.getTarget("C").dependancyDepth, 2, "C had wrong dependancy depth")
-            self.assertEquals(project.getTarget("D").dependancyDepth, 3, "D had wrong dependancy depth")
-            self.assertEquals(len(project.targets), 4, "Number of Targets in project is wrong")
-            self.assertEquals(project.targets[0].name, "A", "Sorting failed. A should have been the first target.")
-            self.assertEquals(project.targets[1].name, "B", "Sorting failed. B should have been the first target.")
-            self.assertEquals(project.targets[2].name, "C", "Sorting failed. C should have been the first target.")
-            self.assertEquals(project.targets[3].name, "D", "Sorting failed. D should have been the first target.")
+            projects = project.Project(projectFilePath)
+            option = options.Options()
+            option.buildDir = os.path.join(tempDir, option.buildDir)
+            self.assertTrue(projects.read(), "Project file could not be read")
+            self.assertTrue(projects.examine(option), "Project failed to examine")
+            self.assertEquals(projects.getTarget("A").dependancyDepth, 0, "A had wrong dependancy depth")
+            self.assertEquals(projects.getTarget("B").dependancyDepth, 1, "B had wrong dependancy depth")
+            self.assertEquals(projects.getTarget("C").dependancyDepth, 2, "C had wrong dependancy depth")
+            self.assertEquals(projects.getTarget("D").dependancyDepth, 3, "D had wrong dependancy depth")
+            self.assertEquals(len(projects.targets), 4, "Number of Targets in project is wrong")
+            self.assertEquals(projects.targets[0].name, "A", "Sorting failed. A should have been the first target.")
+            self.assertEquals(projects.targets[1].name, "B", "Sorting failed. B should have been the first target.")
+            self.assertEquals(projects.targets[2].name, "C", "Sorting failed. C should have been the first target.")
+            self.assertEquals(projects.targets[3].name, "D", "Sorting failed. D should have been the first target.")
         finally:
             utilityFunctions.removeDir(tempDir)
 
@@ -683,18 +686,18 @@ class Test_mdProject(unittest.TestCase):
         try:
             tempDir = mdTestUtilities.makeTempDir()
             projectFilePath = mdTestUtilities.makeTempFile(tempDir, projectFileContents, ".md")
-            project = mdProject.Project(projectFilePath)
-            options = mdOptions.Options()
-            options.buildDir = os.path.join(tempDir, options.buildDir)
-            self.assertTrue(project.read(), "Project file could not be read")
-            self.assertTrue(project.examine(options), "Project failed to examine")
-            self.assertEquals(project.getTarget("A").dependancyDepth, 0, "A had wrong dependancy depth")
-            self.assertEquals(project.getTarget("B").dependancyDepth, 1, "B had wrong dependancy depth")
-            self.assertEquals(project.getTarget("C").dependancyDepth, 1, "C had wrong dependancy depth")
-            self.assertEquals(len(project.targets), 3, "Number of Targets in project is wrong")
-            self.assertEquals(project.targets[0].name, "A", "Sorting failed. A should have been the first target.")
-            self.assertEquals(project.targets[1].name, "B", "Sorting failed. B should have been the first target.")
-            self.assertEquals(project.targets[2].name, "C", "Sorting failed. C should have been the first target.")
+            projects = project.Project(projectFilePath)
+            option = options.Options()
+            option.buildDir = os.path.join(tempDir, option.buildDir)
+            self.assertTrue(projects.read(), "Project file could not be read")
+            self.assertTrue(projects.examine(option), "Project failed to examine")
+            self.assertEquals(projects.getTarget("A").dependancyDepth, 0, "A had wrong dependancy depth")
+            self.assertEquals(projects.getTarget("B").dependancyDepth, 1, "B had wrong dependancy depth")
+            self.assertEquals(projects.getTarget("C").dependancyDepth, 1, "C had wrong dependancy depth")
+            self.assertEquals(len(projects.targets), 3, "Number of Targets in project is wrong")
+            self.assertEquals(projects.targets[0].name, "A", "Sorting failed. A should have been the first target.")
+            self.assertEquals(projects.targets[1].name, "B", "Sorting failed. B should have been the first target.")
+            self.assertEquals(projects.targets[2].name, "C", "Sorting failed. C should have been the first target.")
         finally:
             utilityFunctions.removeDir(tempDir)
 
@@ -717,28 +720,28 @@ class Test_mdProject(unittest.TestCase):
         try:
             tempDir = mdTestUtilities.makeTempDir()
             projectFilePath = mdTestUtilities.makeTempFile(tempDir, projectFileContents, ".md")
-            project = mdProject.Project(projectFilePath)
-            options = mdOptions.Options()
-            options.buildDir = os.path.join(tempDir, options.buildDir)
-            self.assertTrue(project.read(), "Project file could not be read")
-            self.assertTrue(project.examine(options), "Project failed to examine")
-            self.assertEquals(project.getTarget("A").dependancyDepth, 0, "A had wrong dependancy depth")
-            self.assertEquals(project.getTarget("B").dependancyDepth, 1, "B had wrong dependancy depth")
-            self.assertEquals(project.getTarget("C").dependancyDepth, 1, "C had wrong dependancy depth")
-            self.assertEquals(project.getTarget("D").dependancyDepth, 2, "D had wrong dependancy depth")
-            self.assertEquals(len(project.targets), 4, "Number of Targets in project is wrong")
-            self.assertEquals(project.targets[0].name, "A", "Sorting failed. A should have been the first target.")
-            self.assertEquals(project.targets[1].name, "B", "Sorting failed. B should have been the first target.")
-            self.assertEquals(project.targets[2].name, "C", "Sorting failed. C should have been the first target.")
-            self.assertEquals(project.targets[3].name, "D", "Sorting failed. D should have been the first target.")
+            projects = project.Project(projectFilePath)
+            option = options.Options()
+            option.buildDir = os.path.join(tempDir, option.buildDir)
+            self.assertTrue(projects.read(), "Project file could not be read")
+            self.assertTrue(projects.examine(option), "Project failed to examine")
+            self.assertEquals(projects.getTarget("A").dependancyDepth, 0, "A had wrong dependancy depth")
+            self.assertEquals(projects.getTarget("B").dependancyDepth, 1, "B had wrong dependancy depth")
+            self.assertEquals(projects.getTarget("C").dependancyDepth, 1, "C had wrong dependancy depth")
+            self.assertEquals(projects.getTarget("D").dependancyDepth, 2, "D had wrong dependancy depth")
+            self.assertEquals(len(projects.targets), 4, "Number of Targets in project is wrong")
+            self.assertEquals(projects.targets[0].name, "A", "Sorting failed. A should have been the first target.")
+            self.assertEquals(projects.targets[1].name, "B", "Sorting failed. B should have been the first target.")
+            self.assertEquals(projects.targets[2].name, "C", "Sorting failed. C should have been the first target.")
+            self.assertEquals(projects.targets[3].name, "D", "Sorting failed. D should have been the first target.")
         finally:
             utilityFunctions.removeDir(tempDir)
 
 def suite():
     suite = unittest.TestSuite()
-    suite.addTest(unittest.makeSuite(Test_mdProject))
+    suite.addTest(unittest.makeSuite(Test_project))
     return suite
 
 if __name__ == "__main__":
-    mdLogger.SetLogger("Console")
+    logger.SetLogger("Console")
     unittest.main()

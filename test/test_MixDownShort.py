@@ -23,7 +23,8 @@
 import os, socket, sys, unittest, mdTestUtilities
 if not ".." in sys.path:
     sys.path.append("..")
-import mdLogger, utilityFunctions
+
+from md import logger, utilityFunctions
 
 class Test_MixDownShort(unittest.TestCase):
     def test_cmakeHello(self):
@@ -79,5 +80,5 @@ def suite():
     return suite
 
 if __name__ == "__main__":
-    mdLogger.SetLogger("Console")
+    logger.SetLogger("Console")
     unittest.main()

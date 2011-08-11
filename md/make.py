@@ -20,7 +20,9 @@
 # along with this program; if not, write to the Free Software Foundation,
 # Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 
-import os, mdDefines
+import os
+
+from md import  defines
 
 def isMakeProject(path):
     if os.path.exists(os.path.join(path, "GNUmakefile")) or\
@@ -44,10 +46,10 @@ def getConfigureCommand():
     return ""
 
 def getBuildCommand():
-    return "make " + mdDefines.surround(mdDefines.mdMakeJobSlots[0])
+    return "make " + defines.surround(defines.makeJobSlots[0])
 
 def getInstallCommand():
-    return "make " + mdDefines.surround(mdDefines.mdMakeJobSlots[0]) + " install"
+    return "make " + defines.surround(defines.makeJobSlots[0]) + " install"
 
 def getCleanCommand():
-    return "make " + mdDefines.surround(mdDefines.mdMakeJobSlots[0]) + " clean"
+    return "make " + defines.surround(defines.makeJobSlots[0]) + " clean"

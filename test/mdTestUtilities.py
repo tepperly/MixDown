@@ -24,7 +24,8 @@ import os, shutil, sys, tempfile
 
 if not ".." in sys.path:
     sys.path.append("..")
-import utilityFunctions
+
+from md import utilityFunctions
 
 testFileName = "testFile"
 

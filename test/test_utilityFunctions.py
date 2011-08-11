@@ -24,7 +24,7 @@ import os, sys, unittest
 
 if not ".." in sys.path:
     sys.path.append("..")
-import mdLogger, utilityFunctions
+from md import logger, utilityFunctions
 
 class Test_utilityFunctions(unittest.TestCase):
     def test_URLToFileName01(self):
@@ -90,5 +90,5 @@ def suite():
     return suite
 
 if __name__ == "__main__":
-    mdLogger.SetLogger("Console")
+    logger.SetLogger("Console")
     unittest.main()

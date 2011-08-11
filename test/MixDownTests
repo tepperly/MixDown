@@ -23,26 +23,27 @@
 # Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 
 import sys, unittest
-import test_mdAutoTools, test_mdCMake, test_mdCvs, test_mdGit, test_mdHg, test_mdSteps, test_mdSvn, test_mdProject, test_mdTarget
+import test_autoTools, test_cmake, test_cvs, test_git, test_hg, test_steps, test_svn, test_project, test_target
 import test_MixDownLong, test_MixDownShort, test_utilityFunctions
 
 if not ".." in sys.path:
     sys.path.append("..")
-import mdLogger
+
+from md import logger
 
 def main():
     longTests = False
     suite = unittest.TestSuite()
 
-    suite.addTest(test_mdAutoTools.suite())
-    suite.addTest(test_mdCMake.suite())
-    #suite.addTest(test_mdCvs.suite())
-    suite.addTest(test_mdGit.suite())
-    suite.addTest(test_mdHg.suite())
-    suite.addTest(test_mdSteps.suite())
-    suite.addTest(test_mdSvn.suite())
-    suite.addTest(test_mdProject.suite())
-    suite.addTest(test_mdTarget.suite())
+    suite.addTest(test_autoTools.suite())
+    suite.addTest(test_cmake.suite())
+    #suite.addTest(test_cvs.suite())
+    suite.addTest(test_git.suite())
+    suite.addTest(test_hg.suite())
+    suite.addTest(test_steps.suite())
+    suite.addTest(test_svn.suite())
+    suite.addTest(test_project.suite())
+    suite.addTest(test_target.suite())
     suite.addTest(test_MixDownShort.suite())
     suite.addTest(test_utilityFunctions.suite())
 
@@ -56,5 +57,5 @@ def main():
         print "\nNote: Long tests not run to enable add '--long' to command line"
 
 if __name__ == "__main__":
-    mdLogger.SetLogger("Console")
+    logger.SetLogger("Console")
     main()

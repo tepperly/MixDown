@@ -20,9 +20,11 @@
 # along with this program; if not, write to the Free Software Foundation,
 # Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 
-import mdLogger, os, sys
+import  os, sys
 
-class LoggerFile(mdLogger.LoggerBase):
+from md import logger
+
+class LoggerFile(logger.LoggerBase):
     def __init__(self, logOutputDir=""):
         self.logOutputDir = logOutputDir
         if self.logOutputDir != "" and not os.path.isdir(self.logOutputDir):
@@ -104,7 +106,7 @@ class LoggerFile(mdLogger.LoggerBase):
         messagePrefix = self.__formatMessagePrefix(targetName, targetStep)
         message = messagePrefix + "Succeeded.\n"
         if timeInSeconds != 0:
-            message += messagePrefix + "Time " + mdLogger.secondsToHMS(timeInSeconds) + "\n"
+            message += messagePrefix + "Time " + logger.secondsToHMS(timeInSeconds) + "\n"
         sys.stderr.flush()
         sys.stdout.write(message)
         self.__lookupOutFile(targetName, targetStep).write(message)
@@ -113,7 +115,7 @@ class LoggerFile(mdLogger.LoggerBase):
         messagePrefix = self.__formatMessagePrefix(targetName, targetStep)
         message = ""
         if timeInSeconds != 0:
-            message += messagePrefix + "Time " + mdLogger.secondsToHMS(timeInSeconds) + "\n"
+            message += messagePrefix + "Time " + logger.secondsToHMS(timeInSeconds) + "\n"
         message += self.__formatErrorMessage(messagePrefix + "Failed with error code " + str(returnCode) + ".")
         message += "Look at following log file for failure reason:\n  " + self.__lookupOutFileName(targetName, targetStep)
         message += "\n"

@@ -21,9 +21,9 @@
 # Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 
 import os, time
-import mdAutoTools, mdCMake, mdMake, mdOptions, mdPython, mdDefines, mdTarget, utilityFunctions
+from md import autoTools, cmake, make, python, defines, target, utilityFunctions, steps
 
-from mdLogger import *
+from logger import *
 
 class BuildStep(object):
     def __init__(self, name="", command=""):
@@ -43,9 +43,9 @@ def buildStepActor(target, buildStep, options):
         return True
 
     command = options.expandDefines(buildStep.command)
-    isPythonCommand, namespace, function = mdPython.parsePythonCommand(command)
+    isPythonCommand, namespace, function = python.parsePythonCommand(command)
     if isPythonCommand:
-        success = mdPython.callPythonCommand(namespace, function, target, options)
+        success = python.callPythonCommand(namespace, function, target, options)
         if not success:
             returnCode = 1
         else:
@@ -86,62 +86,62 @@ def getCommand(stepName, target):
     return command
 
 def __getFetchCommand(target):
-    return "mdSteps.fetch(pythonCallInfo)"
+    return "steps.fetch(pythonCallInfo)"
 
 def __getUnpackCommand(target):
-    return "mdSteps.unpack(pythonCallInfo)"
+    return "steps.unpack(pythonCallInfo)"
 
 def __getPatchCommand(target):
     return ""
 
 def __getPreconfigureCommand(target):
     command = ""
-    if mdCMake.isCMakeProject(target.path):
-        command = mdCMake.getPreconfigureCommand()
+    if cmake.isCMakeProject(target.path):
+        command = cmake.getPreconfigureCommand()
     elif os.path.exists(os.path.join(target.path, "autogen.sh")):
         command = "./autogen.sh"
     elif os.path.exists(os.path.join(target.path, "buildconf")):
         command = "./buildconf"
-    elif mdAutoTools.isAutoToolsProject(target.path):
-        command = mdAutoTools.getPreconfigureCommand(target.path)
+    elif autoTools.isAutoToolsProject(target.path):
+        command = autoTools.getPreconfigureCommand(target.path)
     return command
 
 def __getConfigureCommand(target):
     command = ""
-    if mdCMake.isCMakeProject(target.path):
-        command = mdCMake.getConfigureCommand()
+    if cmake.isCMakeProject(target.path):
+        command = cmake.getConfigureCommand()
     elif os.path.exists(os.path.join(target.path, "Configure")):
         command = "./Configure"
-    elif mdAutoTools.isAutoToolsProject(target.path):
-        command = mdAutoTools.getConfigureCommand(target)
+    elif autoTools.isAutoToolsProject(target.path):
+        command = autoTools.getConfigureCommand(target)
     return command
 
 def __getBuildCommand(target):
     command = ""
-    if mdAutoTools.isAutoToolsProject(target.path):
-        command = mdAutoTools.getBuildCommand()
-    elif mdCMake.isCMakeProject(target.path):
-        command = mdCMake.getBuildCommand()
-    elif mdMake.isMakeProject(target.path):
-        command = mdMake.getBuildCommand()
+    if autoTools.isAutoToolsProject(target.path):
+        command = autoTools.getBuildCommand()
+    elif cmake.isCMakeProject(target.path):
+        command = cmake.getBuildCommand()
+    elif make.isMakeProject(target.path):
+        command = make.getBuildCommand()
     return command
 
 def __getInstallCommand(target):
     command = ""
-    if mdAutoTools.isAutoToolsProject(target.path):
-        command = mdAutoTools.getInstallCommand()
-    elif mdCMake.isCMakeProject(target.path):
-        command = mdCMake.getInstallCommand()
-    elif mdMake.isMakeProject(target.path):
-        command = mdMake.getInstallCommand()
+    if autoTools.isAutoToolsProject(target.path):
+        command = autoTools.getInstallCommand()
+    elif cmake.isCMakeProject(target.path):
+        command = cmake.getInstallCommand()
+    elif make.isMakeProject(target.path):
+        command = make.getInstallCommand()
     return command
 
 def __getCleanCommand(target):
     command = ""
-    if mdAutoTools.isAutoToolsProject(target.path):
-        command = mdAutoTools.getCleanCommand()
-    elif mdCMake.isCMakeProject(target.path):
-        command = mdCMake.getCleanCommand()
-    elif mdMake.isMakeProject(target.path):
-        command = mdMake.getCleanCommand()
+    if autoTools.isAutoToolsProject(target.path):
+        command = autoTools.getCleanCommand()
+    elif cmake.isCMakeProject(target.path):
+        command = cmake.getCleanCommand()
+    elif make.isMakeProject(target.path):
+        command = make.getCleanCommand()
     return command

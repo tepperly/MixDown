@@ -21,9 +21,11 @@
 # Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 
 import os, re, tarfile
-import mdAutoTools, mdCMake, mdCommands, mdGit, mdHg, mdOptions, mdPython, mdSvn, utilityFunctions
 
-from mdLogger import *
+from md import git, hg, python, svn, utilityFunctions, options
+import md
+
+from logger import *
 
 def normalizeName(name):
     return name.strip().lower()
@@ -32,14 +34,14 @@ def targetPathToName(path, exitOnFailure=True):
     name = ""
     path = path.strip()
 
-    if mdGit.isGitRepo(path):
+    if git.isGitRepo(path):
         if os.path.isdir(path):
             name = os.path.basename(path)
         elif utilityFunctions.isURL(path):
             name = utilityFunctions.URLToFilename(path)
             if name.endswith(".git"):
                 name = name[:-4]
-    elif mdSvn.isSvnRepo(path):
+    elif svn.isSvnRepo(path):
         if path.endswith(os.sep):
             path = path[:-1]
         if path.endswith("/trunk") or path.endswith("\trunk"):
@@ -74,10 +76,10 @@ class Target(object):
         self.dependancyDepth = 0
         self.dependsOn = []
         self._skipSteps = []
-        self.pythonCallInfo = mdPython.PythonCallInfo()
+        self.pythonCallInfo = python.PythonCallInfo()
         self.buildSteps = []
 
-    def validate(self, options):
+    def validate(self, option):
         normalizedName = normalizeName(self.name)
         if normalizedName == "":
             return False
@@ -89,28 +91,28 @@ class Target(object):
                 return False
 
         #Check for write access to install directories used in commands.
-        if not options.cleanTargets:
+        if not option.cleanTargets:
             for buildStep in self.buildSteps:
-                installDir = mdAutoTools.getInstallDir(buildStep.command)
+                installDir = md.autoTools.getInstallDir(buildStep.command)
                 if installDir == "":
-                    installDir = mdCMake.getInstallDir(buildStep.command)
+                    installDir = md.cmake.getInstallDir(buildStep.command)
 
-                installDir = options.expandDefines(installDir)
+                installDir = option.expandDefines(installDir)
                 if installDir != "" and not utilityFunctions.haveWriteAccess(installDir):
                     Logger().writeError("No write access to used install directory: " + installDir, self.name, step, options.projectFile)
-                    if not options.prefixDefined:
+                    if not option.prefixDefined:
                         Logger().writeMessage("Use commandline option '-p<install path>' or running MixDown with superuser privileges (sudo)")
                     else:
                         Logger().writeMessage("Choose a different install directory for commandline option '-p<install path>'")
                     return False
         return True
 
-    def determineOutputPath(self, options):
+    def determineOutputPath(self, option):
         if self.outputPathSpecified and self.outputPath != "":
             return self.outputPath
         else:
-            targetsBuildDir = os.path.join(options.buildDir, self.name)
-            if options.cleanTargets:
+            targetsBuildDir = os.path.join(option.buildDir, self.name)
+            if option.cleanTargets:
                 if os.path.exists(targetsBuildDir) and os.path.isdir(targetsBuildDir):
                     return targetsBuildDir
                 elif os.path.isdir(self.path):
@@ -119,22 +121,22 @@ class Target(object):
                     Logger().writeError("Output path could not be located, define in project file with \"output=<path>\"", self.name, "clean")
                     return ""
             else:
-                options.validateBuildDir()
+                option.validateBuildDir()
                 return targetsBuildDir
 
-    def examine(self, options):
-        if options.importer:
-            self.__determineCommands(options)
-        self.outputPath = self.determineOutputPath(options)
+    def examine(self, option):
+        if option.importer:
+            self.__determineCommands(option)
+        self.outputPath = self.determineOutputPath(option)
         return True
 
-    def expandDefines(self, options):
+    def expandDefines(self, option):
         for buildStep in self.buildSteps:
-            buildStep.command = options.expandDefines(buildStep.command)
+            buildStep.command = option.expandDefines(buildStep.command)
 
-    def __determineCommands(self, options):
-        for stepName in mdCommands.buildSteps:
-            buildStep = mdCommands.BuildStep(stepName, mdCommands.getCommand(stepName, self))
+    def __determineCommands(self, option):
+        for stepName in md.commands.buildSteps:
+            buildStep = md.commands.BuildStep(stepName, md.commands.getCommand(stepName, self))
             self.buildSteps.append(buildStep)
 
     def __str__(self):

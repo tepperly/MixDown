@@ -21,9 +21,9 @@
 # Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 
 import os, re
-import mdMake, mdDefines, mdTarget, utilityFunctions
 
-from mdLogger import *
+from md import  make, defines, target, utilityFunctions
+from logger import *
 
 def isAutoToolsProject(path):
     if os.path.exists(os.path.join(path, "configure")) or\
@@ -73,7 +73,7 @@ def getDependancies(path, name="", verbose=True):
             match = regexp.search(line)
             if match != None:
                 foundDep = match.group(1)
-                foundDep = mdTarget.normalizeName(foundDep)
+                foundDep = target.normalizeName(foundDep)
                 if not foundDep in deps:
                     deps.append(foundDep)
     finally:
@@ -89,16 +89,16 @@ def getPreconfigureCommand(path):
         return ""
 
 def getConfigureCommand(target):
-    command = "./configure " + mdDefines.surround(mdDefines.mdAutoToolsPrefix[0]) + " " + mdDefines.surround(mdDefines.mdAutoToolsCompilers[0])
+    command = "./configure " + defines.surround(defines.autoToolsPrefix[0]) + " " + defines.surround(defines.autoToolsCompilers[0])
     for dependancy in target.dependsOn:
-        command += " --with-" + dependancy + "=" + mdDefines.surround(mdDefines.mdPrefix[0])
+        command += " --with-" + dependancy + "=" + defines.surround(defines.mdPrefix[0])
     return command
 
 def getBuildCommand():
-    return mdMake.getBuildCommand()
+    return make.getBuildCommand()
 
 def getInstallCommand():
-    return mdMake.getInstallCommand()
+    return make.getInstallCommand()
 
 def getCleanCommand():
-    return mdMake.getCleanCommand()
+    return make.getCleanCommand()

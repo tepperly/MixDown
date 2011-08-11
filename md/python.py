@@ -20,9 +20,11 @@
 # along with this program; if not, write to the Free Software Foundation,
 # Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 
-import os, re, sys, mdTarget
+import os, re, sys
 
-from mdLogger import *
+from md import steps
+
+from logger import *
 
 def parsePythonCommand(command):
     remaining = command.strip()
@@ -56,7 +58,7 @@ def parsePythonCommand(command):
 
 def callPythonCommand(namespace, function, target, options):
     filename = namespace + ".py"
-    if not namespace == "mdSteps" and not os.path.exists(filename):
+    if not namespace == "steps" and not os.path.exists(filename):
         Logger().writeError("Expected python file, " + filename + ", not found")
         return False
     else:
@@ -65,7 +67,9 @@ def callPythonCommand(namespace, function, target, options):
             return False
         if not "." in sys.path:
             sys.path.append(".")
-        importedNamespace = __import__(namespace)
+        if not "md" in sys.path:
+            sys.path.append("md")
+        importedNamespace = __import__("md."+namespace)
 
     try:
         target.pythonCallInfo.success = False

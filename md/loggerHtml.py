@@ -20,9 +20,11 @@
 # along with this program; if not, write to the Free Software Foundation,
 # Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 
-import mdLogger, sys
+import  sys
 
-class LoggerHtml(mdLogger.LoggerBase):
+from md import logger
+
+class LoggerHtml(logger.LoggerBase):
     def __init__(self, logOutputDir=""):
         self.logOutputDir = logOutputDir
         if self.logOutputDir != "" and not os.path.isdir(self.logOutputDir):

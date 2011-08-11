@@ -20,47 +20,49 @@
 # along with this program; if not, write to the Free Software Foundation,
 # Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 
-import os, mdLogger, utilityFunctions
+import os
 
-_isHgInstalled = None
+from md import logger,utilityFunctions
 
-def isHgInstalled():
-    global _isHgInstalled
-    if _isHgInstalled == None:
+_isSvnInstalled = None
+
+def isSvnInstalled():
+    global _isSvnInstalled
+    if _isSvnInstalled == None:
         outFile = open(os.devnull, "w")
         try:
-            returnCode = utilityFunctions.executeSubProcess("hg --help", outFileHandle = outFile)
+            returnCode = utilityFunctions.executeSubProcess("svn --help", outFileHandle = outFile)
         except:
-            #Assume any exceptions means Hg is not installed
+            #Assume any exceptions means Svn is not installed
             returnCode = 1
         outFile.close()
         if returnCode == 0:
-            _isHgInstalled = True
+            _isSvnInstalled = True
         else:
-            mdLogger.Logger().writeMessage("Hg is not installed, hg repositories will fail to be checked out")
-            _isHgInstalled = False
-    return _isHgInstalled
+            ogger.Logger().writeMessage("Svn is not installed, svn repositories will fail to be checked out")
+            _isSvnInstalled = False
+    return _isSvnInstalled
 
-def isHgRepo(location):
+def isSvnRepo(location):
     location = location.strip()
-    if location == "" or not isHgInstalled():
+    if location == "" or not isSvnInstalled():
         return False
     outFile = open(os.devnull, "w")
-    returnCode = utilityFunctions.executeSubProcess("hg id " + location, outFileHandle = outFile)
+    returnCode = utilityFunctions.executeSubProcess("svn ls " + location, outFileHandle = outFile)
     outFile.close()
     if returnCode == 0:
         return True
     return False
 
-def hgCheckout(repoLocation, outPath):
+def svnCheckout(repoLocation, outPath):
     repoLocation = repoLocation.strip()
     outPath = outPath.strip()
-    if repoLocation == "" or outPath == "" or not isHgInstalled():
+    if repoLocation == "" or outPath == "" or not isSvnInstalled():
         return False
     outFile = open(os.devnull, "w")
-    #TODO: decide if i should check for username in .hgrc, if not put "-u <username>" in command
-    returnCode = utilityFunctions.executeSubProcess("hg clone --noninteractive " + repoLocation + " " + outPath, outFileHandle = outFile)
+    returnCode = utilityFunctions.executeSubProcess("svn co --non-interactive " + repoLocation + " " + outPath, outFileHandle = outFile)
     outFile.close()
     if returnCode == 0:
         return True
     return False
+

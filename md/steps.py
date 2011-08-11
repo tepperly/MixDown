@@ -21,25 +21,26 @@
 # Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 
 import os, tarfile, urllib, zipfile
-import mdGit, mdHg, mdSvn, utilityFunctions
 
-from mdLogger import *
+from md import git, hg, svn, utilityFunctions
+
+from logger import *
 
 def fetch(pythonCallInfo):
-    if mdGit.isGitRepo(pythonCallInfo.currentPath):
-        if not mdGit.gitCheckout(pythonCallInfo.currentPath, pythonCallInfo.outputPath):
+    if git.isGitRepo(pythonCallInfo.currentPath):
+        if not git.gitCheckout(pythonCallInfo.currentPath, pythonCallInfo.outputPath):
             pythonCallInfo.logger.writeError("Given Git repo '" + pythonCallInfo.currentPath +"' was unable to be checked out")
         else:
             pythonCallInfo.currentPath = pythonCallInfo.outputPath
             pythonCallInfo.success = True
-    elif mdHg.isHgRepo(pythonCallInfo.currentPath):
-        if not mdHg.hgCheckout(pythonCallInfo.currentPath, pythonCallInfo.outputPath):
+    elif hg.isHgRepo(pythonCallInfo.currentPath):
+        if not hg.hgCheckout(pythonCallInfo.currentPath, pythonCallInfo.outputPath):
             pythonCallInfo.logger.writeError("Given Hg repo '" + pythonCallInfo.currentPath +"' was unable to be checked out")
         else:
             pythonCallInfo.currentPath = pythonCallInfo.outputPath
             pythonCallInfo.success = True
-    elif mdSvn.isSvnRepo(pythonCallInfo.currentPath):
-        if not mdSvn.svnCheckout(pythonCallInfo.currentPath, pythonCallInfo.outputPath):
+    elif svn.isSvnRepo(pythonCallInfo.currentPath):
+        if not svn.svnCheckout(pythonCallInfo.currentPath, pythonCallInfo.outputPath):
             pythonCallInfo.logger.writeError("Given Svn repo '" + pythonCallInfo.currentPath +"' was unable to be checked out")
         else:
             pythonCallInfo.currentPath = pythonCallInfo.outputPath

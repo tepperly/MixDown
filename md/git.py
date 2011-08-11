@@ -20,7 +20,9 @@
 # along with this program; if not, write to the Free Software Foundation,
 # Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 
-import os, mdLogger, utilityFunctions
+import os
+
+from md import logger,utilityFunctions
 
 _isGitInstalled = None
 
@@ -37,7 +39,7 @@ def isGitInstalled():
         if returnCode == 0:
             _isGitInstalled = True
         else:
-            mdLogger.Logger().writeMessage("Git is not installed, git repositories will fail to be checked out")
+            logger.Logger().writeMessage("Git is not installed, git repositories will fail to be checked out")
             _isGitInstalled = False
     return _isGitInstalled
 

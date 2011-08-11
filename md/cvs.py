@@ -20,45 +20,51 @@
 # along with this program; if not, write to the Free Software Foundation,
 # Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 
-import os, mdLogger, utilityFunctions
+import os
 
-_isSvnInstalled = None
+from md import logger,utilityFunctions
 
-def isSvnInstalled():
-    global _isSvnInstalled
-    if _isSvnInstalled == None:
+_isCvsInstalled = None
+
+def isCvsInstalled():
+    global _isCvsInstalled
+    if _isCvsInstalled == None:
         outFile = open(os.devnull, "w")
         try:
-            returnCode = utilityFunctions.executeSubProcess("svn --help", outFileHandle = outFile)
+            returnCode = utilityFunctions.executeSubProcess("cvs --version", outFileHandle = outFile)
         except:
-            #Assume any exceptions means Svn is not installed
+            #Assume any exceptions means Cvs is not installed
             returnCode = 1
         outFile.close()
         if returnCode == 0:
-            _isSvnInstalled = True
+            _isCvsInstalled = True
         else:
-            mdLogger.Logger().writeMessage("Svn is not installed, svn repositories will fail to be checked out")
-            _isSvnInstalled = False
-    return _isSvnInstalled
+            logger.Logger().writeMessage("Cvs is not installed, cvs repositories will fail to be checked out")
+            _isCvsInstalled = False
+    return _isCvsInstalled
 
-def isSvnRepo(location):
+def isCvsRepo(location):
+    #TODO: this does not work, as far as I can tell there is no cvs command that can be called on the server, only
+    #      checked out repositories
     location = location.strip()
-    if location == "" or not isSvnInstalled():
+    if location == "" or not isCvsInstalled():
         return False
     outFile = open(os.devnull, "w")
-    returnCode = utilityFunctions.executeSubProcess("svn ls " + location, outFileHandle = outFile)
+    returnCode = utilityFunctions.executeSubProcess("cvs -d " + location + " log", outFileHandle = outFile)
     outFile.close()
     if returnCode == 0:
         return True
     return False
 
-def svnCheckout(repoLocation, outPath):
+def cvsCheckout(repoLocation, project, outPath):
+    #TODO: CVS requires a project name inside of the repository. decide if i want to have a special format for cvs
+    #TODO: Add code to handle outPath since cvs does not accept an out directory in the checkout command
     repoLocation = repoLocation.strip()
     outPath = outPath.strip()
-    if repoLocation == "" or outPath == "" or not isSvnInstalled():
+    if repoLocation == "" or outPath == "" or not isCvsInstalled():
         return False
     outFile = open(os.devnull, "w")
-    returnCode = utilityFunctions.executeSubProcess("svn co --non-interactive " + repoLocation + " " + outPath, outFileHandle = outFile)
+    returnCode = utilityFunctions.executeSubProcess("cvs -d " + repoLocation + " -Q checkout", outFileHandle = outFile)
     outFile.close()
     if returnCode == 0:
         return True

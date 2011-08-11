@@ -20,51 +20,48 @@
 # along with this program; if not, write to the Free Software Foundation,
 # Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 
-import os, mdLogger, utilityFunctions
+import os
+from md import  logger, utilityFunctions
 
-_isCvsInstalled = None
+_isHgInstalled = None
 
-def isCvsInstalled():
-    global _isCvsInstalled
-    if _isCvsInstalled == None:
+def isHgInstalled():
+    global _isHgInstalled
+    if _isHgInstalled == None:
         outFile = open(os.devnull, "w")
         try:
-            returnCode = utilityFunctions.executeSubProcess("cvs --version", outFileHandle = outFile)
+            returnCode = utilityFunctions.executeSubProcess("hg --help", outFileHandle = outFile)
         except:
-            #Assume any exceptions means Cvs is not installed
+            #Assume any exceptions means Hg is not installed
             returnCode = 1
         outFile.close()
         if returnCode == 0:
-            _isCvsInstalled = True
+            _isHgInstalled = True
         else:
-            mdLogger.Logger().writeMessage("Cvs is not installed, cvs repositories will fail to be checked out")
-            _isCvsInstalled = False
-    return _isCvsInstalled
+            logger.Logger().writeMessage("Hg is not installed, hg repositories will fail to be checked out")
+            _isHgInstalled = False
+    return _isHgInstalled
 
-def isCvsRepo(location):
-    #TODO: this does not work, as far as I can tell there is no cvs command that can be called on the server, only
-    #      checked out repositories
+def isHgRepo(location):
     location = location.strip()
-    if location == "" or not isCvsInstalled():
+    if location == "" or not isHgInstalled():
         return False
     outFile = open(os.devnull, "w")
-    returnCode = utilityFunctions.executeSubProcess("cvs -d " + location + " log", outFileHandle = outFile)
+    returnCode = utilityFunctions.executeSubProcess("hg id " + location, outFileHandle = outFile)
     outFile.close()
     if returnCode == 0:
         return True
     return False
 
-def cvsCheckout(repoLocation, project, outPath):
-    #TODO: CVS requires a project name inside of the repository. decide if i want to have a special format for cvs
-    #TODO: Add code to handle outPath since cvs does not accept an out directory in the checkout command
+def hgCheckout(repoLocation, outPath):
     repoLocation = repoLocation.strip()
     outPath = outPath.strip()
-    if repoLocation == "" or outPath == "" or not isCvsInstalled():
+    if repoLocation == "" or outPath == "" or not isHgInstalled():
         return False
     outFile = open(os.devnull, "w")
-    returnCode = utilityFunctions.executeSubProcess("cvs -d " + repoLocation + " -Q checkout", outFileHandle = outFile)
+    #TODO: decide if i should check for username in .hgrc, if not put "-u <username>" in command
+    returnCode = utilityFunctions.executeSubProcess("hg clone --noninteractive " + repoLocation + " " + outPath, outFileHandle = outFile)
     outFile.close()
     if returnCode == 0:
         return True
     return False
-
