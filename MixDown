@@ -23,13 +23,12 @@
 # Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 
 import os, sys, tarfile, time, urllib
-
-from md import commands, importer, options, project, defines, utilityFunctions, logger
+from md import commands, defines, importer, logger, options, project, utilityFunctions
 
 #--------------------------------Main---------------------------------
 def main():
-    logger.SetLogger("console")
-    logger.Logger().writeMessage("MixDown - A tool to simplify building\n")
+    logger.setLogger("console")
+    logger.writeMessage("MixDown - A tool to simplify building\n")
     try:
         succeeded = True
         partialImport = False
@@ -78,18 +77,18 @@ def main():
         else:
             message += " succeeded."
             if option.importer:
-                logger.Logger().writeMessage("\nProject " + projects.name + " has been imported to file " + projects.path)
+                logger.writeMessage("\nProject " + projects.name + " has been imported to file " + projects.path)
             elif option.cleanTargets:
-                logger.Logger().writeMessage("\n" + projects.name + " has been cleaned in " + os.path.abspath(option.buildDir))
+                logger.writeMessage("\n" + projects.name + " has been cleaned in " + os.path.abspath(option.buildDir))
             else:
-                logger.Logger().writeMessage("\n" + projects.name + " has been built in " + os.path.abspath(option.buildDir))
-                logger.Logger().writeMessage(projects.name + " has been installed to " + os.path.abspath(option.getDefine(defines.mdPrefix[0])))
+                logger.writeMessage("\n" + projects.name + " has been built in " + os.path.abspath(option.buildDir))
+                logger.writeMessage(projects.name + " has been installed to " + os.path.abspath(option.getDefine(defines.mdPrefix[0])))
         message = "\nTotal time " + logger.secondsToHMS(timeElapsed) + "\n" + message
-        logger.Logger().writeMessage(message)
+        logger.writeMessage(message)
         if partialImport:
-            logger.Logger().writeError("\nProject partially imported.  Please refer to comments in created MixDown project file to determine reason.")
+            logger.writeError("\nProject partially imported.  Please refer to comments in created MixDown project file to determine reason.")
     finally:
-        logger.Logger().close()
+        logger.close()
     if succeeded:
         sys.exit()
     else:
@@ -97,11 +96,11 @@ def main():
 
 #--------------------------------Setup---------------------------------
 def setup(option):
-    logger.SetLogger(option.logger, option.logDir)
+    logger.setLogger(option.logger, option.logDir)
     if option.verbose:
-        logger.Logger().writeMessage(str(option))
+        logger.writeMessage(str(option))
         if not option.prefixDefined and not option.cleanTargets:
-            logger.Logger().writeMessage("No prefix defined, defaulting to '" + option.getDefine(defines.mdPrefix[0]) + "'")
+            logger.writeMessage("No prefix defined, defaulting to '" + option.getDefine(defines.mdPrefix[0]) + "'")
 
     projects = project.Project(option.projectFile)
     if not projects.read():
@@ -122,7 +121,7 @@ def setup(option):
         for currTarget in projects.targets:
             if currTarget.outputPath != "" and os.path.exists(currTarget.outputPath):
                 if cleaningOutputReported:
-                    logger.Logger().writeMessage("Cleaning MixDown and Target output directories...")
+                    logger.writeMessage("Cleaning MixDown and Target output directories...")
                     cleaningOutputReported = True
                 utilityFunctions.removeDir(currTarget.outputPath)
 
@@ -136,20 +135,16 @@ def setup(option):
                     libraryPaths += ":" + originalLibraryPath
             os.environ["LD_LIBRARY_PATH"] = libraryPaths
 
-    #Add MixDown's directory to path so mdSteps can be found
-    print os.path.dirname(sys.argv[0])
-    sys.path.append(os.path.dirname(sys.argv[0]))
-
     return projects
 
 def cleanMixDown(option):
     try:
-        logger.Logger().writeMessage("Cleaning MixDown directories...")
+        logger.writeMessage("Cleaning MixDown directories...")
         utilityFunctions.removeDir(option.buildDir)
         utilityFunctions.removeDir(option.downloadDir)
         utilityFunctions.removeDir(option.logDir)
     except IOError, e:
-        logger.Logger().writeError(e, exitProgram=True)
+        logger.writeError(e, exitProgram=True)
 
 #----------------------------------------------------------------------
 
