@@ -67,8 +67,9 @@ def callPythonCommand(namespace, function, target, options):
             return False
         if not "." in sys.path:
             sys.path.append(".")
-        sys.path.append("md")
-        importedNamespace = __import__(namespace)
+        if not "md" in sys.path:
+            sys.path.append("md")
+        importedNamespace = __import__("md."+namespace)
 
     try:
         target.pythonCallInfo.success = False
