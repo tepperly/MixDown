@@ -24,92 +24,93 @@ import os, sys, unittest, mdTestUtilities
 
 if not ".." in sys.path:
     sys.path.append("..")
-import md.mdGit, md.mdLogger, md.utilityFunctions
 
-class Test_mdGit(unittest.TestCase):
+from md import git, logger, utilityFunctions
+
+class Test_git(unittest.TestCase):
     def test_isGitInstalled(self):
-        returnValue = md.mdGit.isGitInstalled()
+        returnValue = git.isGitInstalled()
         self.assertEqual(returnValue, True, "Git is not installed on your system.  All Git tests will fail.")
 
     def test_isGitRepoCase1(self):
         #Case 1: Local directory that is a git repository
-        if not md.mdGit.isGitInstalled():
+        if not git.isGitInstalled():
             self.fail("Git is not installed on your system.  All Git tests will fail.")
         #Create repository and test if is git repo
         tempDir = mdTestUtilities.makeTempDir()
         tempRepo = mdTestUtilities.createGitRepository(tempDir)
         try:
-            self.assertTrue(md.mdGit.isGitRepo(tempRepo), "md.mdGit.isGitRepo(" + tempRepo + ") should have returned true.")
+            self.assertTrue(git.isGitRepo(tempRepo), "git.isGitRepo(" + tempRepo + ") should have returned true.")
         finally:
-            md.utilityFunctions.removeDir(tempDir)
+            utilityFunctions.removeDir(tempDir)
         #Test if wrong path returns false
         falsePath = "/foo/wrong/path"
-        self.assertFalse(md.mdGit.isGitRepo(falsePath), "md.mdGit.isGitRepo(" + falsePath + ") should have returned false.")
+        self.assertFalse(git.isGitRepo(falsePath), "git.isGitRepo(" + falsePath + ") should have returned false.")
 
     def test_isGitRepoCase2(self):
         #Case 2: URL that is a git repository
-        if not md.mdGit.isGitInstalled():
+        if not git.isGitInstalled():
             self.fail("Git is not installed on your system.  All Git tests will fail.")
 
         path = "http://github.com/tepperly/MixDown.git"
-        self.assertTrue(md.mdGit.isGitRepo(path), "md.mdGit.isGitRepo(" + path + ") should have returned true.")
+        self.assertTrue(git.isGitRepo(path), "git.isGitRepo(" + path + ") should have returned true.")
         #Test if wrong path returns false
         falsePath = "http://foo/wrong/path"
-        returnValue = md.mdGit.isGitRepo(falsePath)
-        self.assertEqual(returnValue, False, "md.mdGit.isGitRepo(" + falsePath + ") should have returned false.")
+        returnValue = git.isGitRepo(falsePath)
+        self.assertEqual(returnValue, False, "git.isGitRepo(" + falsePath + ") should have returned false.")
 
     def test_isGitRepoCase3(self):
         #Case 3: Check for false positive with .bz2 files
-        if not md.mdGit.isGitInstalled():
+        if not git.isGitInstalled():
             self.fail("Git is not installed on your system.  All Git tests will fail.")
 
         #Local file
         try:
             tempDir = mdTestUtilities.makeTempDir()
             tarDir, path = mdTestUtilities.createBzipFile(tempDir)
-            self.assertFalse(md.mdGit.isGitRepo(path), "md.mdGit.isGitRepo(" + path + ") should have returned false.")
+            self.assertFalse(git.isGitRepo(path), "git.isGitRepo(" + path + ") should have returned false.")
         finally:
-            md.utilityFunctions.removeDir(tempDir)
+            utilityFunctions.removeDir(tempDir)
 
         #Remote file
         path = "http://www.eng.lsu.edu/mirrors/apache//apr/apr-util-1.3.10.tar.bz2"
-        self.assertFalse(md.mdGit.isGitRepo(path), "md.mdGit.isGitRepo(" + path + ") should have returned false.")
+        self.assertFalse(git.isGitRepo(path), "git.isGitRepo(" + path + ") should have returned false.")
 
     def test_isGitRepoCase4(self):
         #Case 4: Check for false positive with .gz files
-        if not md.mdGit.isGitInstalled():
+        if not git.isGitInstalled():
             self.fail("Git is not installed on your system.  All Git tests will fail.")
 
         #Local file
         try:
             tempDir = mdTestUtilities.makeTempDir()
             tarDir, path = mdTestUtilities.createGzipFile(tempDir)
-            self.assertFalse(md.mdGit.isGitRepo(path), "md.mdGit.isGitRepo(" + path + ") should have returned false.")
+            self.assertFalse(git.isGitRepo(path), "git.isGitRepo(" + path + ") should have returned false.")
         finally:
-            md.utilityFunctions.removeDir(tempDir)
+            utilityFunctions.removeDir(tempDir)
 
         #Remote file
         path = "http://www.eng.lsu.edu/mirrors/apache//apr/apr-util-1.3.10.tar.gz"
-        self.assertFalse(md.mdGit.isGitRepo(path), "md.mdGit.isGitRepo(" + path + ") should have returned false.")
+        self.assertFalse(git.isGitRepo(path), "git.isGitRepo(" + path + ") should have returned false.")
 
     def test_gitCheckout(self):
-        if not md.mdGit.isGitInstalled():
+        if not git.isGitInstalled():
             self.fail("Git is not installed on your system.  All Git tests will fail.")
         tempDir = mdTestUtilities.makeTempDir()
         tempRepo = mdTestUtilities.createGitRepository(tempDir)
         checkedOutRepo = os.path.join(tempDir, "checkedOut")
         try:
-            md.mdGit.gitCheckout(tempRepo, checkedOutRepo)
+            git.gitCheckout(tempRepo, checkedOutRepo)
             returnValue = os.path.exists(os.path.join(checkedOutRepo, mdTestUtilities.testFileName))
-            self.assertEqual(returnValue, True, "'" + mdTestUtilities.testFileName + "' did not exist after md.mdGit.gitCheckout(" + tempRepo + ") was called.")
+            self.assertEqual(returnValue, True, "'" + mdTestUtilities.testFileName + "' did not exist after git.gitCheckout(" + tempRepo + ") was called.")
         finally:
-            md.utilityFunctions.removeDir(tempDir)
+            utilityFunctions.removeDir(tempDir)
 
 def suite():
     suite = unittest.TestSuite()
-    suite.addTest(unittest.makeSuite(Test_mdGit))
+    suite.addTest(unittest.makeSuite(Test_git))
     return suite
 
 if __name__ == "__main__":
-    md.mdLogger.SetLogger("Console")
+    logger.SetLogger("Console")
     unittest.main()

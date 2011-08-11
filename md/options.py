@@ -24,7 +24,8 @@ import os, sys
 
 from logger import *
 
-from md import defines,utilityFunctions,target
+from md import defines,utilityFunctions
+import md
 
 class Options(object):
     def __init__(self):
@@ -143,8 +144,8 @@ class Options(object):
             elif currArg.lower() == "-v":
                 self.verbose = True
             elif utilityFunctions.isURL(currArg) or os.path.isfile(currArg) or os.path.isdir(currArg):
-                name = target.targetPathToName(currArg)
-                currTarget = target.Target(name, currArg)
+                name = md.target.targetPathToName(currArg)
+                currTarget = md.target.Target(name, currArg)
                 targetsToImport.append(currTarget)
             else:
                 Logger().writeError("Could not understand given commandline option: " + currArg, exitProgram=True)

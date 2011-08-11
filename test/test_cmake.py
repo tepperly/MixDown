@@ -24,91 +24,92 @@ import os, sys, unittest, mdTestUtilities
 
 if not ".." in sys.path:
     sys.path.append("..")
-import md.mdCMake, md.mdLogger, md.utilityFunctions
 
-class Test_mdCMake(unittest.TestCase):
+from md import cmake, logger, utilityFunctions
+
+class Test_cmake(unittest.TestCase):
     def test_isCMakeProject1(self):
-        self.assertTrue(md.mdCMake.isCMakeProject("cases/cmake/hello/hello1"), "Failed to detect CMake project.")
-        self.assertTrue(md.mdCMake.isCMakeProject("cases/cmake/hello/main"), "Failed to detect CMake project.")
-        self.assertFalse(md.mdCMake.isCMakeProject("cases/simpleGraphAutoTools/TestCaseA"), "False positive when given CMake project.")
+        self.assertTrue(cmake.isCMakeProject("cases/cmake/hello/hello1"), "Failed to detect CMake project.")
+        self.assertTrue(cmake.isCMakeProject("cases/cmake/hello/main"), "Failed to detect CMake project.")
+        self.assertFalse(cmake.isCMakeProject("cases/simpleGraphAutoTools/TestCaseA"), "False positive when given CMake project.")
 
     def test_isCMakeProject2(self):
         try:
             tempDir = mdTestUtilities.makeTempDir()
             tempFile = os.path.join(tempDir, "CMakeLists.txt")
             mdTestUtilities.createBlankFile(tempFile)
-            self.assertTrue(md.mdCMake.isCMakeProject(tempDir), "Failed to detect CMake project.")
+            self.assertTrue(cmake.isCMakeProject(tempDir), "Failed to detect CMake project.")
         finally:
-            md.utilityFunctions.removeDir(tempDir)
+            utilityFunctions.removeDir(tempDir)
 
     def test_getInstallDir1(self):
-        installDir = md.mdCMake.getInstallDir("cmake -DCMAKE_INSTALL_PREFIX=/usr/local")
+        installDir = cmake.getInstallDir("cmake -DCMAKE_INSTALL_PREFIX=/usr/local")
         self.assertEquals(installDir, "/usr/local", "Wrong install directory returned.")
 
     def test_getInstallDir2(self):
-        installDir = md.mdCMake.getInstallDir("cmake -DCMAKE_PREFIX_PATH=/usr/foo -DCMAKE_INSTALL_PREFIX=/usr/local")
+        installDir = cmake.getInstallDir("cmake -DCMAKE_PREFIX_PATH=/usr/foo -DCMAKE_INSTALL_PREFIX=/usr/local")
         self.assertEquals(installDir, "/usr/local", "Wrong install directory returned.")
 
     def test_getInstallDir3(self):
-        installDir = md.mdCMake.getInstallDir("cmake -DCMAKE_PREFIX_PATH=/usr/foo -DCMAKE_INSTALL_PREFIX=/usr/local ../")
+        installDir = cmake.getInstallDir("cmake -DCMAKE_PREFIX_PATH=/usr/foo -DCMAKE_INSTALL_PREFIX=/usr/local ../")
         self.assertEquals(installDir, "/usr/local", "Wrong install directory returned.")
 
     def test_getInstallDir4(self):
-        installDir = md.mdCMake.getInstallDir("cmake -DCMAKE_INSTALL_PREFIX=someRelativePath")
+        installDir = cmake.getInstallDir("cmake -DCMAKE_INSTALL_PREFIX=someRelativePath")
         self.assertEquals(installDir, "someRelativePath", "Wrong install directory returned.")
 
     def test_getInstallDir5(self):
-        installDir = md.mdCMake.getInstallDir("cmake -DCMAKE_INSTALL_PREFIX=")
+        installDir = cmake.getInstallDir("cmake -DCMAKE_INSTALL_PREFIX=")
         self.assertEquals(installDir, "", "Wrong install directory returned.")
 
     def test_getInstallDir6(self):
-        installDir = md.mdCMake.getInstallDir("cmake -DCMAKE_INSTALL_PREFIX= -DCMAKE_PREFIX_PATH=/usr/foo")
+        installDir = cmake.getInstallDir("cmake -DCMAKE_INSTALL_PREFIX= -DCMAKE_PREFIX_PATH=/usr/foo")
         self.assertEquals(installDir, "", "Wrong install directory returned.")
 
     def test_getInstallDir7(self):
-        installDir = md.mdCMake.getInstallDir("test && .cmake -DCMAKE_INSTALL_PREFIX= -DCMAKE_PREFIX_PATH=/usr/foo")
+        installDir = cmake.getInstallDir("test && .cmake -DCMAKE_INSTALL_PREFIX= -DCMAKE_PREFIX_PATH=/usr/foo")
         self.assertEquals(installDir, "", "Wrong install directory returned.")
 
     def test_getInstallDir8(self):
         #False positive
-        installDir = md.mdCMake.getInstallDir("./cmake --prefix=foobarbaz")
+        installDir = cmake.getInstallDir("./cmake --prefix=foobarbaz")
         self.assertEquals(installDir, "", "Wrong install directory returned.")
 
     def test_getInstallDir9(self):
         #False positive
-        installDir = md.mdCMake.getInstallDir("./configure -DCMAaKE_PREaFIX_aPATH=temp/")
+        installDir = cmake.getInstallDir("./configure -DCMAaKE_PREaFIX_aPATH=temp/")
         self.assertEquals(installDir, "", "Wrong install directory returned.")
 
     def test_getInstallDir10(self):
         #False positive
-        installDir = md.mdCMake.getInstallDir("./configure -CMAKE_PREFIX_PATH=temp/")
+        installDir = cmake.getInstallDir("./configure -CMAKE_PREFIX_PATH=temp/")
         self.assertEquals(installDir, "", "Wrong install directory returned.")
 
     def test_getInstallDir11(self):
         #False positive
-        installDir = md.mdCMake.getInstallDir("-DCMAKE_PREFIX_PATH=temp/")
+        installDir = cmake.getInstallDir("-DCMAKE_PREFIX_PATH=temp/")
         self.assertEquals(installDir, "", "Wrong install directory returned.")
 
     def test_getDependancies1(self):
         try:
             tempDir = mdTestUtilities.copyDirToTempDir("cases/cmake/hello/main")
-            dependancies = md.mdCMake.getDependancies(tempDir, verbose=False)
+            dependancies = cmake.getDependancies(tempDir, verbose=False)
             self.assertEquals(dependancies, ['hello1'], "Wrong dependancies found in CMake project")
         finally:
-            md.utilityFunctions.removeDir(tempDir)
+            utilityFunctions.removeDir(tempDir)
 
     def test_getDependancies2(self):
         try:
             tempDir = mdTestUtilities.copyDirToTempDir("cases/cmake/hello/hello1")
-            dependancies = md.mdCMake.getDependancies(tempDir, verbose=False)
+            dependancies = cmake.getDependancies(tempDir, verbose=False)
             self.assertEquals(dependancies, [], "Wrong dependancies found in CMake project")
         finally:
-            md.utilityFunctions.removeDir(tempDir)
+            utilityFunctions.removeDir(tempDir)
 
     def test_getDependancies3(self):
         try:
             tempDir = mdTestUtilities.copyDirToTempDir("cases/cmake/ogre3dBuildFilesOnly")
-            dependancies = md.mdCMake.getDependancies(tempDir, verbose=False)
+            dependancies = cmake.getDependancies(tempDir, verbose=False)
             dependancies.sort()
             self.assertEquals(dependancies, ['boost', 'carbon', 'cg', 'cocoa',
                                              'cppunit', 'd3d10', 'd3d11', 'd3d9', 'd3dcompiler', 'd3dx10',
@@ -118,31 +119,31 @@ class Test_mdCMake(unittest.TestCase):
                                              'x11', 'xaw', 'zlib', 'zzip'],
                               "Wrong dependancies found in CMake project")
         finally:
-            md.utilityFunctions.removeDir(tempDir)
+            utilityFunctions.removeDir(tempDir)
 
     def test_getDependanciesFalse1(self):
         #False positive
         try:
             tempDir = mdTestUtilities.copyDirToTempDir("cases/simpleGraphAutoTools/TestCaseA")
-            dependancies = md.mdCMake.getDependancies(tempDir, verbose=False)
+            dependancies = cmake.getDependancies(tempDir, verbose=False)
             self.assertEquals(dependancies, None, "Wrong dependancies found in CMake project")
         finally:
-            md.utilityFunctions.removeDir(tempDir)
+            utilityFunctions.removeDir(tempDir)
 
     def test_getDependanciesFalse2(self):
         #False positive
         try:
             tempDir = mdTestUtilities.copyDirToTempDir("cases/simpleGraphAutoTools/TestCaseB")
-            dependancies = md.mdCMake.getDependancies(tempDir, verbose=False)
+            dependancies = cmake.getDependancies(tempDir, verbose=False)
             self.assertEquals(dependancies, None, "Wrong dependancies found in CMake project")
         finally:
-            md.utilityFunctions.removeDir(tempDir)
+            utilityFunctions.removeDir(tempDir)
 
 def suite():
     suite = unittest.TestSuite()
-    suite.addTest(unittest.makeSuite(Test_mdCMake))
+    suite.addTest(unittest.makeSuite(Test_cmake))
     return suite
 
 if __name__ == "__main__":
-    md.mdLogger.SetLogger("Console")
+    logger.SetLogger("Console")
     unittest.main()

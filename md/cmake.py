@@ -22,6 +22,8 @@
 
 import os, re
 
+from md import target, defines, make
+
 from logger import *
 
 def isCMakeProject(path):

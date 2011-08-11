@@ -21,6 +21,7 @@
 # Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 
 import os, collections, Queue
+
 from md import commands, target, utilityFunctions
 
 from logger import *
@@ -47,11 +48,11 @@ class Project(object):
                 Logger().writeMessage("Proper use: -s[Semi-colon delimited list of Skip Step pairs]")
                 Logger().writeMessage("Skip Step Pair: [targetName]:[Steps to skip, comma delimited]")
                 return False
-            target = self.getTarget(pair[0])
-            if target == None:
+            targets = self.getTarget(pair[0])
+            if targets == None:
                 Logger().writeError("Target not found in -s commandline option: " + pair[0])
                 return False
-            target.skipSteps = pair[1].split(",")
+            targets.skipSteps = pair[1].split(",")
         return True
 
     def validate(self, options):
@@ -62,8 +63,8 @@ class Project(object):
                 return False
             if not self.__validateDependsOnLists():
                 return False
-            for target in self.targets:
-                if not target.validate(options):
+            for targets in self.targets:
+                if not targets.validate(options):
                     return False
             self.__validated = True
             return True
@@ -77,22 +78,22 @@ class Project(object):
                 return False
             self.__assignDepthToTargetList()
             self.targets = self.__sortTargetList(self.targets)
-            for target in self.targets:
-                if not target.examine(options):
+            for targets in self.targets:
+                if not targets.examine(options):
                     return False
             self.__examined = True
             return True
 
-    def __addTarget(self, target, lineCount=0):
-        if target.name == "" or target.path == "":
+    def __addTarget(self, targets, lineCount=0):
+        if targets.name == "" or targets.path == "":
             Logger().writeError("New target started before previous was finished, all targets require atleast 'Name' and 'Path' to be declared", "", "", self.path, lineCount)
             return False
 
         for currTarget in self.targets:
-            if target.normalizeName(target.name) == target.normalizeName(currTarget.name):
+            if target.normalizeName(targets.name) == target.normalizeName(currTarget.name):
                 Logger().writeError("Cannot have more than one project target by the same name", currTarget.name, "", self.path, lineCount)
                 return False
-        self.targets.append(target)
+        self.targets.append(targets)
         return True
 
     def getTarget(self, targetName):
@@ -196,10 +197,10 @@ class Project(object):
 
     def __str__(self):
         retStr = ""
-        for target in self.targets:
+        for targets in self.targets:
             if len(retStr) != 0:
                 retStr += "\n"
-            retStr += str(target)
+            retStr += str(targets)
         return retStr
 
     def __validateDependsOnLists(self):
@@ -239,8 +240,8 @@ class Project(object):
 
     def __assignDepthToTargetList(self):
         q = Queue.Queue()
-        for target in self.targets:
-            q.put(target.name)
+        for targets in self.targets:
+            q.put(targets.name)
             while not q.empty():
                 currName = q.get()
                 currTarget = self.getTarget(currName)

@@ -24,36 +24,37 @@ import os, shutil, sys, tempfile
 
 if not ".." in sys.path:
     sys.path.append("..")
-import md.utilityFunctions
+
+from md import utilityFunctions
 
 testFileName = "testFile"
 
 def createTarFile(tempDir):
     tarDir = os.path.join(tempDir, "tar")
     os.mkdir(tarDir)
-    md.utilityFunctions.executeSubProcess("touch tar/" + testFileName, tempDir)
-    md.utilityFunctions.executeSubProcess("tar -cf test.tar tar", tempDir)
+    utilityFunctions.executeSubProcess("touch tar/" + testFileName, tempDir)
+    utilityFunctions.executeSubProcess("tar -cf test.tar tar", tempDir)
     return tarDir, "test.tar"
 
 def createGzipFile(tempDir):
     tarDir = os.path.join(tempDir, "tar")
     os.mkdir(tarDir)
-    md.utilityFunctions.executeSubProcess("touch tar/" + testFileName, tempDir)
-    md.utilityFunctions.executeSubProcess("tar -czf test.tgz tar", tempDir)
+    utilityFunctions.executeSubProcess("touch tar/" + testFileName, tempDir)
+    utilityFunctions.executeSubProcess("tar -czf test.tgz tar", tempDir)
     return tarDir, "test.tgz"
 
 def createBzipFile(tempDir):
     tarDir = os.path.join(tempDir, "tar")
     os.mkdir(tarDir)
-    md.utilityFunctions.executeSubProcess("touch tar/" + testFileName, tempDir)
-    md.utilityFunctions.executeSubProcess("tar -cjf test.tar.bz2 tar", tempDir)
+    utilityFunctions.executeSubProcess("touch tar/" + testFileName, tempDir)
+    utilityFunctions.executeSubProcess("tar -cjf test.tar.bz2 tar", tempDir)
     return tarDir, "test.tar.bz2"
 
 def createZipFile(tempDir):
     zipDir = os.path.join(tempDir, "zip")
     os.mkdir(zipDir)
-    md.utilityFunctions.executeSubProcess("touch zip/" + testFileName, tempDir)
-    md.utilityFunctions.executeSubProcess("zip -q -r test.zip ./zip", tempDir)
+    utilityFunctions.executeSubProcess("touch zip/" + testFileName, tempDir)
+    utilityFunctions.executeSubProcess("zip -q -r test.zip ./zip", tempDir)
     return zipDir, "test.zip"
 
 def createCvsRepository(tempDir):
@@ -62,27 +63,27 @@ def createCvsRepository(tempDir):
     os.mkdir(repoPath)
     os.mkdir(projPath)
 
-    md.utilityFunctions.executeSubProcess("cvs -d " + repoPath + " init", tempDir)
-    md.utilityFunctions.executeSubProcess("touch " + testFileName, projPath)
-    md.utilityFunctions.executeSubProcess("cvs -d " + repoPath + " -Q import -m message project vendor start", projPath)
+    utilityFunctions.executeSubProcess("cvs -d " + repoPath + " init", tempDir)
+    utilityFunctions.executeSubProcess("touch " + testFileName, projPath)
+    utilityFunctions.executeSubProcess("cvs -d " + repoPath + " -Q import -m message project vendor start", projPath)
     return repoPath
 
 def createGitRepository(tempDir):
     repoPath = os.path.join(tempDir, "repo")
     os.mkdir(repoPath)
-    md.utilityFunctions.executeSubProcess("git init --quiet", repoPath)
-    md.utilityFunctions.executeSubProcess("touch " + testFileName, repoPath)
-    md.utilityFunctions.executeSubProcess("git add " + testFileName, repoPath)
-    md.utilityFunctions.executeSubProcess("git commit -m message --quiet", repoPath)
+    utilityFunctions.executeSubProcess("git init --quiet", repoPath)
+    utilityFunctions.executeSubProcess("touch " + testFileName, repoPath)
+    utilityFunctions.executeSubProcess("git add " + testFileName, repoPath)
+    utilityFunctions.executeSubProcess("git commit -m message --quiet", repoPath)
     return repoPath
 
 def createHgRepository(tempDir):
     repoPath = os.path.join(tempDir, "repo")
     os.mkdir(repoPath)
-    md.utilityFunctions.executeSubProcess("hg init --quiet", repoPath)
-    md.utilityFunctions.executeSubProcess("touch " + testFileName, repoPath)
-    md.utilityFunctions.executeSubProcess("hg add --quiet " + testFileName, repoPath)
-    md.utilityFunctions.executeSubProcess("hg commit -m message --quiet", repoPath)
+    utilityFunctions.executeSubProcess("hg init --quiet", repoPath)
+    utilityFunctions.executeSubProcess("touch " + testFileName, repoPath)
+    utilityFunctions.executeSubProcess("hg add --quiet " + testFileName, repoPath)
+    utilityFunctions.executeSubProcess("hg commit -m message --quiet", repoPath)
     return repoPath
 
 def createSvnRepository(tempDir):
@@ -92,9 +93,9 @@ def createSvnRepository(tempDir):
     projPath = os.path.join(tempDir, "project")
     os.mkdir(projPath)
 
-    md.utilityFunctions.executeSubProcess("svnadmin create " + repoPath, tempDir)
-    md.utilityFunctions.executeSubProcess("touch testFile", projPath)
-    md.utilityFunctions.executeSubProcess("svn import --quiet --non-interactive " + projPath + " " + repoURL + " -m message", tempDir)
+    utilityFunctions.executeSubProcess("svnadmin create " + repoPath, tempDir)
+    utilityFunctions.executeSubProcess("touch testFile", projPath)
+    utilityFunctions.executeSubProcess("svn import --quiet --non-interactive " + projPath + " " + repoURL + " -m message", tempDir)
     return repoURL
 
 def createBlankFile(path):

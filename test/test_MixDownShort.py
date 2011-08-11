@@ -23,7 +23,8 @@
 import os, socket, sys, unittest, mdTestUtilities
 if not ".." in sys.path:
     sys.path.append("..")
-import md.mdLogger, md.utilityFunctions
+
+from md import logger, utilityFunctions
 
 class Test_MixDownShort(unittest.TestCase):
     def test_cmakeHello(self):
@@ -33,10 +34,10 @@ class Test_MixDownShort(unittest.TestCase):
             os.environ["PATH"] = mixDownPath + ":" + origPath
 
             tempDir = mdTestUtilities.copyDirToTempDir("cases/cmake/hello")
-            importRC = md.utilityFunctions.executeSubProcess("MixDown --import " + os.path.join(tempDir, "main") + " " + os.path.join(tempDir, "hello1"), tempDir)
+            importRC = utilityFunctions.executeSubProcess("MixDown --import " + os.path.join(tempDir, "main") + " " + os.path.join(tempDir, "hello1"), tempDir)
             self.assertEquals(os.path.exists(os.path.join(tempDir, "main.md")), True, "MixDown project file does not exist after importing CMake Hello test case.")
-            buildRC = md.utilityFunctions.executeSubProcess("MixDown main.md -ptestPrefix", tempDir)
-            cleanRC = md.utilityFunctions.executeSubProcess("MixDown --clean main.md", tempDir)
+            buildRC = utilityFunctions.executeSubProcess("MixDown main.md -ptestPrefix", tempDir)
+            cleanRC = utilityFunctions.executeSubProcess("MixDown --clean main.md", tempDir)
             self.assertEquals(importRC, 0, "CMake Hello test case failed import.")
             self.assertEquals(buildRC, 0, "CMake Hello test case failed build.")
             self.assertEquals(cleanRC, 0, "CMake Hello test case failed clean.")
@@ -46,7 +47,7 @@ class Test_MixDownShort(unittest.TestCase):
             self.assertEquals(os.path.exists(os.path.join(binDir, "hello")), True, "Executable does not exist after building CMake Hello test case.")
             self.assertEquals(os.path.exists(os.path.join(libDir, "libhello1.a")), True, "Library does not exist after building CMake Hello test case.")
         finally:
-            md.utilityFunctions.removeDir(tempDir)
+            utilityFunctions.removeDir(tempDir)
             os.environ["PATH"] = origPath
 
     def test_AutoToolsSimpleGraph(self):
@@ -56,10 +57,10 @@ class Test_MixDownShort(unittest.TestCase):
             os.environ["PATH"] = mixDownPath + ":" + origPath
 
             tempDir = mdTestUtilities.copyDirToTempDir("cases/simpleGraphAutoTools")
-            importRC = md.utilityFunctions.executeSubProcess("MixDown --import " + os.path.join(tempDir, "TestCaseA") + " " + os.path.join(tempDir, "TestCaseB") + " " + os.path.join(tempDir, "TestCaseC") + " " + os.path.join(tempDir, "TestCaseD"), tempDir)
+            importRC = utilityFunctions.executeSubProcess("MixDown --import " + os.path.join(tempDir, "TestCaseA") + " " + os.path.join(tempDir, "TestCaseB") + " " + os.path.join(tempDir, "TestCaseC") + " " + os.path.join(tempDir, "TestCaseD"), tempDir)
             self.assertEquals(os.path.exists(os.path.join(tempDir, "TestCaseA.md")), True, "MixDown project file does not exist after importing AutoTools Simple Graph test case.")
-            buildRC = md.utilityFunctions.executeSubProcess("MixDown TestCaseA.md -ptestPrefix", tempDir)
-            cleanRC = md.utilityFunctions.executeSubProcess("MixDown --clean TestCaseA.md", tempDir)
+            buildRC = utilityFunctions.executeSubProcess("MixDown TestCaseA.md -ptestPrefix", tempDir)
+            cleanRC = utilityFunctions.executeSubProcess("MixDown --clean TestCaseA.md", tempDir)
             self.assertEquals(importRC, 0, "AutoTools Simple Graph test case failed import.")
             self.assertEquals(buildRC, 0, "AutoTools Simple Graph test case failed build.")
             self.assertEquals(cleanRC, 0, "AutoTools Simple Graph test case failed clean.")
@@ -70,7 +71,7 @@ class Test_MixDownShort(unittest.TestCase):
             self.assertEquals(os.path.exists(os.path.join(binDir, "TestCaseC")), True, "Executable C does not exist after building AutoTools Simple Graph test case.")
             self.assertEquals(os.path.exists(os.path.join(binDir, "TestCaseD")), True, "Executable D does not exist after building AutoTools Simple Graph test case.")
         finally:
-            md.utilityFunctions.removeDir(tempDir)
+            utilityFunctions.removeDir(tempDir)
             os.environ["PATH"] = origPath
 
 def suite():
@@ -79,5 +80,5 @@ def suite():
     return suite
 
 if __name__ == "__main__":
-    md.mdLogger.SetLogger("Console")
+    logger.SetLogger("Console")
     unittest.main()

@@ -42,17 +42,17 @@ def main():
         timeStarted = time.time()
 
         if option.importer:
-            project, partialImport = importer.importTargets(option, targetsToImport)
+            projects, partialImport = importer.importTargets(option, targetsToImport)
             if project == None or partialImport:
                 succeeded = False
         else:
             if option.cleanMixDown:
                 cleanMixDown(option)
-            project = setup(option)
-            if project == None:
+            projects = setup(option)
+            if projects == None:
                 succeeded = False
             else:
-                for target in reversed(project.targets):
+                for target in reversed(projects.targets):
                     if option.cleanTargets:
                         cleanStep = target.findBuildStep("clean")
                         succeeded = commands.buildStepActor(target, cleanStep, option)
@@ -70,20 +70,20 @@ def main():
         timeElapsed = timeFinished - timeStarted
 
         message = "Project "
-        if project != None:
-            message += project.name
+        if projects != None:
+            message += projects.name
 
         if not succeeded:
             message += " failed."
         else:
             message += " succeeded."
             if option.importer:
-                logger.Logger().writeMessage("\nProject " + project.name + " has been imported to file " + project.path)
+                logger.Logger().writeMessage("\nProject " + projects.name + " has been imported to file " + projects.path)
             elif option.cleanTargets:
-                logger.Logger().writeMessage("\n" + project.name + " has been cleaned in " + os.path.abspath(option.buildDir))
+                logger.Logger().writeMessage("\n" + projects.name + " has been cleaned in " + os.path.abspath(option.buildDir))
             else:
-                logger.Logger().writeMessage("\n" + project.name + " has been built in " + os.path.abspath(option.buildDir))
-                logger.Logger().writeMessage(project.name + " has been installed to " + os.path.abspath(option.getDefine(defines.mdPrefix[0])))
+                logger.Logger().writeMessage("\n" + projects.name + " has been built in " + os.path.abspath(option.buildDir))
+                logger.Logger().writeMessage(projects.name + " has been installed to " + os.path.abspath(option.getDefine(defines.mdPrefix[0])))
         message = "\nTotal time " + logger.secondsToHMS(timeElapsed) + "\n" + message
         logger.Logger().writeMessage(message)
         if partialImport:
@@ -140,7 +140,7 @@ def setup(option):
     print os.path.dirname(sys.argv[0])
     sys.path.append(os.path.dirname(sys.argv[0]))
 
-    return project
+    return projects
 
 def cleanMixDown(option):
     try:

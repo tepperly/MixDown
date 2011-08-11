@@ -24,47 +24,48 @@ import os, sys, unittest, mdTestUtilities
 
 if not ".." in sys.path:
     sys.path.append("..")
-import md.mdLogger, md.mdSvn, md.utilityFunctions
 
-class Test_mdSvn(unittest.TestCase):
+from md import logger, svn, utilityFunctions
+
+class Test_svn(unittest.TestCase):
     def test_isSvnInstalled(self):
-        returnValue = md.mdSvn.isSvnInstalled()
+        returnValue = svn.isSvnInstalled()
         self.assertEqual(returnValue, True, "Svn is not installed on your system.  All Svn tests will fail.")
 
     def test_isSvnRepo(self):
-        if not md.mdSvn.isSvnInstalled():
+        if not svn.isSvnInstalled():
             self.fail("Svn is not installed on your system.  All Svn tests will fail.")
         #Create repository and test if is svn repo
         try:
             tempDir = mdTestUtilities.makeTempDir()
             tempRepo = mdTestUtilities.createSvnRepository(tempDir)
-            returnValue = md.mdSvn.isSvnRepo(tempRepo)
-            self.assertEqual(returnValue, True, "md.mdSvn.isSvnRepo(" + tempRepo + ") should have returned true.")
+            returnValue = svn.isSvnRepo(tempRepo)
+            self.assertEqual(returnValue, True, "svn.isSvnRepo(" + tempRepo + ") should have returned true.")
         finally:
-            md.utilityFunctions.removeDir(tempDir)
+            utilityFunctions.removeDir(tempDir)
         #Test if wrong path returns false
         falsePath = "http://foo/wrong/path"
-        returnValue = md.mdSvn.isSvnRepo(falsePath)
-        self.assertEqual(returnValue, False, "md.mdSvn.isSvnRepo(" + falsePath + ") should have returned false.")
+        returnValue = svn.isSvnRepo(falsePath)
+        self.assertEqual(returnValue, False, "svn.isSvnRepo(" + falsePath + ") should have returned false.")
 
     def test_svnCheckout(self):
-        if not md.mdSvn.isSvnInstalled():
+        if not svn.isSvnInstalled():
             self.fail("Svn is not installed on your system.  All Svn tests will fail.")
         try:
             tempDir = mdTestUtilities.makeTempDir()
             tempRepo = mdTestUtilities.createSvnRepository(tempDir)
             checkedOutRepo = os.path.join(tempDir, "checkedOut")
-            md.mdSvn.svnCheckout(tempRepo, checkedOutRepo)
+            svn.svnCheckout(tempRepo, checkedOutRepo)
             returnValue = os.path.exists(os.path.join(checkedOutRepo, mdTestUtilities.testFileName))
-            self.assertEqual(returnValue, True, "'" + mdTestUtilities.testFileName + "' did not exist after md.mdSvn.svnCheckout(" + tempRepo + ") was called.")
+            self.assertEqual(returnValue, True, "'" + mdTestUtilities.testFileName + "' did not exist after svn.svnCheckout(" + tempRepo + ") was called.")
         finally:
-            md.utilityFunctions.removeDir(tempDir)
+            utilityFunctions.removeDir(tempDir)
 
 def suite():
     suite = unittest.TestSuite()
-    suite.addTest(unittest.makeSuite(Test_mdSvn))
+    suite.addTest(unittest.makeSuite(Test_svn))
     return suite
 
 if __name__ == "__main__":
-    md.mdLogger.SetLogger("Console")
+    logger.SetLogger("Console")
     unittest.main()

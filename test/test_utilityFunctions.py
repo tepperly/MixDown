@@ -24,64 +24,64 @@ import os, sys, unittest
 
 if not ".." in sys.path:
     sys.path.append("..")
-import md.mdLogger, md.utilityFunctions
+from md import logger, utilityFunctions
 
 class Test_utilityFunctions(unittest.TestCase):
     def test_URLToFileName01(self):
         url = "http://sourceforge.net/projects/pymol/files/pymol/1.4.1/pymol-v1.4.1.tar.bz2/download"
-        filename = md.utilityFunctions.URLToFilename(url)
+        filename = utilityFunctions.URLToFilename(url)
         self.assertEquals(filename, "pymol-v1.4.1.tar.bz2", "Wrong filename '" + filename + "' returned from function")
 
     def test_URLToFileName02(self):
         url = "http://sf.net/projects/pymol/files/pymol/1.4.1/pymol-v1.4.1.tar.bz2/download"
-        filename = md.utilityFunctions.URLToFilename(url)
+        filename = utilityFunctions.URLToFilename(url)
         self.assertEquals(filename, "pymol-v1.4.1.tar.bz2", "Wrong filename '" + filename + "' returned from function")
 
     def test_URLToFileName03(self):
         url = "http://www.sourceforge.net/projects/pymol/files/pymol/1.4.1/pymol-v1.4.1.tar.bz2/download"
-        filename = md.utilityFunctions.URLToFilename(url)
+        filename = utilityFunctions.URLToFilename(url)
         self.assertEquals(filename, "pymol-v1.4.1.tar.bz2", "Wrong filename '" + filename + "' returned from function")
 
     def test_URLToFileName04(self):
         url = "http://www.sourceforge.net/projects/pymol/files/pymol/1.4.1/pymol-v1.4.1.tar/download"
-        filename = md.utilityFunctions.URLToFilename(url)
+        filename = utilityFunctions.URLToFilename(url)
         self.assertEquals(filename, "pymol-v1.4.1.tar", "Wrong filename '" + filename + "' returned from function")
 
     def test_URLToFileName05(self):
         url = "http://www.sourceforge.net/projects/pymol/files/pymol/1.4.1/pymol-v1.4.1.tb2/download"
-        filename = md.utilityFunctions.URLToFilename(url)
+        filename = utilityFunctions.URLToFilename(url)
         self.assertEquals(filename, "pymol-v1.4.1.tb2", "Wrong filename '" + filename + "' returned from function")
 
     def test_URLToFileName06(self):
         url = "http://www.sourceforge.net/projects/pymol/files/pymol/1.4.1/pymol-v1.4.1.tbz/download"
-        filename = md.utilityFunctions.URLToFilename(url)
+        filename = utilityFunctions.URLToFilename(url)
         self.assertEquals(filename, "pymol-v1.4.1.tbz", "Wrong filename '" + filename + "' returned from function")
 
     def test_URLToFileName07(self):
         url = "http://www.sourceforge.net/projects/pymol/files/pymol/1.4.1/pymol-v1.4.1.tar.gz/download"
-        filename = md.utilityFunctions.URLToFilename(url)
+        filename = utilityFunctions.URLToFilename(url)
         self.assertEquals(filename, "pymol-v1.4.1.tar.gz", "Wrong filename '" + filename + "' returned from function")
 
     def test_URLToFileName08(self):
         url = "http://www.sourceforge.net/projects/pymol/files/pymol/1.4.1/pymol-v1.4.1.tgz/download"
-        filename = md.utilityFunctions.URLToFilename(url)
+        filename = utilityFunctions.URLToFilename(url)
         self.assertEquals(filename, "pymol-v1.4.1.tgz", "Wrong filename '" + filename + "' returned from function")
 
     def test_URLToFileName09(self):
         #Check for false positive
         url = "http://www.sourceforge.net/projects/pymol/files/pymol/1.4.1/pymol-v1.4.1/download"
-        filename = md.utilityFunctions.URLToFilename(url)
+        filename = utilityFunctions.URLToFilename(url)
         self.assertEquals(filename, "download", "Wrong filename '" + filename + "' returned from function")
 
     def test_URLToFileName10(self):
         #Check for false positive
         url = "http://www.oioioi.net/projects/pymol/files/pymol/1.4.1/pymol-v1.4.1.tar.bz2/download"
-        filename = md.utilityFunctions.URLToFilename(url)
+        filename = utilityFunctions.URLToFilename(url)
         self.assertEquals(filename, "download", "Wrong filename '" + filename + "' returned from function")
 
     def test_URLToFileName11(self):
         url = "http://www.sf.net/projects/pymol/files/pymol/1.4.1/pymol-v1.4.1.tar.bz2"
-        filename = md.utilityFunctions.URLToFilename(url)
+        filename = utilityFunctions.URLToFilename(url)
         self.assertEquals(filename, "pymol-v1.4.1.tar.bz2", "Wrong filename '" + filename + "' returned from function")
 
 def suite():
@@ -90,5 +90,5 @@ def suite():
     return suite
 
 if __name__ == "__main__":
-    md.mdLogger.SetLogger("Console")
+    logger.SetLogger("Console")
     unittest.main()

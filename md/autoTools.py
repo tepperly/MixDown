@@ -21,7 +21,6 @@
 # Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 
 import os, re
-import make, defines, target, utilityFunctions
 
 from md import  make, defines, target, utilityFunctions
 from logger import *

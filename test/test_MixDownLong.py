@@ -23,7 +23,7 @@
 import os, socket, sys, unittest, mdTestUtilities
 if not ".." in sys.path:
     sys.path.append("..")
-import md.mdLogger, md.utilityFunctions
+from md import logger, utilityFunctions
 
 class Test_MixDownLong(unittest.TestCase):
     def test_subversion(self):
@@ -44,28 +44,28 @@ class Test_MixDownLong(unittest.TestCase):
             tempDir = mdTestUtilities.makeTempDir()
             downloadDir = os.path.join(tempDir, "testDownloadFiles")
 
-            svnPath = md.utilityFunctions.downloadFile(svnURL, downloadDir)
+            svnPath = utilityFunctions.downloadFile(svnURL, downloadDir)
             self.assertNotEquals(svnPath, "", "Svn failed to download")
 
-            aprPath = md.utilityFunctions.downloadFile(aprURL, downloadDir)
+            aprPath = utilityFunctions.downloadFile(aprURL, downloadDir)
             self.assertNotEquals(aprPath, "", "Apr failed to download")
 
-            aprUtilPath = md.utilityFunctions.downloadFile(aprUtilURL, downloadDir)
+            aprUtilPath = utilityFunctions.downloadFile(aprUtilURL, downloadDir)
             self.assertNotEquals(aprUtilPath, "", "Apr Util failed to download")
 
-            neonPath = md.utilityFunctions.downloadFile(neonURL, downloadDir)
+            neonPath = utilityFunctions.downloadFile(neonURL, downloadDir)
             self.assertNotEquals(neonPath, "", "Neon failed to download")
 
-            sqlitePath = md.utilityFunctions.downloadFile(sqliteURL, downloadDir)
+            sqlitePath = utilityFunctions.downloadFile(sqliteURL, downloadDir)
             self.assertNotEquals(sqlitePath, "", "Sqlite failed to download")
 
-            importRC = md.utilityFunctions.executeSubProcess("MixDown --import " + svnPath + " " + aprPath + " " + aprUtilPath + " " + neonPath + " " + sqlitePath, tempDir)
+            importRC = utilityFunctions.executeSubProcess("MixDown --import " + svnPath + " " + aprPath + " " + aprUtilPath + " " + neonPath + " " + sqlitePath, tempDir)
             self.assertEquals(importRC, 0, "Subversion test case failed import.")
 
-            buildRC = md.utilityFunctions.executeSubProcess("MixDown subversion-1.6.12.md -ptestPrefix" + skipAPRPreconfig, tempDir)
+            buildRC = utilityFunctions.executeSubProcess("MixDown subversion-1.6.12.md -ptestPrefix" + skipAPRPreconfig, tempDir)
             self.assertEquals(buildRC, 0, "Subversion test case failed build.")
 
-            cleanRC = md.utilityFunctions.executeSubProcess("MixDown --clean subversion-1.6.12.md", tempDir)
+            cleanRC = utilityFunctions.executeSubProcess("MixDown --clean subversion-1.6.12.md", tempDir)
             self.assertEquals(cleanRC, 0, "Subversion test case failed clean.")
 
             prefix = os.path.join(tempDir, "testPrefix")
@@ -73,7 +73,7 @@ class Test_MixDownLong(unittest.TestCase):
             libDir = os.path.join(prefix, "lib")
             self.assertEquals(os.path.exists(os.path.join(binDir, "svn")), True, "Executable does not exist after building CMake Hello test case.")
         finally:
-            md.utilityFunctions.removeDir(tempDir)
+            utilityFunctions.removeDir(tempDir)
             os.environ["PATH"] = origPath
 
 def suite():
@@ -82,5 +82,5 @@ def suite():
     return suite
 
 if __name__ == "__main__":
-    md.mdLogger.SetLogger("Console")
+    logger.SetLogger("Console")
     unittest.main()
