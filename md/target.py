@@ -138,7 +138,7 @@ class Target(object):
     def __str__(self):
         retStr = ""
         if self.comment != "":
-            retStr += "#" + self.comment
+            retStr += "#" + self.comment + "\n"
         retStr += "Name: " + self.name + "\n"
         if self.origPath != "":
             retStr += "Path: " + self.origPath + "\n"
