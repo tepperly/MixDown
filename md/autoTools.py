@@ -48,7 +48,7 @@ def generateConfigureFiles(path, name, verbose=True):
             return False
     return True
 
-def getDependancies(path, name="", verbose=True):
+def getDependencies(path, name="", verbose=True):
     deps = []
     if not os.path.isdir(path) or not os.path.exists(os.path.join(path, "configure")):
         return None

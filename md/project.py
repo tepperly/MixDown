@@ -142,7 +142,7 @@ class Project(object):
                         currTarget.outputPathSpecified = True
                     elif currName == "dependson":
                         if currTarget.dependsOn != []:
-                            logger.writeError("Project targets can only have one 'DependsOn' defined (use a comma delimited list for multiple dependancies)", "", "", self.path, lineCount)
+                            logger.writeError("Project targets can only have one 'DependsOn' defined (use a comma delimited list for multiple dependencies)", "", "", self.path, lineCount)
                             return False
                         if currPair[1] != "":
                             dependsOnList = utilityFunctions.stripItemsInList(currPair[1].split(","))
@@ -206,19 +206,19 @@ class Project(object):
 
         for currTarget in self.targets:
             normalizedName = target.normalizeName(currTarget.name)
-            checkedDependancies = []
+            checkedDependencies = []
             for dependency in currTarget.dependsOn:
                 normalizedDepedancy = target.normalizeName(dependency)
                 if normalizedDepedancy == normalizedName:
                     logger.writeError("Target cannot depend on itself", currTarget.name, "", self.path)
                     return False
-                if normalizedDepedancy in checkedDependancies:
+                if normalizedDepedancy in checkedDependencies:
                     logger.writeError("Target has duplicate dependency '" + dependency + "'", currTarget.name, "", self.path)
                     return False
                 if self.getTarget(dependency) is None:
                     logger.writeError("Target has non-existant dependency '" + dependency + "'", currTarget.name, "", self.path)
                     return False
-                checkedDependancies.append(normalizedDepedancy)
+                checkedDependencies.append(normalizedDepedancy)
 
         path = [target.normalizeName(self.targets[0].name)]
         return self.__searchPathsForCycles(path)
@@ -226,10 +226,10 @@ class Project(object):
     def __searchPathsForCycles(self, path):
         currTarget = self.getTarget(path[len(path)-1])
         for dependency in currTarget.dependsOn:
-            normalizedDependancy = target.normalizeName(dependency)
-            if normalizedDependancy in path:
+            normalizedDependency = target.normalizeName(dependency)
+            if normalizedDependency in path:
                 return False
-            path.append(normalizedDependancy)
+            path.append(normalizedDependency)
             if not self.__searchPathsForCycles(path):
                 return False
             path.pop()
