@@ -88,8 +88,8 @@ def getPreconfigureCommand(path):
 
 def getConfigureCommand(target):
     command = "./configure " + defines.surround(defines.autoToolsPrefix[0]) + " " + defines.surround(defines.autoToolsCompilers[0])
-    for dependancy in target.dependsOn:
-        command += " --with-" + dependancy + "=" + defines.surround(defines.mdPrefix[0])
+    for dependency in target.dependsOn:
+        command += " --with-" + dependency + "=" + defines.surround(defines.mdPrefix[0])
     return command
 
 def getBuildCommand():

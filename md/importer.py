@@ -75,19 +75,19 @@ def importTargets(options, targetsToImport):
         #Find actual dependancies
         for possibleDependancy in possibleDeps:
             if getTarget(possibleDependancy, finalTargets + targetsToImport):
-                logger.writeMessage("Known dependancy found (" + possibleDependancy + ")", target.name)
+                logger.writeMessage("Known dependency found (" + possibleDependancy + ")", target.name)
                 target.dependsOn.append(possibleDependancy)
                 continue
             elif options.interactive and possibleDependancy in ignoredTargets:
-                logger.writeMessage("Previously ignored dependancy found (" + possibleDependancy + ")", target.name)
+                logger.writeMessage("Previously ignored dependency found (" + possibleDependancy + ")", target.name)
                 continue
 
             if searchForPossibleAliasInList(possibleDependancy, finalTargets + targetsToImport, options.interactive):
                 target.dependsOn.append(possibleDependancy)
             elif not options.interactive:
-                logger.writeMessage("Ignoring unknown dependancy (" + possibleDependancy + ")", target.name)
+                logger.writeMessage("Ignoring unknown dependency (" + possibleDependancy + ")", target.name)
             else:
-                logger.writeMessage("Unknown dependancy found (" + possibleDependancy + ")", target.name)
+                logger.writeMessage("Unknown dependency found (" + possibleDependancy + ")", target.name)
                 userInput = raw_input(possibleDependancy + ": Input location, target name, or blank to ignore:").strip()
                 if userInput == "":
                     ignoredTargets.append(possibleDependancy)
