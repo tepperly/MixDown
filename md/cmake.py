@@ -47,7 +47,7 @@ def _findAllCMakeFiles(path, listToBeFilled):
         elif name.endswith(".cmake"):
             listToBeFilled.append(fullPath)
 
-def getDependancies(path, name="", verbose=True):
+def getDependencies(path, name="", verbose=True):
     deps = []
     if not os.path.isdir(path):
         return None
@@ -55,7 +55,7 @@ def getDependancies(path, name="", verbose=True):
         return None
 
     if verbose:
-        logger.writeMessage("Analyzing CMake files for dependancies...", name)
+        logger.writeMessage("Analyzing CMake files for dependencies...", name)
 
     fileList = list()
     _findAllCMakeFiles(path, fileList)

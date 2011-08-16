@@ -217,7 +217,7 @@ class Test_project(unittest.TestCase):
         finally:
             utilityFunctions.removeDir(tempDir)
 
-    def test_validateMultiTargetProjectWithStepsAndDependancies(self):
+    def test_validateMultiTargetProjectWithStepsAndDependencies(self):
         projectFileContents = textwrap.dedent("""
                                             Name: a
                                             Path: a-1.11.tar.gz
@@ -269,7 +269,7 @@ class Test_project(unittest.TestCase):
         finally:
             utilityFunctions.removeDir(tempDir)
 
-    def test_validateMultiTargetProjectWithoutStepsOrDependancies(self):
+    def test_validateMultiTargetProjectWithoutStepsOrDependencies(self):
         projectFileContents = textwrap.dedent("""
                                             Name: a
                                             Path: a-1.11.tar.gz
@@ -444,7 +444,7 @@ class Test_project(unittest.TestCase):
             projects = project.Project(projectFilePath)
             option = options.Options()
             self.assertTrue(projects.read(), "Project file could not be read")
-            self.assertFalse(projects.validate(option), "Project validated when it should not have due to cyclical dependancy graph")
+            self.assertFalse(projects.validate(option), "Project validated when it should not have due to cyclical dependency graph")
         finally:
             utilityFunctions.removeDir(tempDir)
 
@@ -468,7 +468,7 @@ class Test_project(unittest.TestCase):
             projects = project.Project(projectFilePath)
             option = options.Options()
             self.assertTrue(projects.read(), "Project file could not be read")
-            self.assertFalse(projects.validate(option), "Project validated when it should not have due to cyclical dependancy graph")
+            self.assertFalse(projects.validate(option), "Project validated when it should not have due to cyclical dependency graph")
         finally:
             utilityFunctions.removeDir(tempDir)
 
@@ -508,7 +508,7 @@ class Test_project(unittest.TestCase):
         finally:
             utilityFunctions.removeDir(tempDir)
 
-    def test_detectProjectWithNonExistantDependancy(self):
+    def test_detectProjectWithNonExistantDependency(self):
         projectFileContents = textwrap.dedent("""
                                             Name: a
                                             Path: a-1.11.tar.gz
@@ -520,7 +520,7 @@ class Test_project(unittest.TestCase):
             projects = project.Project(projectFilePath)
             option = options.Options()
             self.assertTrue(projects.read(), "Project file could not be read")
-            self.assertFalse(projects.validate(option), "Project validated when it should not have due to non-existant dependancy")
+            self.assertFalse(projects.validate(option), "Project validated when it should not have due to non-existant dependency")
         finally:
             utilityFunctions.removeDir(tempDir)
 
@@ -566,7 +566,7 @@ class Test_project(unittest.TestCase):
             option.buildDir = os.path.join(tempDir, option.buildDir)
             self.assertTrue(projects.read(), "Project file could not be read")
             self.assertTrue(projects.examine(option), "Project failed to examine")
-            self.assertEquals(projects.getTarget("TestCaseA").dependancyDepth, 0, "TestCaseA had wrong dependancy depth")
+            self.assertEquals(projects.getTarget("TestCaseA").dependencyDepth, 0, "TestCaseA had wrong dependency depth")
             self.assertEquals(len(projects.targets), 1, "Number of Targets in project is wrong")
             self.assertEquals(projects.targets[0].name, "TestCaseA", "Sorting failed. TestCaseA should have been the first target.")
         finally:
@@ -593,9 +593,9 @@ class Test_project(unittest.TestCase):
             option.buildDir = os.path.join(tempDir, option.buildDir)
             self.assertTrue(projects.read(), "Project file could not be read")
             self.assertTrue(projects.examine(option), "Project failed to examine")
-            self.assertEquals(projects.getTarget("TestCaseA").dependancyDepth, 0, "TestCaseA had wrong dependancy depth")
-            self.assertEquals(projects.getTarget("TestCaseB").dependancyDepth, 1, "TestCaseB had wrong dependancy depth")
-            self.assertEquals(projects.getTarget("TestCaseC").dependancyDepth, 2, "TestCaseC had wrong dependancy depth")
+            self.assertEquals(projects.getTarget("TestCaseA").dependencyDepth, 0, "TestCaseA had wrong dependency depth")
+            self.assertEquals(projects.getTarget("TestCaseB").dependencyDepth, 1, "TestCaseB had wrong dependency depth")
+            self.assertEquals(projects.getTarget("TestCaseC").dependencyDepth, 2, "TestCaseC had wrong dependency depth")
             self.assertEquals(len(projects.targets), 3, "Number of Targets in project is wrong")
             self.assertEquals(projects.targets[0].name, "TestCaseA", "Sorting failed. TestCaseA should have been the first target.")
             self.assertEquals(projects.targets[1].name, "TestCaseB", "Sorting failed. TestCaseB should have been the first target.")
@@ -624,9 +624,9 @@ class Test_project(unittest.TestCase):
             option.buildDir = os.path.join(tempDir, option.buildDir)
             self.assertTrue(projects.read(), "Project file could not be read")
             self.assertTrue(projects.examine(option), "Project failed to examine")
-            self.assertEquals(projects.getTarget("TestCaseA").dependancyDepth, 0, "TestCaseA had wrong dependancy depth")
-            self.assertEquals(projects.getTarget("TestCaseB").dependancyDepth, 1, "TestCaseB had wrong dependancy depth")
-            self.assertEquals(projects.getTarget("TestCaseC").dependancyDepth, 2, "TestCaseC had wrong dependancy depth")
+            self.assertEquals(projects.getTarget("TestCaseA").dependencyDepth, 0, "TestCaseA had wrong dependency depth")
+            self.assertEquals(projects.getTarget("TestCaseB").dependencyDepth, 1, "TestCaseB had wrong dependency depth")
+            self.assertEquals(projects.getTarget("TestCaseC").dependencyDepth, 2, "TestCaseC had wrong dependency depth")
             self.assertEquals(len(projects.targets), 3, "Number of Targets in project is wrong")
             self.assertEquals(projects.targets[0].name, "TestCaseA", "Sorting failed. TestCaseA should have been the first target.")
             self.assertEquals(projects.targets[1].name, "TestCaseB", "Sorting failed. TestCaseB should have been the first target.")
@@ -659,10 +659,10 @@ class Test_project(unittest.TestCase):
             option.buildDir = os.path.join(tempDir, option.buildDir)
             self.assertTrue(projects.read(), "Project file could not be read")
             self.assertTrue(projects.examine(option), "Project failed to examine")
-            self.assertEquals(projects.getTarget("A").dependancyDepth, 0, "A had wrong dependancy depth")
-            self.assertEquals(projects.getTarget("B").dependancyDepth, 1, "B had wrong dependancy depth")
-            self.assertEquals(projects.getTarget("C").dependancyDepth, 2, "C had wrong dependancy depth")
-            self.assertEquals(projects.getTarget("D").dependancyDepth, 3, "D had wrong dependancy depth")
+            self.assertEquals(projects.getTarget("A").dependencyDepth, 0, "A had wrong dependency depth")
+            self.assertEquals(projects.getTarget("B").dependencyDepth, 1, "B had wrong dependency depth")
+            self.assertEquals(projects.getTarget("C").dependencyDepth, 2, "C had wrong dependency depth")
+            self.assertEquals(projects.getTarget("D").dependencyDepth, 3, "D had wrong dependency depth")
             self.assertEquals(len(projects.targets), 4, "Number of Targets in project is wrong")
             self.assertEquals(projects.targets[0].name, "A", "Sorting failed. A should have been the first target.")
             self.assertEquals(projects.targets[1].name, "B", "Sorting failed. B should have been the first target.")
@@ -691,9 +691,9 @@ class Test_project(unittest.TestCase):
             option.buildDir = os.path.join(tempDir, option.buildDir)
             self.assertTrue(projects.read(), "Project file could not be read")
             self.assertTrue(projects.examine(option), "Project failed to examine")
-            self.assertEquals(projects.getTarget("A").dependancyDepth, 0, "A had wrong dependancy depth")
-            self.assertEquals(projects.getTarget("B").dependancyDepth, 1, "B had wrong dependancy depth")
-            self.assertEquals(projects.getTarget("C").dependancyDepth, 1, "C had wrong dependancy depth")
+            self.assertEquals(projects.getTarget("A").dependencyDepth, 0, "A had wrong dependency depth")
+            self.assertEquals(projects.getTarget("B").dependencyDepth, 1, "B had wrong dependency depth")
+            self.assertEquals(projects.getTarget("C").dependencyDepth, 1, "C had wrong dependency depth")
             self.assertEquals(len(projects.targets), 3, "Number of Targets in project is wrong")
             self.assertEquals(projects.targets[0].name, "A", "Sorting failed. A should have been the first target.")
             self.assertEquals(projects.targets[1].name, "B", "Sorting failed. B should have been the first target.")
@@ -725,10 +725,10 @@ class Test_project(unittest.TestCase):
             option.buildDir = os.path.join(tempDir, option.buildDir)
             self.assertTrue(projects.read(), "Project file could not be read")
             self.assertTrue(projects.examine(option), "Project failed to examine")
-            self.assertEquals(projects.getTarget("A").dependancyDepth, 0, "A had wrong dependancy depth")
-            self.assertEquals(projects.getTarget("B").dependancyDepth, 1, "B had wrong dependancy depth")
-            self.assertEquals(projects.getTarget("C").dependancyDepth, 1, "C had wrong dependancy depth")
-            self.assertEquals(projects.getTarget("D").dependancyDepth, 2, "D had wrong dependancy depth")
+            self.assertEquals(projects.getTarget("A").dependencyDepth, 0, "A had wrong dependency depth")
+            self.assertEquals(projects.getTarget("B").dependencyDepth, 1, "B had wrong dependency depth")
+            self.assertEquals(projects.getTarget("C").dependencyDepth, 1, "C had wrong dependency depth")
+            self.assertEquals(projects.getTarget("D").dependencyDepth, 2, "D had wrong dependency depth")
             self.assertEquals(len(projects.targets), 4, "Number of Targets in project is wrong")
             self.assertEquals(projects.targets[0].name, "A", "Sorting failed. A should have been the first target.")
             self.assertEquals(projects.targets[1].name, "B", "Sorting failed. B should have been the first target.")

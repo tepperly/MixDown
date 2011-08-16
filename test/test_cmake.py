@@ -90,52 +90,52 @@ class Test_cmake(unittest.TestCase):
         installDir = cmake.getInstallDir("-DCMAKE_PREFIX_PATH=temp/")
         self.assertEquals(installDir, "", "Wrong install directory returned.")
 
-    def test_getDependancies1(self):
+    def test_getDependencies1(self):
         try:
             tempDir = mdTestUtilities.copyDirToTempDir("cases/cmake/hello/main")
-            dependancies = cmake.getDependancies(tempDir, verbose=False)
-            self.assertEquals(dependancies, ['hello1'], "Wrong dependancies found in CMake project")
+            dependencies = cmake.getDependencies(tempDir, verbose=False)
+            self.assertEquals(dependencies, ['hello1'], "Wrong dependencies found in CMake project")
         finally:
             utilityFunctions.removeDir(tempDir)
 
-    def test_getDependancies2(self):
+    def test_getDependencies2(self):
         try:
             tempDir = mdTestUtilities.copyDirToTempDir("cases/cmake/hello/hello1")
-            dependancies = cmake.getDependancies(tempDir, verbose=False)
-            self.assertEquals(dependancies, [], "Wrong dependancies found in CMake project")
+            dependencies = cmake.getDependencies(tempDir, verbose=False)
+            self.assertEquals(dependencies, [], "Wrong dependencies found in CMake project")
         finally:
             utilityFunctions.removeDir(tempDir)
 
-    def test_getDependancies3(self):
+    def test_getDependencies3(self):
         try:
             tempDir = mdTestUtilities.copyDirToTempDir("cases/cmake/ogre3dBuildFilesOnly")
-            dependancies = cmake.getDependancies(tempDir, verbose=False)
-            dependancies.sort()
-            self.assertEquals(dependancies, ['boost', 'carbon', 'cg', 'cocoa',
+            dependencies = cmake.getDependencies(tempDir, verbose=False)
+            dependencies.sort()
+            self.assertEquals(dependencies, ['boost', 'carbon', 'cg', 'cocoa',
                                              'cppunit', 'd3d10', 'd3d11', 'd3d9', 'd3dcompiler', 'd3dx10',
                                              'd3dx11', 'd3dx9', 'directx', 'dl', 'doxygen', 'dxerr', 'dxgi',
                                              'dxguid', 'freeimage', 'freetype', 'iokit', 'iphonesdk', 'ois',
                                              'opengl', 'opengles', 'opengles2', 'pkgconfig', 'poco', 'tbb',
                                              'x11', 'xaw', 'zlib', 'zzip'],
-                              "Wrong dependancies found in CMake project")
+                              "Wrong dependencies found in CMake project")
         finally:
             utilityFunctions.removeDir(tempDir)
 
-    def test_getDependanciesFalse1(self):
+    def test_getDependenciesFalse1(self):
         #False positive
         try:
             tempDir = mdTestUtilities.copyDirToTempDir("cases/simpleGraphAutoTools/TestCaseA")
-            dependancies = cmake.getDependancies(tempDir, verbose=False)
-            self.assertEquals(dependancies, None, "Wrong dependancies found in CMake project")
+            dependencies = cmake.getDependencies(tempDir, verbose=False)
+            self.assertEquals(dependencies, None, "Wrong dependencies found in CMake project")
         finally:
             utilityFunctions.removeDir(tempDir)
 
-    def test_getDependanciesFalse2(self):
+    def test_getDependenciesFalse2(self):
         #False positive
         try:
             tempDir = mdTestUtilities.copyDirToTempDir("cases/simpleGraphAutoTools/TestCaseB")
-            dependancies = cmake.getDependancies(tempDir, verbose=False)
-            self.assertEquals(dependancies, None, "Wrong dependancies found in CMake project")
+            dependencies = cmake.getDependencies(tempDir, verbose=False)
+            self.assertEquals(dependencies, None, "Wrong dependencies found in CMake project")
         finally:
             utilityFunctions.removeDir(tempDir)
 

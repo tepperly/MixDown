@@ -48,7 +48,7 @@ def generateConfigureFiles(path, name, verbose=True):
             return False
     return True
 
-def getDependancies(path, name="", verbose=True):
+def getDependencies(path, name="", verbose=True):
     deps = []
     if not os.path.isdir(path) or not os.path.exists(os.path.join(path, "configure")):
         return None
@@ -88,8 +88,8 @@ def getPreconfigureCommand(path):
 
 def getConfigureCommand(target):
     command = "./configure " + defines.surround(defines.autoToolsPrefix[0]) + " " + defines.surround(defines.autoToolsCompilers[0])
-    for dependancy in target.dependsOn:
-        command += " --with-" + dependancy + "=" + defines.surround(defines.mdPrefix[0])
+    for dependency in target.dependsOn:
+        command += " --with-" + dependency + "=" + defines.surround(defines.mdPrefix[0])
     return command
 
 def getBuildCommand():

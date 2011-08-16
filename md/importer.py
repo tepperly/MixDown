@@ -49,69 +49,69 @@ def importTargets(options, targetsToImport):
             utilityFunctions.removeDir(tempDir)
             return None, False
 
-        #Generate build files and find possible dependancies
+        #Generate build files and find possible dependencies
         possibleDeps = []
         if cmake.isCMakeProject(target.path):
             logger.writeMessage("CMake project found...", target.name)
-            logger.writeMessage("Analyzing for dependancies...", target.name)
-            possibleDeps = cmake.getDependancies(target.path, target.name)
+            logger.writeMessage("Analyzing for dependencies...", target.name)
+            possibleDeps = cmake.getDependencies(target.path, target.name)
         elif autoTools.isAutoToolsProject(target.path):
             logger.writeMessage("Auto Tools project found...", target.name)
             if not os.path.exists(os.path.join(target.path, "configure")):
                 if not autoTools.generateConfigureFiles(target.path, target.name):
                     utilityFunctions.removeDir(tempDir)
                     return None, False
-            logger.writeMessage("Analyzing for dependancies...", target.name)
-            possibleDeps = autoTools.getDependancies(target.path, target.name)
+            logger.writeMessage("Analyzing for dependencies...", target.name)
+            possibleDeps = autoTools.getDependencies(target.path, target.name)
         elif make.isMakeProject(target.path):
-            target.comment = "Make project found. MixDown cannot determine dependancies from Make projects."
+            target.comment = "Make project found. MixDown cannot determine dependencies from Make projects."
             logger.writeError(target.comment, target.name)
             partialImport = True
         else:
-            target.comment = "Unknown build system found.  MixDown cannot determine dependancies or build commands."
+            target.comment = "Unknown build system found.  MixDown cannot determine dependencies or build commands."
             logger.writeError(target.comment, target.name)
             partialImport = True
 
-        #Find actual dependancies
-        for possibleDependancy in possibleDeps:
-            if getTarget(possibleDependancy, finalTargets + targetsToImport):
-                logger.writeMessage("Known dependancy found (" + possibleDependancy + ")", target.name)
-                target.dependsOn.append(possibleDependancy)
+        #Find actual dependencies
+        for possibleDependency in possibleDeps:
+            if getTarget(possibleDependency, finalTargets + targetsToImport):
+                logger.writeMessage("Known dependency found (" + possibleDependency + ")", target.name)
+                target.dependsOn.append(possibleDependency)
                 continue
-            elif options.interactive and possibleDependancy in ignoredTargets:
-                logger.writeMessage("Previously ignored dependancy found (" + possibleDependancy + ")", target.name)
+            elif options.interactive and possibleDependency in ignoredTargets:
+                logger.writeMessage("Previously ignored dependency found (" + possibleDependency + ")", target.name)
                 continue
 
-            if searchForPossibleAliasInList(possibleDependancy, finalTargets + targetsToImport, options.interactive):
-                target.dependsOn.append(possibleDependancy)
+            if searchForPossibleAliasInList(possibleDependency, finalTargets + targetsToImport, options.interactive):
+                target.dependsOn.append(possibleDependency)
             elif not options.interactive:
-                logger.writeMessage("Ignoring unknown dependancy (" + possibleDependancy + ")", target.name)
+                logger.writeMessage("Ignoring unknown dependency (" + possibleDependency + ")", target.name)
             else:
-                logger.writeMessage("Unknown dependancy found (" + possibleDependancy + ")", target.name)
-                userInput = raw_input(possibleDependancy + ": Input location, target name, or blank to ignore:").strip()
+                logger.writeMessage("Unknown dependency found (" + possibleDependency + ")", target.name)
+                userInput = raw_input(possibleDependency + ": Input location, target name, or blank to ignore:").strip()
                 if userInput == "":
-                    ignoredTargets.append(possibleDependancy)
+                    ignoredTargets.append(possibleDependency)
                 elif os.path.isfile(userInput) or os.path.isdir(userInput) or utilityFunctions.isURL(userInput):
                     name = target.targetPathToName(userInput)
                     newTarget = target.Target(name, userInput)
                     targetsToImport.append(newTarget)
-                    if target.normalizeName(possibleDependancy) != target.normalizeName(userInput):
-                        newTarget.aliases.append(possibleDependancy)
-                    target.dependsOn.append(possibleDependancy)
+                    if target.normalizeName(possibleDependency) != target.normalizeName(userInput):
+                        newTarget.aliases.append(possibleDependency)
+                    target.dependsOn.append(possibleDependency)
                 else:
-                    aliasTarget = getTarget(userInput, finalTargets + targetsToImport, possibleDependancy)
+                    aliasTarget = getTarget(userInput, finalTargets + targetsToImport, possibleDependency)
                     if aliasTarget != None:
                         logger.writeMessage("Alias added (" + userInput + ")", aliasTarget.name)
-                        target.dependsOn.append(possibleDependancy)
+                        target.dependsOn.append(possibleDependency)
                     else:
                         aliasLocation = raw_input(userInput + ": Target name not found in any known targets.  Location of new target:").strip()
                         if os.path.isfile(aliasLocation) or os.path.isdir(aliasLocation) or utilityFunctions.isURL(aliasLocation):
                             name = target.targetPathToName(aliasLocation)
                             newTarget = target.Target(name, aliasLocation)
                             notReviewedTargets.append(newTarget)
-                            if target.normalizeName(possibleDependancy) != target.normalizeName(aliasLocation):
-                                newTarget.aliases.append(possibleDependancy)
-                            target.dependsOn.append(possibleDependancy)
+                            if target.normalizeName(possibleDependency) != target.normalizeName(aliasLocation):
+                                newTarget.aliases.append(possibleDependency)
+                            target.dependsOn.append(possibleDependency)
                         else:
                             logger.writeError(userInput + ": Alias location not understood.", exitProgram=True)
 

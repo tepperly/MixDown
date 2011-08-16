@@ -69,7 +69,7 @@ class Target(object):
         self.path = path
         self.outputPath = ""
         self.outputPathSpecified = False
-        self.dependancyDepth = 0
+        self.dependencyDepth = 0
         self.dependsOn = []
         self._skipSteps = []
         self.pythonCallInfo = python.PythonCallInfo()

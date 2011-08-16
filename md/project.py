@@ -142,13 +142,13 @@ class Project(object):
                         currTarget.outputPathSpecified = True
                     elif currName == "dependson":
                         if currTarget.dependsOn != []:
-                            logger.writeError("Project targets can only have one 'DependsOn' defined (use a comma delimited list for multiple dependancies)", "", "", self.path, lineCount)
+                            logger.writeError("Project targets can only have one 'DependsOn' defined (use a comma delimited list for multiple dependencies)", "", "", self.path, lineCount)
                             return False
                         if currPair[1] != "":
                             dependsOnList = utilityFunctions.stripItemsInList(currPair[1].split(","))
                             normalizedName = target.normalizeName(currTarget.name)
-                            for dependancy in dependsOnList:
-                                if target.normalizeName(dependancy) == normalizedName:
+                            for dependency in dependsOnList:
+                                if target.normalizeName(dependency) == normalizedName:
                                     logger.writeError("Project targets cannot depend on themselves", currTarget.name, "", self.path, lineCount)
                                     return False
                             currTarget.dependsOn = dependsOnList
@@ -206,30 +206,30 @@ class Project(object):
 
         for currTarget in self.targets:
             normalizedName = target.normalizeName(currTarget.name)
-            checkedDependancies = []
-            for dependancy in currTarget.dependsOn:
-                normalizedDepedancy = target.normalizeName(dependancy)
+            checkedDependencies = []
+            for dependency in currTarget.dependsOn:
+                normalizedDepedancy = target.normalizeName(dependency)
                 if normalizedDepedancy == normalizedName:
                     logger.writeError("Target cannot depend on itself", currTarget.name, "", self.path)
                     return False
-                if normalizedDepedancy in checkedDependancies:
-                    logger.writeError("Target has duplicate dependancy '" + dependancy + "'", currTarget.name, "", self.path)
+                if normalizedDepedancy in checkedDependencies:
+                    logger.writeError("Target has duplicate dependency '" + dependency + "'", currTarget.name, "", self.path)
                     return False
-                if self.getTarget(dependancy) is None:
-                    logger.writeError("Target has non-existant dependancy '" + dependancy + "'", currTarget.name, "", self.path)
+                if self.getTarget(dependency) is None:
+                    logger.writeError("Target has non-existant dependency '" + dependency + "'", currTarget.name, "", self.path)
                     return False
-                checkedDependancies.append(normalizedDepedancy)
+                checkedDependencies.append(normalizedDepedancy)
 
         path = [target.normalizeName(self.targets[0].name)]
         return self.__searchPathsForCycles(path)
 
     def __searchPathsForCycles(self, path):
         currTarget = self.getTarget(path[len(path)-1])
-        for dependancy in currTarget.dependsOn:
-            normalizedDependancy = target.normalizeName(dependancy)
-            if normalizedDependancy in path:
+        for dependency in currTarget.dependsOn:
+            normalizedDependency = target.normalizeName(dependency)
+            if normalizedDependency in path:
                 return False
-            path.append(normalizedDependancy)
+            path.append(normalizedDependency)
             if not self.__searchPathsForCycles(path):
                 return False
             path.pop()
@@ -244,8 +244,8 @@ class Project(object):
                 currTarget = self.getTarget(currName)
                 for currChildName in currTarget.dependsOn:
                     currChildTarget = self.getTarget(currChildName)
-                    if currChildTarget.dependancyDepth < (currTarget.dependancyDepth + 1):
-                        currChildTarget.dependancyDepth = currTarget.dependancyDepth + 1
+                    if currChildTarget.dependencyDepth < (currTarget.dependencyDepth + 1):
+                        currChildTarget.dependencyDepth = currTarget.dependencyDepth + 1
                         q.put(currChildName)
 
     def __sortTargetList(self, targetList):
@@ -253,6 +253,6 @@ class Project(object):
             return []
         else:
             pivot = targetList[0]
-            greater = self.__sortTargetList([x for x in targetList[1:] if x.dependancyDepth >= pivot.dependancyDepth])
-            lesser = self.__sortTargetList([x for x in targetList[1:] if x.dependancyDepth < pivot.dependancyDepth])
+            greater = self.__sortTargetList([x for x in targetList[1:] if x.dependencyDepth >= pivot.dependencyDepth])
+            lesser = self.__sortTargetList([x for x in targetList[1:] if x.dependencyDepth < pivot.dependencyDepth])
             return lesser + [pivot] + greater

@@ -127,7 +127,7 @@ class Test_target(unittest.TestCase):
         self.assertEquals(targets.findBuildStep("build").command, "make -j4", "'cases/simpleGraphAutoTools/TestCaseA' returned wrong build command")
         self.assertEquals(targets.findBuildStep("install").command, "make -j4 install", "'cases/simpleGraphAutoTools/TestCaseA' returned wrong install command")
 
-    def test_examineWithDependancies(self):
+    def test_examineWithDependencies(self):
         option = options.Options()
         option.buildDir = "."
         option.importer = True
@@ -140,7 +140,7 @@ class Test_target(unittest.TestCase):
         self.assertEquals(targets.findBuildStep("build").command, "make", "'cases/simpleGraphAutoTools/TestCaseA' returned wrong build command")
         self.assertEquals(targets.findBuildStep("install").command, "make install", "'cases/simpleGraphAutoTools/TestCaseA' returned wrong install command")
 
-    def test_examineWithDependanciesWithPrefix(self):
+    def test_examineWithDependenciesWithPrefix(self):
         option = options.Options()
         option.buildDir = "."
         option.importer = True
