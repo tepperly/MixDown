@@ -1,6 +1,6 @@
 #! /usr/bin/env python
 
-# Copyright (c) 2010, Lawrence Livermore National Security, LLC
+# Copyright (c) 2010-2011, Lawrence Livermore National Security, LLC
 # Produced at Lawrence Livermore National Laboratory
 # LLNL-CODE-462894
 # All rights reserved.
@@ -42,7 +42,7 @@ def main():
 
         if option.importer:
             projects, partialImport = importer.importTargets(option, targetsToImport)
-            if project == None or partialImport:
+            if projects == None or partialImport:
                 succeeded = False
         else:
             if option.cleanMixDown:
@@ -68,9 +68,9 @@ def main():
         timeFinished = time.time()
         timeElapsed = timeFinished - timeStarted
 
-        message = "Project "
+        message = "Project"
         if projects != None:
-            message += projects.name
+            message += " " + projects.name
 
         if not succeeded:
             message += " failed."

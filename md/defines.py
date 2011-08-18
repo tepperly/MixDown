@@ -1,4 +1,4 @@
-# Copyright (c) 2010, Lawrence Livermore National Security, LLC
+# Copyright (c) 2010-2011, Lawrence Livermore National Security, LLC
 # Produced at Lawrence Livermore National Laboratory
 # LLNL-CODE-462894
 # All rights reserved.
@@ -75,7 +75,7 @@ def setCompilerDefines(options, CCompiler, CXXCompiler, CPreProcessor):
     options.setDefine(mdCCompiler[0], CCompiler)
     options.setDefine(mdCXXCompiler[0], CXXCompiler)
     options.setDefine(mdCPreProcessor[0], CPreProcessor)
-    
+
     options.setDefine(autoToolsCCompiler[0], autoToolsCCompiler[1])
     options.setDefine(autoToolsCXXCompiler[0], autoToolsCXXCompiler[1])
     options.setDefine(autoToolsCPreProcessor[0], autoToolsCPreProcessor[1])
