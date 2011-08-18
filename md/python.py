@@ -1,4 +1,4 @@
-# Copyright (c) 2010, Lawrence Livermore National Security, LLC
+# Copyright (c) 2010-2011, Lawrence Livermore National Security, LLC
 # Produced at Lawrence Livermore National Laboratory
 # LLNL-CODE-462894
 # All rights reserved.
@@ -62,11 +62,15 @@ def callPythonCommand(namespace, function, target, options):
         if os.path.isdir(filename):
             logger.writeError("Expected python file, " + filename + ", found directory")
             return False
-        if not "." in sys.path:
-            sys.path.append(".")
-        if not "md" in sys.path:
-            sys.path.append("md")
-        importedNamespace = __import__("md." + namespace)
+
+        projectPath = os.path.abspath(".")
+        if not projectPath in sys.path:
+            sys.path.append(projectPath)
+        mixDownPath = os.path.dirname(sys.argv[0])
+        mdPath = os.path.join(mixDownPath, "md")
+        if not mdPath in sys.path:
+            sys.path.append(mdPath)
+        importedNamespace = __import__(namespace)
 
     try:
         target.pythonCallInfo.success = False
