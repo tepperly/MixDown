@@ -20,7 +20,7 @@
 # along with this program; if not, write to the Free Software Foundation,
 # Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 
-import os, re, sys
+import os, re, sys, traceback
 import logger, steps
 
 def parsePythonCommand(command):
@@ -81,6 +81,7 @@ def callPythonCommand(namespace, function, target, options):
         pythonCallInfo = getattr(importedNamespace, function)(target.pythonCallInfo)
     except AttributeError as e:
         logger.writeError(str(e))
+        traceback.print_exc(file=logger.getErrorFd())
         return False
 
     if not pythonCallInfo.success:
