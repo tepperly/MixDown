@@ -68,8 +68,11 @@ def callPythonCommand(namespace, function, target, options):
             sys.path.insert(0, projectPath)
         mixDownPath = os.path.dirname(sys.argv[0])
         mdPath = os.path.join(mixDownPath, "md")
-        if not mdPath in sys.path:
+        if os.path.exists(mdPath) and not mdPath in sys.path:
             sys.path.insert(0, mdPath)
+        stepsPath = os.path.dirname(os.path.abspath(steps.__file__))
+        if mdPath != stepsPath and not stepsPath in sys.path:
+            sys.path.insert(0, stepsPath)
         importedNamespace = __import__(namespace)
 
     try:
