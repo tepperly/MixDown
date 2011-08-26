@@ -29,7 +29,7 @@ setup(
  name = "mixdown",
  version = "0.1",
  author = "Tom Epperly, Chris White, Lorin Hochstein, Prakashkumar Thiagarajan",
- author_email = "epperly2@llnl.gov, white238@llnl.gov, lorinh@gmail.com, tprak@seas.upenn.edu",
+ author_email = "epperly2@llnl.gov, white238@llnl.gov, lorin@isi.edu, tprak@seas.upenn.edu",
  url = "https://github.com/tepperly/MixDown/",
  packages = ['md'],
  scripts = ['MixDown'],
