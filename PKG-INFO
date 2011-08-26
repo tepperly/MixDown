@@ -1,11 +1,19 @@
 Metadata-Version: 1.0
 Name: mixdown
-Version: 1.0
+Version: 0.1
 Summary: Meta-build tool for managing collections of third-party libraries
 Home-page: https://github.com/tepperly/MixDown/
 Author: Tom Epperly, Chris White, Lorin Hochstein, Prakashkumar Thiagarajan 
 Author-email: epperly2@llnl.gov, white238@llnl.gov, lorinh@gmail.com, tprak@seas.upenn.edu 
-License: UNKNOWN
-Description: UNKNOWN
-Platform: UNKNOWN
+License: LGPL
+Description: Meta-build tool for managing collections of third-party libraries
 
+Platform: UNKNOWN
+Classifier: Development Status :: 3 - Alpha
+Classifier: Operating System :: OS Independent
+Classifier: Environment :: Console
+Classifier: Programming Language :: Python
+Classifier: Intended Audience :: Developers
+Classifier: License :: OSI Approved :: GNU Library or Lesser General Public License (LGPL)
+Classifier: Operating System :: Unix
+Classifier: Programming Language :: Python

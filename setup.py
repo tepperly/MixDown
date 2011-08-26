@@ -34,4 +34,15 @@ setup(
  packages = ['md'],
  scripts = ['MixDown'],
  description = "Meta-build tool for managing collections of third-party libraries",
+ license = "LGPL",
+ classifiers = [
+     'Development Status :: 3 - Alpha',
+     'Operating System :: OS Independent',
+     'Environment :: Console',
+     'Programming Language :: Python',
+     'Intended Audience :: Developers',
+     'License :: OSI Approved :: GNU Library or Lesser General Public License (LGPL)',
+     'Operating System :: Unix',
+     'Programming Language :: Python'
+ ]
 )
