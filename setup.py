@@ -29,9 +29,20 @@ setup(
  name = "mixdown",
  version = "0.1",
  author = "Tom Epperly, Chris White, Lorin Hochstein, Prakashkumar Thiagarajan",
- author_email = "epperly2@llnl.gov, white238@llnl.gov, lorinh@gmail.com, tprak@seas.upenn.edu",
+ author_email = "epperly2@llnl.gov, white238@llnl.gov, lorin@isi.edu, tprak@seas.upenn.edu",
  url = "https://github.com/tepperly/MixDown/",
  packages = ['md'],
  scripts = ['MixDown'],
  description = "Meta-build tool for managing collections of third-party libraries",
+ license = "LGPL",
+ classifiers = [
+     'Development Status :: 3 - Alpha',
+     'Operating System :: OS Independent',
+     'Environment :: Console',
+     'Programming Language :: Python',
+     'Intended Audience :: Developers',
+     'License :: OSI Approved :: GNU Library or Lesser General Public License (LGPL)',
+     'Operating System :: Unix',
+     'Programming Language :: Python'
+ ]
 )

@@ -20,6 +20,8 @@
 # along with this program; if not, write to the Free Software Foundation,
 # Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 
+import fileinput
+
 import os, Queue, re, shutil, subprocess, sys, tarfile, tempfile, urllib, urllib2, zipfile
 
 def downloadFile(URL, downloadDir):
@@ -216,3 +218,20 @@ def URLToFilename(url):
     if url == "" or file == "":
         return "_"
     return fileName
+
+def setVariables(filename,variableList):
+    isWritten = False
+    try:
+        for i, line in enumerate(fileinput.input(filename, inplace = 1)):
+            isWritten = False
+            line = line.strip()
+            for variable,value in variableList.iteritems():
+                if(line.startswith(variable)):
+                    sys.stdout.write(variable+" = "+value+"\n")
+                    isWritten = True
+            if not isWritten: 
+                sys.stdout.write(line+"\n")
+        return True
+    except Exception, e:
+        print e
+        return False
