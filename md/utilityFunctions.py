@@ -129,7 +129,10 @@ def removeDir(path):
         shutil.rmtree(path)
 
 def splitFileName(fileName):
-    basename = fileName
+    if fileName.endswith(os.path.sep):
+        basename = fileName[:-1]
+    else:
+        basename = fileName
     version = ""
 
     if basename.endswith(".tar.gz"):
