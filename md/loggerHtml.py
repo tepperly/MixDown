@@ -40,17 +40,15 @@ class LoggerHtml(logger.LoggerBase):
         else:
             return "Error: %s (line %d): %s\n" % (filePath, lineNumber, message)
 
-    def writeMessage(self, message):
-        self.writeMessage(message, "", "")
-
-    def writeMessage(self, message, targetName="", targetStep=""):
-        sys.stderr.flush()
-        sys.stdout.write(message)
+    def writeMessage(self, message, targetName="", targetStep="", forceStdOut=False):
+        message = self.__formatMessagePrefix(targetName, targetStep) + message + "\n"
+        self._writeStdOut(message)
 
     def writeError(self, message, targetName="", targetStep="", filePath="", lineNumber=0, exitProgram=False):
-        sys.stdout.flush()
-        sys.stderr.write(self.__FormatErrorMessage(message, filePath, lineNumber))
-        sys.stderr.flush()
+        message = self.__formatErrorMessage(self.__formatMessagePrefix(targetName, targetStep) + message , filePath, lineNumber)
+        self._writeStdErr(message)
+        if exitProgram:
+            sys.exit()
 
     def reportSkipped(self, targetName="", targetStep="", reason=""):
         pass

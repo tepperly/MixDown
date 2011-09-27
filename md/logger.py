@@ -20,7 +20,7 @@
 # along with this program; if not, write to the Free Software Foundation,
 # Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 
-import os
+import os, sys
 
 def secondsToHMS(seconds=0):
     m, s = divmod(seconds, 60)
@@ -54,11 +54,8 @@ def setLogger(loggerName="", logOutputDir=""):
 def close():
     Logger().close()
 
-def writeMessage(message):
-    Logger().writeMessage(message)
-
-def writeMessage(message, targetName="", targetStep=""):
-    Logger().writeMessage(message, targetName, targetStep)
+def writeMessage(message, targetName="", targetStep="", forceStdOut=False):
+    Logger().writeMessage(message, targetName, targetStep, forceStdOut)
 
 def writeError(message, targetName="", targetStep="", filePath="", lineNumber=0, exitProgram=False):
     Logger().writeError(message, targetName, targetStep, filePath, lineNumber, exitProgram)
@@ -82,10 +79,17 @@ def getErrorFd(targetName="", targetStep=""):
     return Logger().getErrorFd(targetName, targetStep)
 
 class LoggerBase(object):
-    def close(self):
-        pass
+    def _writeStdOut(self, message):
+        sys.stderr.flush()
+        sys.stdout.write(message)
+        sys.stdout.flush()
 
-    def writeMessage(self, message):
+    def _writeStdErr(self, message):
+        sys.stdout.flush()
+        sys.stderr.write(message)
+        sys.stderr.flush()
+
+    def close(self):
         pass
 
     def writeMessage(self, message, targetName="", targetStep=""):
@@ -111,4 +115,3 @@ class LoggerBase(object):
 
     def getErrorFd(self, targetName="", targetStep=""):
         return sys.stderr
-

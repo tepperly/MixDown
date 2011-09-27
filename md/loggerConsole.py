@@ -44,41 +44,37 @@ class LoggerConsole(logger.LoggerBase):
             return "%s: " % (targetName)
         return ""
 
-    def writeMessage(self, message, targetName="", targetStep=""):
-        sys.stderr.flush()
-        sys.stdout.write(self.__formatMessagePrefix(targetName, targetStep) + message + "\n")
+    def writeMessage(self, message, targetName="", targetStep="", forceStdOut=False):
+        message = self.__formatMessagePrefix(targetName, targetStep) + message + "\n"
+        self._writeStdOut(message)
 
     def writeError(self, message, targetName="", targetStep="", filePath="", lineNumber=0, exitProgram=False):
-        sys.stdout.flush()
-        sys.stderr.write(self.__formatErrorMessage(self.__formatMessagePrefix(targetName, targetStep) + message , filePath, lineNumber))
-        sys.stderr.flush()
+        message = self.__formatErrorMessage(self.__formatMessagePrefix(targetName, targetStep) + message , filePath, lineNumber)
+        self._writeStdErr(message)
         if exitProgram:
             sys.exit()
 
     def reportSkipped(self, targetName="", targetStep="", reason=""):
-        sys.stderr.flush()
-        sys.stdout.write(self.__formatMessagePrefix(targetName, targetStep) + reason + "Skipped.\n")
+        message = self.__formatMessagePrefix(targetName, targetStep) + reason + "Skipped.\n"
+        self._writeStdOut(message)
 
     def reportStart(self, targetName="", targetStep=""):
-        sys.stderr.flush()
-        sys.stdout.write(self.__formatMessagePrefix(targetName, targetStep) + "Starting...\n")
+        message = self.__formatMessagePrefix(targetName, targetStep) + "Starting...\n"
+        self._writeStdOut(message)
 
     def reportSuccess(self, targetName="", targetStep="", timeInSeconds=0):
-        sys.stderr.flush()
         messagePrefix = self.__formatMessagePrefix(targetName, targetStep)
         message = messagePrefix + "Succeeded\n"
         if timeInSeconds != 0:
             message += messagePrefix + "Time " + logger.secondsToHMS(timeInSeconds) + "\n"
-        sys.stdout.write(message)
+        self._writeStdOut(message)
 
     def reportFailure(self, targetName="", targetStep="", timeInSeconds=0, returnCode=0, exitProgram=False):
-        sys.stdout.flush()
         messagePrefix = self.__formatMessagePrefix(targetName, targetStep)
         message = self.__formatErrorMessage(messagePrefix + "Failed with error code " + str(returnCode) + ".")
         if timeInSeconds != 0:
             message += messagePrefix + "Time " + logger.secondsToHMS(timeInSeconds) + "\n"
-        sys.stderr.write(message)
-        sys.stderr.flush()
+        self._writeStdErr(message)
         if exitProgram:
             sys.exit()
 
