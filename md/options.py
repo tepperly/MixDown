@@ -37,12 +37,10 @@ class Options(object):
         self.interactive = False
         self.prefixDefined = False
         self.skipSteps = ""
+        self.threadCount = 1
         self._defines = dict()
         self._defines.setdefault("")
         defines.setPrefixDefines(self, '/usr/local')
-        #defines.setCompilerDefines(self, '/usr/bin/gcc', '/usr/bin/g++', '/usr/bin/cpp')
-        #defines.setCompilerDefines(self, '/home/white238/bin/gcc', '/home/white238/bin/g++')
-        #defines.setCompilerDefines(self, '/home/white238/projects/gcc4.6.1/testPrefix/bin/gcc', '/home/white238/projects/gcc4.6.1/testPrefix/bin/g++', '/home/white238/projects/gcc4.6.1/testPrefix/bin/cpp')
 
     def __str__(self):
         return "Options:\n\
@@ -55,7 +53,9 @@ class Options(object):
   Clean Targets: " + str(self.cleanTargets) + "\n\
   Clean MixDown: " + str(self.cleanMixDown) + "\n\
   Verbose:       " + str(self.verbose) + "\n\
-  Logger:        " + self.logger.capitalize() + "\n"
+  Logger:        " + self.logger.capitalize() + "\n\
+  Thread Count:  " + str(self.threadCount) + "\n\
+  Job Count:     " + self.getDefine(defines.surround(defines.mdJobSlots[0])) + "\n"
 
     def _normalizeKey(self, key, lower=True):
         normalizedKey = key.strip()
@@ -159,7 +159,7 @@ class Options(object):
             return self.__processImportCommandline(commandline)
 
         for currArg in commandline[1:]: #skip script name
-            currFlag = str.lower(currArg[:2])
+            currFlag = currArg[:2].lower()
             currValue = currArg[2:]
 
             if currFlag == "-d":
@@ -175,8 +175,23 @@ class Options(object):
                 validateOptionPair(currFlag, currValue)
                 defines.setPrefixDefines(self, os.path.abspath(currValue))
                 self.prefixDefined = True
+            elif currFlag == "-t":
+                validateOptionPair(currFlag, currValue)
+                try:
+                    count = int(currValue)
+                except ValueError:
+                    count = 0
+                if count < 1:
+                    logger.writeError("Positive numeric value needed " + definePair, exitProgram=True)
+                self.threadCount = count
             elif currFlag == "-j":
                 validateOptionPair(currFlag, currValue)
+                try:
+                    count = int(currValue)
+                except ValueError:
+                    count = 0
+                if count < 1:
+                    logger.writeError("Positive numeric value needed " + definePair, exitProgram=True)
                 #Add "-j<jobSlots>" only if user defines -j on commandline
                 defines.setJobSlotsDefines(self, currValue)
             elif currFlag == "-l":

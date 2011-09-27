@@ -20,7 +20,7 @@
 # along with this program; if not, write to the Free Software Foundation,
 # Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 
-import os, time
+import os, multiprocessing, time
 import autoTools, cmake, logger, make, python, defines, target, utilityFunctions
 
 class BuildStep(object):
@@ -30,14 +30,25 @@ class BuildStep(object):
 
 buildSteps = ["fetch", "unpack", "patch", "preconfig", "config", "build", "install", "clean"]
 
-def buildStepActor(target, buildStep, options):
-    logger.reportStart(target.name, buildStep.name)
+def buildStepActor(target, buildStep, options, lock=None):
+    try:
+        if lock:
+            lock.acquire()
+        logger.reportStart(target.name, buildStep.name)
+    finally:
+        if lock:
+            lock.release()
     returnCode = None
 
     timeStart = time.time()
-
     if target.isStepToBeSkipped(buildStep.name):
-        logger.reportSkipped(target.name, buildStep.name, "Target specified to skip step")
+        try:
+            if lock:
+                lock.acquire()
+            logger.reportSkipped(target.name, buildStep.name, "Target specified to skip step")
+        finally:
+            if lock:
+                lock.release()
         return True
 
     command = options.expandDefines(buildStep.command)
@@ -49,18 +60,60 @@ def buildStepActor(target, buildStep, options):
         else:
             returnCode = 0
     else:
+        try:
+            if lock:
+                lock.acquire()
+            logger.writeMessage("Executing command: " + command, target.name, buildStep.name, True)
+        finally:
+            if lock:
+                lock.release()
         outFd = logger.getOutFd(target.name, buildStep.name)
-        returnCode = utilityFunctions.executeSubProcess(command, target.path, outFd, options.verbose)
+        returnCode = utilityFunctions.executeSubProcess(command, target.path, outFd)
 
     timeFinished = time.time()
     timeElapsed = timeFinished - timeStart
 
     if returnCode != 0:
-        logger.reportFailure(target.name, buildStep.name, timeElapsed, returnCode)
+        try:
+            if lock:
+                lock.acquire()
+            logger.reportFailure(target.name, buildStep.name, timeElapsed, returnCode)
+        finally:
+            if lock:
+                lock.release()
         return False
 
-    logger.reportSuccess(target.name, buildStep.name, timeElapsed)
+    try:
+        if lock:
+            lock.acquire()
+        logger.reportSuccess(target.name, buildStep.name, timeElapsed)
+    finally:
+        if lock:
+            lock.release()
     return True
+
+def buildTarget(target, options, lock=None):
+    if options.cleanTargets:
+        cleanStep = target.findBuildStep("clean")
+        target.succeeded = buildStepActor(target, cleanStep, options, lock)
+    else:
+        for buildStep in target.buildSteps:
+            if buildStep.name == "clean" or buildStep.command == "":
+                continue
+            target.succeeded = buildStepActor(target, buildStep, options, lock)
+            if not target.succeeded:
+                break
+
+def buildTargetThreaded(jobQueue, options, lock):
+    previousTarget = None
+    target = None
+    while True:
+        previousTarget = target
+        target = jobQueue.get()
+        if target == None or (previousTarget != None and previousTarget.succeeded == False):
+            break
+
+        buildTarget(target, options, lock)
 
 def getCommand(stepName, target):
     command = ""

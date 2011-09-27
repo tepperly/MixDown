@@ -22,7 +22,7 @@
 # along with this program; if not, write to the Free Software Foundation,
 # Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 
-import os, sys, tarfile, time, urllib
+import multiprocessing, os, sys, tarfile, time, urllib
 from md import commands, defines, importer, logger, options, project, utilityFunctions
 
 #--------------------------------Main---------------------------------
@@ -32,57 +32,87 @@ def main():
     try:
         succeeded = True
         partialImport = False
-        option = options.Options()
-        targetsToImport = option.processCommandline(sys.argv)
+        mdOptions = options.Options()
+        targetsToImport = mdOptions.processCommandline(sys.argv)
 
-        if (not option.importer or not targetsToImport) and not\
-           option.cleanTargets and option.projectFile == "":
-            option.printUsageAndExit("MixDown's mode could not be determined")
+        if (not mdOptions.importer or not targetsToImport) and not\
+           mdOptions.cleanTargets and mdOptions.projectFile == "":
+            mdOptions.printUsageAndExit("MixDown's mode could not be determined")
         timeStarted = time.time()
 
-        if option.importer:
-            projects, partialImport = importer.importTargets(option, targetsToImport)
-            if projects == None or partialImport:
+        if mdOptions.importer:
+            mdProject, partialImport = importer.importTargets(mdOptions, targetsToImport)
+            if mdProject == None or partialImport:
                 succeeded = False
         else:
-            if option.cleanMixDown:
-                cleanMixDown(option)
-            projects = setup(option)
-            if projects == None:
+            if mdOptions.cleanMixDown:
+                cleanMixDown(mdOptions)
+            mdProject = setup(mdOptions)
+            if mdProject == None:
                 succeeded = False
             else:
-                for target in reversed(projects.targets):
-                    if option.cleanTargets:
-                        cleanStep = target.findBuildStep("clean")
-                        succeeded = commands.buildStepActor(target, cleanStep, option)
-                    else:
-                        for buildStep in target.buildSteps:
-                            if buildStep.name == "clean" or buildStep.command == "":
-                                continue
-                            succeeded = commands.buildStepActor(target, buildStep, option)
-                            if not succeeded:
+                if mdOptions.threadCount == 1:
+                    for target in reversed(mdProject.targets):
+                        commands.buildTarget(target, mdOptions)
+                        if target.succeeded == False:
+                            succeeded = False
+                            break
+                else:
+                    lock = multiprocessing.RLock()
+                    jobQueue = multiprocessing.Queue()
+                    maxDepth = mdProject.targets[len(mdProject.targets)-1].dependencyDepth
+                    for currDepth in range(maxDepth, -1, -1):
+                        processes = []
+                        jobCount = 0
+
+                        for target in reversed(mdProject.targets):
+                            if target.dependencyDepth == currDepth:
+                                jobQueue.put(target)
+                                jobCount += 1
+
+                        if jobCount < mdOptions.threadCount:
+                            processCount = jobCount
+                        else:
+                            processCount = mdOptions.threadCount
+
+                        for _ in range(processCount):
+                            jobQueue.put(None)
+                        for _ in range(processCount):
+                            p = multiprocessing.Process(target=commands.buildTargetThreaded, args=(jobQueue,mdOptions,lock,))
+                            processes.append(p)
+
+                        for p in processes:
+                            p.start()
+                        for p in processes:
+                            p.join()
+
+                        for target in reversed(mdProject.targets):
+                            if target.dependencyDepth == currDepth and target.succeeded == False:
+                                if jobCount != 1:
+                                    logger.writeError(target.name + " failed.  Due to threading, you may need to scroll up to read error message.")
+                                succeeded = False
                                 break
-                    if not succeeded:
-                        break
+                        if succeeded == False:
+                            break
 
         timeFinished = time.time()
         timeElapsed = timeFinished - timeStarted
 
         message = "Project"
-        if projects != None:
-            message += " " + projects.name
+        if mdProject != None:
+            message += " " + mdProject.name
 
         if not succeeded:
             message += " failed."
         else:
             message += " succeeded."
-            if option.importer:
-                logger.writeMessage("\nProject " + projects.name + " has been imported to file " + projects.path)
-            elif option.cleanTargets:
-                logger.writeMessage("\n" + projects.name + " has been cleaned in " + os.path.abspath(option.buildDir))
+            if mdOptions.importer:
+                logger.writeMessage("\nProject " + mdProject.name + " has been imported to file " + mdProject.path)
+            elif mdOptions.cleanTargets:
+                logger.writeMessage("\n" + mdProject.name + " has been cleaned in " + os.path.abspath(mdOptions.buildDir))
             else:
-                logger.writeMessage("\n" + projects.name + " has been built in " + os.path.abspath(option.buildDir))
-                logger.writeMessage(projects.name + " has been installed to " + os.path.abspath(option.getDefine(defines.mdPrefix[0])))
+                logger.writeMessage("\n" + mdProject.name + " has been built in " + os.path.abspath(mdOptions.buildDir))
+                logger.writeMessage(mdProject.name + " has been installed to " + os.path.abspath(mdOptions.getDefine(defines.mdPrefix[0])))
         message = "\nTotal time " + logger.secondsToHMS(timeElapsed) + "\n" + message
         logger.writeMessage(message)
         if partialImport:
@@ -95,37 +125,37 @@ def main():
         sys.exit(1)
 
 #--------------------------------Setup---------------------------------
-def setup(option):
-    logger.setLogger(option.logger, option.logDir)
-    if option.verbose:
-        logger.writeMessage(str(option))
-        if not option.prefixDefined and not option.cleanTargets:
-            logger.writeMessage("No prefix defined, defaulting to '" + option.getDefine(defines.mdPrefix[0]) + "'")
+def setup(mdOptions):
+    logger.setLogger(mdOptions.logger, mdOptions.logDir)
+    if mdOptions.verbose:
+        logger.writeMessage(str(mdOptions))
+        if not mdOptions.prefixDefined and not mdOptions.cleanTargets:
+            logger.writeMessage("No prefix defined, defaulting to '" + mdOptions.getDefine(defines.mdPrefix[0]) + "'")
 
-    projects = project.Project(option.projectFile)
-    if not projects.read():
+    mdProject = project.Project(mdOptions.projectFile)
+    if not mdProject.read():
         return None
-    if not projects.addSkipStepFromOptions(option):
-        return None
-
-    if not projects.examine(option):
-        return None
-    if not projects.validate(option):
+    if not mdProject.addSkipStepFromOptions(mdOptions):
         return None
 
-    if option.cleanTargets:
-        for currTarget in projects.targets:
-            currTarget.path = currTarget.determineOutputPath(option)
+    if not mdProject.examine(mdOptions):
+        return None
+    if not mdProject.validate(mdOptions):
+        return None
+
+    if mdOptions.cleanTargets:
+        for currTarget in mdProject.targets:
+            currTarget.path = currTarget.determineOutputPath(mdOptions)
     else:
         cleaningOutputReported = False
-        for currTarget in projects.targets:
+        for currTarget in mdProject.targets:
             if currTarget.outputPath != "" and os.path.exists(currTarget.outputPath):
                 if cleaningOutputReported:
                     logger.writeMessage("Cleaning MixDown and Target output directories...")
                     cleaningOutputReported = True
                 utilityFunctions.removeDir(currTarget.outputPath)
 
-        prefixDefine = option.getDefine(defines.mdPrefix[0])
+        prefixDefine = mdOptions.getDefine(defines.mdPrefix[0])
         if prefixDefine != "":
             #TODO: only add lib64 if on 64bit machines
             libraryPaths = os.path.join(prefixDefine, "lib64") + ":" + os.path.join(prefixDefine, "lib")
@@ -135,14 +165,14 @@ def setup(option):
                     libraryPaths += ":" + originalLibraryPath
             os.environ["LD_LIBRARY_PATH"] = libraryPaths
 
-    return projects
+    return mdProject
 
-def cleanMixDown(option):
+def cleanMixDown(mdOptions):
     try:
         logger.writeMessage("Cleaning MixDown directories...")
-        utilityFunctions.removeDir(option.buildDir)
-        utilityFunctions.removeDir(option.downloadDir)
-        utilityFunctions.removeDir(option.logDir)
+        utilityFunctions.removeDir(mdOptions.buildDir)
+        utilityFunctions.removeDir(mdOptions.downloadDir)
+        utilityFunctions.removeDir(mdOptions.logDir)
     except IOError, e:
         logger.writeError(e, exitProgram=True)
 

@@ -74,6 +74,7 @@ class Target(object):
         self._skipSteps = []
         self.pythonCallInfo = python.PythonCallInfo()
         self.buildSteps = []
+        self.succeeded = False
 
     def validate(self, option):
         normalizedName = normalizeName(self.name)
