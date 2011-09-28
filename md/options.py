@@ -254,6 +254,8 @@ class Options(object):
         <path to .md file>   Path to MixDown project file\n\
     \n\
         Optional:\n\
+        -j<number>    Number of build job slots\n\
+        -t<number>    Number of threads used to build concurrent targets\n\
         -s<list>      Add steps to skip for individual targets\n\
            Example: -starget1:preconfig;target2:config\n\
         -p<path>      Override prefix directory\n\
@@ -270,6 +272,8 @@ class Options(object):
         <path to .md file>   Path to MixDown project file\n\
     \n\
         Optional:\n\
+        -j<number>    Number of build job slots\n\
+        -t<number>    Number of threads used to build concurrent targets\n\
         -b<path>      Override build directory\n\
         -o<path>      Override download directory\n\
         -l<logger>    Override default logger (Console, File, Html)\n\
