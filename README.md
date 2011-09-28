@@ -1,9 +1,9 @@
 MixDown
 =======
 
-MixDown is a meta-build tool that makes it easier to build software packages that have multiple dependencies. It uses a simple input file format to describe package information, and uses a series of heuristics to automatically generate an initial problem input file from a collection of tar, zip files, or download URLs. 
+MixDown is a meta-build tool that makes it easier to build software packages that have multiple dependencies. It uses a simple input file format to describe package information, and uses a series of heuristics to automatically generate an initial problem input file from a collection of tar, zip files, or download URLs.
 
-MixDown supports the following targets: 
+MixDown supports the following targets:
 
  * Local tarballs and zipfiles (e.g., /tmp/foo-1.2.3.tar.gz)
  * Download URLs for tarballs and zipfiles (e.g., http://www.example.com/download/foo-1.2.3.tar.gz)
@@ -51,57 +51,45 @@ Next, execute the build. By default, git will try to install itself in /usr/loca
 Usage
 -----
 
-    Import Mode: 
+    Import Mode:
         Example Usage: MixDown --import foo.tar.gz http://path/to/bar
-    
+
         Required:
         --import                  Toggle Import mode
         <package location list>   Space delimited list of package locations
-    
-    Build Mode (Default): 
+
+    Build Mode (Default):
         Example Usage: MixDown foo.md
-    
+
         Required:
         <path to .md file>   Path to MixDown project file
-    
+
         Optional:
+        -j<number>    Number of build job slots
+        -t<number>    Number of threads used to build concurrent targets
+        -s<list>      Add steps to skip for individual targets
+           Example: -starget1:preconfig;target2:config
         -p<path>      Override prefix directory
         -b<path>      Override build directory
         -o<path>      Override download directory
         -l<logger>    Override default logger (Console, File, Html)
         -k            Keeps previously existing MixDown directories
-    
-    Clean Mode: 
+
+    Clean Mode:
         Example Usage: MixDown --clean foo.md
-    
+
         Required:
         --clean              Toggle Clean mode
         <path to .md file>   Path to MixDown project file
-    
+
         Optional:
+        -j<number>    Number of build job slots
+        -t<number>    Number of threads used to build concurrent targets
         -b<path>      Override build directory
         -o<path>      Override download directory
         -l<logger>    Override default logger (Console, File, Html)
-
-    Custom Build Mode:
-        1. Create a .md file manually with rules for Name, Path and Build.
-        2. The order of steps in the .md file will be respected while processing.
-        3. In the Build rule, add the necessary steps before running the make.
-        4. Write custom methods in a new file called mySteps.py which may be used to patch auto-generated files.
-        5. Use MixDown in Build Mode.
-
-    Sample .md file:
-        Name: <Name of Project>
-        Path: <Path of Project> 
-        Patch: <METHOD_CALL>
-        Config: <Commands to be executed>; ./configure
-        Build: <Commands to be executed>; make
-        Install: <Commands to be executed>; make install
-
 
     Default Directories:
     Builds:       mdBuild/
     Downloads:    mdDownload/
     Logs:         mdLogFiles/
-
-     
