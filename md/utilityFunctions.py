@@ -235,3 +235,24 @@ def setVariables(filename,variableList):
     except Exception, e:
         print e
         return False
+
+def is_exe(fpath):
+    """Check if a file is an executable accessible by the user"""
+    return os.path.exists(fpath) and os.access(fpath, os.X_OK)
+
+def isInstalled(program):
+    """Checks if a program is installed by searching for executable files in the PATH. 
+
+    See: http://stackoverflow.com/questions/377017/test-if-executable-exists-in-python#377028
+    """
+    fpath, fname = os.path.split(program)
+    if fpath:
+        if is_exe(program):
+            return True
+    else:
+        for path in os.environ["PATH"].split(os.pathsep):
+            exe_file = os.path.join(path, program)
+            if is_exe(exe_file):
+                return True
+
+    return False

@@ -23,7 +23,8 @@
 # Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 
 import multiprocessing, os, sys, tarfile, time, urllib
-from md import commands, defines, importer, logger, options, project, utilityFunctions
+from md import commands, defines, exceptions, importer, logger, options, project, utilityFunctions
+
 
 #--------------------------------Main---------------------------------
 def main():
@@ -117,6 +118,9 @@ def main():
         logger.writeMessage(message)
         if partialImport:
             logger.writeError("\nProject partially imported.  Please refer to comments in created MixDown project file to determine reason.")
+    except exceptions.ToolNotInstalledException, e:
+        logger.writeError("%s not found." % e.tool)
+        logger.writeError("This project requires that %s is installed on your system." % e.tool)
     finally:
         logger.close()
     if succeeded:

@@ -21,7 +21,8 @@
 # Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 
 import os, re
-import defines, logger, make, target
+import defines, exceptions, logger, make, target, utilityFunctions
+
 
 def isCMakeProject(path):
     if os.path.exists(os.path.join(path, "CMakeLists.txt")):
@@ -102,12 +103,17 @@ def getDependencies(path, name="", verbose=True):
             cmakeFile.close()
     return deps
 
+def isCmakeInstalled():
+    return utilityFunctions.isInstalled("cmake")
+
 # Commands
 def getPreconfigureCommand():
     #There is no preconfigure command for CMake
     return ""
 
 def getConfigureCommand():
+    if not isCmakeInstalled():
+        raise exceptions.ToolNotInstalledException("CMake")
     return "cmake " + defines.surround(defines.cmakePrefix[0]) + " " + defines.surround(defines.cmakeCompilers[0])
 
 def getBuildCommand():
