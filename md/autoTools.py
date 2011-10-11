@@ -82,10 +82,15 @@ def getDependencies(path, name="", verbose=True):
 def isAutoconfInstalled():
     return utilityFunctions.isInstalled("autoreconf")
 
+def isLibtoolInstalled():
+    return utilityFunctions.isInstalled("libtool")
+
 # Commands
 def getPreconfigureCommand(path):
     if not isAutoconfInstalled():
-        raise exceptions.ToolNotInstalledException("Autoconf")
+        raise exceptions.ToolNotInstalledException("autoconf")
+    if not isLibtoolInstalled():
+        raise exceptions.ToolNotInstalledException("libtool")
     if os.path.exists(os.path.join(path, "configure.ac")) or os.path.exists(os.path.join(path, "configure.in")):
         return "autoreconf -i"
     else:
