@@ -21,7 +21,7 @@
 # Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 
 import os, re
-import make, defines, logger, target, utilityFunctions
+import make, defines, exceptions, logger, target, utilityFunctions
 
 def isAutoToolsProject(path):
     if os.path.exists(os.path.join(path, "configure")) or\
@@ -79,8 +79,13 @@ def getDependencies(path, name="", verbose=True):
 
     return deps
 
+def isAutoconfInstalled():
+    return utilityFunctions.isInstalled("autoreconf")
+
 # Commands
 def getPreconfigureCommand(path):
+    if not isAutoconfInstalled():
+        raise exceptions.ToolNotInstalledException("Autoconf")
     if os.path.exists(os.path.join(path, "configure.ac")) or os.path.exists(os.path.join(path, "configure.in")):
         return "autoreconf -i"
     else:
