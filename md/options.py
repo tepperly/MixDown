@@ -144,7 +144,7 @@ class Options(object):
                 currTarget = target.Target(name, currArg)
                 targetsToImport.append(currTarget)
             else:
-                logger.writeError("File not found: " + currArg, exitProgram=True)
+                logger.writeError("File not found or commandline option not understood: " + currArg, exitProgram=True)
 
         if len(targetsToImport) == 0:
             self.printUsageAndExit()
