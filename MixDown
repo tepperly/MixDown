@@ -23,8 +23,7 @@
 # Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 
 import multiprocessing, os, sys, tarfile, time, urllib
-from md import commands, defines, exceptions, importer, logger, options, project, utilityFunctions
-
+from md import commands, defines, exceptions, importer, logger, options, overrides, project, utilityFunctions
 
 #--------------------------------Main---------------------------------
 def main():
@@ -48,6 +47,10 @@ def main():
         else:
             if mdOptions.cleanMixDown:
                 cleanMixDown(mdOptions)
+
+            overrideGroups = overrides.readGroups(mdOptions.overrideFile)
+            overrides.selectGroups(overrideGroups, mdOptions)
+
             mdProject = setup(mdOptions)
             if mdProject == None:
                 succeeded = False
@@ -93,7 +96,7 @@ def main():
                                     logger.writeError(target.name + " failed.  Due to threading, you may need to scroll up to read error message.")
                                 succeeded = False
                                 break
-                        if succeeded == False:
+                        if not succeeded:
                             break
 
         timeFinished = time.time()

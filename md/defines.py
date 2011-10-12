@@ -51,7 +51,7 @@ autoToolsOBJCPreProcessor = "_AutotoolsOBJCPreProcessor", "OBJCPP=" + surround(m
 autoToolsOBJCXXCompiler = "_AutotoolsOBJCCompiler", "OBJCXX=" + surround(mdOBJCXXCompiler[0])
 autoToolsOBJCXXPreProcessor = "_AutotoolsOBJCPreProcessor", "OBJCXXCPP=" + surround(mdOBJCXXPreProcessor[0])
 
-autoToolsCompilers = "_AutoToolsCompilers", surround(autoToolsCCompiler[0]) + " " + surround(autoToolsCXXCompiler[0]) + " " + surround(autoToolsCPreProcessor[0])
+autoToolsCompilers = "_AutoToolsCompilers", ""
 
 #CMake
 cmakePrefix = "_CMakePrefix", "-DCMAKE_PREFIX_PATH=" + surround(mdPrefix[0]) + " -DCMAKE_INSTALL_PREFIX=" + surround(mdPrefix[0])
@@ -62,7 +62,7 @@ cmakeCXXCompiler = "_CMakeCXXCompiler","-DCMAKE_CXX_COMPILER=" + surround(mdCXXC
 cmakeFCompiler = "_CMakeFCompiler", "-DCMAKE_Fortran_COMPILER=" + surround(mdFCompiler[0])
 cmakeF77Compiler = "_CMakeF77Compiler", "" #CMake only has one Fortran compiler override
 cmakeOBJCCompiler = "_CMakeOBJCCompiler", "OBJC=" + surround(mdOBJCCompiler[0])
-cmakesOBJCPreProcessor = "_CMakeOBJCPreProcessor", "OBJCPP=" + surround(mdOBJCPreProcessor[0])
+cmakeOBJCPreProcessor = "_CMakeOBJCPreProcessor", "OBJCPP=" + surround(mdOBJCPreProcessor[0])
 cmakeOBJCXXCompiler = "_CMakeOBJCCompiler", "OBJCXX=" + surround(mdOBJCXXCompiler[0])
 cmakeOBJCXXPreProcessor = "_CMakeOBJCPreProcessor", "OBJCXXCPP=" + surround(mdOBJCXXPreProcessor[0])
 
@@ -71,19 +71,63 @@ cmakeCompilers = "_CMakeCompilers", surround(cmakeCCompiler[0]) + " " + surround
 #GNUMake
 makeJobSlots = "_MakeJobSlots", "-j" + surround(mdJobSlots[0])
 
-def setCompilerDefines(options, CCompiler, CXXCompiler, CPreProcessor):
-    options.setDefine(mdCCompiler[0], CCompiler)
-    options.setDefine(mdCXXCompiler[0], CXXCompiler)
-    options.setDefine(mdCPreProcessor[0], CPreProcessor)
+def setCompilerDefines(options, compilerOverrides):
+    autoTools = ""
+    cmake = ""
 
-    options.setDefine(autoToolsCCompiler[0], autoToolsCCompiler[1])
-    options.setDefine(autoToolsCXXCompiler[0], autoToolsCXXCompiler[1])
-    options.setDefine(autoToolsCPreProcessor[0], autoToolsCPreProcessor[1])
-    options.setDefine(autoToolsCompilers[0], autoToolsCompilers[1])
+    if compilerOverrides.CCompiler != "":
+        options.setDefine(mdCCompiler[0], compilerOverrides.CCompiler)
+        options.setDefine(autoToolsCCompiler[0], autoToolsCCompiler[1])
+        options.setDefine(cmakeCCompiler[0], cmakeCCompiler[1])
+        autoTools = surround(autoToolsCCompiler[0])
+        cmake = surround(autoToolsCCompiler[0])
+    if compilerOverrides.CPreProcessor != "":
+        options.setDefine(mdCPreProcessor[0], compilerOverrides.CPreProcessor)
+        options.setDefine(autoToolsCPreProcessor[0], autoToolsCPreProcessor[1])
+        options.setDefine(cmakeCPreProcessor[0], cmakeCPreProcessor[1])
+        autoTools += " " + surround(autoToolsCPreProcessor[0])
+        cmake += " " + surround(cmakeCPreProcessor[0])
+    if compilerOverrides.CXXCompiler != "":
+        options.setDefine(mdCXXCompiler[0], compilerOverrides.CXXCompiler)
+        options.setDefine(autoToolsCXXCompiler[0], autoToolsCXXCompiler[1])
+        autoTools += " " + surround(autoToolsCXXCompiler[0])
+    if compilerOverrides.FCompiler != "":
+        options.setDefine(mdFCompiler[0], compilerOverrides.FCompiler)
+        options.setDefine(autoToolsFCompiler[0], autoToolsFCompiler[1])
+        options.setDefine(cmakeFCompiler[0], cmakeFCompiler[1])
+        autoTools += " " + surround(autoToolsFCompiler[0])
+        cmake += " " + surround(cmakeFCompiler[0])
+    if compilerOverrides.F77Compiler != "":
+        options.setDefine(mdF77Compiler[0], compilerOverrides.F77Compiler)
+        options.setDefine(autoToolsF77Compiler[0], autoToolsF77Compiler[1])
+        autoTools += " " + surround(autoToolsF77Compiler[0])
+    if compilerOverrides.OBJCCompiler != "":
+        options.setDefine(mdOBJCCompiler[0], compilerOverrides.OBJCCompiler)
+        options.setDefine(autoToolsOBJCCompiler[0], autoToolsOBJCCompiler[1])
+        options.setDefine(cmakeOBJCCompiler[0], cmakeOBJCCompiler[1])
+        autoTools += " " + surround(autoToolsOBJCCompiler[0])
+        cmake += " " + surround(cmakeOBJCCompiler[0])
+    if compilerOverrides.OBJCPreProcessor != "":
+        options.setDefine(mdOBJCPreProcessor[0], compilerOverrides.OBJCPreProcessor)
+        options.setDefine(autoToolsOBJCPreProcessor[0], autoToolsOBJCPreProcessor[1])
+        options.setDefine(cmakeOBJCPreProcessor[0], cmakeOBJCPreProcessor[1])
+        autoTools += " " + surround(autoToolsOBJCPreProcessor[0])
+        cmake += " " + surround(cmakeOBJCPreProcessor[0])
+    if compilerOverrides.OBJCXXCompiler != "":
+        options.setDefine(mdOBJCXXCompiler[0], compilerOverrides.OBJCXXCompiler)
+        options.setDefine(autoToolsOBJCXXCompiler[0], autoToolsOBJCXXCompiler[1])
+        options.setDefine(cmakeOBJCXXCompiler[0], cmakeOBJCXXCompiler[1])
+        autoTools += " " + surround(autoToolsOBJCXXCompiler[0])
+        cmake += " " + surround(cmakeOBJCXXCompiler[0])
+    if compilerOverrides.OBJCXXPreProcessor != "":
+        options.setDefine(mdOBJCXXPreProcessor[0], compilerOverrides.OBJCXXPreProcessor)
+        options.setDefine(autoToolsOBJCXXPreProcessor[0], autoToolsOBJCXXPreProcessor[1])
+        options.setDefine(cmakeOBJCXXPreProcessor[0], cmakeOBJCXXPreProcessor[1])
+        autoTools += " " + surround(autoToolsOBJCXXPreProcessor[0])
+        cmake += " " + surround(cmakeOBJCXXPreProcessor[0])
 
-    options.setDefine(cmakeCCompiler[0], cmakeCCompiler[1])
-    options.setDefine(cmakeCXXCompiler[0], cmakeCXXCompiler[1])
-    options.setDefine(cmakeCompilers[0], cmakeCompilers[1])
+    options.setDefine(autoToolsCompilers[0], autoTools)
+    options.setDefine(cmakeCompilers[0], cmake)
 
 def setJobSlotsDefines(options, jobSlots):
     options.setDefine(mdJobSlots[0], jobSlots)

@@ -38,24 +38,33 @@ class Options(object):
         self.prefixDefined = False
         self.skipSteps = ""
         self.threadCount = 1
+        self.overrideFile = ""
+        self.compilerGroupName = ""
+        self.optimizationGroupName = ""
+        self.parallelGroupName = ""
         self._defines = dict()
         self._defines.setdefault("")
         defines.setPrefixDefines(self, '/usr/local')
 
     def __str__(self):
         return "Options:\n\
-  Project File:  " + self.projectFile + "\n\
-  Build Dir:     " + self.buildDir + "\n\
-  Download Dir:  " + self.downloadDir + "\n\
-  Log Dir:       " + self.logDir + "\n\
-  Defines:       " + str(self._defines) + "\n\
-  Import:        " + str(self.importer) + "\n\
-  Clean Targets: " + str(self.cleanTargets) + "\n\
-  Clean MixDown: " + str(self.cleanMixDown) + "\n\
-  Verbose:       " + str(self.verbose) + "\n\
-  Logger:        " + self.logger.capitalize() + "\n\
-  Thread Count:  " + str(self.threadCount) + "\n\
-  Job Count:     " + self.getDefine(defines.surround(defines.mdJobSlots[0])) + "\n"
+  Project File:   " + self.projectFile + "\n\
+  Override File:  " + self.overrideFile + "\n\
+  Build Dir:      " + self.buildDir + "\n\
+  Download Dir:   " + self.downloadDir + "\n\
+  Log Dir:        " + self.logDir + "\n\
+  Defines:        " + str(self._defines) + "\n\
+  Import:         " + str(self.importer) + "\n\
+  Clean Targets:  " + str(self.cleanTargets) + "\n\
+  Clean MixDown:  " + str(self.cleanMixDown) + "\n\
+  Verbose:        " + str(self.verbose) + "\n\
+  Logger:         " + self.logger.capitalize() + "\n\
+  Thread Count:   " + str(self.threadCount) + "\n\
+  Job Count:      " + self.getDefine(defines.surround(defines.mdJobSlots[0])) + "\n\
+  Override Group Names:\n\
+    Compiler:     " + self.compilerGroupName + "\n\
+    Optimization: " + self.optimizationGroupName + "\n\
+    Parallel:     " + self.parallelGroupName + "\n"
 
     def _normalizeKey(self, key, lower=True):
         normalizedKey = key.strip()
@@ -200,7 +209,7 @@ class Options(object):
             elif currFlag == "-b":
                 validateOptionPair(currFlag, currValue)
                 self.buildDir = currValue
-            elif currFlag == "-o":
+            elif currFlag == "-w":
                 validateOptionPair(currFlag, currValue)
                 self.downloadDir = currValue
             elif currFlag == "-k":
@@ -214,6 +223,19 @@ class Options(object):
             elif currFlag == "-s":
                 validateOptionPair(currFlag, currValue)
                 self.skipSteps = currValue
+            elif currFlag == "-o":
+                validateOptionPair(currFlag, currValue)
+                self.overrideFile = currValue
+            elif currFlag == "-g":
+                validateOptionPair(currFlag, currValue)
+                groupsList = currValue.split(";")
+                length = len(groupsList)
+                if length >= 1:
+                    self.compilerGroupName = groupsList[0].lower()
+                if length >= 2:
+                    self.optimizationGroupName = groupsList[1].lower()
+                if length >= 3:
+                    self.parallelGroupName = groupsList[2].lower()
             elif currArg.lower() in ("/help", "/h", "-help", "--help", "-h"):
                 self.printUsageAndExit()
             elif currFlag == "-c" or currArg.lower() == "--clean":
@@ -258,9 +280,13 @@ class Options(object):
         -t<number>    Number of threads used to build concurrent targets\n\
         -s<list>      Add steps to skip for individual targets\n\
            Example: -starget1:preconfig;target2:config\n\
+        -o<path>      Specify path to Override Groups file\n\
+        -g<Compiler>;<Debug>;<Parallel>  Specify Override Groups\n\
+           Example: -gGNU;Debug;MPI\n\
+           Example: -gGNU;;\n\
         -p<path>      Override prefix directory\n\
         -b<path>      Override build directory\n\
-        -o<path>      Override download directory\n\
+        -w<path>      Override download directory\n\
         -l<logger>    Override default logger (Console, File, Html)\n\
         -k            Keeps previously existing MixDown directories\n\
     \n\
@@ -275,7 +301,7 @@ class Options(object):
         -j<number>    Number of build job slots\n\
         -t<number>    Number of threads used to build concurrent targets\n\
         -b<path>      Override build directory\n\
-        -o<path>      Override download directory\n\
+        -w<path>      Override download directory\n\
         -l<logger>    Override default logger (Console, File, Html)\n\
     \n\
     Default Directories:\n\

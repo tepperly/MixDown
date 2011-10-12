@@ -1,5 +1,5 @@
 from tokenizer import Tokenizer, TokenType
-import logger
+import defines, logger
 
 class CompilerOverrides(object):
     def __init__(self):
@@ -150,3 +150,25 @@ def readGroups(filename):
 
         groups.append(overrideGroup)
     return groups
+
+def selectGroups(groups, options):
+    compilerGroupSet = False
+    optimizationGroupSet = False
+    parallelGroupSet = False
+
+    for group in groups:
+        if group.compiler[0].lower() == options.compilerGroupName:
+            if compilerGroupSet:
+                logger.writeError("Duplicate Compiler Group name found: " + group.compiler[0], filePath=options.overrideFile, exitProgram=True)
+            defines.setCompilerDefines(options, group.compiler[1])
+            compilerGroupSet = True
+        if group.optimization[0].lower() == options.optimizationGroupName:
+            if optimizationGroupSet:
+                logger.writeError("Duplicate Optimization Group name found: " + group.optimization[0], filePath=options.overrideFile, exitProgram=True)
+            defines.setOptimizationDefines(options, group.optimization[1])
+            optimizationGroupSet = True
+        if group.parallel[0].lower() == options.parallelGroupName:
+            if parallelGroupSet:
+                logger.writeError("Duplicate Parallel Group name found: " + group.parallel[0], filePath=options.overrideFile, exitProgram=True)
+            defines.setParallelDefines(options, group.parallel[1])
+            parallelGroupSet = True
