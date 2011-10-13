@@ -149,10 +149,6 @@ def __getPreconfigureCommand(target):
     command = ""
     if cmake.isCMakeProject(target.path):
         command = cmake.getPreconfigureCommand()
-    elif os.path.exists(os.path.join(target.path, "autogen.sh")):
-        command = "./autogen.sh"
-    elif os.path.exists(os.path.join(target.path, "buildconf")):
-        command = "./buildconf"
     elif autoTools.isAutoToolsProject(target.path):
         command = autoTools.getPreconfigureCommand(target.path)
     return command

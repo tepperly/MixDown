@@ -91,10 +91,15 @@ def getPreconfigureCommand(path):
         raise exceptions.ToolNotInstalledException("autoconf")
     if not isLibtoolInstalled():
         raise exceptions.ToolNotInstalledException("libtool")
-    if os.path.exists(os.path.join(path, "configure.ac")) or os.path.exists(os.path.join(path, "configure.in")):
-        return "autoreconf -i"
-    else:
-        return ""
+
+    command = ""
+    if os.path.exists(os.path.join(path, "autogen.sh")):
+        command = "test -x configure || ./autogen.sh"
+    elif os.path.exists(os.path.join(path, "buildconf")):
+        command = "test -x configure || ./buildconf"
+    elif os.path.exists(os.path.join(path, "configure.ac")) or os.path.exists(os.path.join(path, "configure.in")):
+        command = "test -x configure || autoreconf -i"
+    return command
 
 def getConfigureCommand(target):
     command = "./configure " + defines.surround(defines.autoToolsPrefix[0]) + " " + defines.surround(defines.autoToolsCompilers[0])
