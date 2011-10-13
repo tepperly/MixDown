@@ -48,8 +48,9 @@ def main():
             if mdOptions.cleanMixDown:
                 cleanMixDown(mdOptions)
 
-            overrideGroups = overrides.readGroups(mdOptions.overrideFile)
-            overrides.selectGroups(overrideGroups, mdOptions)
+            if mdOptions.overrideFile != "":
+                overrideGroups = overrides.readGroups(mdOptions.overrideFile)
+                overrides.selectGroups(overrideGroups, mdOptions)
 
             mdProject = setup(mdOptions)
             if mdProject == None:
