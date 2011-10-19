@@ -65,6 +65,7 @@ def main():
                 else:
                     lock = multiprocessing.RLock()
                     jobQueue = multiprocessing.Queue()
+                    resultQueue = multiprocessing.Queue()
                     maxDepth = mdProject.targets[len(mdProject.targets)-1].dependencyDepth
                     for currDepth in range(maxDepth, -1, -1):
                         processes = []
@@ -83,7 +84,7 @@ def main():
                         for _ in range(processCount):
                             jobQueue.put(None)
                         for _ in range(processCount):
-                            p = multiprocessing.Process(target=commands.buildTargetThreaded, args=(jobQueue,mdOptions,lock,))
+                            p = multiprocessing.Process(target=commands.buildTargetThreaded, args=(jobQueue,resultQueue,mdOptions,lock,))
                             processes.append(p)
 
                         for p in processes:
@@ -91,12 +92,15 @@ def main():
                         for p in processes:
                             p.join()
 
+                        while not resultQueue.empty():
+                            resultTarget = resultQueue.get(False)
+                            mdProject.replaceTarget(resultTarget)
+
                         for target in reversed(mdProject.targets):
-                            if target.dependencyDepth == currDepth and target.succeeded == False:
+                            if target.dependencyDepth == currDepth and not target.succeeded:
                                 if jobCount != 1:
                                     logger.writeError(target.name + " failed.  Due to threading, you may need to scroll up to read error message.")
                                 succeeded = False
-                                break
                         if not succeeded:
                             break
 

@@ -20,7 +20,7 @@
 # along with this program; if not, write to the Free Software Foundation,
 # Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 
-import os, multiprocessing, time
+import os, multiprocessing, sys, time
 import autoTools, cmake, logger, make, python, defines, target, utilityFunctions
 
 class BuildStep(object):
@@ -104,16 +104,14 @@ def buildTarget(target, options, lock=None):
             if not target.succeeded:
                 break
 
-def buildTargetThreaded(jobQueue, options, lock):
-    previousTarget = None
+def buildTargetThreaded(jobQueue, resultQueue, options, lock):
     target = None
     while True:
-        previousTarget = target
-        target = jobQueue.get()
-        if target == None or (previousTarget != None and previousTarget.succeeded == False):
-            break
-
+        target = jobQueue.get(False)
+        if target == None:
+            sys.exit(0)
         buildTarget(target, options, lock)
+        resultQueue.put(target)
 
 def getCommand(stepName, target):
     command = ""

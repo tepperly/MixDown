@@ -103,6 +103,18 @@ class Project(object):
                     return currTarget
         return None
 
+    def replaceTarget(self, newTarget):
+        normalizedTargetName = target.normalizeName(newTarget.name)
+        i = 0
+        targetFound = False
+        for currTarget in self.targets:
+            if normalizedTargetName == target.normalizeName(currTarget.name):
+                targetFound = True
+                break
+            i += 1
+        if targetFound:
+            self.targets[i] = newTarget
+
     def read(self):
         f = open(self.path, "r")
         try:
