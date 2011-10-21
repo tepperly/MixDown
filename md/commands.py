@@ -155,10 +155,10 @@ def __getConfigureCommand(target):
     command = ""
     if cmake.isCMakeProject(target.path):
         command = cmake.getConfigureCommand()
-    elif os.path.exists(os.path.join(target.path, "Configure")):
-        command = "./Configure"
     elif autoTools.isAutoToolsProject(target.path):
         command = autoTools.getConfigureCommand(target)
+    elif os.path.exists(os.path.join(target.path, "Configure")):
+        command = "./Configure"
     return command
 
 def __getBuildCommand(target):
