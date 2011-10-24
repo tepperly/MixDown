@@ -129,6 +129,8 @@ def main():
     except exceptions.ToolNotInstalledException, e:
         logger.writeError("%s not found." % e.tool)
         logger.writeError("This project requires that %s is installed on your system." % e.tool)
+    except exceptions.ProjectFileNotSpecifiedException:
+        logger.writeError("Must specify a MixDown project file")
     finally:
         logger.close()
     if succeeded:
