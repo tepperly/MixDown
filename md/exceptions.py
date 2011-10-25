@@ -26,3 +26,9 @@ class ToolNotInstalledException(Exception):
 		super(ToolNotInstalledException, self).__init__(message)
 		self.tool = tool
 		self.message = message
+
+class ProjectFileNotSpecifiedException(Exception):
+    def __init__(self):
+        message = "No project file was specified"
+        super(ProjectFileNotSpecifiedException, self).__init__(message)
+        self.message = message

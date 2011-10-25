@@ -20,8 +20,8 @@
 # along with this program; if not, write to the Free Software Foundation,
 # Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 
-import os, collections, Queue
-import commands, logger, target, utilityFunctions
+import os, collections, errno, Queue
+import commands, exceptions, logger, target, utilityFunctions
 
 class Project(object):
     def __init__(self, projectFilePath, targets=[]):
@@ -116,6 +116,8 @@ class Project(object):
             self.targets[i] = newTarget
 
     def read(self):
+        if self.path=='':
+            raise exceptions.ProjectFileNotSpecifiedException()
         f = open(self.path, "r")
         try:
             currTarget = None

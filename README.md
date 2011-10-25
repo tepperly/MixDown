@@ -19,7 +19,7 @@ Examples
 Subversion
 ----------
 
-Here's how you would use MixDown to build subversion. First, create an initial MixDown build file using information from the source tarballs of subversion and its dependencies (the order doesn't matter):
+Here's how you would use MixDown to build subversion. First, create an initial MixDown project file using information from the source tarballs of subversion and its dependencies (the order doesn't matter):
 
     MixDown --import \
     http://subversion.tigris.org/downloads/subversion-1.6.12.tar.bz2 \
@@ -28,7 +28,7 @@ Here's how you would use MixDown to build subversion. First, create an initial M
     http://www.webdav.org/neon/neon-0.29.5.tar.gz \
     http://www.sqlite.org/sqlite-autoconf-3070500.tar.gz
 
-This will create a MixDown build file called subversion-1.6.12.md.
+This will create a MixDown project file called subversion-1.6.12.md.
 
 Next, execute the build:
 
@@ -40,9 +40,9 @@ Git
 Here's how you can use MixDown to build Git.
 
      MixDown --import \
-     http://kernel.org/pub/software/scm/git/git-1.7.5.1.tar.bz2
+     http://git-core.googlecode.com/files/git-1.7.7.tar.gz
 
-This will create a MixDown build file called git-1.7.5.1.md.
+This will create a MixDown project file called git-1.7.7.md.
 
 Next, execute the build. By default, git will try to install itself in /usr/local, but this can be overridden with the -p flag. Here we install it into ./testPrefix instead.
 
@@ -54,12 +54,17 @@ Usage
     Import Mode:
         Example Usage: MixDown --import foo.tar.gz http://path/to/bar
 
+        This mode generates the MixDown project file by introspecting the source packages to be 
+        built. It will also download the source packages from the specified URLs.
+
         Required:
         --import                  Toggle Import mode
         <package location list>   Space delimited list of package locations
 
     Build Mode (Default):
         Example Usage: MixDown foo.md
+
+        This mode builds the packages described in the MixDown project file.
 
         Required:
         <path to .md file>   Path to MixDown project file
@@ -77,6 +82,9 @@ Usage
 
     Clean Mode:
         Example Usage: MixDown --clean foo.md
+
+        This mode does a "make clean" or equivalent in the build directory of each package described
+        in the MixDown project file.
 
         Required:
         --clean              Toggle Clean mode
