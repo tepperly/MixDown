@@ -54,7 +54,7 @@ Usage
     Import Mode:
         Example Usage: MixDown --import foo.tar.gz http://path/to/bar
 
-        This mode generates the MixDown project file by introspecting the source packages to be 
+        This mode generates the MixDown project file by introspecting the source packages to be
         built. It will also download the source packages from the specified URLs.
 
         Required:
@@ -74,6 +74,10 @@ Usage
         -t<number>    Number of threads used to build concurrent targets
         -s<list>      Add steps to skip for individual targets
            Example: -starget1:preconfig;target2:config
+        -o<path>      Specify path to Override Groups file
+        -g<Compiler>;<Debug>;<Parallel>  Specify Override Groups
+           Example: -gGNU;Debug;MPI
+           Example: -gGNU;;
         -p<path>      Override prefix directory
         -b<path>      Override build directory
         -o<path>      Override download directory
