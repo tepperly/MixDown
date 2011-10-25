@@ -21,11 +21,11 @@
 # Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 
 class ToolNotInstalledException(Exception):
-	def __init__(self, tool):
-		message = "%s not installed" % tool
-		super(ToolNotInstalledException, self).__init__(message)
-		self.tool = tool
-		self.message = message
+    def __init__(self, tool):
+        message = "%s not installed" % tool
+        super(ToolNotInstalledException, self).__init__(message)
+        self.tool = tool
+        self.message = message
 
 class ProjectFileNotSpecifiedException(Exception):
     def __init__(self):

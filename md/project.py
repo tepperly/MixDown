@@ -116,7 +116,7 @@ class Project(object):
             self.targets[i] = newTarget
 
     def read(self):
-        if self.path=='':
+        if self.path == "":
             raise exceptions.ProjectFileNotSpecifiedException()
         f = open(self.path, "r")
         try:
