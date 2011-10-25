@@ -24,7 +24,7 @@ import os, re
 import make, defines, exceptions, logger, target, utilityFunctions
 
 def isAutoToolsProject(path):
-    if os.path.exists(os.path.join(path, "configure")) or\
+    if utilityFunctions.pathExists(os.path.join(path, "configure"), True) or\
        os.path.exists(os.path.join(path, "configure.ac")) or\
        os.path.exists(os.path.join(path, "configure.in")):
         return True

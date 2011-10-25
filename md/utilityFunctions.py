@@ -103,6 +103,26 @@ def isURL(url):
     except:
         return False
 
+def __pathExists(directory, basename):
+    listDir = os.listdir(directory)
+    if basename in listDir:
+        return True
+    return False
+
+def pathExists(path, forceCaseSensitive=False):
+    if not forceCaseSensitive:
+        return os.path.exists(path)
+
+    fullPath = os.path.abspath(path)
+    fullPathList = fullPath.split(os.path.sep)
+
+    directory = "/"
+    for basename in fullPathList[1:]:
+        if not __pathExists(directory, basename):
+            return False
+        directory = os.path.join(directory, basename)
+    return True
+
 def prettyPrintList(list, header="", headerIndent="", itemIndent=""):
     retStr = headerIndent + header
     listLen = len(list)
@@ -229,7 +249,7 @@ def setVariables(filename,variableList):
                 if(line.startswith(variable)):
                     sys.stdout.write(variable+" = "+value+"\n")
                     isWritten = True
-            if not isWritten: 
+            if not isWritten:
                 sys.stdout.write(line+"\n")
         return True
     except Exception, e:
@@ -241,7 +261,7 @@ def is_exe(fpath):
     return os.path.exists(fpath) and os.access(fpath, os.X_OK)
 
 def isInstalled(program):
-    """Checks if a program is installed by searching for executable files in the PATH. 
+    """Checks if a program is installed by searching for executable files in the PATH.
 
     See: http://stackoverflow.com/questions/377017/test-if-executable-exists-in-python#377028
     """

@@ -20,13 +20,55 @@
 # along with this program; if not, write to the Free Software Foundation,
 # Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 
-import os, sys, unittest
+import os, sys, unittest, mdTestUtilities
 
 if not ".." in sys.path:
     sys.path.append("..")
 from md import logger, utilityFunctions
 
 class Test_utilityFunctions(unittest.TestCase):
+    def test_pathExists1(self):
+        try:
+            tempDir = mdTestUtilities.makeTempDir()
+            tempFile = mdTestUtilities.makeTempFile(tempDir)
+            self.assertEquals(utilityFunctions.pathExists(tempFile), True, "pathExists should have returned True")
+        finally:
+            utilityFunctions.removeDir(tempDir)
+
+    def test_pathExists2(self):
+        try:
+            tempDir = mdTestUtilities.makeTempDir()
+            tempFile = mdTestUtilities.makeTempFile(tempDir)
+            self.assertEquals(utilityFunctions.pathExists(tempFile, True), True, "pathExists should have returned True")
+        finally:
+            utilityFunctions.removeDir(tempDir)
+
+    def test_pathExists3(self):
+        try:
+            tempDir = mdTestUtilities.makeTempDir()
+            tempFile = mdTestUtilities.createBlankFile(os.path.join(tempDir, "test"))
+            self.assertEquals(utilityFunctions.pathExists(os.path.join(tempDir, "TeSt"), True), False, "pathExists should have returned False")
+        finally:
+            utilityFunctions.removeDir(tempDir)
+
+    def test_pathExists4(self):
+        try:
+            tempDir = mdTestUtilities.makeTempDir()
+            self.assertEquals(utilityFunctions.pathExists(os.path.join(tempDir, "test"), True), False, "pathExists should have returned False")
+        finally:
+            utilityFunctions.removeDir(tempDir)
+
+    def test_pathExists5(self):
+        try:
+            tempDir = mdTestUtilities.makeTempDir()
+            directory = os.path.join(tempDir, "testDir")
+            os.makedirs(directory)
+            mdTestUtilities.createBlankFile(os.path.join(directory, "test"))
+            wrongPath = os.path.join(os.path.join(tempDir, "TeStDiR"), "test")
+            self.assertEquals(utilityFunctions.pathExists(wrongPath, True), False, "pathExists should have returned False")
+        finally:
+            utilityFunctions.removeDir(tempDir)
+
     def test_URLToFileName01(self):
         url = "http://sourceforge.net/projects/pymol/files/pymol/1.4.1/pymol-v1.4.1.tar.bz2/download"
         filename = utilityFunctions.URLToFilename(url)
