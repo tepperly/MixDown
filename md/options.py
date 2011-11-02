@@ -92,10 +92,12 @@ class Options(object):
         return value
 
     def expandDefines(self, inString):
+        if inString == "":
+            return ""
         expandedString = inString
         loopCount = 0
         while expandedString.find("$(") != -1:
-            if loopCount > 10:
+            if loopCount > 50:
                 logger.writeError("Define depth count (10) exceeded in string '" + inString + "'", exitProgram=True)
 
             strLength = len(expandedString)
@@ -173,7 +175,7 @@ class Options(object):
 
             if currFlag == "-d":
                 validateOptionPair(currFlag, currValue)
-                for definePair in currValue.split(";"):
+                for definePair in currValue.split(","):
                     splitPair = definePair.split("=")
                     if len(splitPair) != 2:
                         logger.writeError("Invalid define pair given, " + definePair, exitProgram=True)
@@ -228,7 +230,7 @@ class Options(object):
                 self.overrideFile = currValue
             elif currFlag == "-g":
                 validateOptionPair(currFlag, currValue)
-                groupsList = currValue.split(";")
+                groupsList = currValue.split(",")
                 length = len(groupsList)
                 if length >= 1:
                     self.compilerGroupName = groupsList[0].lower()
@@ -279,11 +281,11 @@ class Options(object):
         -j<number>    Number of build job slots\n\
         -t<number>    Number of threads used to build concurrent targets\n\
         -s<list>      Add steps to skip for individual targets\n\
-           Example: -starget1:preconfig;target2:config\n\
+           Example: -starget1:preconfig,target2:config\n\
         -o<path>      Specify path to Override Groups file\n\
-        -g<Compiler>;<Debug>;<Parallel>  Specify Override Groups\n\
-           Example: -gGNU;Debug;MPI\n\
-           Example: -gGNU;;\n\
+        -g<Compiler>,<Debug>,<Parallel>  Specify Override Groups\n\
+           Example: -gGNU,Debug,MPI\n\
+           Example: -gGNU,,\n\
         -p<path>      Override prefix directory\n\
         -b<path>      Override build directory\n\
         -w<path>      Override download directory\n\
