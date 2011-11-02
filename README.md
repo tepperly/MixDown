@@ -75,9 +75,9 @@ Usage
         -s<list>      Add steps to skip for individual targets
            Example: -starget1:preconfig;target2:config
         -o<path>      Specify path to Override Groups file
-        -g<Compiler>;<Debug>;<Parallel>  Specify Override Groups
-           Example: -gGNU;Debug;MPI
-           Example: -gGNU;;
+        -g<Compiler>,<Debug>,<Parallel>  Specify Override Groups
+           Example: -gGNU,Debug,MPI
+           Example: -gGNU,,
         -p<path>      Override prefix directory
         -b<path>      Override build directory
         -o<path>      Override download directory
