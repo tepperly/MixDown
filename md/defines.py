@@ -35,10 +35,14 @@ mdOBJCPreProcessor = "_OBJCPreProcessor", ""
 mdOBJCXXCompiler = "_OBJCCompiler", ""
 mdOBJCXXPreProcessor = "_OBJCPreProcessor", ""
 
+mdCFlags = "_CFlags", ""
+mdCXXFlags = "_CXXFlags", ""
+mdFFlags = "_FFlags", ""
+
 mdJobSlots = "_JobSlots", ""
 mdPrefix = "_Prefix", ""
 
-#AutoTool
+#AutoTools
 autoToolsPrefix = "_AutoToolsPrefix", "--prefix=" + surround(mdPrefix[0])
 
 autoToolsCCompiler = "_AutotoolsCCompiler", "CC=" + surround(mdCCompiler[0])
@@ -51,7 +55,12 @@ autoToolsOBJCPreProcessor = "_AutotoolsOBJCPreProcessor", "OBJCPP=" + surround(m
 autoToolsOBJCXXCompiler = "_AutotoolsOBJCCompiler", "OBJCXX=" + surround(mdOBJCXXCompiler[0])
 autoToolsOBJCXXPreProcessor = "_AutotoolsOBJCPreProcessor", "OBJCXXCPP=" + surround(mdOBJCXXPreProcessor[0])
 
+autoToolsCFlags = "_AutotoolsCFlags", "CFLAGS=" + surround(mdCFlags[0])
+autoToolsCXXFlags = "_AutotoolsCXXFlags", "CXXFLAGS=" + surround(mdCXXFlags[0])
+autoToolsFFlags = "_AutotoolsFFlags", "FFLAGS=" + surround(mdFFlags[0])
+
 autoToolsCompilers = "_AutoToolsCompilers", ""
+autoToolsFlags = "_AutoToolsFlags", ""
 
 #CMake
 cmakePrefix = "_CMakePrefix", "-DCMAKE_PREFIX_PATH=" + surround(mdPrefix[0]) + " -DCMAKE_INSTALL_PREFIX=" + surround(mdPrefix[0])
@@ -61,15 +70,29 @@ cmakeCPreProcessor = "_CMakeCPreProcessor", "" #CMake doesn't have a default way
 cmakeCXXCompiler = "_CMakeCXXCompiler","-DCMAKE_CXX_COMPILER=" + surround(mdCXXCompiler[0])
 cmakeFCompiler = "_CMakeFCompiler", "-DCMAKE_Fortran_COMPILER=" + surround(mdFCompiler[0])
 cmakeF77Compiler = "_CMakeF77Compiler", "" #CMake only has one Fortran compiler override
-cmakeOBJCCompiler = "_CMakeOBJCCompiler", "OBJC=" + surround(mdOBJCCompiler[0])
-cmakeOBJCPreProcessor = "_CMakeOBJCPreProcessor", "OBJCPP=" + surround(mdOBJCPreProcessor[0])
-cmakeOBJCXXCompiler = "_CMakeOBJCCompiler", "OBJCXX=" + surround(mdOBJCXXCompiler[0])
-cmakeOBJCXXPreProcessor = "_CMakeOBJCPreProcessor", "OBJCXXCPP=" + surround(mdOBJCXXPreProcessor[0])
+cmakeOBJCCompiler = "_CMakeOBJCCompiler", "-DCMAKE_OBJC_COMPILER=" + surround(mdOBJCCompiler[0]) #Guessed
+cmakeOBJCPreProcessor = "_CMakeOBJCPreProcessor", "-DCMAKE_OBJCPP_COMPILER=" + surround(mdOBJCPreProcessor[0]) #Guessed
+cmakeOBJCXXCompiler = "_CMakeOBJCCompiler", "-DCMAKE_OBJCXX_COMPILER=" + surround(mdOBJCXXCompiler[0]) #Guessed
+cmakeOBJCXXPreProcessor = "_CMakeOBJCPreProcessor", "-DCMAKE_OBJCXXCPP_COMPILER=" + surround(mdOBJCXXPreProcessor[0]) #Guessed
 
-cmakeCompilers = "_CMakeCompilers", surround(cmakeCCompiler[0]) + " " + surround(cmakeCXXCompiler[0])
+cmakeCFlags = "_CMakeCFlags", "-DCMAKE_C_FLAGS=" + surround(mdCFlags[0])
+cmakeCXXFlags = "_CMakeCXXFlags", " -DCMAKE_CXX_FLAGS=" + surround(mdCXXFlags[0])
+cmakeFFlags = "_CMakeFFlags", "-DCMAKE_Fortran_FLAGS=" + surround(mdFFlags[0])  #Guessed
+
+cmakeCompilers = "_CMakeCompilers", ""
+cmakeFlags = "_CMakeFlags", ""
 
 #GNUMake
 makeJobSlots = "_MakeJobSlots", "-j" + surround(mdJobSlots[0])
+
+#GCC
+gccCFlags = "_GCCCFlags", ""
+gccCXXFlags = "_GCCCXXFlags", ""
+gccOptimize = "_GCCOptimize", ""
+
+#gfortran
+gfortranFFlags = "_GFortranFFlags", ""
+gfortranOptimize = "_GFortranOptimize", ""
 
 def setCompilerDefines(options, compilerOverrides):
     autoTools = ""
@@ -128,6 +151,52 @@ def setCompilerDefines(options, compilerOverrides):
 
     options.setDefine(autoToolsCompilers[0], autoTools)
     options.setDefine(cmakeCompilers[0], cmake)
+
+def setOptimizationDefines(options, optimizationOverrides):
+    gccCFlags = ""
+    gccCXXFlags = ""
+    gfortranFFlags = ""
+
+    if optimizationOverrides.optimize != "":
+        if optimizationOverrides.optimize == "true":
+            options.setDefine(gccOptimize[0], "-O2")
+            options.setDefine(gfortranOptimize[0], "-O2")
+        else:
+            options.setDefine(gccOptimize[0], "-O0")
+            options.setDefine(gfortranOptimize[0], "-O0")
+        gccCFlags = surround(gccOptimize[0])
+        gccCXXFlags = surround(gccOptimize[0])
+        gfortranFFlags = surround(gfortranOptimize[0])
+
+    #TODO: Test which compiler is actually being used and set flags accordingly
+    #  For example: gcc gets gccCFlags, icc gets iccCflags
+
+    autoTools = " "
+    cmake = " "
+    if gccCFlags != "":
+        options.setDefine(mdCFlags[0], gccCFlags)
+        options.setDefine(autoToolsCFlags[0], autoToolsCFlags[1])
+        options.setDefine(cmakeCFlags[0], cmakeCFlags[1])
+        autoTools += surround(autoToolsCFlags[0]) + " "
+        cmake += surround(cmakeCFlags[0]) + " "
+    if gccCXXFlags != "":
+        options.setDefine(mdCXXFlags[0], gccCXXFlags)
+        options.setDefine(autoToolsCXXFlags[0], autoToolsCXXFlags[1])
+        options.setDefine(cmakeCXXFlags[0], cmakeCXXFlags[1])
+        autoTools += surround(autoToolsCXXFlags[0]) + " "
+        cmake += surround(cmakeCXXFlags[0]) + " "
+    if gfortranFFlags != "":
+        options.setDefine(mdFFlags[0], gfortranFFlags)
+        options.setDefine(autoToolsFFlags[0], autoToolsFFlags[1])
+        options.setDefine(cmakeFFlags[0], cmakeFFlags[1])
+        autoTools += surround(autoToolsFFlags[0]) + " "
+        cmake += surround(cmakeFFlags[0]) + " "
+
+    options.setDefine(autoToolsFlags[0], autoTools)
+    options.setDefine(cmakeFlags[0], cmake)
+
+def setParallelDefines(options, parallelDefines):
+    pass
 
 def setJobSlotsDefines(options, jobSlots):
     options.setDefine(mdJobSlots[0], jobSlots)

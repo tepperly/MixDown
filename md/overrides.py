@@ -15,8 +15,8 @@ class CompilerOverrides(object):
 
 class OptimizationOverrides(object):
     def __init__(self):
-        self.optimizationLevel = ""
-        self.debugInfo = False
+        self.optimize = ""
+        self.debugInfo = ""
 
 class ParallelOverrides(object):
     def __init__(self):
@@ -138,10 +138,18 @@ def readGroups(filename):
             elif overrideName == "objcxxpreprocessor":
                 overrideGroup.compiler[1].OBJCXXPreProcessor = overrideString
             #Optimization Overrides
-            elif overrideName == "optimizationlevel":
-                overrideGroup.optimization[1].optimizationLevel = overrideString
+            elif overrideName == "optimize":
+                lowered = overrideString.lower()
+                if lowered == "true" or lowered == "false":
+                    overrideGroup.optimization[1].optimize = lowered
+                else:
+                    logger.writeError("Optimize pair expected either 'True' or 'False' got '" + overrideString + "'", filePath=filename, exitProgram=True)
             elif overrideName == "debuginfo":
-                overrideGroup.optimization[1].debugInfo = overrideString
+                lowered = overrideString.lower()
+                if lowered == "true" or lowered == "false":
+                    overrideGroup.optimization[1].debugInfo = lowered
+                else:
+                    logger.writeError("DebugInfo pair expected either 'True' or 'False' got '" + overrideString + "'", filePath=filename, exitProgram=True)
             #Syntax end
             else:
                 logger.writeError("Unknown override pair:\n\t" + overrideNameOriginal + " = " + overrideString, filePath=filename, exitProgram=True)
