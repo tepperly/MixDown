@@ -38,7 +38,7 @@ class Project(object):
         if options.skipSteps == '' or options.skipSteps == None:
             return True
         skipSteps = options.skipSteps
-        for item in skipSteps.split(";"):
+        for item in skipSteps.split(","):
             pair = item.split(":")
             if len(pair) != 2 or pair[0] == "" or pair[1] == "":
                 logger.writeError("Invalid commandline -s pair found: " + item)
