@@ -114,7 +114,7 @@ def getPreconfigureCommand():
 def getConfigureCommand():
     if not isCmakeInstalled():
         raise exceptions.ToolNotInstalledException("CMake")
-    return "cmake " + defines.surround(defines.cmakePrefix[0]) + " " + defines.surround(defines.cmakeCompilers[0])
+    return "cmake " + defines.surround(defines.cmakePrefix[0]) + " " + defines.surround(defines.cmakeCompilers[0]) + " " + defines.surround(defines.cmakeFlags[0])
 
 def getBuildCommand():
     return make.getBuildCommand()
