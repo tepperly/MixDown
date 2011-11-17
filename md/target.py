@@ -76,7 +76,7 @@ class Target(object):
         self.buildSteps = []
         self.succeeded = False
 
-    def validate(self, option):
+    def validate(self, mdOptions):
         normalizedName = normalizeName(self.name)
         if normalizedName == "":
             return False
@@ -88,28 +88,28 @@ class Target(object):
                 return False
 
         #Check for write access to install directories used in commands.
-        if not option.cleanTargets:
+        if not mdOptions.cleanTargets:
             for buildStep in self.buildSteps:
-                installDir = autoTools.getInstallDir(buildStep.command)
+                expandedCommand = mdOptions.expandDefines(buildStep.command)
+                installDir = autoTools.getInstallDir(expandedCommand)
                 if installDir == "":
-                    installDir = cmake.getInstallDir(buildStep.command)
+                    installDir = cmake.getInstallDir(expandedCommand)
 
-                installDir = option.expandDefines(installDir)
                 if installDir != "" and not utilityFunctions.haveWriteAccess(installDir):
-                    logger.writeError("No write access to used install directory: " + installDir, self.name, step, options.projectFile)
-                    if not option.prefixDefined:
+                    logger.writeError("No write access to used install directory: " + installDir, self.name, buildStep.name, mdOptions.projectFile)
+                    if not mdOptions.prefixDefined:
                         logger.writeMessage("Use commandline option '-p<install path>' or running MixDown with superuser privileges (sudo)")
                     else:
                         logger.writeMessage("Choose a different install directory for commandline option '-p<install path>'")
                     return False
         return True
 
-    def determineOutputPath(self, option):
+    def determineOutputPath(self, mdOptions):
         if self.outputPathSpecified and self.outputPath != "":
             return self.outputPath
         else:
-            targetsBuildDir = os.path.join(option.buildDir, self.name)
-            if option.cleanTargets:
+            targetsBuildDir = os.path.join(mdOptions.buildDir, self.name)
+            if mdOptions.cleanTargets:
                 if os.path.exists(targetsBuildDir) and os.path.isdir(targetsBuildDir):
                     return targetsBuildDir
                 elif os.path.isdir(self.path):
@@ -118,20 +118,20 @@ class Target(object):
                     logger.writeError("Output path could not be located, define in project file with \"output=<path>\"", self.name, "clean")
                     return ""
             else:
-                option.validateBuildDir()
+                mdOptions.validateBuildDir()
                 return targetsBuildDir
 
-    def examine(self, option):
-        if option.importer:
-            self.__determineCommands(option)
-        self.outputPath = self.determineOutputPath(option)
+    def examine(self, mdOptions):
+        if mdOptions.importer:
+            self.__determineCommands()
+        self.outputPath = self.determineOutputPath(mdOptions)
         return True
 
-    def expandDefines(self, option):
+    def expandDefines(self, mdOptions):
         for buildStep in self.buildSteps:
-            buildStep.command = option.expandDefines(buildStep.command)
+            buildStep.command = mdOptions.expandDefines(buildStep.command)
 
-    def __determineCommands(self, option):
+    def __determineCommands(self):
         for stepName in commands.buildSteps:
             buildStep = commands.BuildStep(stepName, commands.getCommand(stepName, self))
             self.buildSteps.append(buildStep)
