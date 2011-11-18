@@ -34,20 +34,6 @@ Next, execute the build:
 
     MixDown subversion-1.6.12.md
 
-Git
----
-
-Here's how you can use MixDown to build Git.
-
-     MixDown --import \
-     http://git-core.googlecode.com/files/git-1.7.7.tar.gz
-
-This will create a MixDown project file called git-1.7.7.md.
-
-Next, execute the build. By default, git will try to install itself in /usr/local, but this can be overridden with the -p flag. Here we install it into ./testPrefix instead.
-
-     MixDown git-1.7.7.md -ptestPrefix
-
 Usage
 -----
 
