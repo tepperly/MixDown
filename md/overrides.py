@@ -16,7 +16,20 @@ class CompilerOverrides(object):
 class OptimizationOverrides(object):
     def __init__(self):
         self.optimize = ""
-        self.debugInfo = ""
+        self.CFlags = ""
+        self.CDefines = ""
+        self.CXXFlags = ""
+        self.CPPFlags = ""
+        self.FFlags = ""
+        self.FLibs = ""
+        self.F77Flags = ""
+        self.F77Libs = ""
+        self.LinkerFlags = ""
+        self.LinkerFlagsEXE = ""
+        self.LinkerFlagsShared = ""
+        self.LinkerFlagsModule = ""
+        self.OBJCFlags = ""
+        self.OBJCXXFlags = ""
 
 class ParallelOverrides(object):
     def __init__(self):
@@ -129,10 +142,8 @@ def readGroups(filename):
                 overrideGroup.compiler[1].FCompiler = overrideString
             elif overrideName == "f77compiler":
                 overrideGroup.compiler[1].F77Compiler = overrideString
-            elif overrideName == "objcCompiler":
+            elif overrideName == "objccompiler":
                 overrideGroup.compiler[1].OBJCCompiler = overrideString
-            elif overrideName == "objcpreprocessor":
-                overrideGroup.compiler[1].OBJCPreProcessor = overrideString
             elif overrideName == "objcxxcompiler":
                 overrideGroup.compiler[1].OBJCXXCompiler = overrideString
             elif overrideName == "objcxxpreprocessor":
@@ -144,12 +155,34 @@ def readGroups(filename):
                     overrideGroup.optimization[1].optimize = lowered
                 else:
                     logger.writeError("Optimize pair expected either 'True' or 'False' got '" + overrideString + "'", filePath=filename, exitProgram=True)
-            elif overrideName == "debuginfo":
-                lowered = overrideString.lower()
-                if lowered == "true" or lowered == "false":
-                    overrideGroup.optimization[1].debugInfo = lowered
-                else:
-                    logger.writeError("DebugInfo pair expected either 'True' or 'False' got '" + overrideString + "'", filePath=filename, exitProgram=True)
+            elif overrideName == "cflags":
+                overrideGroup.optimization[1].CFlags = overrideString
+            elif overrideName == "cdefines":
+                overrideGroup.optimization[1].CDefines = overrideString
+            elif overrideName == "cpreprocessorflags":
+                overrideGroup.optimization[1].CPPFlags = overrideString
+            elif overrideName == "cxxflags":
+                overrideGroup.optimization[1].CXXFlags = overrideString
+            elif overrideName == "fflags":
+                overrideGroup.optimization[1].FFlags = overrideString
+            elif overrideName == "flibs":
+                overrideGroup.optimization[1].FLibs = overrideString
+            elif overrideName == "f77flags":
+                overrideGroup.optimization[1].F77Flags = overrideString
+            elif overrideName == "f77libs":
+                overrideGroup.optimization[1].F77Libs = overrideString
+            elif overrideName == "linkerflags":
+                overrideGroup.optimization[1].LinkerFlags = overrideString
+            elif overrideName == "linkerflagsexe":
+                overrideGroup.optimization[1].LinkerFlagsEXE = overrideString
+            elif overrideName == "linkerflagsmodule":
+                overrideGroup.optimization[1].LinkerFlagsModule = overrideString
+            elif overrideName == "linkerflagsshared":
+                overrideGroup.optimization[1].LinkerFlagsShared = overrideString
+            elif overrideName == "objcflags":
+                overrideGroup.optimization[1].OBJCFlags = overrideString
+            elif overrideName == "objcxxflags":
+                overrideGroup.optimization[1].OBJCXXFlags = overrideString
             #Syntax end
             else:
                 logger.writeError("Unknown override pair:\n\t" + overrideNameOriginal + " = " + overrideString, filePath=filename, exitProgram=True)
