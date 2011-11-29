@@ -1,45 +1,89 @@
 from tokenizer import Tokenizer, TokenType
 import defines, logger
 
-class CompilerOverrides(object):
+class Overrides(object):
     def __init__(self):
-        self.CCompiler = ""
-        self.CPreProcessor = ""
-        self.CXXCompiler = ""
-        self.FCompiler = ""
-        self.F77Compiler = ""
-        self.OBJCCompiler = ""
-        self.OBJCPreProcessor = ""
-        self.OBJCXXCompiler = ""
-        self.OBJCXXPreProcessor = ""
+        self.CCompiler = None
+        self.CPreProcessor = None
+        self.CXXCompiler = None
+        self.FCompiler = None
+        self.F77Compiler = None
+        self.OBJCCompiler = None
+        self.OBJCPreProcessor = None
+        self.OBJCXXCompiler = None
+        self.OBJCXXPreProcessor = None
+        self.optimize = None
+        self.CFlags = None
+        self.CDefines = None
+        self.CXXFlags = None
+        self.CPPFlags = None
+        self.FFlags = None
+        self.FLibs = None
+        self.F77Flags = None
+        self.F77Libs = None
+        self.LinkerFlags = None
+        self.LinkerFlagsEXE = None
+        self.LinkerFlagsShared = None
+        self.LinkerFlagsModule = None
+        self.OBJCFlags = None
+        self.OBJCXXFlags = None
 
-class OptimizationOverrides(object):
-    def __init__(self):
-        self.optimize = ""
-        self.CFlags = ""
-        self.CDefines = ""
-        self.CXXFlags = ""
-        self.CPPFlags = ""
-        self.FFlags = ""
-        self.FLibs = ""
-        self.F77Flags = ""
-        self.F77Libs = ""
-        self.LinkerFlags = ""
-        self.LinkerFlagsEXE = ""
-        self.LinkerFlagsShared = ""
-        self.LinkerFlagsModule = ""
-        self.OBJCFlags = ""
-        self.OBJCXXFlags = ""
-
-class ParallelOverrides(object):
-    def __init__(self):
-        self.library = ""
+    def combine(self, child):
+        if child.CCompiler != None:
+            self.CCompiler = child.CCompiler
+        if child.CPreProcessor != None:
+            self.CPreProcessor = child.CPreProcessor
+        if child.CXXCompiler != None:
+            self.CXXCompiler = child.CXXCompiler
+        if child.FCompiler != None:
+            self.FCompiler = child.FCompiler
+        if child.F77Compiler != None:
+            self.F77Compiler = child.F77Compiler
+        if child.OBJCCompiler != None:
+            self.OBJCCompiler = child.OBJCCompiler
+        if child.OBJCPreProcessor != None:
+            self.OBJCPreProcessor = child.OBJCPreProcessor
+        if child.OBJCXXCompiler != None:
+            self.OBJCXXCompiler = child.OBJCXXCompiler
+        if child.OBJCXXPreProcessor != None:
+            self.OBJCXXPreProcessor = child.OBJCXXPreProcessor
+        if child.optimize != None:
+            self.optimize = child.optimize
+        if child.CFlags != None:
+            self.CFlags = child.CFlags
+        if child.CDefines != None:
+            self.CDefines = child.CDefines
+        if child.CXXFlags != None:
+            self.CXXFlags = child.CXXFlags
+        if child.CPPFlags != None:
+            self.CPPFlags = child.CPPFlags
+        if child.FFlags != None:
+            self.FFlags = child.FFlags
+        if child.FLibs != None:
+            self.FLibs = child.FLibs
+        if child.F77Flags != None:
+            self.F77Flags = child.F77Flags
+        if child.F77Libs != None:
+            self.F77Libs = child.F77Libs
+        if child.LinkerFlags != None:
+            self.LinkerFlags = child.LinkerFlags
+        if child.LinkerFlagsEXE != None:
+            self.LinkerFlagsEXE = child.LinkerFlagsEXE
+        if child.LinkerFlagsShared != None:
+            self.LinkerFlagsShared = child.LinkerFlagsShared
+        if child.LinkerFlagsModule != None:
+            self.LinkerFlagsModule = child.LinkerFlagsModule
+        if child.OBJCFlags != None:
+            self.OBJCFlags = child.OBJCFlags
+        if child.OBJCXXFlags != None:
+            self.OBJCXXFlags = child.OBJCXXFlags
 
 class OverrideGroup(object):
     def __init__(self):
-        self.compiler = "", None
-        self.optimization = "", None
-        self.parallel = "", None
+        self.compiler = ""
+        self.optimization = ""
+        self.parallel = ""
+        self.overrides = Overrides()
 
 def readGroups(filename):
     groups = list()
@@ -52,11 +96,11 @@ def readGroups(filename):
 
     while i < lengthOfTokens:
         #Syntax start: <compiler group name>, <optimization group name>, <parallel group name>
-        if tokens[i].type == TokenType.Identifier or (tokens[i].type == TokenType.Symbol and tokens[i].value == '*'):
+        if tokens[i].type == TokenType.Identifier:
             overrideGroup = OverrideGroup()
-            overrideGroup.compiler = tokens[i].value, CompilerOverrides()
+            overrideGroup.compiler = tokens[i].value
         else:
-            logger.writeError("Expected either Compiler Override group name or '*' got '" + tokens[i].value + "'", filePath=filename, exitProgram=True)
+            logger.writeError("Expected Compiler Override group name '" + tokens[i].value + "'", filePath=filename, exitProgram=True)
         i += 1
         if i >= lengthOfTokens:
             logger.writeError("Parsing ended inside of Override group. Please finish file and re-run MixDown.", filePath=filename, exitProgram=True)
@@ -68,7 +112,7 @@ def readGroups(filename):
             logger.writeError("Parsing ended inside of Override group. Please finish file and re-run MixDown.", filePath=filename, exitProgram=True)
 
         if tokens[i].type == TokenType.Identifier or (tokens[i].type == TokenType.Symbol and tokens[i].value == '*'):
-            overrideGroup.optimization = tokens[i].value, OptimizationOverrides()
+            overrideGroup.optimization = tokens[i].value
         else:
             logger.writeError("Expected either Optimization Override group name or '*' got '" + tokens[i].value + "'", filePath=filename, exitProgram=True)
         i += 1
@@ -82,7 +126,7 @@ def readGroups(filename):
             logger.writeError("Parsing ended inside of Override group. Please finish file and re-run MixDown.", filePath=filename, exitProgram=True)
 
         if tokens[i].type == TokenType.Identifier or (tokens[i].type == TokenType.Symbol and tokens[i].value == '*'):
-            overrideGroup.parallel = tokens[i].value, ParallelOverrides()
+            overrideGroup.parallel = tokens[i].value
         else:
             logger.writeError("Expected either Parallel Override group name or '*' got '" + tokens[i].value + "'", filePath=filename, exitProgram=True)
         i += 1
@@ -133,56 +177,56 @@ def readGroups(filename):
 
             #Compiler Overrides
             if overrideName == "ccompiler":
-                overrideGroup.compiler[1].CCompiler = overrideString
+                overrideGroup.overrides.CCompiler = overrideString
             elif overrideName == "cpreprocessor":
-                overrideGroup.compiler[1].CPreProcessor = overrideString
+                overrideGroup.overrides.CPreProcessor = overrideString
             elif overrideName == "cxxcompiler":
-                overrideGroup.compiler[1].CXXCompiler = overrideString
+                overrideGroup.overrides.CXXCompiler = overrideString
             elif overrideName == "fcompiler":
-                overrideGroup.compiler[1].FCompiler = overrideString
+                overrideGroup.overrides.FCompiler = overrideString
             elif overrideName == "f77compiler":
-                overrideGroup.compiler[1].F77Compiler = overrideString
+                overrideGroup.overrides.F77Compiler = overrideString
             elif overrideName == "objccompiler":
-                overrideGroup.compiler[1].OBJCCompiler = overrideString
+                overrideGroup.overrides.OBJCCompiler = overrideString
             elif overrideName == "objcxxcompiler":
-                overrideGroup.compiler[1].OBJCXXCompiler = overrideString
+                overrideGroup.overrides.OBJCXXCompiler = overrideString
             elif overrideName == "objcxxpreprocessor":
-                overrideGroup.compiler[1].OBJCXXPreProcessor = overrideString
+                overrideGroup.overrides.OBJCXXPreProcessor = overrideString
             #Optimization Overrides
             elif overrideName == "optimize":
                 lowered = overrideString.lower()
                 if lowered == "true" or lowered == "false":
-                    overrideGroup.optimization[1].optimize = lowered
+                    overrideGroup.overrides.optimize = lowered
                 else:
                     logger.writeError("Optimize pair expected either 'True' or 'False' got '" + overrideString + "'", filePath=filename, exitProgram=True)
             elif overrideName == "cflags":
-                overrideGroup.optimization[1].CFlags = overrideString
+                overrideGroup.overrides.CFlags = overrideString
             elif overrideName == "cdefines":
-                overrideGroup.optimization[1].CDefines = overrideString
+                overrideGroup.overrides.CDefines = overrideString
             elif overrideName == "cpreprocessorflags":
-                overrideGroup.optimization[1].CPPFlags = overrideString
+                overrideGroup.overrides.CPPFlags = overrideString
             elif overrideName == "cxxflags":
-                overrideGroup.optimization[1].CXXFlags = overrideString
+                overrideGroup.overrides.CXXFlags = overrideString
             elif overrideName == "fflags":
-                overrideGroup.optimization[1].FFlags = overrideString
+                overrideGroup.overrides.FFlags = overrideString
             elif overrideName == "flibs":
-                overrideGroup.optimization[1].FLibs = overrideString
+                overrideGroup.overrides.FLibs = overrideString
             elif overrideName == "f77flags":
-                overrideGroup.optimization[1].F77Flags = overrideString
+                overrideGroup.overrides.F77Flags = overrideString
             elif overrideName == "f77libs":
-                overrideGroup.optimization[1].F77Libs = overrideString
+                overrideGroup.overrides.F77Libs = overrideString
             elif overrideName == "linkerflags":
-                overrideGroup.optimization[1].LinkerFlags = overrideString
+                overrideGroup.overrides.LinkerFlags = overrideString
             elif overrideName == "linkerflagsexe":
-                overrideGroup.optimization[1].LinkerFlagsEXE = overrideString
+                overrideGroup.overrides.LinkerFlagsEXE = overrideString
             elif overrideName == "linkerflagsmodule":
-                overrideGroup.optimization[1].LinkerFlagsModule = overrideString
+                overrideGroup.overrides.LinkerFlagsModule = overrideString
             elif overrideName == "linkerflagsshared":
-                overrideGroup.optimization[1].LinkerFlagsShared = overrideString
+                overrideGroup.overrides.LinkerFlagsShared = overrideString
             elif overrideName == "objcflags":
-                overrideGroup.optimization[1].OBJCFlags = overrideString
+                overrideGroup.overrides.OBJCFlags = overrideString
             elif overrideName == "objcxxflags":
-                overrideGroup.optimization[1].OBJCXXFlags = overrideString
+                overrideGroup.overrides.OBJCXXFlags = overrideString
             #Syntax end
             else:
                 logger.writeError("Unknown override pair:\n\t" + overrideNameOriginal + " = " + overrideString, filePath=filename, exitProgram=True)
@@ -196,20 +240,25 @@ def selectGroups(groups, options):
     compilerGroupSet = False
     optimizationGroupSet = False
     parallelGroupSet = False
+    overrides = Overrides()
 
     for group in groups:
-        if group.compiler[0].lower() == options.compilerGroupName:
+        if group.compiler.lower() == options.compilerGroupName and group.optimization == '*' and group.parallel == '*':
             if compilerGroupSet:
-                logger.writeError("Duplicate Compiler Group name found: " + group.compiler[0], filePath=options.overrideFile, exitProgram=True)
-            defines.setCompilerDefines(options, group.compiler[1])
+                logger.writeError("Duplicate override group found: " + group.compiler + ",* ,*", filePath=options.overrideFile, exitProgram=True)
+            overrides = group.overrides
             compilerGroupSet = True
-        if group.optimization[0].lower() == options.optimizationGroupName:
+    for group in groups:
+        if group.optimization.lower() == options.optimizationGroupName:
             if optimizationGroupSet:
-                logger.writeError("Duplicate Optimization Group name found: " + group.optimization[0], filePath=options.overrideFile, exitProgram=True)
-            defines.setOptimizationDefines(options, group.optimization[1])
+                logger.writeError("Duplicate override group found: " + group.compiler + ", " + group.optimization + ",*", filePath=options.overrideFile, exitProgram=True)
+            overrides.combine(group.overrides)
             optimizationGroupSet = True
-        if group.parallel[0].lower() == options.parallelGroupName:
+    for group in groups:
+        if group.parallel.lower() == options.parallelGroupName:
             if parallelGroupSet:
-                logger.writeError("Duplicate Parallel Group name found: " + group.parallel[0], filePath=options.overrideFile, exitProgram=True)
-            defines.setParallelDefines(options, group.parallel[1])
+                logger.writeError("Duplicate override group found: " + group.compiler + ", " + group.optimization + group.parallel, filePath=options.overrideFile, exitProgram=True)
+            overrides.combine(group.overrides)
             parallelGroupSet = True
+
+    defines.setOverrideDefines(options, overrides)

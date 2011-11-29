@@ -134,68 +134,76 @@ def quoteDefine(define, defineToBeAdded=""):
         finalDefine = '"' + define.strip('"') + " " + defineToBeAdded.strip('"') + '"'
     return finalDefine
 
-def setCompilerDefines(options, compilerOverrides):
+def setOverrideDefines(options, overrides):
+    __setToolDefines(options, overrides)
+    __setFlagDefines(options, overrides)
+
+def __setToolDefines(options, overrides):
     autoTools = ""
     cmake = ""
 
-    if compilerOverrides.CCompiler != "":
-        options.setDefine(mdCCompiler[0], compilerOverrides.CCompiler)
+    if overrides.CCompiler != None:
+        options.setDefine(mdCCompiler[0], overrides.CCompiler)
         options.setDefine(autoToolsCCompiler[0], autoToolsCCompiler[1])
         options.setDefine(cmakeCCompiler[0], cmakeCCompiler[1])
         autoTools = surround(autoToolsCCompiler[0])
         cmake = surround(autoToolsCCompiler[0])
-    if compilerOverrides.CPreProcessor != "":
-        options.setDefine(mdCPreProcessor[0], compilerOverrides.CPreProcessor)
+    if overrides.CPreProcessor != None:
+        options.setDefine(mdCPreProcessor[0], overrides.CPreProcessor)
         options.setDefine(autoToolsCPreProcessor[0], autoToolsCPreProcessor[1])
         options.setDefine(cmakeCPreProcessor[0], cmakeCPreProcessor[1])
         autoTools += " " + surround(autoToolsCPreProcessor[0])
         cmake += " " + surround(cmakeCPreProcessor[0])
-    if compilerOverrides.CXXCompiler != "":
-        options.setDefine(mdCXXCompiler[0], compilerOverrides.CXXCompiler)
+    if overrides.CXXCompiler != None:
+        options.setDefine(mdCXXCompiler[0], overrides.CXXCompiler)
         options.setDefine(autoToolsCXXCompiler[0], autoToolsCXXCompiler[1])
         autoTools += " " + surround(autoToolsCXXCompiler[0])
-    if compilerOverrides.FCompiler != "":
-        options.setDefine(mdFCompiler[0], compilerOverrides.FCompiler)
+    if overrides.FCompiler != None:
+        options.setDefine(mdFCompiler[0], overrides.FCompiler)
         options.setDefine(autoToolsFCompiler[0], autoToolsFCompiler[1])
         options.setDefine(cmakeFCompiler[0], cmakeFCompiler[1])
         autoTools += " " + surround(autoToolsFCompiler[0])
         cmake += " " + surround(cmakeFCompiler[0])
-    if compilerOverrides.F77Compiler != "":
-        options.setDefine(mdF77Compiler[0], compilerOverrides.F77Compiler)
+    if overrides.F77Compiler != None:
+        options.setDefine(mdF77Compiler[0], overrides.F77Compiler)
         options.setDefine(autoToolsF77Compiler[0], autoToolsF77Compiler[1])
         autoTools += " " + surround(autoToolsF77Compiler[0])
-    if compilerOverrides.OBJCCompiler != "":
-        options.setDefine(mdOBJCCompiler[0], compilerOverrides.OBJCCompiler)
+    if overrides.OBJCCompiler != None:
+        options.setDefine(mdOBJCCompiler[0], overrides.OBJCCompiler)
         options.setDefine(autoToolsOBJCCompiler[0], autoToolsOBJCCompiler[1])
         options.setDefine(cmakeOBJCCompiler[0], cmakeOBJCCompiler[1])
         autoTools += " " + surround(autoToolsOBJCCompiler[0])
         cmake += " " + surround(cmakeOBJCCompiler[0])
-    if compilerOverrides.OBJCXXCompiler != "":
-        options.setDefine(mdOBJCXXCompiler[0], compilerOverrides.OBJCXXCompiler)
+    if overrides.OBJCXXCompiler != None:
+        options.setDefine(mdOBJCXXCompiler[0], overrides.OBJCXXCompiler)
         options.setDefine(autoToolsOBJCXXCompiler[0], autoToolsOBJCXXCompiler[1])
         options.setDefine(cmakeOBJCXXCompiler[0], cmakeOBJCXXCompiler[1])
         autoTools += " " + surround(autoToolsOBJCXXCompiler[0])
         cmake += " " + surround(cmakeOBJCXXCompiler[0])
-    if compilerOverrides.OBJCXXPreProcessor != "":
-        options.setDefine(mdOBJCXXPreProcessor[0], compilerOverrides.OBJCXXPreProcessor)
+    if overrides.OBJCXXPreProcessor != None:
+        options.setDefine(mdOBJCXXPreProcessor[0], overrides.OBJCXXPreProcessor)
         options.setDefine(autoToolsOBJCXXPreProcessor[0], autoToolsOBJCXXPreProcessor[1])
         autoTools += " " + surround(autoToolsOBJCXXCompiler[0])
 
     options.setDefine(autoToolsCompilers[0], autoTools)
     options.setDefine(cmakeCompilers[0], cmake)
 
-def setOptimizationDefines(options, optimizationOverrides):
+def __setFlagDefines(options, overrides):
     gccCFlags = ""
     gccCPPFlags = ""
     gxxFlags = ""
     gfortranFlags = ""
     g77Flags = ""
+    ldFlags = ""
+    ldFlagsEXE = ""
+    ldFlagsModule = ""
+    ldFlagsShared = ""
     gobjcFlags = ""
     gobjcxxFlags = ""
 
     #Verbose flags (for example: Optimize = True/False)"
-    if optimizationOverrides.optimize != "":
-        if optimizationOverrides.optimize == "true":
+    if overrides.optimize != None:
+        if overrides.optimize == "true":
             options.setDefine(gccOptimize[0], "-O2")
             options.setDefine(gfortranOptimize[0], "-O2")
         else:
@@ -208,30 +216,34 @@ def setOptimizationDefines(options, optimizationOverrides):
 
     #Account for CMake's undocumented 3 different linker flags.  If not none of the three are
     #  specified by user, just use Linker Flags for all three.
-    ldFlags = optimizationOverrides.LinkerFlags
-    ldFlagsEXE = optimizationOverrides.LinkerFlagsEXE
-    ldFlagsModule = optimizationOverrides.LinkerFlagsModule
-    ldFlagsShared = optimizationOverrides.LinkerFlagsShared
+    if overrides.LinkerFlags != None:
+        ldFlags = overrides.LinkerFlags
+    if overrides.LinkerFlagsEXE != None:
+        ldFlagsEXE = overrides.LinkerFlagsEXE
+    if overrides.LinkerFlagsModule != None:
+        ldFlagsModule = overrides.LinkerFlagsModule
+    if overrides.LinkerFlagsShared != None:
+        ldFlagsShared = overrides.LinkerFlagsShared
     if ldFlags != "" and ldFlagsEXE == "" and ldFlagsModule == "" and ldFlagsShared == "":
         ldFlagsEXE = ldFlags
         ldFlagsModule = ldFlags
         ldFlagsShared = ldFlags
 
     #Add specified flags last
-    if optimizationOverrides.CFlags != "":
-        gccCFlags = quoteDefine(gccCFlags, optimizationOverrides.CFlags)
-    if optimizationOverrides.CPPFlags != "":
-        gccCPPFlags = quoteDefine(gccCPPFlags, optimizationOverrides.CPPFlags)
-    if optimizationOverrides.CXXFlags != "":
-        gccCXXFlags = quoteDefine(gccCXXFlags, optimizationOverrides.CXXFlags)
-    if optimizationOverrides.FFlags != "":
-        gfortranFlags = quoteDefine(gfortranFlags, optimizationOverrides.FFlags)
-    if optimizationOverrides.F77Flags != "":
-        g77Flags = quoteDefine(g77Flags, optimizationOverrides.F77Flags)
-    if optimizationOverrides.OBJCFlags != "":
-        gobjcFlags = quoteDefine(gobjcFlags, optimizationOverrides.OBJCFlags)
-    if optimizationOverrides.OBJCXXFlags != "":
-        gobjcxxFlags = quoteDefine(gobjcxxFlags, optimizationOverrides.OBJCXXFlags)
+    if overrides.CFlags != None:
+        gccCFlags = quoteDefine(gccCFlags, overrides.CFlags)
+    if overrides.CPPFlags != None:
+        gccCPPFlags = quoteDefine(gccCPPFlags, overrides.CPPFlags)
+    if overrides.CXXFlags != None:
+        gccCXXFlags = quoteDefine(gccCXXFlags, overrides.CXXFlags)
+    if overrides.FFlags != None:
+        gfortranFlags = quoteDefine(gfortranFlags, overrides.FFlags)
+    if overrides.F77Flags != None:
+        g77Flags = quoteDefine(g77Flags, overrides.F77Flags)
+    if overrides.OBJCFlags != None:
+        gobjcFlags = quoteDefine(gobjcFlags, overrides.OBJCFlags)
+    if overrides.OBJCXXFlags != None:
+        gobjcxxFlags = quoteDefine(gobjcxxFlags, overrides.OBJCXXFlags)
 
     #TODO: Test which compiler is actually being used and set flags accordingly
     #  For example: gcc gets gccCFlags, icc gets iccCflags
@@ -299,9 +311,6 @@ def setOptimizationDefines(options, optimizationOverrides):
 
     options.setDefine(autoToolsFlags[0], autoTools)
     options.setDefine(cmakeFlags[0], cmake)
-
-def setParallelDefines(options, parallelDefines):
-    pass
 
 def setJobSlotsDefines(options, jobSlots):
     options.setDefine(mdJobSlots[0], jobSlots)
