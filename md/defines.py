@@ -20,6 +20,8 @@
 # along with this program; if not, write to the Free Software Foundation,
 # Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 
+import overrides
+
 #Expands define name to full define
 def surround(name):
     return "$(" + name + ")"
@@ -134,61 +136,61 @@ def quoteDefine(define, defineToBeAdded=""):
         finalDefine = '"' + define.strip('"') + " " + defineToBeAdded.strip('"') + '"'
     return finalDefine
 
-def setOverrideDefines(options, overrides):
-    __setToolDefines(options, overrides)
-    __setFlagDefines(options, overrides)
+def setOverrideDefines(options, overrideGroup):
+    __setToolDefines(options, overrideGroup)
+    __setFlagDefines(options, overrideGroup)
 
-def __setToolDefines(options, overrides):
+def __setToolDefines(options, overrideGroup):
     autoTools = ""
     cmake = ""
 
-    if overrides.CCompiler != None:
-        options.setDefine(mdCCompiler[0], overrides.CCompiler)
+    if overrideGroup.hasOverride("CCompiler"):
+        options.setDefine(mdCCompiler[0], overrideGroup.getOverride("CCompiler"))
         options.setDefine(autoToolsCCompiler[0], autoToolsCCompiler[1])
         options.setDefine(cmakeCCompiler[0], cmakeCCompiler[1])
         autoTools = surround(autoToolsCCompiler[0])
         cmake = surround(autoToolsCCompiler[0])
-    if overrides.CPreProcessor != None:
-        options.setDefine(mdCPreProcessor[0], overrides.CPreProcessor)
+    if overrideGroup.hasOverride("CPreProcessor"):
+        options.setDefine(mdCPreProcessor[0], overrideGroup.getOverride("CPreProcessor"))
         options.setDefine(autoToolsCPreProcessor[0], autoToolsCPreProcessor[1])
         options.setDefine(cmakeCPreProcessor[0], cmakeCPreProcessor[1])
         autoTools += " " + surround(autoToolsCPreProcessor[0])
         cmake += " " + surround(cmakeCPreProcessor[0])
-    if overrides.CXXCompiler != None:
-        options.setDefine(mdCXXCompiler[0], overrides.CXXCompiler)
+    if overrideGroup.hasOverride("CXXCompiler"):
+        options.setDefine(mdCXXCompiler[0], overrideGroup.getOverride("CXXCompiler"))
         options.setDefine(autoToolsCXXCompiler[0], autoToolsCXXCompiler[1])
         autoTools += " " + surround(autoToolsCXXCompiler[0])
-    if overrides.FCompiler != None:
-        options.setDefine(mdFCompiler[0], overrides.FCompiler)
+    if overrideGroup.hasOverride("FCompiler"):
+        options.setDefine(mdFCompiler[0], overrideGroup.getOverride("FCompiler"))
         options.setDefine(autoToolsFCompiler[0], autoToolsFCompiler[1])
         options.setDefine(cmakeFCompiler[0], cmakeFCompiler[1])
         autoTools += " " + surround(autoToolsFCompiler[0])
         cmake += " " + surround(cmakeFCompiler[0])
-    if overrides.F77Compiler != None:
-        options.setDefine(mdF77Compiler[0], overrides.F77Compiler)
+    if overrideGroup.hasOverride("F77Compiler"):
+        options.setDefine(mdF77Compiler[0], overrideGroup.getOverride("F77Compiler"))
         options.setDefine(autoToolsF77Compiler[0], autoToolsF77Compiler[1])
         autoTools += " " + surround(autoToolsF77Compiler[0])
-    if overrides.OBJCCompiler != None:
-        options.setDefine(mdOBJCCompiler[0], overrides.OBJCCompiler)
+    if overrideGroup.hasOverride("OBJCCompiler"):
+        options.setDefine(mdOBJCCompiler[0], overrideGroup.getOverride("OBJCCompiler"))
         options.setDefine(autoToolsOBJCCompiler[0], autoToolsOBJCCompiler[1])
         options.setDefine(cmakeOBJCCompiler[0], cmakeOBJCCompiler[1])
         autoTools += " " + surround(autoToolsOBJCCompiler[0])
         cmake += " " + surround(cmakeOBJCCompiler[0])
-    if overrides.OBJCXXCompiler != None:
-        options.setDefine(mdOBJCXXCompiler[0], overrides.OBJCXXCompiler)
+    if overrideGroup.hasOverride("OBJCXXCompiler"):
+        options.setDefine(mdOBJCXXCompiler[0], overrideGroup.getOverride("OBJCXXCompiler"))
         options.setDefine(autoToolsOBJCXXCompiler[0], autoToolsOBJCXXCompiler[1])
         options.setDefine(cmakeOBJCXXCompiler[0], cmakeOBJCXXCompiler[1])
         autoTools += " " + surround(autoToolsOBJCXXCompiler[0])
         cmake += " " + surround(cmakeOBJCXXCompiler[0])
-    if overrides.OBJCXXPreProcessor != None:
-        options.setDefine(mdOBJCXXPreProcessor[0], overrides.OBJCXXPreProcessor)
+    if overrideGroup.hasOverride("OBJCXXPreProcessor"):
+        options.setDefine(mdOBJCXXPreProcessor[0], overrideGroup.getOverride("OBJCXXPreProcessor"))
         options.setDefine(autoToolsOBJCXXPreProcessor[0], autoToolsOBJCXXPreProcessor[1])
         autoTools += " " + surround(autoToolsOBJCXXCompiler[0])
 
     options.setDefine(autoToolsCompilers[0], autoTools)
     options.setDefine(cmakeCompilers[0], cmake)
 
-def __setFlagDefines(options, overrides):
+def __setFlagDefines(options, overrideGroup):
     gccCFlags = ""
     gccCPPFlags = ""
     gxxFlags = ""
@@ -202,8 +204,8 @@ def __setFlagDefines(options, overrides):
     gobjcxxFlags = ""
 
     #Verbose flags (for example: Optimize = True/False)"
-    if overrides.optimize != None:
-        if overrides.optimize == "true":
+    if overrideGroup.hasOverride("optimize"):
+        if overrideGroup.getOverride("optimize") == "true":
             options.setDefine(gccOptimize[0], "-O2")
             options.setDefine(gfortranOptimize[0], "-O2")
         else:
@@ -216,34 +218,34 @@ def __setFlagDefines(options, overrides):
 
     #Account for CMake's undocumented 3 different linker flags.  If not none of the three are
     #  specified by user, just use Linker Flags for all three.
-    if overrides.LinkerFlags != None:
-        ldFlags = overrides.LinkerFlags
-    if overrides.LinkerFlagsEXE != None:
-        ldFlagsEXE = overrides.LinkerFlagsEXE
-    if overrides.LinkerFlagsModule != None:
-        ldFlagsModule = overrides.LinkerFlagsModule
-    if overrides.LinkerFlagsShared != None:
-        ldFlagsShared = overrides.LinkerFlagsShared
+    if overrideGroup.hasOverride("LinkerFlags"):
+        ldFlags = overrideGroup.getOverride("LinkerFlags")
+    if overrideGroup.hasOverride("LinkerFlagsEXE"):
+        ldFlagsEXE = overrideGroup.getOverride("LinkerFlagsEXE")
+    if overrideGroup.hasOverride("LinkerFlagsModule"):
+        ldFlagsModule = overrideGroup.getOverride("LinkerFlagsModule")
+    if overrideGroup.hasOverride("LinkerFlagsShared"):
+        ldFlagsShared = overrideGroup.getOverride("LinkerFlagsShared")
     if ldFlags != "" and ldFlagsEXE == "" and ldFlagsModule == "" and ldFlagsShared == "":
         ldFlagsEXE = ldFlags
         ldFlagsModule = ldFlags
         ldFlagsShared = ldFlags
 
     #Add specified flags last
-    if overrides.CFlags != None:
-        gccCFlags = quoteDefine(gccCFlags, overrides.CFlags)
-    if overrides.CPPFlags != None:
-        gccCPPFlags = quoteDefine(gccCPPFlags, overrides.CPPFlags)
-    if overrides.CXXFlags != None:
-        gccCXXFlags = quoteDefine(gccCXXFlags, overrides.CXXFlags)
-    if overrides.FFlags != None:
-        gfortranFlags = quoteDefine(gfortranFlags, overrides.FFlags)
-    if overrides.F77Flags != None:
-        g77Flags = quoteDefine(g77Flags, overrides.F77Flags)
-    if overrides.OBJCFlags != None:
-        gobjcFlags = quoteDefine(gobjcFlags, overrides.OBJCFlags)
-    if overrides.OBJCXXFlags != None:
-        gobjcxxFlags = quoteDefine(gobjcxxFlags, overrides.OBJCXXFlags)
+    if overrideGroup.hasOverride("CFlags"):
+        gccCFlags = quoteDefine(gccCFlags, overrideGroup.getOverride("CFlags"))
+    if overrideGroup.hasOverride("CPPFlags"):
+        gccCPPFlags = quoteDefine(gccCPPFlags, overrideGroup.getOverride("CPPFlags"))
+    if overrideGroup.hasOverride("CXXFlags"):
+        gccCXXFlags = quoteDefine(gccCXXFlags, overrideGroup.getOverride("CXXFlags"))
+    if overrideGroup.hasOverride("FFlags"):
+        gfortranFlags = quoteDefine(gfortranFlags, overrideGroup.getOverride("FFlags"))
+    if overrideGroup.hasOverride("F77Flags"):
+        g77Flags = quoteDefine(g77Flags, overrideGroup.getOverride("F77Flags"))
+    if overrideGroup.hasOverride("OBJCFlags"):
+        gobjcFlags = quoteDefine(gobjcFlags, overrideGroup.getOverride("OBJCFlags"))
+    if overrideGroup.hasOverride("OBJCXXFlags"):
+        gobjcxxFlags = quoteDefine(gobjcxxFlags, overrideGroup.getOverride("OBJCXXFlags"))
 
     #TODO: Test which compiler is actually being used and set flags accordingly
     #  For example: gcc gets gccCFlags, icc gets iccCflags
