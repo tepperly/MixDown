@@ -10,7 +10,6 @@ reservedOverrides = ["ccompiler",        "cflags",    "cdefines",
                      "objcpreprocessor",
                      "objcxxcompiler",   "objcxxflags"
                      "objcxxpreprocessor",
-                     "optimize",
                      "linkerflags", "linkerflagsexe", "linkerflagsshared", "linkerflagsmodule",
                      ]
 
@@ -133,14 +132,7 @@ def readGroups(filename):
 
             #Compiler Overrides
             if overrideName in reservedOverrides:
-                if overrideName == "optimize":
-                    lowered = overrideString.lower()
-                    if lowered == "true" or lowered == "false":
-                        overrideGroup.setOverride("optimize", lowered)
-                    else:
-                        logger.writeError("Optimize pair expected either 'True' or 'False' got '" + overrideString + "'", filePath=filename, exitProgram=True)
-                else:
-                    overrideGroup.setOverride(overrideName, overrideString)
+                overrideGroup.setOverride(overrideName, overrideString)
             #Syntax end
             else:
                 logger.writeError("Unknown override pair:\n\t" + overrideNameOriginal + " = " + overrideString, filePath=filename, exitProgram=True)

@@ -191,33 +191,15 @@ def __setToolDefines(options, overrideGroup):
     options.setDefine(cmakeCompilers[0], cmake)
 
 def __setFlagDefines(options, overrideGroup):
-    gccCFlags = ""
-    gccCPPFlags = ""
-    gxxFlags = ""
-    gfortranFlags = ""
-    g77Flags = ""
+    autoTools = " "
+    cmake = " "
+
+    #Account for CMake's undocumented 3 different linker flags.  If not none of the three are
+    #  specified by user, just use Linker Flags for all three.
     ldFlags = ""
     ldFlagsEXE = ""
     ldFlagsModule = ""
     ldFlagsShared = ""
-    gobjcFlags = ""
-    gobjcxxFlags = ""
-
-    #Verbose flags (for example: Optimize = True/False)"
-    if overrideGroup.hasOverride("optimize"):
-        if overrideGroup.getOverride("optimize") == "true":
-            options.setDefine(gccOptimize[0], "-O2")
-            options.setDefine(gfortranOptimize[0], "-O2")
-        else:
-            options.setDefine(gccOptimize[0], "-O0")
-            options.setDefine(gfortranOptimize[0], "-O0")
-        gccCFlags = surround(gccOptimize[0])
-        gccCXXFlags = surround(gccOptimize[0])
-        gfortranFlags = surround(gfortranOptimize[0])
-        g77Flags = surround(gfortranOptimize[0])
-
-    #Account for CMake's undocumented 3 different linker flags.  If not none of the three are
-    #  specified by user, just use Linker Flags for all three.
     if overrideGroup.hasOverride("LinkerFlags"):
         ldFlags = overrideGroup.getOverride("LinkerFlags")
     if overrideGroup.hasOverride("LinkerFlagsEXE"):
@@ -231,81 +213,61 @@ def __setFlagDefines(options, overrideGroup):
         ldFlagsModule = ldFlags
         ldFlagsShared = ldFlags
 
-    #Add specified flags last
+    if ldFlags != "":
+        options.setDefine(mdLinkerFlags[0], quoteDefine(ldFlags))
+        options.setDefine(autoToolsLinkerFlags[0], autoToolsLinkerFlags[1])
+        autoTools += surround(autoToolsLinkerFlags[0]) + " "
+    if ldFlagsEXE != "":
+        options.setDefine(mdLinkerFlagsEXE[0], quoteDefine(ldFlagsEXE))
+        options.setDefine(cmakeLinkerFlagsEXE[0], cmakeLinkerFlagsEXE[1])
+        cmake += surround(cmakeLinkerFlagsEXE[0]) + " "
+    if ldFlagsModule != "":
+        options.setDefine(mdLinkerFlagsModule[0], quoteDefine(ldFlagsModule))
+        options.setDefine(cmakeLinkerFlagsModule[0], cmakeLinkerFlagsModule[1])
+        cmake += surround(cmakeLinkerFlagsModule[0]) + " "
+    if ldFlagsShared != "":
+        options.setDefine(mdLinkerFlagsShared[0], quoteDefine(ldFlagsShared))
+        options.setDefine(cmakeLinkerFlagsShared[0], cmakeLinkerFlagsShared[1])
+        cmake += surround(cmakeLinkerFlagsShared[0]) + " "
+
     if overrideGroup.hasOverride("CFlags"):
-        gccCFlags = quoteDefine(gccCFlags, overrideGroup.getOverride("CFlags"))
-    if overrideGroup.hasOverride("CPPFlags"):
-        gccCPPFlags = quoteDefine(gccCPPFlags, overrideGroup.getOverride("CPPFlags"))
-    if overrideGroup.hasOverride("CXXFlags"):
-        gccCXXFlags = quoteDefine(gccCXXFlags, overrideGroup.getOverride("CXXFlags"))
-    if overrideGroup.hasOverride("FFlags"):
-        gfortranFlags = quoteDefine(gfortranFlags, overrideGroup.getOverride("FFlags"))
-    if overrideGroup.hasOverride("F77Flags"):
-        g77Flags = quoteDefine(g77Flags, overrideGroup.getOverride("F77Flags"))
-    if overrideGroup.hasOverride("OBJCFlags"):
-        gobjcFlags = quoteDefine(gobjcFlags, overrideGroup.getOverride("OBJCFlags"))
-    if overrideGroup.hasOverride("OBJCXXFlags"):
-        gobjcxxFlags = quoteDefine(gobjcxxFlags, overrideGroup.getOverride("OBJCXXFlags"))
-
-    #TODO: Test which compiler is actually being used and set flags accordingly
-    #  For example: gcc gets gccCFlags, icc gets iccCflags
-
-    autoTools = " "
-    cmake = " "
-    if gccCFlags != "":
-        options.setDefine(mdCFlags[0], gccCFlags)
+        options.setDefine(mdCFlags[0], quoteDefine(overrideGroup.getOverride("CFlags")))
         options.setDefine(autoToolsCFlags[0], autoToolsCFlags[1])
         options.setDefine(cmakeCFlags[0], cmakeCFlags[1])
         autoTools += surround(autoToolsCFlags[0]) + " "
         cmake += surround(cmakeCFlags[0]) + " "
-    if gccCPPFlags != "":
-        options.setDefine(mdCPPFlags[0], gccCPPFlags)
+    if overrideGroup.hasOverride("CPPFlags"):
+        options.setDefine(mdCPPFlags[0], quoteDefine(overrideGroup.getOverride("CPPFlags")))
         options.setDefine(autoToolsCPPFlags[0], autoToolsCPPFlags[1])
         options.setDefine(cmakeCPPFlags[0], cmakeCPPFlags[1])
         autoTools += surround(autoToolsCPPFlags[0]) + " "
         cmake += surround(cmakeCPPFlags[0]) + " "
-    if gccCXXFlags != "":
-        options.setDefine(mdCXXFlags[0], gccCXXFlags)
+    if overrideGroup.hasOverride("CXXFlags"):
+        options.setDefine(mdCXXFlags[0], quoteDefine(overrideGroup.getOverride("CXXFlags")))
         options.setDefine(autoToolsCXXFlags[0], autoToolsCXXFlags[1])
         options.setDefine(cmakeCXXFlags[0], cmakeCXXFlags[1])
         autoTools += surround(autoToolsCXXFlags[0]) + " "
         cmake += surround(cmakeCXXFlags[0]) + " "
-    if gfortranFlags != "":
-        options.setDefine(mdFFlags[0], gfortranFlags)
+    if overrideGroup.hasOverride("FFlags"):
+        options.setDefine(mdFFlags[0], quoteDefine(overrideGroup.getOverride("FFlags")))
         options.setDefine(autoToolsFFlags[0], autoToolsFFlags[1])
         options.setDefine(cmakeFFlags[0], cmakeFFlags[1])
         autoTools += surround(autoToolsFFlags[0]) + " "
         cmake += surround(cmakeFFlags[0]) + " "
-    if g77Flags != "":
-        options.setDefine(mdF77Flags[0], g77Flags)
+    if overrideGroup.hasOverride("F77Flags"):
+        options.setDefine(mdF77Flags[0], quoteDefine(overrideGroup.getOverride("F77Flags")))
         options.setDefine(autoToolsF77Flags[0], autoToolsF77Flags[1])
         options.setDefine(cmakeF77Flags[0], cmakeF77Flags[1])
         autoTools += surround(autoToolsF77Flags[0]) + " "
         cmake += surround(cmakeF77Flags[0]) + " "
-    if ldFlags != "":
-        options.setDefine(mdLinkerFlags[0], ldFlags)
-        options.setDefine(autoToolsLinkerFlags[0], autoToolsLinkerFlags[1])
-        autoTools += surround(autoToolsLinkerFlags[0]) + " "
-    if ldFlagsEXE != "":
-        options.setDefine(mdLinkerFlagsEXE[0], ldFlagsEXE)
-        options.setDefine(cmakeLinkerFlagsEXE[0], cmakeLinkerFlagsEXE[1])
-        cmake += surround(cmakeLinkerFlagsEXE[0]) + " "
-    if ldFlagsModule != "":
-        options.setDefine(mdLinkerFlagsModule[0], ldFlagsModule)
-        options.setDefine(cmakeLinkerFlagsModule[0], cmakeLinkerFlagsModule[1])
-        cmake += surround(cmakeLinkerFlagsModule[0]) + " "
-    if ldFlagsShared != "":
-        options.setDefine(mdLinkerFlagsShared[0], ldFlagsShared)
-        options.setDefine(cmakeLinkerFlagsShared[0], cmakeLinkerFlagsShared[1])
-        cmake += surround(cmakeLinkerFlagsShared[0]) + " "
-    if gobjcFlags != "":
-        options.setDefine(mdOBJCFlags[0], gobjcFlags)
+    if overrideGroup.hasOverride("OBJCFlags"):
+        options.setDefine(mdOBJCFlags[0], quoteDefine(overrideGroup.getOverride("OBJCFlags")))
         options.setDefine(autoToolsOBJCFlags[0], autoToolsOBJCFlags[1])
         options.setDefine(cmakeOBJCFlags[0], cmakeOBJCFlags[1])
         autoTools += surround(autoToolsOBJCFlags[0]) + " "
         cmake += surround(cmakeOBJCFlags[0]) + " "
-    if gobjcxxFlags != "":
-        options.setDefine(mdOBJCXXFlags[0], gobjcxxFlags)
+    if overrideGroup.hasOverride("OBJCXXFlags"):
+        options.setDefine(mdOBJCXXFlags[0], quoteDefine(overrideGroup.getOverride("OBJCXXFlags")))
         options.setDefine(autoToolsOBJCXXFlags[0], autoToolsOBJCXXFlags[1])
         options.setDefine(cmakeOBJCXXFlags[0], cmakeOBJCXXFlags[1])
         autoTools += surround(autoToolsOBJCXXFlags[0]) + " "
