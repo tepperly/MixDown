@@ -19,6 +19,7 @@ class OverrideGroup(object):
         self.optimization = ""
         self.parallel = ""
         self.overrides = dict()
+        self.defines = dict()
 
     def combine(self, child):
         self.compiler = child.compiler
@@ -26,6 +27,8 @@ class OverrideGroup(object):
         self.parallel = child.parallel
         for override in child.overrides.keys():
             self.overrides[override] = child.overrides[override]
+        for define in child.defines.keys():
+            self.defines[define] = child.defines[define]
 
     def hasOverride(self, override):
         return self.overrides.has_key(override.lower())
@@ -133,9 +136,9 @@ def readGroups(filename):
             #Compiler Overrides
             if overrideName in reservedOverrides:
                 overrideGroup.setOverride(overrideName, overrideString)
-            #Syntax end
             else:
-                logger.writeError("Unknown override pair:\n\t" + overrideNameOriginal + " = " + overrideString, filePath=filename, exitProgram=True)
+                overrideGroup.defines[overrideName] = overrideString
+            #Syntax end
 
         #Syntax end
 
@@ -167,4 +170,5 @@ def selectGroups(groups, options):
             finalGroup.combine(group)
             parallelGroupSet = True
 
+    options.overrideGroup = finalGroup
     defines.setOverrideDefines(options, finalGroup)
