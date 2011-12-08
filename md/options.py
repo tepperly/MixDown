@@ -42,6 +42,7 @@ class Options(object):
         self.compilerGroupName = ""
         self.optimizationGroupName = ""
         self.parallelGroupName = ""
+        self.overrideGroup = None
         self._defines = dict()
         self._defines.setdefault("")
         defines.setPrefixDefines(self, '/usr/local')
@@ -53,7 +54,6 @@ class Options(object):
   Build Dir:      " + self.buildDir + "\n\
   Download Dir:   " + self.downloadDir + "\n\
   Log Dir:        " + self.logDir + "\n\
-  Defines:        " + str(self._defines) + "\n\
   Import:         " + str(self.importer) + "\n\
   Clean Targets:  " + str(self.cleanTargets) + "\n\
   Clean MixDown:  " + str(self.cleanMixDown) + "\n\
@@ -90,6 +90,12 @@ class Options(object):
         else:
             value = ""
         return value
+
+    def combineDefines(self, mdProject):
+        for key in mdProject.defines.keys():
+            self.setDefine(key, mdProject.defines[key])
+        for key in self.overrideGroup.defines.keys():
+            self.setDefine(key, self.overrideGroup.defines[key])
 
     def expandDefines(self, inString):
         if inString == "":
@@ -173,16 +179,7 @@ class Options(object):
             currFlag = currArg[:2].lower()
             currValue = currArg[2:]
 
-            if currFlag == "-d":
-                validateOptionPair(currFlag, currValue)
-                for definePair in currValue.split(","):
-                    splitPair = definePair.split("=")
-                    if len(splitPair) != 2:
-                        logger.writeError("Invalid define pair given, " + definePair, exitProgram=True)
-                    if splitPair[0].lower() in self._defines:
-                        logger.writeError("Define pair already given, " + definePair, exitProgram=True)
-                    self.setDefine(splitPair[0], splitPair[1])
-            elif currFlag == "-p":
+            if currFlag == "-p":
                 validateOptionPair(currFlag, currValue)
                 defines.setPrefixDefines(self, os.path.abspath(currValue))
                 self.prefixDefined = True
