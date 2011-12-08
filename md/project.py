@@ -33,6 +33,7 @@ class Project(object):
         self.targets = targets[:] #Use copy to prevent list instance to be used between project instances
         self.__validated = False
         self.__examined = False
+        self.defines = dict()
 
     def addSkipStepFromOptions(self, options):
         if options.skipSteps == '' or options.skipSteps == None:
@@ -129,68 +130,82 @@ class Project(object):
                 if (currLine == "") or currLine.startswith('#') or currLine.startswith('//'):
                     pass
                 else:
-                    currPair = currLine.split(":", 1)
-                    currPair = currPair[0].strip(), currPair[1].strip()
-                    currName = str.lower(currPair[0])
+                    colonIndex = currLine.find(":")
+                    equalsIndex = currLine.find("=")
 
-                    if (currName != "name") and (currTarget is None):
-                        logger.writeError("'" + currPair[0] +  "' declared before 'name' in Project file", "", "", self.path, lineCount)
+                    if (colonIndex == -1) and (equalsIndex == -1):
+                        logger.writeError("Line could not be understood by project parser.  Lines can be comments, variables, or project definitions.", "", "", self.path, lineCount)
                         return False
 
-                    if currName == "name":
-                        lastPackageLineNumber = lineCount
-                        if currTarget != None:
-                            if not self.__addTarget(currTarget, lastPackageLineNumber):
-                                return False
-                        currTarget = target.Target(currPair[1])
-                    elif currName == "path":
-                        if currTarget.path != "":
-                            logger.writeError("Project targets can only have one 'Path' defined", "", "", self.path, lineCount)
-                            return False
-                        currTarget.path = currPair[1]
-                    elif currName == "output":
-                        if currTarget.outputPathSpecified:
-                            logger.writeError("Project targets can only have one 'Output' defined", "", "", self.path, lineCount)
-                            return False
-                        currTarget.outputPath = currPair[1]
-                        currTarget.outputPathSpecified = True
-                    elif currName == "dependson":
-                        if currTarget.dependsOn != []:
-                            logger.writeError("Project targets can only have one 'DependsOn' defined (use a comma delimited list for multiple dependencies)", "", "", self.path, lineCount)
-                            return False
-                        if currPair[1] != "":
-                            dependsOnList = utilityFunctions.stripItemsInList(currPair[1].split(","))
-                            normalizedName = target.normalizeName(currTarget.name)
-                            for dependency in dependsOnList:
-                                if target.normalizeName(dependency) == normalizedName:
-                                    logger.writeError("Project targets cannot depend on themselves", currTarget.name, "", self.path, lineCount)
-                                    return False
-                            currTarget.dependsOn = dependsOnList
-                    elif currName == "aliases":
-                        if currTarget.aliases != []:
-                            logger.writeError("Project targets can only have one 'Aliases' defined (use a comma delimited list for multiple aliases)", "", "", self.path, lineCount)
-                            return False
-                        if currPair[1] != "":
-                            aliases = utilityFunctions.stripItemsInList(currPair[1].split(","))
-                            noralizedName = target.normalizeName(currTarget.name)
-                            for alias in aliases:
-                                if target.normalizeName(alias) == normalizedName:
-                                    logger.writeError("Project target alias cannot be same as its name", currTarget.name, "", self.path, lineCount)
-                                    return False
-                            currTarget.aliases = aliases
-                    elif currName == "skipsteps" or currName == "skipstep":
-                        if currTarget.skipSteps != []:
-                            logger.writeError("Project targets can only have one 'SkipSteps' defined (use a comma delimited list for multiple steps)", "", "", self.path, lineCount)
-                            return False
-                        currTarget.skipSteps = utilityFunctions.stripItemsInList(str.lower(currPair[1]).split(","))
-                    elif currName in commands.buildSteps:
-                        if currTarget.findBuildStep(currName) != None:
-                            logger.writeError("Project targets can only have one '" + currName + "' defined", "", "", self.path, lineCount)
-                            return False
-                        currTarget.buildSteps.append(commands.BuildStep(currName, currPair[1]))
+                    if ((colonIndex == -1) and (equalsIndex != -1)) or\
+                       ((colonIndex != -1) and (equalsIndex != -1) and (equalsIndex < colonIndex)):
+                        currPair = currLine.split("=", 1)
+                        currPair = currPair[0].strip(), currPair[1].strip()
+                        currName = str.lower(currPair[0])
+                        self.defines[currPair[0]] = currPair[1]
                     else:
-                        logger.writeError("Cannot understand given line: '" + currLine + "'", "", "", self.path, lineCount)
-                        return False
+                        currPair = currLine.split(":", 1)
+                        currPair = currPair[0].strip(), currPair[1].strip()
+                        currName = str.lower(currPair[0])
+
+                        if (currName != "name") and (currTarget is None):
+                            logger.writeError("'" + currPair[0] +  "' declared before 'name' in Project file", "", "", self.path, lineCount)
+                            return False
+
+                        if currName == "name":
+                            lastPackageLineNumber = lineCount
+                            if currTarget != None:
+                                if not self.__addTarget(currTarget, lastPackageLineNumber):
+                                    return False
+                            currTarget = target.Target(currPair[1])
+                        elif currName == "path":
+                            if currTarget.path != "":
+                                logger.writeError("Project targets can only have one 'Path' defined", "", "", self.path, lineCount)
+                                return False
+                            currTarget.path = currPair[1]
+                        elif currName == "output":
+                            if currTarget.outputPathSpecified:
+                                logger.writeError("Project targets can only have one 'Output' defined", "", "", self.path, lineCount)
+                                return False
+                            currTarget.outputPath = currPair[1]
+                            currTarget.outputPathSpecified = True
+                        elif currName == "dependson":
+                            if currTarget.dependsOn != []:
+                                logger.writeError("Project targets can only have one 'DependsOn' defined (use a comma delimited list for multiple dependencies)", "", "", self.path, lineCount)
+                                return False
+                            if currPair[1] != "":
+                                dependsOnList = utilityFunctions.stripItemsInList(currPair[1].split(","))
+                                normalizedName = target.normalizeName(currTarget.name)
+                                for dependency in dependsOnList:
+                                    if target.normalizeName(dependency) == normalizedName:
+                                        logger.writeError("Project targets cannot depend on themselves", currTarget.name, "", self.path, lineCount)
+                                        return False
+                                currTarget.dependsOn = dependsOnList
+                        elif currName == "aliases":
+                            if currTarget.aliases != []:
+                                logger.writeError("Project targets can only have one 'Aliases' defined (use a comma delimited list for multiple aliases)", "", "", self.path, lineCount)
+                                return False
+                            if currPair[1] != "":
+                                aliases = utilityFunctions.stripItemsInList(currPair[1].split(","))
+                                noralizedName = target.normalizeName(currTarget.name)
+                                for alias in aliases:
+                                    if target.normalizeName(alias) == normalizedName:
+                                        logger.writeError("Project target alias cannot be same as its name", currTarget.name, "", self.path, lineCount)
+                                        return False
+                                currTarget.aliases = aliases
+                        elif currName == "skipsteps" or currName == "skipstep":
+                            if currTarget.skipSteps != []:
+                                logger.writeError("Project targets can only have one 'SkipSteps' defined (use a comma delimited list for multiple steps)", "", "", self.path, lineCount)
+                                return False
+                            currTarget.skipSteps = utilityFunctions.stripItemsInList(str.lower(currPair[1]).split(","))
+                        elif currName in commands.buildSteps:
+                            if currTarget.findBuildStep(currName) != None:
+                                logger.writeError("Project targets can only have one '" + currName + "' defined", "", "", self.path, lineCount)
+                                return False
+                            currTarget.buildSteps.append(commands.BuildStep(currName, currPair[1]))
+                        else:
+                            logger.writeError("Cannot understand given line: '" + currLine + "'", "", "", self.path, lineCount)
+                            return False
 
             if not self.__addTarget(currTarget, lastPackageLineNumber):
                 return False
