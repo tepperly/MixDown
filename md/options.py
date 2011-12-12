@@ -94,8 +94,9 @@ class Options(object):
     def combineDefines(self, mdProject):
         for key in mdProject.defines.keys():
             self.setDefine(key, mdProject.defines[key])
-        for key in self.overrideGroup.defines.keys():
-            self.setDefine(key, self.overrideGroup.defines[key])
+        if self.overrideGroup:
+            for key in self.overrideGroup.defines.keys():
+                self.setDefine(key, self.overrideGroup.defines[key])
 
     def expandDefines(self, inString):
         if inString == "":
