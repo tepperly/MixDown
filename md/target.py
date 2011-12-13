@@ -88,7 +88,7 @@ class Target(object):
                 return False
 
         #Check for write access to install directories used in commands.
-        if not mdOptions.cleanTargets:
+        if not mdOptions.cleanTargets and not mdOptions.importer:
             for buildStep in self.buildSteps:
                 expandedCommand = mdOptions.expandDefines(buildStep.command)
                 installDir = autoTools.getInstallDir(expandedCommand)
