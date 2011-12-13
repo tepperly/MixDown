@@ -25,7 +25,7 @@ import os, sys, textwrap, unittest, mdTestUtilities
 if not ".." in sys.path:
     sys.path.append("..")
 
-from md import logger, options, project, utilityFunctions
+from md import defines, logger, options, project, utilityFunctions
 
 class Test_project(unittest.TestCase):
     def test_readSingleTargetProject(self):
@@ -212,6 +212,9 @@ class Test_project(unittest.TestCase):
             projectFilePath = mdTestUtilities.makeTempFile(tempDir, projectFileContents, ".md")
             projects = project.Project(projectFilePath)
             option = options.Options()
+            defines.setPrefixDefines(option, os.path.abspath(os.path.join(tempDir, "prefix")))
+            option.prefixDefined = True
+
             self.assertTrue(projects.read(), "Project file could not be read")
             self.assertTrue(projects.validate(option), "Project could not validate")
         finally:
@@ -247,7 +250,8 @@ class Test_project(unittest.TestCase):
             projectFilePath = mdTestUtilities.makeTempFile(tempDir, projectFileContents, ".md")
             projects = project.Project(projectFilePath)
             option = options.Options()
-
+            defines.setPrefixDefines(option, os.path.abspath(os.path.join(tempDir, "prefix")))
+            option.prefixDefined = True
 
             self.assertTrue(projects.read(), "Project file could not be read")
             self.assertTrue(projects.validate(option), "Project could not validate")

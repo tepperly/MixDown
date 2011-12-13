@@ -136,7 +136,7 @@ class Test_target(unittest.TestCase):
         targets.examine(option)
         targets.expandDefines(option)
         self.assertEquals(targets.findBuildStep("preconfig").command, "test -x configure || autoreconf -i", "'cases/simpleGraphAutoTools/TestCaseA' returned wrong preconfig command")
-        self.assertEquals(targets.findBuildStep("config").command, "./configure --prefix=/usr/local --with-TestCaseB=/usr/local --with-TestCaseC=/usr/local", "'cases/simpleGraphAutoTools/TestCaseA' returned wrong config command")
+        self.assertEquals(targets.findBuildStep("config").command, "./configure --prefix=/usr/local  --with-TestCaseB=/usr/local --with-TestCaseC=/usr/local", "'cases/simpleGraphAutoTools/TestCaseA' returned wrong config command")
         self.assertEquals(targets.findBuildStep("build").command, "make", "'cases/simpleGraphAutoTools/TestCaseA' returned wrong build command")
         self.assertEquals(targets.findBuildStep("install").command, "make install", "'cases/simpleGraphAutoTools/TestCaseA' returned wrong install command")
 
@@ -150,7 +150,7 @@ class Test_target(unittest.TestCase):
         targets.examine(option)
         targets.expandDefines(option)
         self.assertEquals(targets.findBuildStep("preconfig").command, "test -x configure || autoreconf -i", "'cases/simpleGraphAutoTools/TestCaseA' returned wrong preconfig command")
-        self.assertEquals(targets.findBuildStep("config").command, "./configure --prefix=/test/path --with-TestCaseB=/test/path --with-TestCaseC=/test/path", "'cases/simpleGraphAutoTools/TestCaseA' returned wrong config command")
+        self.assertEquals(targets.findBuildStep("config").command, "./configure --prefix=/test/path  --with-TestCaseB=/test/path --with-TestCaseC=/test/path", "'cases/simpleGraphAutoTools/TestCaseA' returned wrong config command")
         self.assertEquals(targets.findBuildStep("build").command, "make", "'cases/simpleGraphAutoTools/TestCaseA' returned wrong build command")
         self.assertEquals(targets.findBuildStep("install").command, "make install", "'cases/simpleGraphAutoTools/TestCaseA' returned wrong install command")
 
