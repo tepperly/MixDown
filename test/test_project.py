@@ -212,7 +212,7 @@ class Test_project(unittest.TestCase):
             projectFilePath = mdTestUtilities.makeTempFile(tempDir, projectFileContents, ".md")
             projects = project.Project(projectFilePath)
             option = options.Options()
-            defines.setPrefixDefines(option, os.path.abspath(os.path.join(tempDir, "prefix")))
+            defines.setPrefixDefines(option.defines, os.path.abspath(os.path.join(tempDir, "prefix")))
             option.prefixDefined = True
 
             self.assertTrue(projects.read(), "Project file could not be read")
@@ -250,7 +250,7 @@ class Test_project(unittest.TestCase):
             projectFilePath = mdTestUtilities.makeTempFile(tempDir, projectFileContents, ".md")
             projects = project.Project(projectFilePath)
             option = options.Options()
-            defines.setPrefixDefines(option, os.path.abspath(os.path.join(tempDir, "prefix")))
+            defines.setPrefixDefines(option.defines, os.path.abspath(os.path.join(tempDir, "prefix")))
             option.prefixDefined = True
 
             self.assertTrue(projects.read(), "Project file could not be read")

@@ -56,7 +56,10 @@ def main():
             if mdProject == None:
                 succeeded = False
             else:
-                mdOptions.combineDefines(mdProject)
+                #Define Hierarchy: options defines <  project defines < override group defines
+                mdOptions.defines.combine(mdProject.defines)
+                if mdOptions.overrideGroup:
+                    mdOptions.defines.combine(mdOptions.overrideGroup.defines)
 
                 if mdOptions.threadCount == 1:
                     for target in reversed(mdProject.targets):
@@ -123,7 +126,7 @@ def main():
                 logger.writeMessage("\n" + mdProject.name + " has been cleaned in " + os.path.abspath(mdOptions.buildDir))
             else:
                 logger.writeMessage("\n" + mdProject.name + " has been built in " + os.path.abspath(mdOptions.buildDir))
-                logger.writeMessage(mdProject.name + " has been installed to " + os.path.abspath(mdOptions.getDefine(defines.mdPrefix[0])))
+                logger.writeMessage(mdProject.name + " has been installed to " + os.path.abspath(mdOptions.defines.get(defines.mdPrefix[0])))
         message = "\nTotal time " + logger.secondsToHMS(timeElapsed) + "\n" + message
         logger.writeMessage(message)
         if partialImport:
@@ -146,7 +149,7 @@ def setup(mdOptions):
     if mdOptions.verbose:
         logger.writeMessage(str(mdOptions))
         if not mdOptions.prefixDefined and not mdOptions.cleanTargets:
-            logger.writeMessage("No prefix defined, defaulting to '" + mdOptions.getDefine(defines.mdPrefix[0]) + "'")
+            logger.writeMessage("No prefix defined, defaulting to '" + mdOptions.defines.get(defines.mdPrefix[0]) + "'")
 
     mdProject = project.Project(mdOptions.projectFile)
     if not mdProject.read():
@@ -171,7 +174,7 @@ def setup(mdOptions):
                     cleaningOutputReported = True
                 utilityFunctions.removeDir(currTarget.outputPath)
 
-        prefixDefine = mdOptions.getDefine(defines.mdPrefix[0])
+        prefixDefine = mdOptions.defines.get(defines.mdPrefix[0])
         if prefixDefine != "":
             #TODO: only add lib64 if on 64bit machines
             libraryPaths = os.path.join(prefixDefine, "lib64") + ":" + os.path.join(prefixDefine, "lib")

@@ -21,7 +21,7 @@
 # Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 
 import os, collections, errno, Queue
-import commands, exceptions, logger, target, utilityFunctions
+import commands, defines, exceptions, logger, target, utilityFunctions
 
 class Project(object):
     def __init__(self, projectFilePath, targets=[]):
@@ -33,7 +33,7 @@ class Project(object):
         self.targets = targets[:] #Use copy to prevent list instance to be used between project instances
         self.__validated = False
         self.__examined = False
-        self.defines = dict()
+        self.defines = defines.Defines()
 
     def addSkipStepFromOptions(self, options):
         if options.skipSteps == '' or options.skipSteps == None:
@@ -142,7 +142,7 @@ class Project(object):
                         currPair = currLine.split("=", 1)
                         currPair = currPair[0].strip(), currPair[1].strip()
                         currName = str.lower(currPair[0])
-                        self.defines[currPair[0]] = currPair[1]
+                        self.defines.set(currPair[0], currPair[1])
                     else:
                         currPair = currLine.split(":", 1)
                         currPair = currPair[0].strip(), currPair[1].strip()

@@ -51,7 +51,7 @@ def buildStepActor(target, buildStep, options, lock=None):
                 lock.release()
         return True
 
-    command = options.expandDefines(buildStep.command)
+    command = options.defines.expand(buildStep.command)
     isPythonCommand, namespace, function = python.parsePythonCommand(command)
     if isPythonCommand:
         success = python.callPythonCommand(namespace, function, target, options)

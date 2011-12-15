@@ -43,9 +43,8 @@ class Options(object):
         self.optimizationGroupName = ""
         self.parallelGroupName = ""
         self.overrideGroup = None
-        self._defines = dict()
-        self._defines.setdefault("")
-        defines.setPrefixDefines(self, '/usr/local')
+        self.defines = defines.Defines()
+        defines.setPrefixDefines(self.defines, '/usr/local')
 
     def __str__(self):
         return "Options:\n\
@@ -60,76 +59,11 @@ class Options(object):
   Verbose:        " + str(self.verbose) + "\n\
   Logger:         " + self.logger.capitalize() + "\n\
   Thread Count:   " + str(self.threadCount) + "\n\
-  Job Count:      " + self.getDefine(defines.surround(defines.mdJobSlots[0])) + "\n\
+  Job Count:      " + self.get(defines.surround(defines.mdJobSlots[0])) + "\n\
   Override Group Names:\n\
     Compiler:     " + self.compilerGroupName + "\n\
     Optimization: " + self.optimizationGroupName + "\n\
     Parallel:     " + self.parallelGroupName + "\n"
-
-    def _normalizeKey(self, key, lower=True):
-        normalizedKey = key.strip()
-        if lower:
-            normalizedKey = normalizedKey.lower()
-        if normalizedKey.startswith("$("):
-            normalizedKey = normalizedKey[2:]
-            if normalizedKey.endswith(")"):
-                normalizedKey = normalizedKey[:-1]
-            normalizedKey = normalizedKey.strip()
-        return normalizedKey
-
-    def setDefine(self, key, value):
-        self._defines[self._normalizeKey(key)] = value.strip()
-
-    def getDefine(self, key):
-        normalizedKey = self._normalizeKey(key)
-        strippedKey = self._normalizeKey(key, False)
-        if normalizedKey in self._defines:
-            value = self._defines[normalizedKey]
-        elif strippedKey in os.environ:
-            value = os.environ[strippedKey]
-        else:
-            value = ""
-        return value
-
-    def combineDefines(self, mdProject):
-        for key in mdProject.defines.keys():
-            self.setDefine(key, mdProject.defines[key])
-        if self.overrideGroup:
-            for key in self.overrideGroup.defines.keys():
-                self.setDefine(key, self.overrideGroup.defines[key])
-
-    def expandDefines(self, inString):
-        if inString == "":
-            return ""
-        expandedString = inString
-        loopCount = 0
-        while expandedString.find("$(") != -1:
-            if loopCount > 50:
-                logger.writeError("Define depth count (10) exceeded in string '" + inString + "'", exitProgram=True)
-
-            strLength = len(expandedString)
-            startIndex = 0
-            endIndex = 0
-            for i in range(strLength):
-                if expandedString[i] == "$":
-                    if strLength - i < 4:
-                        if inString == expandedString:
-                            logger.writeError("Unterminated define found in '" + inString + "' at index " + str(i), exitProgram=True)
-                        else:
-                            logger.writeError("Unterminated define found in original string '" + inString + "'\n After expanding defines, '" + expandedString + "'", exitProgram=True)
-                    startIndex = i
-                    break
-            if startIndex != 0:
-                for j in range(startIndex, strLength):
-                    if expandedString[j] == ")":
-                        endIndex = j
-                        break
-                defineName = expandedString[startIndex:endIndex+1]
-                defineValue = self.getDefine(defineName)
-                expandedString = expandedString.replace(defineName, defineValue)
-            loopCount += 1
-        expandedString = expandedString.replace("  ", " ").strip()
-        return expandedString
 
     def validateBuildDir(self):
         if os.path.isfile(self.buildDir):
@@ -182,7 +116,7 @@ class Options(object):
 
             if currFlag == "-p":
                 validateOptionPair(currFlag, currValue)
-                defines.setPrefixDefines(self, os.path.abspath(currValue))
+                defines.setPrefixDefines(self.defines, os.path.abspath(currValue))
                 self.prefixDefined = True
             elif currFlag == "-t":
                 validateOptionPair(currFlag, currValue)
@@ -202,7 +136,7 @@ class Options(object):
                 if count < 1:
                     logger.writeError("Positive numeric value needed " + definePair, exitProgram=True)
                 #Add "-j<jobSlots>" only if user defines -j on commandline
-                defines.setJobSlotsDefines(self, currValue)
+                defines.setJobSlotsDefines(self.defines, currValue)
             elif currFlag == "-l":
                 validateOptionPair(currFlag, currValue)
                 self.logger = str.lower(currValue)

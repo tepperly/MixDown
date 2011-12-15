@@ -20,7 +20,76 @@
 # along with this program; if not, write to the Free Software Foundation,
 # Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 
-import overrides
+import os, overrides
+
+class Defines(object):
+    def __init__(self):
+        self._defines = dict()
+
+    def keys(self):
+        return self._defines.keys()
+
+    def set(self, key, value):
+        self._defines[normalizeKey(key)] = value.strip()
+
+    def get(self, key):
+        normalizedKey = normalizeKey(key)
+        strippedKey = normalizeKey(key, False)
+        if normalizedKey in self._defines:
+            value = self._defines[normalizedKey]
+        elif strippedKey in os.environ:
+            value = os.environ[strippedKey]
+        else:
+            value = ""
+        return value
+
+    def combine(self, overridingDefines):
+        for key in overridingDefines.keys():
+            self.set(key, overridingDefines.get(key))
+
+    def expand(self, inString):
+        if inString == "":
+            return ""
+        expandedString = inString
+        loopCount = 0
+        while expandedString.find("$(") != -1:
+            if loopCount > 50:
+                logger.writeError("Define depth count (10) exceeded in string '" + inString + "'", exitProgram=True)
+
+            strLength = len(expandedString)
+            startIndex = 0
+            endIndex = 0
+            for i in range(strLength):
+                if expandedString[i] == "$":
+                    if strLength - i < 4:
+                        if inString == expandedString:
+                            logger.writeError("Unterminated define found in '" + inString + "' at index " + str(i), exitProgram=True)
+                        else:
+                            logger.writeError("Unterminated define found in original string '" + inString + "'\n After expanding defines, '" + expandedString + "'", exitProgram=True)
+                    startIndex = i
+                    break
+            if startIndex != 0:
+                for j in range(startIndex, strLength):
+                    if expandedString[j] == ")":
+                        endIndex = j
+                        break
+                defineName = expandedString[startIndex:endIndex+1]
+                defineValue = self.get(defineName)
+                expandedString = expandedString.replace(defineName, defineValue)
+            loopCount += 1
+        expandedString = expandedString.replace("  ", " ").strip()
+        return expandedString
+
+def normalizeKey(key, lower=True):
+    normalizedKey = key.strip()
+    if lower:
+        normalizedKey = normalizedKey.lower()
+    if normalizedKey.startswith("$("):
+        normalizedKey = normalizedKey[2:]
+        if normalizedKey.endswith(")"):
+            normalizedKey = normalizedKey[:-1]
+        normalizedKey = normalizedKey.strip()
+    return normalizedKey
 
 #Expands define name to full define
 def surround(name):
@@ -136,61 +205,61 @@ def quoteDefine(define, defineToBeAdded=""):
         finalDefine = '"' + define.strip('"') + " " + defineToBeAdded.strip('"') + '"'
     return finalDefine
 
-def setOverrideDefines(options, overrideGroup):
-    __setToolDefines(options, overrideGroup)
-    __setFlagDefines(options, overrideGroup)
+def setOverrideDefines(defs, overrideGroup):
+    __setToolDefines(defs, overrideGroup)
+    __setFlagDefines(defs, overrideGroup)
 
-def __setToolDefines(options, overrideGroup):
+def __setToolDefines(defs, overrideGroup):
     autoTools = ""
     cmake = ""
 
     if overrideGroup.hasOverride("CCompiler"):
-        options.setDefine(mdCCompiler[0], overrideGroup.getOverride("CCompiler"))
-        options.setDefine(autoToolsCCompiler[0], autoToolsCCompiler[1])
-        options.setDefine(cmakeCCompiler[0], cmakeCCompiler[1])
+        defs.set(mdCCompiler[0], overrideGroup.getOverride("CCompiler"))
+        defs.set(autoToolsCCompiler[0], autoToolsCCompiler[1])
+        defs.set(cmakeCCompiler[0], cmakeCCompiler[1])
         autoTools = surround(autoToolsCCompiler[0])
         cmake = surround(autoToolsCCompiler[0])
     if overrideGroup.hasOverride("CPreProcessor"):
-        options.setDefine(mdCPreProcessor[0], overrideGroup.getOverride("CPreProcessor"))
-        options.setDefine(autoToolsCPreProcessor[0], autoToolsCPreProcessor[1])
-        options.setDefine(cmakeCPreProcessor[0], cmakeCPreProcessor[1])
+        defs.set(mdCPreProcessor[0], overrideGroup.getOverride("CPreProcessor"))
+        defs.set(autoToolsCPreProcessor[0], autoToolsCPreProcessor[1])
+        defs.set(cmakeCPreProcessor[0], cmakeCPreProcessor[1])
         autoTools += " " + surround(autoToolsCPreProcessor[0])
         cmake += " " + surround(cmakeCPreProcessor[0])
     if overrideGroup.hasOverride("CXXCompiler"):
-        options.setDefine(mdCXXCompiler[0], overrideGroup.getOverride("CXXCompiler"))
-        options.setDefine(autoToolsCXXCompiler[0], autoToolsCXXCompiler[1])
+        defs.set(mdCXXCompiler[0], overrideGroup.getOverride("CXXCompiler"))
+        defs.set(autoToolsCXXCompiler[0], autoToolsCXXCompiler[1])
         autoTools += " " + surround(autoToolsCXXCompiler[0])
     if overrideGroup.hasOverride("FCompiler"):
-        options.setDefine(mdFCompiler[0], overrideGroup.getOverride("FCompiler"))
-        options.setDefine(autoToolsFCompiler[0], autoToolsFCompiler[1])
-        options.setDefine(cmakeFCompiler[0], cmakeFCompiler[1])
+        defs.set(mdFCompiler[0], overrideGroup.getOverride("FCompiler"))
+        defs.set(autoToolsFCompiler[0], autoToolsFCompiler[1])
+        defs.set(cmakeFCompiler[0], cmakeFCompiler[1])
         autoTools += " " + surround(autoToolsFCompiler[0])
         cmake += " " + surround(cmakeFCompiler[0])
     if overrideGroup.hasOverride("F77Compiler"):
-        options.setDefine(mdF77Compiler[0], overrideGroup.getOverride("F77Compiler"))
-        options.setDefine(autoToolsF77Compiler[0], autoToolsF77Compiler[1])
+        defs.set(mdF77Compiler[0], overrideGroup.getOverride("F77Compiler"))
+        defs.set(autoToolsF77Compiler[0], autoToolsF77Compiler[1])
         autoTools += " " + surround(autoToolsF77Compiler[0])
     if overrideGroup.hasOverride("OBJCCompiler"):
-        options.setDefine(mdOBJCCompiler[0], overrideGroup.getOverride("OBJCCompiler"))
-        options.setDefine(autoToolsOBJCCompiler[0], autoToolsOBJCCompiler[1])
-        options.setDefine(cmakeOBJCCompiler[0], cmakeOBJCCompiler[1])
+        defs.set(mdOBJCCompiler[0], overrideGroup.getOverride("OBJCCompiler"))
+        defs.set(autoToolsOBJCCompiler[0], autoToolsOBJCCompiler[1])
+        defs.set(cmakeOBJCCompiler[0], cmakeOBJCCompiler[1])
         autoTools += " " + surround(autoToolsOBJCCompiler[0])
         cmake += " " + surround(cmakeOBJCCompiler[0])
     if overrideGroup.hasOverride("OBJCXXCompiler"):
-        options.setDefine(mdOBJCXXCompiler[0], overrideGroup.getOverride("OBJCXXCompiler"))
-        options.setDefine(autoToolsOBJCXXCompiler[0], autoToolsOBJCXXCompiler[1])
-        options.setDefine(cmakeOBJCXXCompiler[0], cmakeOBJCXXCompiler[1])
+        defs.set(mdOBJCXXCompiler[0], overrideGroup.getOverride("OBJCXXCompiler"))
+        defs.set(autoToolsOBJCXXCompiler[0], autoToolsOBJCXXCompiler[1])
+        defs.set(cmakeOBJCXXCompiler[0], cmakeOBJCXXCompiler[1])
         autoTools += " " + surround(autoToolsOBJCXXCompiler[0])
         cmake += " " + surround(cmakeOBJCXXCompiler[0])
     if overrideGroup.hasOverride("OBJCXXPreProcessor"):
-        options.setDefine(mdOBJCXXPreProcessor[0], overrideGroup.getOverride("OBJCXXPreProcessor"))
-        options.setDefine(autoToolsOBJCXXPreProcessor[0], autoToolsOBJCXXPreProcessor[1])
+        defs.set(mdOBJCXXPreProcessor[0], overrideGroup.getOverride("OBJCXXPreProcessor"))
+        defs.set(autoToolsOBJCXXPreProcessor[0], autoToolsOBJCXXPreProcessor[1])
         autoTools += " " + surround(autoToolsOBJCXXCompiler[0])
 
-    options.setDefine(autoToolsCompilers[0], autoTools)
-    options.setDefine(cmakeCompilers[0], cmake)
+    defs.set(autoToolsCompilers[0], autoTools)
+    defs.set(cmakeCompilers[0], cmake)
 
-def __setFlagDefines(options, overrideGroup):
+def __setFlagDefines(defs, overrideGroup):
     autoTools = " "
     cmake = " "
 
@@ -214,73 +283,73 @@ def __setFlagDefines(options, overrideGroup):
         ldFlagsShared = ldFlags
 
     if ldFlags != "":
-        options.setDefine(mdLinkerFlags[0], quoteDefine(ldFlags))
-        options.setDefine(autoToolsLinkerFlags[0], autoToolsLinkerFlags[1])
+        defs.set(mdLinkerFlags[0], quoteDefine(ldFlags))
+        defs.set(autoToolsLinkerFlags[0], autoToolsLinkerFlags[1])
         autoTools += surround(autoToolsLinkerFlags[0]) + " "
     if ldFlagsEXE != "":
-        options.setDefine(mdLinkerFlagsEXE[0], quoteDefine(ldFlagsEXE))
-        options.setDefine(cmakeLinkerFlagsEXE[0], cmakeLinkerFlagsEXE[1])
+        defs.set(mdLinkerFlagsEXE[0], quoteDefine(ldFlagsEXE))
+        defs.set(cmakeLinkerFlagsEXE[0], cmakeLinkerFlagsEXE[1])
         cmake += surround(cmakeLinkerFlagsEXE[0]) + " "
     if ldFlagsModule != "":
-        options.setDefine(mdLinkerFlagsModule[0], quoteDefine(ldFlagsModule))
-        options.setDefine(cmakeLinkerFlagsModule[0], cmakeLinkerFlagsModule[1])
+        defs.set(mdLinkerFlagsModule[0], quoteDefine(ldFlagsModule))
+        defs.set(cmakeLinkerFlagsModule[0], cmakeLinkerFlagsModule[1])
         cmake += surround(cmakeLinkerFlagsModule[0]) + " "
     if ldFlagsShared != "":
-        options.setDefine(mdLinkerFlagsShared[0], quoteDefine(ldFlagsShared))
-        options.setDefine(cmakeLinkerFlagsShared[0], cmakeLinkerFlagsShared[1])
+        defs.set(mdLinkerFlagsShared[0], quoteDefine(ldFlagsShared))
+        defs.set(cmakeLinkerFlagsShared[0], cmakeLinkerFlagsShared[1])
         cmake += surround(cmakeLinkerFlagsShared[0]) + " "
 
     if overrideGroup.hasOverride("CFlags"):
-        options.setDefine(mdCFlags[0], quoteDefine(overrideGroup.getOverride("CFlags")))
-        options.setDefine(autoToolsCFlags[0], autoToolsCFlags[1])
-        options.setDefine(cmakeCFlags[0], cmakeCFlags[1])
+        defs.set(mdCFlags[0], quoteDefine(overrideGroup.getOverride("CFlags")))
+        defs.set(autoToolsCFlags[0], autoToolsCFlags[1])
+        defs.set(cmakeCFlags[0], cmakeCFlags[1])
         autoTools += surround(autoToolsCFlags[0]) + " "
         cmake += surround(cmakeCFlags[0]) + " "
     if overrideGroup.hasOverride("CPPFlags"):
-        options.setDefine(mdCPPFlags[0], quoteDefine(overrideGroup.getOverride("CPPFlags")))
-        options.setDefine(autoToolsCPPFlags[0], autoToolsCPPFlags[1])
-        options.setDefine(cmakeCPPFlags[0], cmakeCPPFlags[1])
+        defs.set(mdCPPFlags[0], quoteDefine(overrideGroup.getOverride("CPPFlags")))
+        defs.set(autoToolsCPPFlags[0], autoToolsCPPFlags[1])
+        defs.set(cmakeCPPFlags[0], cmakeCPPFlags[1])
         autoTools += surround(autoToolsCPPFlags[0]) + " "
         cmake += surround(cmakeCPPFlags[0]) + " "
     if overrideGroup.hasOverride("CXXFlags"):
-        options.setDefine(mdCXXFlags[0], quoteDefine(overrideGroup.getOverride("CXXFlags")))
-        options.setDefine(autoToolsCXXFlags[0], autoToolsCXXFlags[1])
-        options.setDefine(cmakeCXXFlags[0], cmakeCXXFlags[1])
+        defs.set(mdCXXFlags[0], quoteDefine(overrideGroup.getOverride("CXXFlags")))
+        defs.set(autoToolsCXXFlags[0], autoToolsCXXFlags[1])
+        defs.set(cmakeCXXFlags[0], cmakeCXXFlags[1])
         autoTools += surround(autoToolsCXXFlags[0]) + " "
         cmake += surround(cmakeCXXFlags[0]) + " "
     if overrideGroup.hasOverride("FFlags"):
-        options.setDefine(mdFFlags[0], quoteDefine(overrideGroup.getOverride("FFlags")))
-        options.setDefine(autoToolsFFlags[0], autoToolsFFlags[1])
-        options.setDefine(cmakeFFlags[0], cmakeFFlags[1])
+        defs.set(mdFFlags[0], quoteDefine(overrideGroup.getOverride("FFlags")))
+        defs.set(autoToolsFFlags[0], autoToolsFFlags[1])
+        defs.set(cmakeFFlags[0], cmakeFFlags[1])
         autoTools += surround(autoToolsFFlags[0]) + " "
         cmake += surround(cmakeFFlags[0]) + " "
     if overrideGroup.hasOverride("F77Flags"):
-        options.setDefine(mdF77Flags[0], quoteDefine(overrideGroup.getOverride("F77Flags")))
-        options.setDefine(autoToolsF77Flags[0], autoToolsF77Flags[1])
-        options.setDefine(cmakeF77Flags[0], cmakeF77Flags[1])
+        defs.set(mdF77Flags[0], quoteDefine(overrideGroup.getOverride("F77Flags")))
+        defs.set(autoToolsF77Flags[0], autoToolsF77Flags[1])
+        defs.set(cmakeF77Flags[0], cmakeF77Flags[1])
         autoTools += surround(autoToolsF77Flags[0]) + " "
         cmake += surround(cmakeF77Flags[0]) + " "
     if overrideGroup.hasOverride("OBJCFlags"):
-        options.setDefine(mdOBJCFlags[0], quoteDefine(overrideGroup.getOverride("OBJCFlags")))
-        options.setDefine(autoToolsOBJCFlags[0], autoToolsOBJCFlags[1])
-        options.setDefine(cmakeOBJCFlags[0], cmakeOBJCFlags[1])
+        defs.set(mdOBJCFlags[0], quoteDefine(overrideGroup.getOverride("OBJCFlags")))
+        defs.set(autoToolsOBJCFlags[0], autoToolsOBJCFlags[1])
+        defs.set(cmakeOBJCFlags[0], cmakeOBJCFlags[1])
         autoTools += surround(autoToolsOBJCFlags[0]) + " "
         cmake += surround(cmakeOBJCFlags[0]) + " "
     if overrideGroup.hasOverride("OBJCXXFlags"):
-        options.setDefine(mdOBJCXXFlags[0], quoteDefine(overrideGroup.getOverride("OBJCXXFlags")))
-        options.setDefine(autoToolsOBJCXXFlags[0], autoToolsOBJCXXFlags[1])
-        options.setDefine(cmakeOBJCXXFlags[0], cmakeOBJCXXFlags[1])
+        defs.set(mdOBJCXXFlags[0], quoteDefine(overrideGroup.getOverride("OBJCXXFlags")))
+        defs.set(autoToolsOBJCXXFlags[0], autoToolsOBJCXXFlags[1])
+        defs.set(cmakeOBJCXXFlags[0], cmakeOBJCXXFlags[1])
         autoTools += surround(autoToolsOBJCXXFlags[0]) + " "
         cmake += surround(cmakeOBJCXXFlags[0]) + " "
 
-    options.setDefine(autoToolsFlags[0], autoTools)
-    options.setDefine(cmakeFlags[0], cmake)
+    defs.set(autoToolsFlags[0], autoTools)
+    defs.set(cmakeFlags[0], cmake)
 
-def setJobSlotsDefines(options, jobSlots):
-    options.setDefine(mdJobSlots[0], jobSlots)
-    options.setDefine(makeJobSlots[0], makeJobSlots[1])
+def setJobSlotsDefines(defs, jobSlots):
+    defs.set(mdJobSlots[0], jobSlots)
+    defs.set(makeJobSlots[0], makeJobSlots[1])
 
-def setPrefixDefines(options, prefix):
-    options.setDefine(mdPrefix[0], prefix)
-    options.setDefine(autoToolsPrefix[0], autoToolsPrefix[1])
-    options.setDefine(cmakePrefix[0], cmakePrefix[1])
+def setPrefixDefines(defs, prefix):
+    defs.set(mdPrefix[0], prefix)
+    defs.set(autoToolsPrefix[0], autoToolsPrefix[1])
+    defs.set(cmakePrefix[0], cmakePrefix[1])

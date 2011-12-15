@@ -90,7 +90,7 @@ class Target(object):
         #Check for write access to install directories used in commands.
         if not mdOptions.cleanTargets and not mdOptions.importer:
             for buildStep in self.buildSteps:
-                expandedCommand = mdOptions.expandDefines(buildStep.command)
+                expandedCommand = mdOptions.defines.expand(buildStep.command)
                 installDir = autoTools.getInstallDir(expandedCommand)
                 if installDir == "":
                     installDir = cmake.getInstallDir(expandedCommand)
@@ -129,7 +129,7 @@ class Target(object):
 
     def expandDefines(self, mdOptions):
         for buildStep in self.buildSteps:
-            buildStep.command = mdOptions.expandDefines(buildStep.command)
+            buildStep.command = mdOptions.defines.expand(buildStep.command)
 
     def __determineCommands(self):
         for stepName in commands.buildSteps:
