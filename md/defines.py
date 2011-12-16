@@ -48,34 +48,28 @@ class Defines(object):
             self.set(key, overridingDefines.get(key))
 
     def expand(self, inString):
-        if inString == "":
+        if inString.strip() == "":
             return ""
         expandedString = inString
         loopCount = 0
-        while expandedString.find("$(") != -1:
+        while True:
             if loopCount > 50:
-                logger.writeError("Define depth count (10) exceeded in string '" + inString + "'", exitProgram=True)
+                logger.writeError("Define depth count (50) exceeded in string '" + inString + "'", exitProgram=True)
 
-            strLength = len(expandedString)
-            startIndex = 0
-            endIndex = 0
-            for i in range(strLength):
-                if expandedString[i] == "$":
-                    if strLength - i < 4:
-                        if inString == expandedString:
-                            logger.writeError("Unterminated define found in '" + inString + "' at index " + str(i), exitProgram=True)
-                        else:
-                            logger.writeError("Unterminated define found in original string '" + inString + "'\n After expanding defines, '" + expandedString + "'", exitProgram=True)
-                    startIndex = i
-                    break
-            if startIndex != 0:
-                for j in range(startIndex, strLength):
-                    if expandedString[j] == ")":
-                        endIndex = j
-                        break
-                defineName = expandedString[startIndex:endIndex+1]
-                defineValue = self.get(defineName)
-                expandedString = expandedString.replace(defineName, defineValue)
+            startIndex = expandedString.find("$(")
+            if startIndex == -1:
+                break
+            endIndex = expandedString.find(")", startIndex)
+            if startIndex == -1:
+                if inString == expandedString:
+                    logger.writeError("Unterminated define found in '" + inString + "' starting at index " + str(startIndex), exitProgram=True)
+                else:
+                    logger.writeError("Unterminated define found in original string '" + inString + "'\n After expanding defines, '" + expandedString + "' starting at index " + str(startIndex), exitProgram=True)
+
+            defineName = expandedString[startIndex:endIndex+1]
+            defineValue = self.get(defineName)
+            expandedString = expandedString.replace(defineName, defineValue)
+
             loopCount += 1
         expandedString = expandedString.replace("  ", " ").strip()
         return expandedString
@@ -84,10 +78,9 @@ def normalizeKey(key, lower=True):
     normalizedKey = key.strip()
     if lower:
         normalizedKey = normalizedKey.lower()
-    if normalizedKey.startswith("$("):
+    if normalizedKey.startswith("$(") and normalizedKey.endswith(")"):
         normalizedKey = normalizedKey[2:]
-        if normalizedKey.endswith(")"):
-            normalizedKey = normalizedKey[:-1]
+        normalizedKey = normalizedKey[:-1]
         normalizedKey = normalizedKey.strip()
     return normalizedKey
 
