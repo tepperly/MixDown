@@ -85,6 +85,14 @@ class Test_defines(unittest.TestCase):
         self.assertEquals(def1.expand("$(a)"), "aResult", "Define returned wrong value when using expand()")
         self.assertEquals(def1.expand("$(b)"), "bResult", "Define returned wrong value when using expand()")
         self.assertEquals(def1.expand("$(c)"), "cResult", "Define returned wrong value when using expand()")
+        self.assertEquals(def1.expand("$(a)$(b)$(c)"), "aResultbResultcResult", "Define returned wrong value when using expand()")
+        self.assertEquals(def1.expand("$(a) $(b) $(c)"), "aResult bResult cResult", "Define returned wrong value when using expand()")
+        self.assertEquals(def1.expand("foo$(a)bar$(b)baz$(c)qux"), "fooaResultbarbResultbazcResultqux", "Define returned wrong value when using expand()")
+        self.assertEquals(def1.expand("f!!oo$(a)ba!!r$(b)b!!az$(c)q!!ux"), "f!!ooaResultba!!rbResultb!!azcResultq!!ux", "Define returned wrong value when using expand()")
+        self.assertEquals(def1.expand("$(a)"), "aResult", "Define returned wrong value when using expand()")
+        self.assertEquals(def1.expand("$$(a)"), "$aResult", "Define returned wrong value when using expand()")
+        self.assertEquals(def1.expand("$$(a)$"), "$aResult$", "Define returned wrong value when using expand()")
+        self.assertEquals(def1.expand("$$($a)$"), "$$", "Define returned wrong value when using expand()")
 
     def test_normalizeKey(self):
         self.assertEquals(defines.normalizeKey("foo"), "foo", "normalizeKey() returned wrong value")
