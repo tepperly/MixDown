@@ -31,7 +31,7 @@ class Test_defines(unittest.TestCase):
     def test_combine(self):
         def1 = defines.Defines()
         def1.set("options", "optionsResult")
-        def1.set("both", "optionsResult")
+        def1.set("both", "optionsResultBoth")
         def1.set("same", "sameResult")
 
         def2 = defines.Defines()

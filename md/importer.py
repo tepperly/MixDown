@@ -23,7 +23,7 @@
 import os, re, shutil, sys, tarfile, tempfile, urllib
 import autoTools, cmake, commands, logger, make, project, target, utilityFunctions
 
-def importTargets(options, targetsToImport):
+def importTargets(options):
     logger.setLogger("console")
 
     finalTargets = []
@@ -35,8 +35,8 @@ def importTargets(options, targetsToImport):
     tempDir = tempfile.mkdtemp(prefix="mixdown-")
     options.downloadDir = os.path.join(tempDir, "mdDownloads")
 
-    while len(targetsToImport) != 0:
-        target = targetsToImport.pop(0)
+    while len(options.targetsToImport) != 0:
+        target = options.targetsToImport.pop(0)
 
         logger.writeMessage("Analyzing target...", target.name)
         logger.writeMessage("Extracting target...", target.name)
@@ -74,7 +74,7 @@ def importTargets(options, targetsToImport):
 
         #Find actual dependencies
         for possibleDependency in possibleDeps:
-            if getTarget(possibleDependency, finalTargets + targetsToImport):
+            if getTarget(possibleDependency, finalTargets + options.targetsToImport):
                 logger.writeMessage("Known dependency found (" + possibleDependency + ")", target.name)
                 target.dependsOn.append(possibleDependency)
                 continue
@@ -82,7 +82,7 @@ def importTargets(options, targetsToImport):
                 logger.writeMessage("Previously ignored dependency found (" + possibleDependency + ")", target.name)
                 continue
 
-            if searchForPossibleAliasInList(possibleDependency, finalTargets + targetsToImport, options.interactive):
+            if searchForPossibleAliasInList(possibleDependency, finalTargets + options.targetsToImport, options.interactive):
                 target.dependsOn.append(possibleDependency)
             elif not options.interactive:
                 logger.writeMessage("Ignoring unknown dependency (" + possibleDependency + ")", target.name)
@@ -94,12 +94,12 @@ def importTargets(options, targetsToImport):
                 elif os.path.isfile(userInput) or os.path.isdir(userInput) or utilityFunctions.isURL(userInput):
                     name = target.targetPathToName(userInput)
                     newTarget = target.Target(name, userInput)
-                    targetsToImport.append(newTarget)
+                    options.targetsToImport.append(newTarget)
                     if target.normalizeName(possibleDependency) != target.normalizeName(userInput):
                         newTarget.aliases.append(possibleDependency)
                     target.dependsOn.append(possibleDependency)
                 else:
-                    aliasTarget = getTarget(userInput, finalTargets + targetsToImport, possibleDependency)
+                    aliasTarget = getTarget(userInput, finalTargets + options.targetsToImport, possibleDependency)
                     if aliasTarget != None:
                         logger.writeMessage("Alias added (" + userInput + ")", aliasTarget.name)
                         target.dependsOn.append(possibleDependency)

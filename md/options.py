@@ -29,11 +29,12 @@ class Options(object):
         self.buildDir = "mdBuild"
         self.downloadDir = "mdDownload"
         self.logDir = "mdLogFiles"
-        self.cleanTargets = False
+        self.cleanMode = False
         self.cleanMixDown = True
         self.verbose = False
         self.logger = "file"
-        self.importer = False
+        self.importMode = False
+        self.targetsToImport = []
         self.interactive = False
         self.prefixDefined = False
         self.skipSteps = ""
@@ -47,43 +48,56 @@ class Options(object):
         defines.setPrefixDefines(self.defines, '/usr/local')
 
     def __str__(self):
+        if self.importMode:
+            modeStr = "Import"
+        elif self.cleanMode:
+            modeStr = "Clean"
+        else:
+            modeStr = "Build"
         return "Options:\n\
+  Mode:           " + modeStr + "\n\
   Project File:   " + self.projectFile + "\n\
-  Override File:  " + self.overrideFile + "\n\
   Build Dir:      " + self.buildDir + "\n\
   Download Dir:   " + self.downloadDir + "\n\
   Log Dir:        " + self.logDir + "\n\
-  Import:         " + str(self.importer) + "\n\
-  Clean Targets:  " + str(self.cleanTargets) + "\n\
   Clean MixDown:  " + str(self.cleanMixDown) + "\n\
   Verbose:        " + str(self.verbose) + "\n\
   Logger:         " + self.logger.capitalize() + "\n\
   Thread Count:   " + str(self.threadCount) + "\n\
-  Job Count:      " + self.get(defines.surround(defines.mdJobSlots[0])) + "\n\
+  Job Count:      " + self.defines.get(defines.surround(defines.mdJobSlots[0])) + "\n\
+  Skip Steps:     " + self.skipSteps + "\n\
+  Override File:  " + self.overrideFile + "\n\
   Override Group Names:\n\
     Compiler:     " + self.compilerGroupName + "\n\
     Optimization: " + self.optimizationGroupName + "\n\
     Parallel:     " + self.parallelGroupName + "\n"
 
-    def validateBuildDir(self):
-        if os.path.isfile(self.buildDir):
-            logger.writeError("Cannot create build directory, a file by the same name already exists", exitProgram=True)
-        elif not os.path.isdir(self.buildDir):
-            os.makedirs(self.buildDir)
+    def validate(self):
+        if not self.__validateOptionsDir(self.buildDir) or not\
+           self.__validateOptionsDir(self.downloadDir) or not\
+           self.__validateOptionsDir(self.logDir):
+            return False
+        if self.importMode and self.cleanMode:
+            logger.writeError("MixDown cannot be in both import mode and clean mode")
+            return False
+        if self.overrideFile == "" and (self.compilerGroupName != "" or self.optimizationGroupName != "" or self.parallelGroupName != ""):
+            logger.writeError("Override group name(s) given but no override file specified.  Use command line option '-o<filename>'.")
+            return False
+        return True
 
-    def validateDownloadDir(self):
-        if os.path.isfile(self.downloadDir):
-            logger.writeError("Cannot create download directory, a file by the same name already exists", exitProgram=True)
-        elif not os.path.isdir(self.downloadDir):
-            os.makedirs(self.downloadDir)
+    def __validateOptionsDir(self, path):
+        if os.path.isfile(self.buildDir):
+            logger.writeError("Cannot create directory by MixDown, a file by the same name already exists: " + path)
+            return False
+        return True
 
     def __processImportCommandline(self, commandline):
         if len(commandline) < 3:
-            self.printUsageAndExit()
+            self.printUsage()
+            return False
 
-        targetsToImport = []
         self.verbose = True
-        self.importer = True
+        self.importMode = True
         for currArg in commandline[1:]:
             if currArg == "--import":
                 continue
@@ -94,20 +108,26 @@ class Options(object):
             elif utilityFunctions.isURL(currArg) or os.path.isfile(currArg) or os.path.isdir(currArg):
                 name = target.targetPathToName(currArg)
                 currTarget = target.Target(name, currArg)
-                targetsToImport.append(currTarget)
+                self.targetsToImport.append(currTarget)
             else:
-                logger.writeError("File not found or commandline option not understood: " + currArg, exitProgram=True)
+                logger.writeError("File not found or commandline option not understood: " + currArg)
+                return False
 
-        if len(targetsToImport) == 0:
-            self.printUsageAndExit()
+        if len(self.targetsToImport) == 0:
+            self.printUsage()
+            return False
 
-        return targetsToImport
+        return True
 
     def processCommandline(self, commandline=[]):
         if len(commandline) < 2:
-            self.printUsageAndExit()
+            self.printUsage()
+            return False
 
         if "--import" in commandline:
+            if "--clean" in commandline:
+                logger.writeError("MixDown cannot be in both import mode and clean mode")
+                return False
             return self.__processImportCommandline(commandline)
 
         for currArg in commandline[1:]: #skip script name
@@ -115,53 +135,67 @@ class Options(object):
             currValue = currArg[2:]
 
             if currFlag == "-p":
-                validateOptionPair(currFlag, currValue)
+                if not validateOptionPair(currFlag, currValue):
+                    return False
                 defines.setPrefixDefines(self.defines, os.path.abspath(currValue))
                 self.prefixDefined = True
             elif currFlag == "-t":
-                validateOptionPair(currFlag, currValue)
+                if not validateOptionPair(currFlag, currValue):
+                    return False
                 try:
                     count = int(currValue)
                 except ValueError:
                     count = 0
                 if count < 1:
-                    logger.writeError("Positive numeric value needed " + definePair, exitProgram=True)
+                    logger.writeError("Positive numeric value needed " + definePair)
+                    return False
                 self.threadCount = count
             elif currFlag == "-j":
-                validateOptionPair(currFlag, currValue)
+                if not validateOptionPair(currFlag, currValue):
+                    return False
                 try:
                     count = int(currValue)
                 except ValueError:
                     count = 0
                 if count < 1:
-                    logger.writeError("Positive numeric value needed " + definePair, exitProgram=True)
+                    logger.writeError("Positive numeric value needed " + definePair)
+                    return False
                 #Add "-j<jobSlots>" only if user defines -j on commandline
                 defines.setJobSlotsDefines(self.defines, currValue)
             elif currFlag == "-l":
-                validateOptionPair(currFlag, currValue)
+                if not validateOptionPair(currFlag, currValue):
+                    return False
                 self.logger = str.lower(currValue)
             elif currFlag == "-b":
-                validateOptionPair(currFlag, currValue)
+                if not validateOptionPair(currFlag, currValue):
+                    return False
                 self.buildDir = currValue
             elif currFlag == "-w":
-                validateOptionPair(currFlag, currValue)
+                if not validateOptionPair(currFlag, currValue):
+                    return False
                 self.downloadDir = currValue
             elif currFlag == "-k":
-                validateOptionPair(currFlag, currValue)
-                if self.cleanTargets == True:
-                    logger.writeError("Command line arguments '--clean' and '-k' cannot both be used", exitProgram=True)
+                if not validateOption(currFlag, currValue):
+                    return False
+                if self.cleanMode == True:
+                    logger.writeError("Command line arguments '--clean' and '-k' cannot both be used")
+                    return False
                 self.cleanMixDown = False
             elif currFlag == "-v":
-                validateOption(currFlag, currValue)
+                if not validateOption(currFlag, currValue):
+                    return False
                 self.verbose = True
             elif currFlag == "-s":
-                validateOptionPair(currFlag, currValue)
+                if not validateOptionPair(currFlag, currValue):
+                    return False
                 self.skipSteps = currValue
             elif currFlag == "-o":
-                validateOptionPair(currFlag, currValue)
+                if not validateOptionPair(currFlag, currValue):
+                    return False
                 self.overrideFile = currValue
             elif currFlag == "-g":
-                validateOptionPair(currFlag, currValue)
+                if not validateOptionPair(currFlag, currValue):
+                    return False
                 groupsList = currValue.split(",")
                 length = len(groupsList)
                 if length >= 1:
@@ -171,21 +205,24 @@ class Options(object):
                 if length >= 3:
                     self.parallelGroupName = groupsList[2].lower()
             elif currArg.lower() in ("/help", "/h", "-help", "--help", "-h"):
-                self.printUsageAndExit()
-            elif currFlag == "-c" or currArg.lower() == "--clean":
-                if currFlag == "-c":
-                    validateOption(currFlag, currValue)
+                self.printUsage()
+                return False
+            elif currArg.lower() == "--clean":
                 if self.cleanMixDown == False:
-                    logger.writeError("Command line arguments '--clean' and '-k' cannot both be used", exitProgram=True)
-                self.cleanTargets = True
+                    logger.writeError("Command line arguments '--clean' and '-k' cannot both be used")
+                    return False
+                self.cleanMode = True
                 self.cleanMixDown = False
             elif os.path.splitext(currArg)[1] == ".md":
                 if not os.path.isfile(currArg):
-                    logger.writeError("File " + currArg + " does not exist", exitProgram=True)
+                    logger.writeError("File " + currArg + " does not exist")
+                    return False
                 else:
                     self.projectFile = currArg
             else:
-                logger.writeError("Command line argument '" + currArg + "' not understood", exitProgram=True)
+                logger.writeError("Command line argument '" + currArg + "' not understood")
+                return False
+        return True
 
     def printUsageAndExit(self, errorStr=""):
         self.printUsage(errorStr)
@@ -245,8 +282,12 @@ class Options(object):
 
 def validateOptionPair(flag, value):
     if value == "":
-        logger.writeError(flag + " option requires a following value", exitProgram=True)
+        logger.writeError(flag + " option requires a following value")
+        return False
+    return True
 
 def validateOption(flag, value):
     if value != "":
-        logger.writeError(flag + " option does not require a following value", exitProgram=True)
+        logger.writeError(flag + " option does not require a following value")
+        return False
+    return True

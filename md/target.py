@@ -88,7 +88,7 @@ class Target(object):
                 return False
 
         #Check for write access to install directories used in commands.
-        if not mdOptions.cleanTargets and not mdOptions.importer:
+        if not mdOptions.cleanMode and not mdOptions.importMode:
             for buildStep in self.buildSteps:
                 expandedCommand = mdOptions.defines.expand(buildStep.command)
                 installDir = autoTools.getInstallDir(expandedCommand)
@@ -109,7 +109,7 @@ class Target(object):
             return self.outputPath
         else:
             targetsBuildDir = os.path.join(mdOptions.buildDir, self.name)
-            if mdOptions.cleanTargets:
+            if mdOptions.cleanMode:
                 if os.path.exists(targetsBuildDir) and os.path.isdir(targetsBuildDir):
                     return targetsBuildDir
                 elif os.path.isdir(self.path):
@@ -117,14 +117,14 @@ class Target(object):
                 else:
                     logger.writeError("Output path could not be located, define in project file with \"output=<path>\"", self.name, "clean")
                     return ""
-            else:
-                mdOptions.validateBuildDir()
-                return targetsBuildDir
+            return targetsBuildDir
 
     def examine(self, mdOptions):
-        if mdOptions.importer:
+        if mdOptions.importMode:
             self.__determineCommands()
         self.outputPath = self.determineOutputPath(mdOptions)
+        if self.outputPath == "":
+            return False
         return True
 
     def expandDefines(self, mdOptions):

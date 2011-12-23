@@ -93,7 +93,7 @@ def buildStepActor(target, buildStep, options, lock=None):
     return True
 
 def buildTarget(target, options, lock=None):
-    if options.cleanTargets:
+    if options.cleanMode:
         cleanStep = target.findBuildStep("clean")
         target.succeeded = buildStepActor(target, cleanStep, options, lock)
     else:

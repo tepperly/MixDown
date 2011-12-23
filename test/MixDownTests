@@ -23,8 +23,8 @@
 # Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 
 import sys, unittest
-import test_autoTools, test_cmake, test_cvs, test_git, test_hg, test_steps, test_svn, test_project, test_target
-import test_MixDownLong, test_MixDownShort, test_utilityFunctions
+import test_autoTools, test_cmake, test_cvs, test_defines, test_git, test_hg, test_options, test_steps
+import test_svn, test_project, test_target, test_MixDownLong, test_MixDownShort, test_utilityFunctions
 
 if not ".." in sys.path:
     sys.path.append("..")
@@ -38,8 +38,10 @@ def main():
     suite.addTest(test_autoTools.suite())
     suite.addTest(test_cmake.suite())
     #suite.addTest(test_cvs.suite())
+    suite.addTest(test_defines.suite())
     suite.addTest(test_git.suite())
     suite.addTest(test_hg.suite())
+    suite.addTest(test_options.suite())
     suite.addTest(test_steps.suite())
     suite.addTest(test_svn.suite())
     suite.addTest(test_project.suite())

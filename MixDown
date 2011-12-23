@@ -33,15 +33,16 @@ def main():
         succeeded = True
         partialImport = False
         mdOptions = options.Options()
-        targetsToImport = mdOptions.processCommandline(sys.argv)
+        if not mdOptions.processCommandline(sys.argv):
+            sys.exit(1)
 
-        if (not mdOptions.importer or not targetsToImport) and not\
-           mdOptions.cleanTargets and mdOptions.projectFile == "":
+        if (not mdOptions.importMode or not mdOptions.targetsToImport) and\
+           not mdOptions.cleanMode and mdOptions.projectFile == "":
             mdOptions.printUsageAndExit("MixDown's mode could not be determined")
         timeStarted = time.time()
 
-        if mdOptions.importer:
-            mdProject, partialImport = importer.importTargets(mdOptions, targetsToImport)
+        if mdOptions.importMode:
+            mdProject, partialImport = importer.importTargets(mdOptions)
             if mdProject == None or partialImport:
                 succeeded = False
         else:
@@ -120,9 +121,9 @@ def main():
             message += " failed."
         else:
             message += " succeeded."
-            if mdOptions.importer:
+            if mdOptions.importMode:
                 logger.writeMessage("\nProject " + mdProject.name + " has been imported to file " + mdProject.path)
-            elif mdOptions.cleanTargets:
+            elif mdOptions.cleanMode:
                 logger.writeMessage("\n" + mdProject.name + " has been cleaned in " + os.path.abspath(mdOptions.buildDir))
             else:
                 logger.writeMessage("\n" + mdProject.name + " has been built in " + os.path.abspath(mdOptions.buildDir))
@@ -148,8 +149,14 @@ def setup(mdOptions):
     logger.setLogger(mdOptions.logger, mdOptions.logDir)
     if mdOptions.verbose:
         logger.writeMessage(str(mdOptions))
-        if not mdOptions.prefixDefined and not mdOptions.cleanTargets:
+        if not mdOptions.prefixDefined and not mdOptions.cleanMode:
             logger.writeMessage("No prefix defined, defaulting to '" + mdOptions.defines.get(defines.mdPrefix[0]) + "'")
+
+    if not mdOptions.validate():
+        return None
+    if not mdOptions.cleanMode and not mdOptions.importMode:
+        os.makedirs(mdOptions.buildDir)
+        os.makedirs(mdOptions.downloadDir)
 
     mdProject = project.Project(mdOptions.projectFile)
     if not mdProject.read():
@@ -162,7 +169,7 @@ def setup(mdOptions):
     if not mdProject.validate(mdOptions):
         return None
 
-    if mdOptions.cleanTargets:
+    if mdOptions.cleanMode:
         for currTarget in mdProject.targets:
             currTarget.path = currTarget.determineOutputPath(mdOptions)
     else:

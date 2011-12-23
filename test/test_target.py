@@ -54,7 +54,7 @@ class Test_target(unittest.TestCase):
             os.makedirs(targetDir)
             option = options.Options()
             option.buildDir = "."
-            option.cleanTargets = True
+            option.cleanMode = True
             targets = target.Target("foo", targetDir)
             targets.outputPath = targets.determineOutputPath(option)
             self.assertEquals(targets.outputPath, targetDir, "During cleaning found target path should not be overwritten.")
@@ -68,7 +68,7 @@ class Test_target(unittest.TestCase):
             os.makedirs(targetDir)
             option = options.Options()
             option.buildDir = "."
-            option.cleanTargets = True
+            option.cleanMode = True
             option.buildDir = tempDir
             targets = target.Target("foo", targetDir)
             targets.outputPath = targets.determineOutputPath(option)
@@ -105,7 +105,7 @@ class Test_target(unittest.TestCase):
     def test_examine(self):
         option = options.Options()
         option.buildDir = "."
-        option.importer = True
+        option.importMode = True
         targets = target.Target("TestCaseA", "cases/simpleGraphAutoTools/TestCaseA")
         targets.examine(option)
         targets.expandDefines(option)
@@ -117,7 +117,7 @@ class Test_target(unittest.TestCase):
     def test_examineWithJobSlots(self):
         option = options.Options()
         option.buildDir = "."
-        option.importer = True
+        option.importMode = True
         option.processCommandline(["test", "-j4"])
         targets = target.Target("TestCaseA", "cases/simpleGraphAutoTools/TestCaseA")
         targets.examine(option)
@@ -130,7 +130,7 @@ class Test_target(unittest.TestCase):
     def test_examineWithDependencies(self):
         option = options.Options()
         option.buildDir = "."
-        option.importer = True
+        option.importMode = True
         targets = target.Target("TestCaseA", "cases/simpleGraphAutoTools/TestCaseA")
         targets.dependsOn = ["TestCaseB", "TestCaseC"]
         targets.examine(option)
@@ -143,7 +143,7 @@ class Test_target(unittest.TestCase):
     def test_examineWithDependenciesWithPrefix(self):
         option = options.Options()
         option.buildDir = "."
-        option.importer = True
+        option.importMode = True
         option.processCommandline(["test", "-p/test/path"])
         targets = target.Target("TestCaseA", "cases/simpleGraphAutoTools/TestCaseA")
         targets.dependsOn = ["TestCaseB", "TestCaseC"]
@@ -162,7 +162,7 @@ class Test_target(unittest.TestCase):
             mdTestUtilities.createBlankFile(os.path.join(targetDir, "Makefile"))
             option = options.Options()
             option.buildDir = os.path.join(tempDir, option.buildDir)
-            option.importer = True
+            option.importMode = True
             targets = target.Target("OnlyMakefile", targetDir)
             targets.examine(option)
             targets.expandDefines(option)
@@ -181,7 +181,7 @@ class Test_target(unittest.TestCase):
             mdTestUtilities.createBlankFiles(targetDir, ["Makefile.am", "configure.ac"])
             option = options.Options()
             option.buildDir = os.path.join(tempDir, option.buildDir)
-            option.importer = True
+            option.importMode = True
             targets = target.Target("AutoTools", targetDir)
             targets.examine(option)
             targets.expandDefines(option)
@@ -201,7 +201,7 @@ class Test_target(unittest.TestCase):
             option = options.Options()
             option.processCommandline(["test", "-p/test/prefix"])
             option.buildDir = os.path.join(tempDir, option.buildDir)
-            option.importer = True
+            option.importMode = True
             targets = target.Target("AutoTools", targetDir)
             targets.examine(option)
             targets.expandDefines(option)
