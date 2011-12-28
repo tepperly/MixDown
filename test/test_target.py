@@ -25,8 +25,7 @@ import os, sys, unittest, mdTestUtilities
 if not ".." in sys.path:
     sys.path.append("..")
 
-from md import cvs, svn, git, hg, logger, options, target, utilityFunctions
-import md
+from md import cvs, defines, svn, git, hg, logger, options, target, utilityFunctions
 
 class Test_target(unittest.TestCase):
     def test_determineOutputPath1(self):
@@ -118,7 +117,8 @@ class Test_target(unittest.TestCase):
         option = options.Options()
         option.buildDir = "."
         option.importMode = True
-        option.processCommandline(["test", "-j4"])
+        defines.setJobSlotsDefines(option.defines, "4")
+
         targets = target.Target("TestCaseA", "cases/simpleGraphAutoTools/TestCaseA")
         targets.examine(option)
         targets.expandDefines(option)
@@ -144,7 +144,9 @@ class Test_target(unittest.TestCase):
         option = options.Options()
         option.buildDir = "."
         option.importMode = True
-        option.processCommandline(["test", "-p/test/path"])
+        defines.setPrefixDefines(option.defines, "/test/path")
+        option.prefixDefined = True
+
         targets = target.Target("TestCaseA", "cases/simpleGraphAutoTools/TestCaseA")
         targets.dependsOn = ["TestCaseB", "TestCaseC"]
         targets.examine(option)
@@ -199,9 +201,11 @@ class Test_target(unittest.TestCase):
             os.makedirs(targetDir)
             mdTestUtilities.createBlankFiles(targetDir, ["Makefile.am", "configure.ac"])
             option = options.Options()
-            option.processCommandline(["test", "-p/test/prefix"])
+            defines.setPrefixDefines(option.defines, "/test/prefix")
+            option.prefixDefined = True
             option.buildDir = os.path.join(tempDir, option.buildDir)
             option.importMode = True
+
             targets = target.Target("AutoTools", targetDir)
             targets.examine(option)
             targets.expandDefines(option)

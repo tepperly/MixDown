@@ -20,30 +20,59 @@
 # along with this program; if not, write to the Free Software Foundation,
 # Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 
-import sys, unittest
+import os, sys, unittest, mdTestUtilities
 
 if not ".." in sys.path:
     sys.path.append("..")
 
-from md import options, logger
+from md import options, logger, utilityFunctions
 
 class Test_options(unittest.TestCase):
     def test_processCommandline01(self):
         testOptions = options.Options()
-        commandline = "--clean --import".split(" ")
-        self.assertEquals(testOptions.processCommandline(commandline), False, "Command line should not have processed correctly")
+        commandline = "MixDown --clean --import"
+        self.assertEquals(testOptions.processCommandline(commandline.split(" ")), False, "Command line should not have processed correctly")
+
+    def test_processCommandline02(self):
+        testOptions = options.Options()
+        commandline = "MixDown --clean"
+        self.assertEquals(testOptions.processCommandline(commandline.split(" ")), False, "Command line should not have processed correctly")
+
+    def test_processCommandline03(self):
+        testOptions = options.Options()
+        commandline = "MixDown --import"
+        self.assertEquals(testOptions.processCommandline(commandline.split(" ")), False, "Command line should not have processed correctly")
+
+    def test_processCommandline04(self):
+        testOptions = options.Options()
+        commandline = "MixDown"
+        self.assertEquals(testOptions.processCommandline(commandline.split(" ")), False, "Command line should not have processed correctly")
 
     def test_validate01(self):
-        testOptions = options.Options()
-        commandline = "TestCaseA.md -ptestPrefix -v -otestOverrides -ggcc,debug,parallel".split(" ")
-        self.assertEquals(testOptions.processCommandline(commandline), True, "Command line should have processed correctly")
-        self.assertEquals(testOptions.validate(), True, "Command line options should have validated")
+        try:
+            tempDir = mdTestUtilities.makeTempDir()
+            projectFilePath = os.path.join(tempDir, "test.md")
+            mdTestUtilities.createBlankFile(projectFilePath)
+
+            testOptions = options.Options()
+            commandline = "MixDown " + projectFilePath + " -ptestPrefix -v -otestOverrides -ggcc,debug,parallel"
+            self.assertEquals(testOptions.processCommandline(commandline.split(" ")), True, "Command line should have processed correctly")
+            self.assertEquals(testOptions.validate(), True, "Command line options should have validated")
+        finally:
+            utilityFunctions.removeDir(tempDir)
 
     def test_validate02(self):
-        testOptions = options.Options()
-        commandline = "TestCaseA.md -ptestPrefix -v -ggcc,debug,parallel".split(" ")
-        self.assertEquals(testOptions.processCommandline(commandline), True, "Command line should have processed correctly")
-        self.assertEquals(testOptions.validate(), False, "Commandline options should not have validated")
+        try:
+            tempDir = mdTestUtilities.makeTempDir()
+            projectFilePath = os.path.join(tempDir, "test.md")
+            mdTestUtilities.createBlankFile(projectFilePath)
+
+            testOptions = options.Options()
+            commandline = "MixDown " + projectFilePath + " -ptestPrefix -v -ggcc,debug,parallel"
+            self.assertEquals(testOptions.processCommandline(commandline.split(" ")), True, "Command line should have processed correctly")
+            self.assertEquals(testOptions.validate(), False, "Commandline options should not have validated")
+        finally:
+            utilityFunctions.removeDir(tempDir)
 
 def suite():
     suite = unittest.TestSuite()

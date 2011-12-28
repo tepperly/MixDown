@@ -115,6 +115,7 @@ class Options(object):
 
         if len(self.targetsToImport) == 0:
             self.printUsage()
+            logger.writeError("No packages given when MixDown is in import mode")
             return False
 
         return True
@@ -124,13 +125,37 @@ class Options(object):
             self.printUsage()
             return False
 
-        if "--import" in commandline:
-            if "--clean" in commandline:
+        #Find mode
+        for arg in commandline[1:]: #skip script name
+            loweredArg = arg.lower()
+            if loweredArg == "--import":
+                self.importMode = True
+            if loweredArg == "--clean":
+                self.cleanMode = True
+                self.cleanMixDown = False
+
+        if self.cleanMode and self.importMode:
                 logger.writeError("MixDown cannot be in both import mode and clean mode")
                 return False
+        if self.importMode:
             return self.__processImportCommandline(commandline)
 
         for currArg in commandline[1:]: #skip script name
+            #Handle all options that don't follow -<letter><option>
+            if currArg.lower() in ("/help", "/h", "-help", "--help", "-h"):
+                self.printUsage()
+                return False
+            elif os.path.splitext(currArg)[1] == ".md":
+                if not os.path.isfile(currArg):
+                    logger.writeError("Project file " + currArg + " does not exist")
+                    return False
+                else:
+                    self.projectFile = currArg
+                    continue
+            elif currArg.lower() == "--clean":
+                continue
+
+            #Handle all options that follow -<letter><option>
             currFlag = currArg[:2].lower()
             currValue = currArg[2:]
 
@@ -177,8 +202,8 @@ class Options(object):
             elif currFlag == "-k":
                 if not validateOption(currFlag, currValue):
                     return False
-                if self.cleanMode == True:
-                    logger.writeError("Command line arguments '--clean' and '-k' cannot both be used")
+                if self.cleanMode:
+                    logger.writeError("Command line arguments '--clean' and '-k' cannot both be used at the same time")
                     return False
                 self.cleanMixDown = False
             elif currFlag == "-v":
@@ -204,24 +229,16 @@ class Options(object):
                     self.optimizationGroupName = groupsList[1].lower()
                 if length >= 3:
                     self.parallelGroupName = groupsList[2].lower()
-            elif currArg.lower() in ("/help", "/h", "-help", "--help", "-h"):
-                self.printUsage()
-                return False
-            elif currArg.lower() == "--clean":
-                if self.cleanMixDown == False:
-                    logger.writeError("Command line arguments '--clean' and '-k' cannot both be used")
-                    return False
-                self.cleanMode = True
-                self.cleanMixDown = False
-            elif os.path.splitext(currArg)[1] == ".md":
-                if not os.path.isfile(currArg):
-                    logger.writeError("File " + currArg + " does not exist")
-                    return False
-                else:
-                    self.projectFile = currArg
             else:
                 logger.writeError("Command line argument '" + currArg + "' not understood")
                 return False
+        if self.projectFile == "":
+            self.printUsage()
+            if self.cleanMode:
+                logger.writeError("No MixDown project file given when MixDown is in clean mode")
+            else:
+                logger.writeError("No MixDown project file given when MixDown is in build mode")
+            return False
         return True
 
     def printUsageAndExit(self, errorStr=""):
@@ -271,6 +288,13 @@ class Options(object):
         Optional:\n\
         -j<number>    Number of build job slots\n\
         -t<number>    Number of threads used to build concurrent targets\n\
+        -s<list>      Add steps to skip for individual targets\n\
+           Example: -starget1:preconfig,target2:config\n\
+        -o<path>      Specify path to Override Groups file\n\
+        -g<Compiler>,<Debug>,<Parallel>  Specify Override Groups\n\
+           Example: -gGNU,Debug,MPI\n\
+           Example: -gGNU,,\n\
+        -p<path>      Override prefix directory\n\
         -b<path>      Override build directory\n\
         -w<path>      Override download directory\n\
         -l<logger>    Override default logger (Console, File, Html)\n\
