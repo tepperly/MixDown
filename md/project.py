@@ -118,7 +118,8 @@ class Project(object):
 
     def read(self):
         if self.path == "":
-            raise exceptions.ProjectFileNotSpecifiedException()
+            logger.writeError("No project file was specified")
+            return False
         f = open(self.path, "r")
         try:
             currTarget = None
