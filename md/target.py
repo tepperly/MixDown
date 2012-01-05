@@ -26,7 +26,7 @@ import autoTools, cmake, commands, git, hg, logger, options, python, svn, utilit
 def normalizeName(name):
     return name.strip().lower()
 
-def targetPathToName(path, exitOnFailure=True):
+def targetPathToName(path):
     name = ""
     path = path.strip()
 
@@ -49,7 +49,7 @@ def targetPathToName(path, exitOnFailure=True):
     elif utilityFunctions.isURL(path):
         name = utilityFunctions.URLToFilename(path)
         name = utilityFunctions.splitFileName(name)[0]
-    elif os.path.isfile(path) and tarfile.is_tarfile(path):
+    elif os.path.isfile(path) and utilityFunctions.validateCompressedFile(path, logger):
         name = utilityFunctions.splitFileName(path)[0]
     elif os.path.isdir(path):
         if path.endswith(os.sep):
@@ -57,7 +57,7 @@ def targetPathToName(path, exitOnFailure=True):
         else:
             name = os.path.basename(path)
     else:
-        logger.writeError("Could not convert given target path to name: " + path, exitProgram=exitOnFailure)
+        logger.writeError("Could not convert given target path to name: " + path)
     return name
 
 class Target(object):

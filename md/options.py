@@ -97,7 +97,6 @@ class Options(object):
             return False
 
         self.verbose = True
-        self.importMode = True
         for currArg in commandline[1:]:
             if currArg == "--import":
                 continue
@@ -107,6 +106,8 @@ class Options(object):
                 self.verbose = True
             elif utilityFunctions.isURL(currArg) or os.path.isfile(currArg) or os.path.isdir(currArg):
                 name = target.targetPathToName(currArg)
+                if name == "":
+                    return False
                 currTarget = target.Target(name, currArg)
                 self.targetsToImport.append(currTarget)
             else:
@@ -130,7 +131,7 @@ class Options(object):
             loweredArg = arg.lower()
             if loweredArg == "--import":
                 self.importMode = True
-            if loweredArg == "--clean":
+            elif loweredArg == "--clean":
                 self.cleanMode = True
                 self.cleanMixDown = False
 

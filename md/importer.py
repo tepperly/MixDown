@@ -93,6 +93,8 @@ def importTargets(options):
                     ignoredTargets.append(possibleDependency)
                 elif os.path.isfile(userInput) or os.path.isdir(userInput) or utilityFunctions.isURL(userInput):
                     name = target.targetPathToName(userInput)
+                    if name == "":
+                        return None, False
                     newTarget = target.Target(name, userInput)
                     options.targetsToImport.append(newTarget)
                     if target.normalizeName(possibleDependency) != target.normalizeName(userInput):
@@ -107,6 +109,8 @@ def importTargets(options):
                         aliasLocation = raw_input(userInput + ": Target name not found in any known targets.  Location of new target:").strip()
                         if os.path.isfile(aliasLocation) or os.path.isdir(aliasLocation) or utilityFunctions.isURL(aliasLocation):
                             name = target.targetPathToName(aliasLocation)
+                            if name == "":
+                                return None, False
                             newTarget = target.Target(name, aliasLocation)
                             notReviewedTargets.append(newTarget)
                             if target.normalizeName(possibleDependency) != target.normalizeName(aliasLocation):
