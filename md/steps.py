@@ -61,23 +61,17 @@ def fetch(pythonCallInfo):
 
 def unpack(pythonCallInfo):
     if os.path.isfile(pythonCallInfo.currentPath):
-        if tarfile.is_tarfile(pythonCallInfo.currentPath):
-            utilityFunctions.untar(pythonCallInfo.currentPath, pythonCallInfo.outputPath, True)
-            pythonCallInfo.currentPath = pythonCallInfo.outputPath
-            pythonCallInfo.success = True
-        elif zipfile.is_zipfile(pythonCallInfo.currentPath):
-            utilityFunctions.unzip(pythonCallInfo.currentPath, pythonCallInfo.outputPath, True)
-            pythonCallInfo.currentPath = pythonCallInfo.outputPath
-            pythonCallInfo.success = True
+        if not utilityFunctions.validateCompressedFile(pythonCallInfo.currentPath):
+            pythonCallInfo.success = False
         else:
-            if pythonCallInfo.currentPath.endswith(".tar.gz") or pythonCallInfo.currentPath.endswith(".tar.bz2")\
-               or pythonCallInfo.currentPath.endswith(".tar") or pythonCallInfo.currentPath.endswith(".tgz")\
-               or pythonCallInfo.currentPath.endswith(".tbz") or pythonCallInfo.currentPath.endswith(".tb2"):
-                pythonCallInfo.logger.writeError("Given tar file '" + pythonCallInfo.currentPath +"' not understood by python's tarfile package and possibly corrupt")
-            elif pythonCallInfo.currentPath.endswith(".zip"):
-                pythonCallInfo.logger.writeError("Given zip file '" + pythonCallInfo.currentPath +"' not understood by python's zipfile package and possibly corrupt")
-            else:
-                pythonCallInfo.logger.writeError("Given file '" + pythonCallInfo.currentPath + "' cannot be unpacked")
+            if tarfile.is_tarfile(pythonCallInfo.currentPath):
+                utilityFunctions.untar(pythonCallInfo.currentPath, pythonCallInfo.outputPath, True)
+                pythonCallInfo.currentPath = pythonCallInfo.outputPath
+                pythonCallInfo.success = True
+            elif zipfile.is_zipfile(pythonCallInfo.currentPath):
+                utilityFunctions.unzip(pythonCallInfo.currentPath, pythonCallInfo.outputPath, True)
+                pythonCallInfo.currentPath = pythonCallInfo.outputPath
+                pythonCallInfo.success = True
     elif os.path.isdir(pythonCallInfo.currentPath):
         pythonCallInfo.success = True
     else:

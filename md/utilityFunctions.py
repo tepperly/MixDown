@@ -239,7 +239,28 @@ def URLToFilename(url):
         return "_"
     return fileName
 
-def setVariables(filename,variableList):
+def hasTarFileExtension(path):
+    if path.endswith(".tar.gz") or path.endswith(".tar.bz2") or\
+       path.endswith(".tar") or path.endswith(".tgz") or\
+       path.endswith(".tbz") or path.endswith(".tb2"):
+        return True
+    return False
+
+def validateCompressedFile(path, logger=None):
+    if tarfile.is_tarfile(path):
+        return True
+    elif zipfile.is_zipfile(path):
+        return True
+    elif logger:
+        if hasTarFileExtension(path):
+            logger.writeError("Given tar file '" + path +"' not understood by python's tarfile package and possibly corrupt")
+        elif path.endswith(".zip"):
+            logger.writeError("Given zip file '" + path +"' not understood by python's zipfile package and possibly corrupt")
+        else:
+            logger.writeError("Given file '" + path + "' cannot be uncompressed")
+    return False
+
+def setVariables(filename, variableList):
     isWritten = False
     try:
         for i, line in enumerate(fileinput.input(filename, inplace = 1)):
