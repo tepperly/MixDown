@@ -56,7 +56,7 @@ def main():
     unittest.TextTestRunner(verbosity=2).run(suite)
 
     if not longTests:
-        print "\nNote: Long tests not run to enable add '--long' to command line"
+        print "\nNote: Long tests not run to enable add '--long' to command-line"
 
 if __name__ == "__main__":
     logger.setLogger("Console")

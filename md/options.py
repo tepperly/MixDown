@@ -81,7 +81,10 @@ class Options(object):
             logger.writeError("MixDown cannot be in both import mode and clean mode")
             return False
         if self.overrideFile == "" and (self.compilerGroupName != "" or self.optimizationGroupName != "" or self.parallelGroupName != ""):
-            logger.writeError("Override group name(s) given but no override file specified.  Use command line option '-o<filename>'.")
+            logger.writeError("Override group name(s) given but no override file specified.  Use command-line option '-o<filename>'.")
+            return False
+        if self.overrideFile != "" and self.compilerGroupName == "" and self.optimizationGroupName == "" and self.parallelGroupName == "":
+            logger.writeError("Override file given but no override group(s) specified.  Use command-line option '-g<Compiler>,<Debug>,<Parallel>'.")
             return False
         return True
 
@@ -98,20 +101,35 @@ class Options(object):
 
         self.verbose = True
         for currArg in commandline[1:]:
-            if currArg == "--import":
+            if currArg.lower() in ("/help", "/h", "-help", "--help", "-h"):
+                self.printUsage()
+                return False
+            elif currArg == "--import":
                 continue
-            elif currArg.lower() == "-i":
-                self.interactive = True
-            elif currArg.lower() == "-v":
-                self.verbose = True
             elif utilityFunctions.isURL(currArg) or os.path.isfile(currArg) or os.path.isdir(currArg):
                 name = target.targetPathToName(currArg)
                 if name == "":
                     return False
                 currTarget = target.Target(name, currArg)
                 self.targetsToImport.append(currTarget)
+                continue
+
+            currFlag = currArg[:2].lower()
+            currValue = currArg[2:]
+
+            if currFlag in ("-p", "-l", "-j", "-b", "-w", "-k", "-o", "-g"):
+                logger.writeError("Command-line option is not allowed in import mode: " + currArg)
+                return False
+            if currFlag == "-i":
+                if not validateOption(currFlag, currValue):
+                    return False
+                self.interactive = True
+            elif currFlag == "-v":
+                if not validateOption(currFlag, currValue):
+                    return False
+                self.verbose = True
             else:
-                logger.writeError("File not found or commandline option not understood: " + currArg)
+                logger.writeError("File not found or command-line option not understood: " + currArg)
                 return False
 
         if len(self.targetsToImport) == 0:
@@ -160,7 +178,10 @@ class Options(object):
             currFlag = currArg[:2].lower()
             currValue = currArg[2:]
 
-            if currFlag == "-p":
+            if currFlag in ("-i"):
+                logger.writeError("Command-line option is not allowed in build or clean mode: " + currArg)
+                return False
+            elif currFlag == "-p":
                 if not validateOptionPair(currFlag, currValue):
                     return False
                 defines.setPrefixDefines(self.defines, os.path.abspath(currValue))
@@ -186,7 +207,7 @@ class Options(object):
                 if count < 1:
                     logger.writeError("Positive numeric value needed " + definePair)
                     return False
-                #Add "-j<jobSlots>" only if user defines -j on commandline
+                #Add "-j<jobSlots>" only if user defines -j on command-line
                 defines.setJobSlotsDefines(self.defines, currValue)
             elif currFlag == "-l":
                 if not validateOptionPair(currFlag, currValue):
@@ -204,7 +225,7 @@ class Options(object):
                 if not validateOption(currFlag, currValue):
                     return False
                 if self.cleanMode:
-                    logger.writeError("Command line arguments '--clean' and '-k' cannot both be used at the same time")
+                    logger.writeError("Command-line arguments '--clean' and '-k' cannot both be used at the same time")
                     return False
                 self.cleanMixDown = False
             elif currFlag == "-v":
@@ -230,8 +251,11 @@ class Options(object):
                     self.optimizationGroupName = groupsList[1].lower()
                 if length >= 3:
                     self.parallelGroupName = groupsList[2].lower()
+                if self.compilerGroupName == "" and self.optimizationGroupName == "" and self.parallelGroupName == "":
+                    logger.writeError("Override command-line option used but no group(s) specified.")
+                    return False
             else:
-                logger.writeError("Command line argument '" + currArg + "' not understood")
+                logger.writeError("Command-line argument '" + currArg + "' not understood")
                 return False
         if self.projectFile == "":
             self.printUsage()
@@ -258,6 +282,10 @@ class Options(object):
         --import                  Toggle Import mode\n\
         <package location list>   Space delimited list of package locations\n\
     \n\
+        Optional:\n\
+        -i            Interactive Mode\n\
+        -v            Verbose Mode\n\
+    \n\
     Build Mode (Default): \n\
         Example Usage: MixDown foo.md\n\
     \n\
@@ -265,6 +293,7 @@ class Options(object):
         <path to .md file>   Path to MixDown project file\n\
     \n\
         Optional:\n\
+        -v            Verbose Mode\n\
         -j<number>    Number of build job slots\n\
         -t<number>    Number of threads used to build concurrent targets\n\
         -s<list>      Add steps to skip for individual targets\n\
@@ -287,6 +316,7 @@ class Options(object):
         <path to .md file>   Path to MixDown project file\n\
     \n\
         Optional:\n\
+        -v            Verbose Mode\n\
         -j<number>    Number of build job slots\n\
         -t<number>    Number of threads used to build concurrent targets\n\
         -s<list>      Add steps to skip for individual targets\n\

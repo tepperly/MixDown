@@ -98,9 +98,9 @@ class Target(object):
                 if installDir != "" and not utilityFunctions.haveWriteAccess(installDir):
                     logger.writeError("No write access to used install directory: " + installDir, self.name, buildStep.name, mdOptions.projectFile)
                     if not mdOptions.prefixDefined:
-                        logger.writeMessage("Use commandline option '-p<install path>' or running MixDown with superuser privileges (sudo)")
+                        logger.writeMessage("Use command-line option '-p<install path>' or running MixDown with superuser privileges (sudo)")
                     else:
-                        logger.writeMessage("Choose a different install directory for commandline option '-p<install path>'")
+                        logger.writeMessage("Choose a different install directory for command-line option '-p<install path>'")
                     return False
         return True
 

@@ -25,28 +25,28 @@ import os, sys, unittest, mdTestUtilities
 if not ".." in sys.path:
     sys.path.append("..")
 
-from md import options, logger, utilityFunctions
+from md import defines, options, logger, utilityFunctions
 
 class Test_options(unittest.TestCase):
     def test_processCommandline01(self):
         testOptions = options.Options()
         commandline = "MixDown --clean --import"
-        self.assertEquals(testOptions.processCommandline(commandline.split(" ")), False, "Command line should not have processed correctly")
+        self.assertEquals(testOptions.processCommandline(commandline.split(" ")), False, "Command-line should not have processed correctly")
 
     def test_processCommandline02(self):
         testOptions = options.Options()
         commandline = "MixDown --clean"
-        self.assertEquals(testOptions.processCommandline(commandline.split(" ")), False, "Command line should not have processed correctly")
+        self.assertEquals(testOptions.processCommandline(commandline.split(" ")), False, "Command-line should not have processed correctly")
 
     def test_processCommandline03(self):
         testOptions = options.Options()
         commandline = "MixDown --import"
-        self.assertEquals(testOptions.processCommandline(commandline.split(" ")), False, "Command line should not have processed correctly")
+        self.assertEquals(testOptions.processCommandline(commandline.split(" ")), False, "Command-line should not have processed correctly")
 
     def test_processCommandline04(self):
         testOptions = options.Options()
         commandline = "MixDown"
-        self.assertEquals(testOptions.processCommandline(commandline.split(" ")), False, "Command line should not have processed correctly")
+        self.assertEquals(testOptions.processCommandline(commandline.split(" ")), False, "Command-line should not have processed correctly")
 
     def test_processCommandline05(self):
         try:
@@ -59,7 +59,7 @@ class Test_options(unittest.TestCase):
 
             testOptions = options.Options()
             commandline = "MixDown --import " + url + " " + tarPath + " " + directory
-            self.assertEquals(testOptions.processCommandline(commandline.split(" ")), True, "Command line should have processed correctly")
+            self.assertEquals(testOptions.processCommandline(commandline.split(" ")), True, "Command-line should have processed correctly")
             self.assertEquals(len(testOptions.targetsToImport), 3, "Number of targets to import was wrong")
             self.assertEquals(testOptions.targetsToImport[0].name, "neon", "Target had wrong name")
             self.assertEquals(testOptions.targetsToImport[0].path, url, "Target had wrong name")
@@ -67,6 +67,7 @@ class Test_options(unittest.TestCase):
             self.assertEquals(testOptions.targetsToImport[1].path, tarPath, "Target had wrong name")
             self.assertEquals(testOptions.targetsToImport[2].name, "c", "Target had wrong name")
             self.assertEquals(testOptions.targetsToImport[2].path, directory, "Target had wrong name")
+            self.assertEquals(testOptions.validate(), True, "Command-line options should have validated")
         finally:
             utilityFunctions.removeDir(tempDir)
 
@@ -78,10 +79,11 @@ class Test_options(unittest.TestCase):
 
             testOptions = options.Options()
             commandline = "MixDown --import " + tarPath
-            self.assertEquals(testOptions.processCommandline(commandline.split(" ")), True, "Command line should have processed correctly")
+            self.assertEquals(testOptions.processCommandline(commandline.split(" ")), True, "Command-line should have processed correctly")
             self.assertEquals(len(testOptions.targetsToImport), 1, "Number of targets to import was wrong")
             self.assertEquals(testOptions.targetsToImport[0].name, "test", "Target had wrong name")
             self.assertEquals(testOptions.targetsToImport[0].path, tarPath, "Target had wrong name")
+            self.assertEquals(testOptions.validate(), True, "Command-line options should have validated")
         finally:
             utilityFunctions.removeDir(tempDir)
 
@@ -93,12 +95,13 @@ class Test_options(unittest.TestCase):
 
             testOptions = options.Options()
             commandline = "MixDown --import " + tarPath + " " + tarPath
-            self.assertEquals(testOptions.processCommandline(commandline.split(" ")), True, "Command line should have processed correctly")
+            self.assertEquals(testOptions.processCommandline(commandline.split(" ")), True, "Command-line should have processed correctly")
             self.assertEquals(len(testOptions.targetsToImport), 2, "Number of targets to import was wrong")
             self.assertEquals(testOptions.targetsToImport[0].name, "test", "Target had wrong name")
             self.assertEquals(testOptions.targetsToImport[0].path, tarPath, "Target had wrong name")
             self.assertEquals(testOptions.targetsToImport[1].name, "test", "Target had wrong name")
             self.assertEquals(testOptions.targetsToImport[1].path, tarPath, "Target had wrong name")
+            self.assertEquals(testOptions.validate(), True, "Command-line options should have validated")
         finally:
             utilityFunctions.removeDir(tempDir)
 
@@ -110,10 +113,11 @@ class Test_options(unittest.TestCase):
 
             testOptions = options.Options()
             commandline = "MixDown " + tarPath + " --import"
-            self.assertEquals(testOptions.processCommandline(commandline.split(" ")), True, "Command line should have processed correctly")
+            self.assertEquals(testOptions.processCommandline(commandline.split(" ")), True, "Command-line should have processed correctly")
             self.assertEquals(len(testOptions.targetsToImport), 1, "Number of targets to import was wrong")
             self.assertEquals(testOptions.targetsToImport[0].name, "test", "Target had wrong name")
             self.assertEquals(testOptions.targetsToImport[0].path, tarPath, "Target had wrong name")
+            self.assertEquals(testOptions.validate(), True, "Command-line options should have validated")
         finally:
             utilityFunctions.removeDir(tempDir)
 
@@ -125,7 +129,7 @@ class Test_options(unittest.TestCase):
 
             testOptions = options.Options()
             commandline = "MixDown " + tarPath + " --import --clean"
-            self.assertEquals(testOptions.processCommandline(commandline.split(" ")), False, "Command line should have processed correctly")
+            self.assertEquals(testOptions.processCommandline(commandline.split(" ")), False, "Command-line should not have processed correctly")
             self.assertEquals(testOptions.targetsToImport, [], "targetsToImport should have not been set")
         finally:
             utilityFunctions.removeDir(tempDir)
@@ -140,7 +144,7 @@ class Test_options(unittest.TestCase):
 
             testOptions = options.Options()
             commandline = "MixDown " + tarPath + " --import --clean " + projectFilePath
-            self.assertEquals(testOptions.processCommandline(commandline.split(" ")), False, "Command line should have processed correctly")
+            self.assertEquals(testOptions.processCommandline(commandline.split(" ")), False, "Command-line should not have processed correctly")
             self.assertEquals(testOptions.targetsToImport, [], "targetsToImport should have not been set")
             self.assertEquals(testOptions.projectFile, "", "projectFile should not have been set")
         finally:
@@ -156,9 +160,252 @@ class Test_options(unittest.TestCase):
 
             testOptions = options.Options()
             commandline = "MixDown " + tarPath + " " + projectFilePath
-            self.assertEquals(testOptions.processCommandline(commandline.split(" ")), False, "Command line should have processed correctly")
+            self.assertEquals(testOptions.processCommandline(commandline.split(" ")), False, "Command-line should not have processed correctly")
             self.assertEquals(testOptions.targetsToImport, [], "targetsToImport should have not been set")
             self.assertEquals(testOptions.projectFile, "", "projectFile should not have been set")
+        finally:
+            utilityFunctions.removeDir(tempDir)
+
+    def test_processCommandline12(self):
+        try:
+            tempDir = mdTestUtilities.makeTempDir()
+            overrideFilePath = os.path.join(tempDir, "testOverrides")
+            mdTestUtilities.createBlankFile(overrideFilePath)
+
+            testOptions = options.Options()
+            commandline = "MixDown --import -otestOverrides -gfail,hopefully,please"
+            self.assertEquals(testOptions.processCommandline(commandline.split(" ")), False, "Command-line should not have processed correctly")
+            self.assertEquals(testOptions.targetsToImport, [], "targetsToImport should have not been set")
+            self.assertEquals(testOptions.overrideFile, "", "overrideFile should not have been set")
+            self.assertEquals(testOptions.overrideGroup, None, "overrideGroup should not have been set")
+            self.assertEquals(testOptions.compilerGroupName, "", "compilerGroupName should not have been set")
+            self.assertEquals(testOptions.optimizationGroupName, "", "optimizationGroupName should not have been set")
+            self.assertEquals(testOptions.parallelGroupName, "", "parallelGroupName should not have been set")
+        finally:
+            utilityFunctions.removeDir(tempDir)
+
+    def test_processCommandline13(self):
+        try:
+            tempDir = mdTestUtilities.makeTempDir()
+            overrideFilePath = os.path.join(tempDir, "testOverrides")
+            mdTestUtilities.createBlankFile(overrideFilePath)
+
+            testOptions = options.Options()
+            commandline = "MixDown --import -otestOverrides"
+            self.assertEquals(testOptions.processCommandline(commandline.split(" ")), False, "Command-line should not have processed correctly")
+            self.assertEquals(testOptions.targetsToImport, [], "targetsToImport should have not been set")
+            self.assertEquals(testOptions.overrideFile, "", "overrideFile should not have been set")
+            self.assertEquals(testOptions.overrideGroup, None, "overrideGroup should not have been set")
+            self.assertEquals(testOptions.compilerGroupName, "", "compilerGroupName should not have been set")
+            self.assertEquals(testOptions.optimizationGroupName, "", "optimizationGroupName should not have been set")
+            self.assertEquals(testOptions.parallelGroupName, "", "parallelGroupName should not have been set")
+        finally:
+            utilityFunctions.removeDir(tempDir)
+
+    def test_processCommandline14(self):
+        testOptions = options.Options()
+        commandline = "MixDown --import -sapr:preconfig"
+        self.assertEquals(testOptions.processCommandline(commandline.split(" ")), False, "Command-line should not have processed correctly")
+        self.assertEquals(testOptions.targetsToImport, [], "targetsToImport should have not been set")
+        self.assertEquals(testOptions.skipSteps, "", "skipSteps should not have been set")
+
+    def test_processCommandline15(self):
+        testOptions = options.Options()
+        commandline = "MixDown --import -k"
+        self.assertEquals(testOptions.processCommandline(commandline.split(" ")), False, "Command-line should not have processed correctly")
+        self.assertEquals(testOptions.targetsToImport, [], "targetsToImport should have not been set")
+        self.assertEquals(testOptions.cleanMixDown, True, "cleanMixDown should not have been set")
+
+    def test_processCommandline16(self):
+        testOptions = options.Options()
+        commandline = "MixDown --import -v"
+        self.assertEquals(testOptions.processCommandline(commandline.split(" ")), False, "Command-line should not have processed correctly")
+        self.assertEquals(testOptions.targetsToImport, [], "targetsToImport should have not been set")
+        self.assertEquals(testOptions.verbose, True, "verbose should have been set")
+
+    def test_processCommandline17(self):
+        testOptions = options.Options()
+        commandline = "MixDown --import -wtest"
+        self.assertEquals(testOptions.processCommandline(commandline.split(" ")), False, "Command-line should not have processed correctly")
+        self.assertEquals(testOptions.targetsToImport, [], "targetsToImport should have not been set")
+        self.assertEquals(testOptions.downloadDir, "mdDownload", "downloadDir should not have been set")
+
+    def test_processCommandline18(self):
+        testOptions = options.Options()
+        commandline = "MixDown --import -btest"
+        self.assertEquals(testOptions.processCommandline(commandline.split(" ")), False, "Command-line should not have processed correctly")
+        self.assertEquals(testOptions.targetsToImport, [], "targetsToImport should have not been set")
+        self.assertEquals(testOptions.buildDir, "mdBuild", "buildDir should not have been set")
+
+    def test_processCommandline19(self):
+        testOptions = options.Options()
+        commandline = "MixDown --import -j9"
+        self.assertEquals(testOptions.processCommandline(commandline.split(" ")), False, "Command-line should not have processed correctly")
+        self.assertEquals(testOptions.targetsToImport, [], "targetsToImport should have not been set")
+        self.assertEquals(testOptions.defines.get(defines.surround(defines.mdJobSlots[0])), "", "cleanMixDown should not have been set")
+
+    def test_processCommandline20(self):
+        testOptions = options.Options()
+        commandline = "MixDown --import -lconsole"
+        self.assertEquals(testOptions.processCommandline(commandline.split(" ")), False, "Command-line should not have processed correctly")
+        self.assertEquals(testOptions.targetsToImport, [], "targetsToImport should have not been set")
+        self.assertEquals(testOptions.logger, "file", "logger should not have been set")
+
+    def test_processCommandline21(self):
+        testOptions = options.Options()
+        commandline = "MixDown --import -ptest"
+        self.assertEquals(testOptions.processCommandline(commandline.split(" ")), False, "Command-line should not have processed correctly")
+        self.assertEquals(testOptions.targetsToImport, [], "targetsToImport should have not been set")
+        self.assertEquals(testOptions.defines.get(defines.surround(defines.mdPrefix[0])), "/usr/local", "prefix should not have been set")
+
+    def test_processCommandline22(self):
+        try:
+            tempDir = mdTestUtilities.makeTempDir()
+            tarDir, tarFile = mdTestUtilities.createTarFile(tempDir)
+            tarPath = os.path.join(tempDir, tarFile)
+
+            testOptions = options.Options()
+            commandline = "MixDown -v -i --import " + tarPath
+            self.assertEquals(testOptions.processCommandline(commandline.split(" ")), True, "Command-line should have processed correctly")
+            self.assertEquals(len(testOptions.targetsToImport), 1, "Number of targets to import was wrong")
+            self.assertEquals(testOptions.targetsToImport[0].name, "test", "Target had wrong name")
+            self.assertEquals(testOptions.targetsToImport[0].path, tarPath, "Target had wrong name")
+            self.assertEquals(testOptions.verbose, True, "verbose should have been set")
+            self.assertEquals(testOptions.interactive, True, "interactive should have been set")
+            self.assertEquals(testOptions.validate(), True, "Command-line options should have validated")
+        finally:
+            utilityFunctions.removeDir(tempDir)
+
+    def test_processCommandline23(self):
+        try:
+            tempDir = mdTestUtilities.makeTempDir()
+            tarDir, tarFile = mdTestUtilities.createTarFile(tempDir)
+            tarPath = os.path.join(tempDir, tarFile)
+
+            testOptions = options.Options()
+            commandline = "MixDown -v --import " + tarPath
+            self.assertEquals(testOptions.processCommandline(commandline.split(" ")), True, "Command-line should have processed correctly")
+            self.assertEquals(len(testOptions.targetsToImport), 1, "Number of targets to import was wrong")
+            self.assertEquals(testOptions.targetsToImport[0].name, "test", "Target had wrong name")
+            self.assertEquals(testOptions.targetsToImport[0].path, tarPath, "Target had wrong name")
+            self.assertEquals(testOptions.verbose, True, "verbose should have been set")
+            self.assertEquals(testOptions.validate(), True, "Command-line options should have validated")
+        finally:
+            utilityFunctions.removeDir(tempDir)
+
+    def test_processCommandline24(self):
+        try:
+            tempDir = mdTestUtilities.makeTempDir()
+            tarDir, tarFile = mdTestUtilities.createTarFile(tempDir)
+            tarPath = os.path.join(tempDir, tarFile)
+
+            testOptions = options.Options()
+            commandline = "MixDown -i --import " + tarPath
+            self.assertEquals(testOptions.processCommandline(commandline.split(" ")), True, "Command-line should have processed correctly")
+            self.assertEquals(len(testOptions.targetsToImport), 1, "Number of targets to import was wrong")
+            self.assertEquals(testOptions.targetsToImport[0].name, "test", "Target had wrong name")
+            self.assertEquals(testOptions.targetsToImport[0].path, tarPath, "Target had wrong name")
+            self.assertEquals(testOptions.interactive, True, "interactive should have been set")
+            self.assertEquals(testOptions.validate(), True, "Command-line options should have validated")
+        finally:
+            utilityFunctions.removeDir(tempDir)
+
+    def test_processCommandline25(self):
+        try:
+            tempDir = mdTestUtilities.makeTempDir()
+            overrideFilePath = os.path.join(tempDir, "testOverrides")
+            mdTestUtilities.createBlankFile(overrideFilePath)
+            projectFilePath = os.path.join(tempDir, "test.md")
+            mdTestUtilities.createBlankFile(projectFilePath)
+
+            testOptions = options.Options()
+            commandline = "MixDown -o" + overrideFilePath + " -ga,b,c " + projectFilePath
+            self.assertEquals(testOptions.processCommandline(commandline.split(" ")), True, "Command-line should have processed correctly")
+            self.assertEquals(testOptions.overrideFile, overrideFilePath, "overrideFile should have been set")
+            self.assertEquals(testOptions.overrideGroup, None, "overrideGroup should not have been set")
+            self.assertEquals(testOptions.compilerGroupName, "a", "compilerGroupName should have been set")
+            self.assertEquals(testOptions.optimizationGroupName, "b", "optimizationGroupName should have been set")
+            self.assertEquals(testOptions.parallelGroupName, "c", "parallelGroupName should have been set")
+            self.assertEquals(testOptions.validate(), True, "Command-line options should have validated")
+        finally:
+            utilityFunctions.removeDir(tempDir)
+
+    def test_processCommandline26(self):
+        try:
+            tempDir = mdTestUtilities.makeTempDir()
+            overrideFilePath = os.path.join(tempDir, "testOverrides")
+            mdTestUtilities.createBlankFile(overrideFilePath)
+            projectFilePath = os.path.join(tempDir, "test.md")
+            mdTestUtilities.createBlankFile(projectFilePath)
+
+            testOptions = options.Options()
+            commandline = "MixDown -o" + overrideFilePath + " -ga,b, " + projectFilePath
+            self.assertEquals(testOptions.processCommandline(commandline.split(" ")), True, "Command-line should have processed correctly")
+            self.assertEquals(testOptions.overrideFile, overrideFilePath, "overrideFile should have been set")
+            self.assertEquals(testOptions.overrideGroup, None, "overrideGroup should not have been set")
+            self.assertEquals(testOptions.compilerGroupName, "a", "compilerGroupName should have been set")
+            self.assertEquals(testOptions.optimizationGroupName, "b", "optimizationGroupName should have been set")
+            self.assertEquals(testOptions.parallelGroupName, "", "parallelGroupName should not have been set")
+            self.assertEquals(testOptions.validate(), True, "Command-line options should have validated")
+        finally:
+            utilityFunctions.removeDir(tempDir)
+
+    def test_processCommandline27(self):
+        try:
+            tempDir = mdTestUtilities.makeTempDir()
+            overrideFilePath = os.path.join(tempDir, "testOverrides")
+            mdTestUtilities.createBlankFile(overrideFilePath)
+            projectFilePath = os.path.join(tempDir, "test.md")
+            mdTestUtilities.createBlankFile(projectFilePath)
+
+            testOptions = options.Options()
+            commandline = "MixDown -o" + overrideFilePath + " -ga,,c " + projectFilePath
+            self.assertEquals(testOptions.processCommandline(commandline.split(" ")), True, "Command-line should have processed correctly")
+            self.assertEquals(testOptions.overrideFile, overrideFilePath, "overrideFile should have been set")
+            self.assertEquals(testOptions.overrideGroup, None, "overrideGroup should not have been set")
+            self.assertEquals(testOptions.compilerGroupName, "a", "compilerGroupName should have been set")
+            self.assertEquals(testOptions.optimizationGroupName, "", "optimizationGroupName should not have been set")
+            self.assertEquals(testOptions.parallelGroupName, "c", "parallelGroupName should have been set")
+            self.assertEquals(testOptions.validate(), True, "Command-line options should have validated")
+        finally:
+            utilityFunctions.removeDir(tempDir)
+
+    def test_processCommandline28(self):
+        try:
+            tempDir = mdTestUtilities.makeTempDir()
+            overrideFilePath = os.path.join(tempDir, "testOverrides")
+            mdTestUtilities.createBlankFile(overrideFilePath)
+            projectFilePath = os.path.join(tempDir, "test.md")
+            mdTestUtilities.createBlankFile(projectFilePath)
+
+            testOptions = options.Options()
+            commandline = "MixDown -o" + overrideFilePath + " -g,b,c " + projectFilePath
+            self.assertEquals(testOptions.processCommandline(commandline.split(" ")), True, "Command-line should have processed correctly")
+            self.assertEquals(testOptions.overrideFile, overrideFilePath, "overrideFile should have been set")
+            self.assertEquals(testOptions.overrideGroup, None, "overrideGroup should not have been set")
+            self.assertEquals(testOptions.compilerGroupName, "", "compilerGroupName should not have been set")
+            self.assertEquals(testOptions.optimizationGroupName, "b", "optimizationGroupName should have been set")
+            self.assertEquals(testOptions.parallelGroupName, "c", "parallelGroupName should have been set")
+            self.assertEquals(testOptions.validate(), True, "Command-line options should have validated")
+        finally:
+            utilityFunctions.removeDir(tempDir)
+
+    def test_processCommandline29(self):
+        try:
+            tempDir = mdTestUtilities.makeTempDir()
+            overrideFilePath = os.path.join(tempDir, "testOverrides")
+            mdTestUtilities.createBlankFile(overrideFilePath)
+            projectFilePath = os.path.join(tempDir, "test.md")
+            mdTestUtilities.createBlankFile(projectFilePath)
+
+            testOptions = options.Options()
+            commandline = "MixDown -o" + overrideFilePath + " -g,, " + projectFilePath
+            self.assertEquals(testOptions.processCommandline(commandline.split(" ")), False, "Command-line should not have processed correctly")
+            self.assertEquals(testOptions.overrideFile, overrideFilePath, "overrideFile should have been set")
+            self.assertEquals(testOptions.overrideGroup, None, "overrideGroup should not have been set")
+            self.assertEquals(testOptions.compilerGroupName, "", "compilerGroupName should have been set")
+            self.assertEquals(testOptions.optimizationGroupName, "", "optimizationGroupName should have been set")
+            self.assertEquals(testOptions.parallelGroupName, "", "parallelGroupName should have been set")
         finally:
             utilityFunctions.removeDir(tempDir)
 
@@ -170,8 +417,8 @@ class Test_options(unittest.TestCase):
 
             testOptions = options.Options()
             commandline = "MixDown " + projectFilePath + " -ptestPrefix -v -otestOverrides -ggcc,debug,parallel"
-            self.assertEquals(testOptions.processCommandline(commandline.split(" ")), True, "Command line should have processed correctly")
-            self.assertEquals(testOptions.validate(), True, "Command line options should have validated")
+            self.assertEquals(testOptions.processCommandline(commandline.split(" ")), True, "Command-line should have processed correctly")
+            self.assertEquals(testOptions.validate(), True, "Command-line options should have validated")
         finally:
             utilityFunctions.removeDir(tempDir)
 
@@ -183,8 +430,8 @@ class Test_options(unittest.TestCase):
 
             testOptions = options.Options()
             commandline = "MixDown " + projectFilePath + " -ptestPrefix -v -ggcc,debug,parallel"
-            self.assertEquals(testOptions.processCommandline(commandline.split(" ")), True, "Command line should have processed correctly")
-            self.assertEquals(testOptions.validate(), False, "Commandline options should not have validated")
+            self.assertEquals(testOptions.processCommandline(commandline.split(" ")), True, "Command-line should have processed correctly")
+            self.assertEquals(testOptions.validate(), False, "Command-line options should not have validated")
         finally:
             utilityFunctions.removeDir(tempDir)
 

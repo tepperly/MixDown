@@ -42,13 +42,13 @@ class Project(object):
         for item in skipSteps.split(","):
             pair = item.split(":")
             if len(pair) != 2 or pair[0] == "" or pair[1] == "":
-                logger.writeError("Invalid commandline -s pair found: " + item)
+                logger.writeError("Invalid command-line -s pair found: " + item)
                 logger.writeMessage("Proper use: -s[Semi-colon delimited list of Skip Step pairs]")
                 logger.writeMessage("Skip Step Pair: [targetName]:[Steps to skip, comma delimited]")
                 return False
             targets = self.getTarget(pair[0])
             if targets == None:
-                logger.writeError("Target not found in -s commandline option: " + pair[0])
+                logger.writeError("Target not found in -s command-line option: " + pair[0])
                 return False
             targets.skipSteps = pair[1].split(",")
         return True
