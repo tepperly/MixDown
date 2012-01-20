@@ -116,6 +116,26 @@ class Test_autoTools(unittest.TestCase):
         installDir = autoTools.getInstallDir("--with-prefix=temp/")
         self.assertEquals(installDir, "", "Wrong install directory returned.")
 
+    def test_getInstallDir12(self):
+        installDir = autoTools.getInstallDir('configure --prefix="/usr /local"')
+        self.assertEquals(installDir, "/usr /local", "Wrong install directory returned.")
+
+    def test_getInstallDir13(self):
+        installDir = autoTools.getInstallDir('configure --prefix="test-9"')
+        self.assertEquals(installDir, "test-9", "Wrong install directory returned.")
+
+    def test_getInstallDir14(self):
+        installDir = autoTools.getInstallDir('configure --prefix=test+9')
+        self.assertEquals(installDir, "test+9", "Wrong install directory returned.")
+
+    def test_getInstallDir15(self):
+        installDir = autoTools.getInstallDir('configure --prefix=test_9')
+        self.assertEquals(installDir, "test_9", "Wrong install directory returned.")
+
+    def test_getInstallDir16(self):
+        installDir = autoTools.getInstallDir('fakepath/configure --prefix=test')
+        self.assertEquals(installDir, "test", "Wrong install directory returned.")
+
     def test_getDependencies1(self):
         try:
             tempDir = mdTestUtilities.copyDirToTempDir("cases/simpleGraphAutoTools/TestCaseA")

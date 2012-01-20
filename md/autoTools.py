@@ -31,11 +31,15 @@ def isAutoToolsProject(path):
     return False
 
 def getInstallDir(command):
-    prefix = ""
-    regex = re.compile(r"[\.\/]?configure.*--prefix=([A-Za-z0-9\/\.]+)")
+    prefix = None
+    regex = re.compile(r'.*configure.*--prefix=(?:"([\s\w\/\\\.\-\+\:]+)")|.?configure.*--prefix=([\w\/\\\.\-\+\:]+)')
     match = regex.search(command)
     if match != None:
         prefix = match.group(1)
+        if prefix == None:
+            prefix = match.group(2)
+    if prefix == None:
+        return ""
     return prefix
 
 def generateConfigureFiles(path, name, verbose=True):

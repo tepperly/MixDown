@@ -30,11 +30,15 @@ def isCMakeProject(path):
     return False
 
 def getInstallDir(command):
-    prefix = ""
-    regex = re.compile(r"cmake.*-DCMAKE_INSTALL_PREFIX=([A-Za-z0-9\/\.]+)")
+    prefix = None
+    regex = re.compile(r'.*cmake.*-DCMAKE_INSTALL_PREFIX=(?:"([\s\w\/\\\.\-\+\:]+)")|.?cmake.*-DCMAKE_INSTALL_PREFIX=([\w\/\\\.\-\+\:]+)')
     match = regex.search(command)
     if match != None:
         prefix = match.group(1)
+        if prefix == None:
+            prefix = match.group(2)
+    if prefix == None:
+        return ""
     return prefix
 
 def _findAllCMakeFiles(path, listToBeFilled):

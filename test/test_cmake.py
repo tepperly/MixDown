@@ -90,6 +90,26 @@ class Test_cmake(unittest.TestCase):
         installDir = cmake.getInstallDir("-DCMAKE_PREFIX_PATH=temp/")
         self.assertEquals(installDir, "", "Wrong install directory returned.")
 
+    def test_getInstallDir12(self):
+        installDir = cmake.getInstallDir('cmake -DCMAKE_INSTALL_PREFIX="/usr /local"')
+        self.assertEquals(installDir, "/usr /local", "Wrong install directory returned.")
+
+    def test_getInstallDir13(self):
+        installDir = cmake.getInstallDir('cmake -DCMAKE_INSTALL_PREFIX="test-9"')
+        self.assertEquals(installDir, "test-9", "Wrong install directory returned.")
+
+    def test_getInstallDir14(self):
+        installDir = cmake.getInstallDir('cmake -DCMAKE_INSTALL_PREFIX=test+9')
+        self.assertEquals(installDir, "test+9", "Wrong install directory returned.")
+
+    def test_getInstallDir15(self):
+        installDir = cmake.getInstallDir('cmake -DCMAKE_INSTALL_PREFIX=test_9')
+        self.assertEquals(installDir, "test_9", "Wrong install directory returned.")
+
+    def test_getInstallDir16(self):
+        installDir = cmake.getInstallDir('fakepath/cmake -DCMAKE_INSTALL_PREFIX=test')
+        self.assertEquals(installDir, "test", "Wrong install directory returned.")
+
     def test_getDependencies1(self):
         try:
             tempDir = mdTestUtilities.copyDirToTempDir("cases/cmake/hello/main")

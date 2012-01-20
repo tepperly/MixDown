@@ -42,12 +42,13 @@ def main():
     suite.addTest(test_git.suite())
     suite.addTest(test_hg.suite())
     suite.addTest(test_options.suite())
+    suite.addTest(Test_overrides.suite())
+    suite.addTest(test_project.suite())
     suite.addTest(test_steps.suite())
     suite.addTest(test_svn.suite())
-    suite.addTest(test_project.suite())
     suite.addTest(test_target.suite())
-    suite.addTest(test_MixDownShort.suite())
     suite.addTest(test_utilityFunctions.suite())
+    suite.addTest(test_MixDownShort.suite())
 
     if "--long" in sys.argv:
         suite.addTest(test_MixDownLong.suite())
