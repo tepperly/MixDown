@@ -32,15 +32,18 @@ class Test_MixDownShort(unittest.TestCase):
             mixDownPath = os.path.abspath("..")
             origPath = os.environ["PATH"]
             os.environ["PATH"] = mixDownPath + ":" + origPath
-
             tempDir = mdTestUtilities.copyDirToTempDir("cases/cmake/hello")
+
             importRC = utilityFunctions.executeSubProcess("MixDown --import " + os.path.join(tempDir, "main") + " " + os.path.join(tempDir, "hello1"), tempDir)
             self.assertEquals(importRC, 0, "CMake Hello test case failed import.")
             self.assertEquals(os.path.exists(os.path.join(tempDir, "main.md")), True, "MixDown project file does not exist after importing CMake Hello test case.")
+
             buildRC = utilityFunctions.executeSubProcess("MixDown main.md -ptestPrefix", tempDir)
             self.assertEquals(buildRC, 0, "CMake Hello test case failed build.")
+
             cleanRC = utilityFunctions.executeSubProcess("MixDown --clean main.md", tempDir)
             self.assertEquals(cleanRC, 0, "CMake Hello test case failed clean.")
+
             prefix = os.path.join(tempDir, "testPrefix")
             binDir = os.path.join(prefix, "bin")
             libDir = os.path.join(prefix, "lib")
@@ -55,15 +58,18 @@ class Test_MixDownShort(unittest.TestCase):
             mixDownPath = os.path.abspath("..")
             origPath = os.environ["PATH"]
             os.environ["PATH"] = mixDownPath + ":" + origPath
-
             tempDir = mdTestUtilities.copyDirToTempDir("cases/simpleGraphAutoTools")
+
             importRC = utilityFunctions.executeSubProcess("MixDown --import " + os.path.join(tempDir, "TestCaseA") + " " + os.path.join(tempDir, "TestCaseB") + " " + os.path.join(tempDir, "TestCaseC") + " " + os.path.join(tempDir, "TestCaseD"), tempDir)
-            self.assertEquals(os.path.exists(os.path.join(tempDir, "TestCaseA.md")), True, "MixDown project file does not exist after importing AutoTools Simple Graph test case.")
-            buildRC = utilityFunctions.executeSubProcess("MixDown TestCaseA.md -ptestPrefix", tempDir)
-            cleanRC = utilityFunctions.executeSubProcess("MixDown --clean TestCaseA.md", tempDir)
             self.assertEquals(importRC, 0, "AutoTools Simple Graph test case failed import.")
+            self.assertEquals(os.path.exists(os.path.join(tempDir, "TestCaseA.md")), True, "MixDown project file does not exist after importing AutoTools Simple Graph test case.")
+
+            buildRC = utilityFunctions.executeSubProcess("MixDown TestCaseA.md -ptestPrefix", tempDir)
             self.assertEquals(buildRC, 0, "AutoTools Simple Graph test case failed build.")
+
+            cleanRC = utilityFunctions.executeSubProcess("MixDown --clean TestCaseA.md", tempDir)
             self.assertEquals(cleanRC, 0, "AutoTools Simple Graph test case failed clean.")
+
             prefix = os.path.join(tempDir, "testPrefix")
             binDir = os.path.join(prefix, "bin")
             self.assertEquals(os.path.exists(os.path.join(binDir, "TestCaseA")), True, "Executable A does not exist after building AutoTools Simple Graph test case.")
