@@ -35,11 +35,11 @@ class Test_MixDownShort(unittest.TestCase):
 
             tempDir = mdTestUtilities.copyDirToTempDir("cases/cmake/hello")
             importRC = utilityFunctions.executeSubProcess("MixDown --import " + os.path.join(tempDir, "main") + " " + os.path.join(tempDir, "hello1"), tempDir)
+            self.assertEquals(importRC, 0, "CMake Hello test case failed import.")
             self.assertEquals(os.path.exists(os.path.join(tempDir, "main.md")), True, "MixDown project file does not exist after importing CMake Hello test case.")
             buildRC = utilityFunctions.executeSubProcess("MixDown main.md -ptestPrefix", tempDir)
-            cleanRC = utilityFunctions.executeSubProcess("MixDown --clean main.md", tempDir)
-            self.assertEquals(importRC, 0, "CMake Hello test case failed import.")
             self.assertEquals(buildRC, 0, "CMake Hello test case failed build.")
+            cleanRC = utilityFunctions.executeSubProcess("MixDown --clean main.md", tempDir)
             self.assertEquals(cleanRC, 0, "CMake Hello test case failed clean.")
             prefix = os.path.join(tempDir, "testPrefix")
             binDir = os.path.join(prefix, "bin")

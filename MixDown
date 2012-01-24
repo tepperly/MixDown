@@ -135,6 +135,7 @@ def main():
     except exceptions.ToolNotInstalledException, e:
         logger.writeError("%s not found." % e.tool)
         logger.writeError("This project requires that %s is installed on your system." % e.tool)
+        succeeded = False
     finally:
         logger.close()
     if succeeded:

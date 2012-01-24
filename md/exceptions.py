@@ -22,7 +22,14 @@
 
 class ToolNotInstalledException(Exception):
     def __init__(self, tool):
-        message = "%s not installed" % tool
-        super(ToolNotInstalledException, self).__init__(message)
         self.tool = tool
-        self.message = message
+        self.message = "%s not installed" % self.tool
+        super(ToolNotInstalledException, self).__init__(self.message)
+
+    def _get_message(self):
+        return self._message
+
+    def _set_message(self, message): 
+        self._message = message
+
+    message = property(_get_message, _set_message)
