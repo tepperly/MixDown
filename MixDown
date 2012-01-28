@@ -49,9 +49,18 @@ def main():
             if mdOptions.cleanMixDown:
                 cleanMixDown(mdOptions)
 
-            if mdOptions.overrideFile != "":
+            if mdOptions.overrideFile != ""\
+               and mdOptions.compilerGroupName != ""\
+               and mdOptions.optimizationGroupName != ""\
+               and mdOptions.parallelGroupName != "":
                 overrideGroups = overrides.readGroups(mdOptions.overrideFile)
-                overrides.selectGroups(overrideGroups, mdOptions)
+                finalGroup = overrides.selectGroups(overrideGroups, mdOptions.compilerGroupName, mdOptions.optimizationGroupName, mdOptions.parallelGroupName)
+                if finalGroup == None:
+                    logger.writeError("Override group unable to be found.")
+                    sys.exit(1)
+                else:
+                    mdOptions.overrideGroup = finalGroup
+                    defines.setOverrideDefines(mdOptions, finalGroup)
 
             mdProject = setup(mdOptions)
             if mdProject == None:

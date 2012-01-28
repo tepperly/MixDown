@@ -167,30 +167,38 @@ def readGroups(filename):
         groups.append(overrideGroup)
     return groups
 
-def selectGroups(groups, options):
+def selectGroups(groups, compilerGroupName, optimizationGroupName, parallelGroupName):
     compilerGroupSet = False
     optimizationGroupSet = False
     parallelGroupSet = False
     finalGroup = OverrideGroup()
 
     for group in groups:
-        if group.compiler.lower() == options.compilerGroupName and group.optimization == '*' and group.parallel == '*':
+        if group.compiler.lower() == compilerGroupName\
+           and group.optimization == '*'\
+           and group.parallel == '*':
             if compilerGroupSet:
-                logger.writeError("Duplicate override group found: " + group.compiler + ",* ,*", filePath=options.overrideFile, exitProgram=True)
+                logger.writeError("Duplicate override group found: " + group.compiler + ",* ,*", filePath=options.overrideFile)
+                return None
             finalGroup = group
             compilerGroupSet = True
     for group in groups:
-        if group.optimization.lower() == options.optimizationGroupName:
+        if group.compiler.lower() == compilerGroupName\
+           and group.optimization.lower() == optimizationGroupName\
+           and group.parallel == '*':
             if optimizationGroupSet:
-                logger.writeError("Duplicate override group found: " + group.compiler + ", " + group.optimization + ",*", filePath=options.overrideFile, exitProgram=True)
+                logger.writeError("Duplicate override group found: " + group.compiler + ", " + group.optimization + ",*", filePath=options.overrideFile)
+                return None
             finalGroup.combine(group)
             optimizationGroupSet = True
     for group in groups:
-        if group.parallel.lower() == options.parallelGroupName:
+        if group.compiler.lower() == compilerGroupName\
+           and group.optimization.lower() == optimizationGroupName\
+           and group.parallel.lower() == parallelGroupName:
             if parallelGroupSet:
-                logger.writeError("Duplicate override group found: " + group.compiler + ", " + group.optimization + group.parallel, filePath=options.overrideFile, exitProgram=True)
+                logger.writeError("Duplicate override group found: " + group.compiler + ", " + group.optimization + ", " + group.parallel, filePath=options.overrideFile)
+                return None
             finalGroup.combine(group)
             parallelGroupSet = True
 
-    options.overrideGroup = finalGroup
-    defines.setOverrideDefines(options, finalGroup)
+    return finalGroup
