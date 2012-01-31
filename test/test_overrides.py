@@ -25,7 +25,7 @@ import os, sys, unittest, mdTestUtilities
 if not ".." in sys.path:
     sys.path.append("..")
 
-from md import logger, overrides, utilityFunctions
+from md import logger, overrides, options, utilityFunctions
 
 class Test_overrides(unittest.TestCase):
     def test_setGetOverrides1(self):
@@ -78,6 +78,40 @@ class Test_overrides(unittest.TestCase):
         self.assertEquals(group2.getOverride("group2Only"), "group2OnlyValue", "After combine() getOverride() did not returned correct value")
         self.assertEquals(group2.hasOverride("group1Only"), False, "After combine() hasOverride() did not returned correct value")
         self.assertEquals(group2.getOverride("group1Only"), None, "After combine() getOverride() did not returned correct value")
+
+    def test_selectGroups1(self):
+        mdOptions = options.Options()
+        mdOptions.compilerGroupName = "compiler1"
+        mdOptions.optimizationGroupName = "optimization2"
+        mdOptions.parallelGroupName = "*"
+        mdOptions.overrideFile = "testNOREALFILE"
+
+        group1 = overrides.OverrideGroup()
+        group1.compiler = "compiler1"
+        group1.optimization = "*"
+        group1.parallel = "*"
+        group1.setOverride("test", "value1")
+        group1.setOverride("group1Only", "group1OnlyValue")
+
+        group2 = overrides.OverrideGroup()
+        group2.compiler = "compiler1"
+        group2.optimization = "optimization2"
+        group2.parallel = "*"
+        group2.setOverride("test", "value2")
+        group2.setOverride("group2Only", "group2OnlyValue")
+
+        finalGroup = overrides.selectGroups([group1, group2], mdOptions)
+        self.assertNotEquals(finalGroup, None, "selectGroups() failed to return a group")
+        self.assertEquals(finalGroup.hasOverride("test"), True, "After selectGroups() did not returned correct value")
+        self.assertEquals(finalGroup.getOverride("test"), "value2", "After selectGroups() did not returned correct value")
+        self.assertEquals(finalGroup.hasOverride("group1Only"), True, "After selectGroups() did not returned correct value")
+        self.assertEquals(finalGroup.getOverride("group1Only"), "group1OnlyValue", "After selectGroups() did not returned correct value")
+        self.assertEquals(finalGroup.hasOverride("group2Only"), True, "After selectGroups() did not returned correct value")
+        self.assertEquals(finalGroup.getOverride("group2Only"), "group2OnlyValue", "After selectGroups() did not returned correct value")
+        self.assertEquals(finalGroup.hasOverride("test"), True, "After selectGroups() did not returned correct value")
+        self.assertEquals(finalGroup.getOverride("test"), "value2", "After selectGroups() did not returned correct value")
+        self.assertEquals(finalGroup.hasOverride("group2Only"), True, "After selectGroups() did not returned correct value")
+        self.assertEquals(finalGroup.getOverride("group2Only"), "group2OnlyValue", "After selectGroups() did not returned correct value")
 
 def suite():
     suite = unittest.TestSuite()
