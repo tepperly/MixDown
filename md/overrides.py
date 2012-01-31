@@ -167,24 +167,24 @@ def readGroups(filename):
         groups.append(overrideGroup)
     return groups
 
-def selectGroups(groups, compilerGroupName, optimizationGroupName, parallelGroupName):
+def selectGroups(groups, options):
     compilerGroupSet = False
     optimizationGroupSet = False
     parallelGroupSet = False
     finalGroup = OverrideGroup()
 
     for group in groups:
-        if group.compiler.lower() == compilerGroupName\
+        if (group.compiler.lower() == options.compilerGroupName and group.compiler != "*")\
            and group.optimization == '*'\
            and group.parallel == '*':
             if compilerGroupSet:
                 logger.writeError("Duplicate override group found: " + group.compiler + ",* ,*", filePath=options.overrideFile)
                 return None
-            finalGroup = group
+            finalGroup.combine(group)
             compilerGroupSet = True
     for group in groups:
-        if group.compiler.lower() == compilerGroupName\
-           and group.optimization.lower() == optimizationGroupName\
+        if (group.compiler.lower() == options.compilerGroupName and group.compiler != "*")\
+           and (group.optimization.lower() == options.optimizationGroupName and group.optimization != "*")\
            and group.parallel == '*':
             if optimizationGroupSet:
                 logger.writeError("Duplicate override group found: " + group.compiler + ", " + group.optimization + ",*", filePath=options.overrideFile)
@@ -192,9 +192,9 @@ def selectGroups(groups, compilerGroupName, optimizationGroupName, parallelGroup
             finalGroup.combine(group)
             optimizationGroupSet = True
     for group in groups:
-        if group.compiler.lower() == compilerGroupName\
-           and group.optimization.lower() == optimizationGroupName\
-           and group.parallel.lower() == parallelGroupName:
+        if (group.compiler.lower() == options.compilerGroupName and group.compiler != "*")\
+           and (group.optimization.lower() == options.optimizationGroupName and group.optimization != "*")\
+           and (group.parallel.lower() == options.parallelGroupName and group.parallel != "*"):
             if parallelGroupSet:
                 logger.writeError("Duplicate override group found: " + group.compiler + ", " + group.optimization + ", " + group.parallel, filePath=options.overrideFile)
                 return None

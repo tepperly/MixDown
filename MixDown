@@ -54,7 +54,7 @@ def main():
                and mdOptions.optimizationGroupName != ""\
                and mdOptions.parallelGroupName != "":
                 overrideGroups = overrides.readGroups(mdOptions.overrideFile)
-                finalGroup = overrides.selectGroups(overrideGroups, mdOptions.compilerGroupName, mdOptions.optimizationGroupName, mdOptions.parallelGroupName)
+                finalGroup = overrides.selectGroups(overrideGroups, mdOptions)
                 if finalGroup == None:
                     logger.writeError("Override group unable to be found.")
                     sys.exit(1)
