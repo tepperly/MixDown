@@ -56,7 +56,7 @@ def main():
                 overrideGroups = overrides.readGroups(mdOptions.overrideFile)
                 finalGroup = overrides.selectGroups(overrideGroups, mdOptions)
                 if finalGroup == None:
-                    logger.writeError("Override group unable to be found.")
+                    logger.writeError("Selecting Override group failed.")
                     sys.exit(1)
                 else:
                     mdOptions.overrideGroup = finalGroup

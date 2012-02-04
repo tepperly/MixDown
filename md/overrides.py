@@ -43,6 +43,9 @@ class OverrideGroup(object):
         self.overrides = dict()
         self.defines = dict()
 
+    def count(self):
+        return len(self.overrides) + len(self.defines)
+
     def combine(self, child):
         self.compiler = child.compiler
         self.optimization = child.optimization
@@ -173,6 +176,14 @@ def selectGroups(groups, options):
     parallelGroupSet = False
     finalGroup = OverrideGroup()
 
+    if options.compilerGroupName == '*' and options.optimizationGroupName == '*' and options.parallelGroupName == '*':
+        logger.writeError("Invalid override group name : *, *, *")
+        return None
+    if options.compilerGroupName == '*' or (options.optimizationGroupName == '*' and options.parallelGroupName != '*'):
+        logger.writeError("Invalid override group name : " + options.compilerGroupName + ", " + options.optimizationGroupName + ", " + options.parallelGroupName\
+                          + "\n*'s can only be used to the right and not to the left of a defined override group name.")
+        return None
+
     for group in groups:
         if (group.compiler.lower() == options.compilerGroupName and group.compiler != "*")\
            and group.optimization == '*'\
@@ -182,6 +193,10 @@ def selectGroups(groups, options):
                 return None
             finalGroup.combine(group)
             compilerGroupSet = True
+    if compilerGroupSet == False and options.compilerGroupName != '*':
+        logger.writeError("Compiler override group not found: " + options.compilerGroupName, filePath=options.overrideFile)
+        return None
+
     for group in groups:
         if (group.compiler.lower() == options.compilerGroupName and group.compiler != "*")\
            and (group.optimization.lower() == options.optimizationGroupName and group.optimization != "*")\
@@ -191,6 +206,10 @@ def selectGroups(groups, options):
                 return None
             finalGroup.combine(group)
             optimizationGroupSet = True
+    if optimizationGroupSet == False and options.optimizationGroupName != '*':
+        logger.writeError("Optimization override group not found: " + options.optimizationGroupName, filePath=options.overrideFile)
+        return None
+
     for group in groups:
         if (group.compiler.lower() == options.compilerGroupName and group.compiler != "*")\
            and (group.optimization.lower() == options.optimizationGroupName and group.optimization != "*")\
@@ -200,5 +219,9 @@ def selectGroups(groups, options):
                 return None
             finalGroup.combine(group)
             parallelGroupSet = True
+    if parallelGroupSet == False and options.parallelGroupName != '*':
+        logger.writeError("Parallel override group not found: " + options.parallelGroupName, filePath=options.overrideFile)
+        return None
+
 
     return finalGroup
