@@ -30,58 +30,58 @@ from md import defines, logger
 class Test_defines(unittest.TestCase):
     def test_combine(self):
         def1 = defines.Defines()
-        def1.set("options", "optionsResult")
-        def1.set("both", "optionsResultBoth")
-        def1.set("same", "sameResult")
+        def1["options"] = "optionsResult"
+        def1["both"] = "optionsResultBoth"
+        def1["same"] = "sameResult"
 
         def2 = defines.Defines()
-        def2.set("project", "projectResult")
-        def2.set("both", "projectResultBoth")
-        def2.set("same", "sameResult")
+        def2["project"] = "projectResult"
+        def2["both"] = "projectResultBoth"
+        def2["same"] = "sameResult"
 
         def1.combine(def2)
-        self.assertEquals(def1.get("options"), "optionsResult", "Define should have been result from def1")
-        self.assertEquals(def1.get("project"), "projectResult", "Define should have been result from def2")
-        self.assertEquals(def1.get("both"), "projectResultBoth", "Define should have been result from def2")
-        self.assertEquals(def1.get("same"), "sameResult", "Define should have been the same result")
-        self.assertEquals(def2.get("project"), "projectResult", "Define should not have changed")
-        self.assertEquals(def2.get("both"), "projectResultBoth", "Define should not have changed")
-        self.assertEquals(def2.get("same"), "sameResult", "Define should not have changed")
+        self.assertEquals(def1["options"], "optionsResult", "Define should have been result from def1")
+        self.assertEquals(def1["project"], "projectResult", "Define should have been result from def2")
+        self.assertEquals(def1["both"], "projectResultBoth", "Define should have been result from def2")
+        self.assertEquals(def1["same"], "sameResult", "Define should have been the same result")
+        self.assertEquals(def2["project"], "projectResult", "Define should not have changed")
+        self.assertEquals(def2["both"], "projectResultBoth", "Define should not have changed")
+        self.assertEquals(def2["same"], "sameResult", "Define should not have changed")
 
     def test_setGet(self):
         def1 = defines.Defines()
-        self.assertEquals(def1.get("one"), "", "Define should have returned empty string")
-        def1.set("one", "oneResult")
-        self.assertEquals(def1.get("one"), "oneResult", "Define returned wrong value")
-        def1.set("one", "oneResultNew")
-        self.assertEquals(def1.get("one"), "oneResultNew", "Define returned wrong value")
-        self.assertEquals(def1.get("one"), "oneResultNew", "Define returned wrong value after getting multiple times")
-        self.assertEquals(def1.get("one"), "oneResultNew", "Define returned wrong value after getting multiple times")
-        self.assertEquals(def1.get("one"), "oneResultNew", "Define returned wrong value after getting multiple times")
-        def1.set("both", "bothResult")
-        self.assertEquals(def1.get("both"), "bothResult", "Define returned wrong value")
-        self.assertEquals(def1.get("one"), "oneResultNew", "Define returned wrong value after setting new value")
+        self.assertEquals(def1["one"], "", "Define should have returned empty string")
+        def1["one"] = "oneResult"
+        self.assertEquals(def1["one"], "oneResult", "Define returned wrong value")
+        def1["one"] = "oneResultNew"
+        self.assertEquals(def1["one"], "oneResultNew", "Define returned wrong value")
+        self.assertEquals(def1["one"], "oneResultNew", "Define returned wrong value after getting multiple times")
+        self.assertEquals(def1["one"], "oneResultNew", "Define returned wrong value after getting multiple times")
+        self.assertEquals(def1["one"], "oneResultNew", "Define returned wrong value after getting multiple times")
+        def1["both"] = "bothResult"
+        self.assertEquals(def1["both"], "bothResult", "Define returned wrong value")
+        self.assertEquals(def1["one"], "oneResultNew", "Define returned wrong value after setting new value")
 
     def test_keys(self):
         def1 = defines.Defines()
-        def1.set("a", "aResult")
-        def1.set("b", "bResult")
-        def1.set("c", "cResult")
+        def1["a"] = "aResult"
+        def1["b"] = "bResult"
+        def1["c"] = "cResult"
         keys = def1.keys()
         self.assertEquals(len(keys), 3, "Length of keys returned wrong value")
         keys.sort()
         self.assertEquals(keys[0], "a", "Keys() returned wrong key")
         self.assertEquals(keys[1], "b", "Keys() returned wrong key")
         self.assertEquals(keys[2], "c", "Keys() returned wrong key")
-        self.assertEquals(def1.get(keys[0]), "aResult", "Define returned wrong value when using keys")
-        self.assertEquals(def1.get(keys[1]), "bResult", "Define returned wrong value when using keys")
-        self.assertEquals(def1.get(keys[2]), "cResult", "Define returned wrong value when using keys")
+        self.assertEquals(def1[keys[0]], "aResult", "Define returned wrong value when using keys")
+        self.assertEquals(def1[keys[1]], "bResult", "Define returned wrong value when using keys")
+        self.assertEquals(def1[keys[2]], "cResult", "Define returned wrong value when using keys")
 
     def test_expand(self):
         def1 = defines.Defines()
-        def1.set("a", "aResult")
-        def1.set("b", "bResult")
-        def1.set("c", "cResult")
+        def1["a"] = "aResult"
+        def1["b"] = "bResult"
+        def1["c"] = "cResult"
         self.assertEquals(def1.expand("$(a)"), "aResult", "Define returned wrong value when using expand()")
         self.assertEquals(def1.expand("$(b)"), "bResult", "Define returned wrong value when using expand()")
         self.assertEquals(def1.expand("$(c)"), "cResult", "Define returned wrong value when using expand()")
@@ -133,7 +133,6 @@ class Test_defines(unittest.TestCase):
         self.assertEquals(defines.surround("(foo)"), "$((foo))", "surround() returned wrong value")
         self.assertEquals(defines.surround("$foo)"), "$($foo))", "surround() returned wrong value")
         self.assertEquals(defines.surround("$foo"), "$($foo)", "surround() returned wrong value")
-
 
 def suite():
     suite = unittest.TestSuite()

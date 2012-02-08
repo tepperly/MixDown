@@ -136,7 +136,7 @@ def main():
                 logger.writeMessage("\n" + mdProject.name + " has been cleaned in " + os.path.abspath(mdOptions.buildDir))
             else:
                 logger.writeMessage("\n" + mdProject.name + " has been built in " + os.path.abspath(mdOptions.buildDir))
-                logger.writeMessage(mdProject.name + " has been installed to " + os.path.abspath(mdOptions.defines.get(defines.mdPrefix[0])))
+                logger.writeMessage(mdProject.name + " has been installed to " + os.path.abspath(mdOptions.defines[defines.mdPrefix[0]]))
         message = "\nTotal time " + logger.secondsToHMS(timeElapsed) + "\n" + message
         logger.writeMessage(message)
         if partialImport:
@@ -158,7 +158,7 @@ def setup(mdOptions):
     if mdOptions.verbose:
         logger.writeMessage(str(mdOptions))
         if not mdOptions.prefixDefined and not mdOptions.cleanMode:
-            logger.writeMessage("No prefix defined, defaulting to '" + mdOptions.defines.get(defines.mdPrefix[0]) + "'")
+            logger.writeMessage("No prefix defined, defaulting to '" + mdOptions.defines[defines.mdPrefix[0]] + "'")
 
     if not mdOptions.validate():
         return None
@@ -189,7 +189,7 @@ def setup(mdOptions):
                     cleaningOutputReported = True
                 utilityFunctions.removeDir(currTarget.outputPath)
 
-        prefixDefine = mdOptions.defines.get(defines.mdPrefix[0])
+        prefixDefine = mdOptions.defines[defines.mdPrefix[0]]
         if prefixDefine != "":
             #TODO: only add lib64 if on 64bit machines
             libraryPaths = os.path.join(prefixDefine, "lib64") + ":" + os.path.join(prefixDefine, "lib")

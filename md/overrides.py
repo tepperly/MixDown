@@ -35,38 +35,37 @@ reservedOverrides = ["ccompiler",        "cflags",    "cdefines",
                      "linkerflags", "linkerflagsexe", "linkerflagsshared", "linkerflagsmodule",
                      ]
 
-class OverrideGroup(object):
+class OverrideGroup(dict):
     def __init__(self):
         self.compiler = ""
         self.optimization = ""
         self.parallel = ""
-        self.overrides = dict()
-        self.defines = dict()
+        self.defines = defines.Defines()
+
+    def __contains__(self, key):
+        return defines.normalizeKey(key) in self.keys()
+
+    def __setitem__(self, key, value):
+        super(OverrideGroup, self).__setitem__(defines.normalizeKey(key), value.strip())
+
+    def __getitem__(self, key):
+        normalizedKey = defines.normalizeKey(key)
+        if normalizedKey in self:
+            return super(OverrideGroup, self).__getitem__(defines.normalizeKey(key))
+        else:
+            return None
 
     def count(self):
-        return len(self.overrides) + len(self.defines)
+        return len(self) + len(self.defines)
 
     def combine(self, child):
         self.compiler = child.compiler
         self.optimization = child.optimization
         self.parallel = child.parallel
-        for override in child.overrides.keys():
-            self.overrides[override] = child.overrides[override]
-        for define in child.defines.keys():
-            self.defines[define] = child.defines[define]
-
-    def hasOverride(self, override):
-        return self.overrides.has_key(override.lower())
-
-    def getOverride(self, override):
-        key = override.lower()
-        if self.overrides.has_key(key):
-            return self.overrides[key]
-        else:
-            return None
-
-    def setOverride(self, override, value):
-        self.overrides[override.lower()] = value
+        for key in child:
+            self[key] = child[key]
+        for key in child.defines:
+            self.defines[key] = child.defines[key]
 
 def readGroups(filename):
     groups = list()
@@ -160,7 +159,7 @@ def readGroups(filename):
 
             #Compiler Overrides
             if overrideName in reservedOverrides:
-                overrideGroup.setOverride(overrideName, overrideString)
+                overrideGroup[overrideName] = overrideString
             else:
                 overrideGroup.defines[overrideName] = overrideString
             #Syntax end

@@ -64,7 +64,7 @@ class Options(object):
   Verbose:        " + str(self.verbose) + "\n\
   Logger:         " + self.logger.capitalize() + "\n\
   Thread Count:   " + str(self.threadCount) + "\n\
-  Job Count:      " + self.defines.get(defines.surround(defines.mdJobSlots[0])) + "\n\
+  Job Count:      " + self.defines[defines.surround(defines.mdJobSlots[0])] + "\n\
   Skip Steps:     " + self.skipSteps + "\n\
   Override File:  " + self.overrideFile + "\n\
   Override Group Names:\n\

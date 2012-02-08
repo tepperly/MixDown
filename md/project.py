@@ -143,7 +143,7 @@ class Project(object):
                         currPair = currLine.split("=", 1)
                         currPair = currPair[0].strip(), currPair[1].strip()
                         currName = str.lower(currPair[0])
-                        self.defines.set(currPair[0], currPair[1])
+                        self.defines[currPair[0]] = currPair[1]
                     else:
                         currPair = currLine.split(":", 1)
                         currPair = currPair[0].strip(), currPair[1].strip()

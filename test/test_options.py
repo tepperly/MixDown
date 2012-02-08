@@ -242,7 +242,7 @@ class Test_options(unittest.TestCase):
         commandline = "MixDown --import -j9"
         self.assertEquals(testOptions.processCommandline(commandline.split(" ")), False, "Command-line should not have processed correctly")
         self.assertEquals(testOptions.targetsToImport, [], "targetsToImport should have not been set")
-        self.assertEquals(testOptions.defines.get(defines.surround(defines.mdJobSlots[0])), "", "cleanMixDown should not have been set")
+        self.assertEquals(testOptions.defines[defines.surround(defines.mdJobSlots[0])], "", "cleanMixDown should not have been set")
 
     def test_processCommandline20(self):
         testOptions = options.Options()
@@ -256,7 +256,7 @@ class Test_options(unittest.TestCase):
         commandline = "MixDown --import -ptest"
         self.assertEquals(testOptions.processCommandline(commandline.split(" ")), False, "Command-line should not have processed correctly")
         self.assertEquals(testOptions.targetsToImport, [], "targetsToImport should have not been set")
-        self.assertEquals(testOptions.defines.get(defines.surround(defines.mdPrefix[0])), "/usr/local", "prefix should not have been set")
+        self.assertEquals(testOptions.defines[defines.surround(defines.mdPrefix[0])], "/usr/local", "prefix should not have been set")
 
     def test_processCommandline22(self):
         try:
