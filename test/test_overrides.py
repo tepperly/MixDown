@@ -27,12 +27,16 @@ if not ".." in sys.path:
 
 from md import logger, overrides, options, utilityFunctions
 
+def fullCount(overrideGroup):
+    return len(overrideGroup) + len(overrideGroup.defines)
+
 class Test_overrides(unittest.TestCase):
-    def test_count01(self):
+    def test_len01(self):
         group = overrides.OverrideGroup()
         group.defines["test"] = "value"
         group["ccompiler"] = "gcc"
-        self.assertEquals(group.count(), 2, "count was wrong")
+        self.assertEquals(len(group), 1, "len was wrong")
+        self.assertEquals(fullCount(group), 2, "count was wrong")
 
     def test_setGetOverrides1(self):
         group = overrides.OverrideGroup()
@@ -114,7 +118,7 @@ class Test_overrides(unittest.TestCase):
 
         finalGroup = overrides.selectGroups(groupList, mdOptions)
         self.assertNotEquals(finalGroup, None, "selectGroups() failed to return a group")
-        self.assertEquals(finalGroup.count(), 3, "After selectGroups() override count was wrong")
+        self.assertEquals(fullCount(finalGroup), 3, "After selectGroups() override count was wrong")
         self.assertEquals("test" in finalGroup, True, "After selectGroups() did not returned correct value")
         self.assertEquals(finalGroup["test"], "value2", "After selectGroups() did not returned correct value")
         self.assertEquals("group1Only" in finalGroup, True, "After selectGroups() did not returned correct value")
@@ -150,7 +154,7 @@ class Test_overrides(unittest.TestCase):
         groupList.append(group2)
 
         finalGroup = overrides.selectGroups(groupList, mdOptions)
-        self.assertEquals(finalGroup.count(), 2, "After selectGroups() override count was wrong")
+        self.assertEquals(fullCount(finalGroup), 2, "After selectGroups() override count was wrong")
         self.assertNotEquals(finalGroup, None, "selectGroups() failed to return a group")
         self.assertEquals("test" in finalGroup, True, "After selectGroups() did not returned correct value")
         self.assertEquals(finalGroup["test"], "value1", "After selectGroups() did not returned correct value")
@@ -184,12 +188,12 @@ class Test_overrides(unittest.TestCase):
         groupList.append(group2)
 
         finalGroup = overrides.selectGroups(groupList, mdOptions)
-        self.assertEquals(group1.count(), 2, "After selectGroups(), group1 was incorrectly altered")
+        self.assertEquals(fullCount(group1), 2, "After selectGroups(), group1 was incorrectly altered")
         self.assertEquals("test" in group1, True, "After selectGroups(), group1 was incorrectly altered")
         self.assertEquals(group1["test"], "value1", "After selectGroups(), group1 was incorrectly altered")
         self.assertEquals("group1Only" in group1, True, "After selectGroups(), group1 was incorrectly altered")
         self.assertEquals(group1["group1Only"], "group1OnlyValue", "After selectGroups(), group1 was incorrectly altered")
-        self.assertEquals(group2.count(), 2, "After selectGroups(), group2 was incorrectly altered")
+        self.assertEquals(fullCount(group2), 2, "After selectGroups(), group2 was incorrectly altered")
         self.assertEquals("test" in group2, True, "After selectGroups(), group2 was incorrectly altered")
         self.assertEquals(group2["test"], "value2", "After selectGroups(), group2 was incorrectly altered")
         self.assertEquals("group2Only" in group2, True, "After selectGroups(), group2 was incorrectly altered")
@@ -231,7 +235,7 @@ class Test_overrides(unittest.TestCase):
         groupList.append(group3)
 
         finalGroup = overrides.selectGroups(groupList, mdOptions)
-        self.assertEquals(finalGroup.count(), 5, "After selectGroups() override count was wrong")
+        self.assertEquals(fullCount(finalGroup), 5, "After selectGroups() override count was wrong")
         self.assertNotEquals(finalGroup, None, "selectGroups() failed to return a group")
         self.assertEquals("test" in finalGroup, True, "After selectGroups() did not returned correct value")
         self.assertEquals(finalGroup["test"], "value3", "After selectGroups() did not returned correct value")
@@ -526,14 +530,14 @@ class Test_overrides(unittest.TestCase):
             self.assertEquals(groups[0].compiler, "gcc", "readGroups() has wrong information")
             self.assertEquals(groups[0].optimization, "*", "readGroups() has wrong information")
             self.assertEquals(groups[0].parallel, "*", "readGroups() has wrong information")
-            self.assertEquals(groups[0].count(), 3, "readGroups() has wrong information")
+            self.assertEquals(fullCount(groups[0]), 3, "readGroups() has wrong information")
             self.assertEquals(groups[0]["ccompiler"], "gcc", "readGroups() has wrong information")
             self.assertEquals(groups[0]["cflags"], "-O0", "readGroups() has wrong information")
             self.assertEquals(groups[0].defines["testvariable"], "baseVar", "readGroups() has wrong information")
             self.assertEquals(groups[1].compiler, "gcc", "readGroups() has wrong information")
             self.assertEquals(groups[1].optimization, "release", "readGroups() has wrong information")
             self.assertEquals(groups[1].parallel, "*", "readGroups() has wrong information")
-            self.assertEquals(groups[1].count(), 2, "readGroups() has wrong information")
+            self.assertEquals(fullCount(groups[1]), 2, "readGroups() has wrong information")
             self.assertEquals(groups[1]["cflags"], "-O2", "readGroups() has wrong information")
             self.assertEquals(groups[1].defines["testvariable"], "releaseVar", "readGroups() has wrong information")
         finally:

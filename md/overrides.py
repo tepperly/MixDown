@@ -55,9 +55,6 @@ class OverrideGroup(dict):
         else:
             return None
 
-    def count(self):
-        return len(self) + len(self.defines)
-
     def combine(self, child):
         self.compiler = child.compiler
         self.optimization = child.optimization
