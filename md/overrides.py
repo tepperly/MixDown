@@ -68,7 +68,8 @@ def readGroups(filename):
     groups = list()
     overrideGroup = None
     tokenizer = Tokenizer(filename)
-    tokenizer.tokenize()
+    if not tokenizer.tokenize():
+        return None
     tokens = tokenizer.tokens
     i = 0
     lengthOfTokens = len(tokens)
@@ -79,38 +80,48 @@ def readGroups(filename):
             overrideGroup = OverrideGroup()
             overrideGroup.compiler = tokens[i].value
         else:
-            logger.writeError("Expected Compiler Override group name '" + tokens[i].value + "'", filePath=filename, exitProgram=True)
+            logger.writeError("Expected Compiler Override group name '" + tokens[i].value + "'", filePath=filename)
+            return None
         i += 1
         if i >= lengthOfTokens:
-            logger.writeError("Parsing ended inside of Override group. Please finish file and re-run MixDown.", filePath=filename, exitProgram=True)
+            logger.writeError("Parsing ended inside of Override group. Please finish file and re-run MixDown.", filePath=filename)
+            return None
 
         if not (tokens[i].type == TokenType.Symbol and tokens[i].value == ','):
-            logger.writeError("Expected ',' got '" + tokens[i].value + "'", filePath=filename, exitProgram=True)
+            logger.writeError("Expected ',' got '" + tokens[i].value + "'", filePath=filename)
+            return None
         i += 1
         if i >= lengthOfTokens:
-            logger.writeError("Parsing ended inside of Override group. Please finish file and re-run MixDown.", filePath=filename, exitProgram=True)
+            logger.writeError("Parsing ended inside of Override group. Please finish file and re-run MixDown.", filePath=filename)
+            return None
 
         if tokens[i].type == TokenType.Identifier or (tokens[i].type == TokenType.Symbol and tokens[i].value == '*'):
             overrideGroup.optimization = tokens[i].value
         else:
-            logger.writeError("Expected either Optimization Override group name or '*' got '" + tokens[i].value + "'", filePath=filename, exitProgram=True)
+            logger.writeError("Expected either Optimization Override group name or '*' got '" + tokens[i].value + "'", filePath=filename)
+            return None
         i += 1
         if i >= lengthOfTokens:
-            logger.writeError("Parsing ended inside of Override group. Please finish file and re-run MixDown.", filePath=filename, exitProgram=True)
+            logger.writeError("Parsing ended inside of Override group. Please finish file and re-run MixDown.", filePath=filename)
+            return None
 
         if not (tokens[i].type == TokenType.Symbol and tokens[i].value == ','):
-            logger.writeError("Expected ',' got '" + tokens[i].value + "'", filePath=filename, exitProgram=True)
+            logger.writeError("Expected ',' got '" + tokens[i].value + "'", filePath=filename)
+            return None
         i += 1
         if i >= lengthOfTokens:
-            logger.writeError("Parsing ended inside of Override group. Please finish file and re-run MixDown.", filePath=filename, exitProgram=True)
+            logger.writeError("Parsing ended inside of Override group. Please finish file and re-run MixDown.", filePath=filename)
+            return None
 
         if tokens[i].type == TokenType.Identifier or (tokens[i].type == TokenType.Symbol and tokens[i].value == '*'):
             overrideGroup.parallel = tokens[i].value
         else:
-            logger.writeError("Expected either Parallel Override group name or '*' got '" + tokens[i].value + "'", filePath=filename, exitProgram=True)
+            logger.writeError("Expected either Parallel Override group name or '*' got '" + tokens[i].value + "'", filePath=filename)
+            return None
         i += 1
         if i >= lengthOfTokens:
-            logger.writeError("Parsing ended inside of Override group. Please finish file and re-run MixDown.", filePath=filename, exitProgram=True)
+            logger.writeError("Parsing ended inside of Override group. Please finish file and re-run MixDown.", filePath=filename)
+            return None
         #Syntax end
 
         #Syntax start:
@@ -120,10 +131,12 @@ def readGroups(filename):
         #  <Identifier> = <string>
         #}
         if not (tokens[i].type == TokenType.Symbol and tokens[i].value == '{'):
-            logger.writeError("Expected '{' got '" + tokens[i].value + "'", filePath=filename, exitProgram=True)
+            logger.writeError("Expected '{' got '" + tokens[i].value + "'", filePath=filename)
+            return None
         i += 1
         if i >= lengthOfTokens:
-            logger.writeError("Parsing ended inside of Override group. Please finish file and re-run MixDown.", filePath=filename, exitProgram=True)
+            logger.writeError("Parsing ended inside of Override group. Please finish file and re-run MixDown.", filePath=filename)
+            return None
 
         while True:
             if tokens[i].type == TokenType.Symbol and tokens[i].value == '}':
@@ -134,25 +147,31 @@ def readGroups(filename):
 
             #Syntax start:  <Identifier> = <string>
             if not tokens[i].type == TokenType.Identifier:
-                logger.writeError("Expected Override identifier got '" + tokens[i].value + "'", filePath=filename, exitProgram=True)
+                logger.writeError("Expected Override identifier got '" + tokens[i].value + "'", filePath=filename)
+                return None
             overrideNameOriginal = tokens[i].value
             overrideName = tokens[i].value.lower()
             i += 1
             if i >= lengthOfTokens:
-                logger.writeError("Parsing ended inside of Override group. Please finish file and re-run MixDown.", filePath=filename, exitProgram=True)
+                logger.writeError("Parsing ended inside of Override group. Please finish file and re-run MixDown.", filePath=filename)
+                return None
 
             if not (tokens[i].type == TokenType.Symbol and tokens[i].value == '='):
-                logger.writeError("Expected '=' got '" + tokens[i].value + "'", filePath=filename, exitProgram=True)
+                logger.writeError("Expected '=' got '" + tokens[i].value + "'", filePath=filename)
+                return None
             i += 1
             if i >= lengthOfTokens:
-                logger.writeError("Parsing ended inside of Override group. Please finish file and re-run MixDown.", filePath=filename, exitProgram=True)
+                logger.writeError("Parsing ended inside of Override group. Please finish file and re-run MixDown.", filePath=filename)
+                return None
 
             if not tokens[i].type == TokenType.String:
-                logger.writeError("Expected Override value string got '" + tokens[i].value + "'", filePath=filename, exitProgram=True)
+                logger.writeError("Expected Override value string got '" + tokens[i].value + "'", filePath=filename)
+                return None
             overrideString = tokens[i].value
             i += 1
             if i >= lengthOfTokens:
-                logger.writeError("Parsing ended inside of Override group. Please finish file and re-run MixDown.", filePath=filename, exitProgram=True)
+                logger.writeError("Parsing ended inside of Override group. Please finish file and re-run MixDown.", filePath=filename)
+                return None
 
             #Compiler Overrides
             if overrideName in reservedOverrides:

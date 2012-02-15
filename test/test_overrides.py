@@ -68,6 +68,11 @@ class Test_overrides(unittest.TestCase):
         group["test"] = "value"
         self.assertEquals("testasdf" in group, False, "hasOverride did not returned correct value")
 
+    def test_hasOverrides4(self):
+        group = overrides.OverrideGroup()
+        group.defines["test"] = "value"
+        self.assertEquals("test" in group, False, "hasOverride did not returned correct value")
+
     def test_combine1(self):
         group1 = overrides.OverrideGroup()
         group1["test"] = "value1"
@@ -540,6 +545,208 @@ class Test_overrides(unittest.TestCase):
             self.assertEquals(fullCount(groups[1]), 2, "readGroups() has wrong information")
             self.assertEquals(groups[1]["cflags"], "-O2", "readGroups() has wrong information")
             self.assertEquals(groups[1].defines["testvariable"], "releaseVar", "readGroups() has wrong information")
+        finally:
+            utilityFunctions.removeDir(tempDir)
+
+    def test_readGroups02(self):
+        fileContents = textwrap.dedent("""
+                                       *, *, * {
+                                           ccompiler = gcc
+                                           cflags = -O0
+                                           testVariable = baseVar
+                                       }
+                                       """)
+        try:
+            tempDir = mdTestUtilities.makeTempDir()
+            filePath = mdTestUtilities.makeTempFile(tempDir, fileContents)
+            groups = overrides.readGroups(filePath)
+            self.assertEquals(groups, None, "readGroups() should have failed to read groups")
+        finally:
+            utilityFunctions.removeDir(tempDir)
+
+    def test_readGroups03(self):
+        fileContents = textwrap.dedent("""
+                                       *, fail, * {
+                                           ccompiler = gcc
+                                           cflags = -O0
+                                           testVariable = baseVar
+                                       }
+                                       """)
+        try:
+            tempDir = mdTestUtilities.makeTempDir()
+            filePath = mdTestUtilities.makeTempFile(tempDir, fileContents)
+            groups = overrides.readGroups(filePath)
+            self.assertEquals(groups, None, "readGroups() should have failed to read groups")
+        finally:
+            utilityFunctions.removeDir(tempDir)
+
+    def test_readGroups04(self):
+        fileContents = textwrap.dedent("""
+                                       *, *, fail {
+                                           ccompiler = gcc
+                                           cflags = -O0
+                                           testVariable = baseVar
+                                       }
+                                       """)
+        try:
+            tempDir = mdTestUtilities.makeTempDir()
+            filePath = mdTestUtilities.makeTempFile(tempDir, fileContents)
+            groups = overrides.readGroups(filePath)
+            self.assertEquals(groups, None, "readGroups() should have failed to read groups")
+        finally:
+            utilityFunctions.removeDir(tempDir)
+
+    def test_readGroups05(self):
+        fileContents = textwrap.dedent("""
+                                       empty, *, * {
+                                       }
+                                       """)
+        try:
+            tempDir = mdTestUtilities.makeTempDir()
+            filePath = mdTestUtilities.makeTempFile(tempDir, fileContents)
+            groups = overrides.readGroups(filePath)
+            self.assertNotEquals(groups, None, "readGroups() failed to read groups")
+            self.assertEquals(len(groups), 1, "Wrong number of groups returned")
+            self.assertEquals(groups[0].compiler, "empty", "readGroups() has wrong information")
+            self.assertEquals(groups[0].optimization, "*", "readGroups() has wrong information")
+            self.assertEquals(groups[0].parallel, "*", "readGroups() has wrong information")
+            self.assertEquals(fullCount(groups[0]), 0, "readGroups() has wrong information")
+        finally:
+            utilityFunctions.removeDir(tempDir)
+
+    def test_readGroups06(self):
+        fileContents = textwrap.dedent("""
+                                       incomplete, *, * {
+                                           ccompiler = gcc
+                                           cflags = -O0
+                                           testVariable = baseVar
+
+                                       """)
+        try:
+            tempDir = mdTestUtilities.makeTempDir()
+            filePath = mdTestUtilities.makeTempFile(tempDir, fileContents)
+            groups = overrides.readGroups(filePath)
+            self.assertEquals(groups, None, "readGroups() should have failed to read groups")
+        finally:
+            utilityFunctions.removeDir(tempDir)
+
+    def test_readGroups07(self):
+        fileContents = textwrap.dedent("""
+                                       incomplete, *, * {
+                                           ccompiler = gcc
+                                           cflags = -O0
+                                           testVariable : baseVar
+                                        }
+                                       """)
+        try:
+            tempDir = mdTestUtilities.makeTempDir()
+            filePath = mdTestUtilities.makeTempFile(tempDir, fileContents)
+            groups = overrides.readGroups(filePath)
+            self.assertEquals(groups, None, "readGroups() should have failed to read groups")
+        finally:
+            utilityFunctions.removeDir(tempDir)
+
+    def test_readGroups08(self):
+        fileContents = textwrap.dedent("""
+                                       incomplete, *, * {
+                                           ccompiler = gcc
+                                           cflags = -O0
+                                           testVariable
+                                        }
+                                       """)
+        try:
+            tempDir = mdTestUtilities.makeTempDir()
+            filePath = mdTestUtilities.makeTempFile(tempDir, fileContents)
+            groups = overrides.readGroups(filePath)
+            self.assertEquals(groups, None, "readGroups() should have failed to read groups")
+        finally:
+            utilityFunctions.removeDir(tempDir)
+
+    def test_readGroups09(self):
+        fileContents = textwrap.dedent("""
+                                       incomplete, *, * {
+                                           ccompiler = gcc
+                                           cflags = -O0
+                                           testVariable foo
+                                        }
+                                       """)
+        try:
+            tempDir = mdTestUtilities.makeTempDir()
+            filePath = mdTestUtilities.makeTempFile(tempDir, fileContents)
+            groups = overrides.readGroups(filePath)
+            self.assertEquals(groups, None, "readGroups() should have failed to read groups")
+        finally:
+            utilityFunctions.removeDir(tempDir)
+
+    def test_readGroups10(self):
+        fileContents = textwrap.dedent("""
+                                       incomplete {
+                                           ccompiler = gcc
+                                           cflags = -O0
+                                           testVariable = foo
+                                        }
+                                       """)
+        try:
+            tempDir = mdTestUtilities.makeTempDir()
+            filePath = mdTestUtilities.makeTempFile(tempDir, fileContents)
+            groups = overrides.readGroups(filePath)
+            self.assertEquals(groups, None, "readGroups() should have failed to read groups")
+        finally:
+            utilityFunctions.removeDir(tempDir)
+
+    def test_readGroups11(self):
+        fileContents = textwrap.dedent("""
+                                       incomplete,, {
+                                           ccompiler = gcc
+                                           cflags = -O0
+                                           testVariable = foo
+                                        }
+                                       """)
+        try:
+            tempDir = mdTestUtilities.makeTempDir()
+            filePath = mdTestUtilities.makeTempFile(tempDir, fileContents)
+            groups = overrides.readGroups(filePath)
+            self.assertEquals(groups, None, "readGroups() should have failed to read groups")
+        finally:
+            utilityFunctions.removeDir(tempDir)
+
+    def test_readGroups12(self):
+        fileContents = textwrap.dedent("""
+                                       foo,*,* {
+                                           ccompiler = gcc
+                                           cflags = -O0
+                                           testVariable = foo
+                                        }
+                                       """)
+        try:
+            tempDir = mdTestUtilities.makeTempDir()
+            filePath = mdTestUtilities.makeTempFile(tempDir, fileContents)
+            groups = overrides.readGroups(filePath)
+            self.assertNotEquals(groups, None, "readGroups() failed to read groups")
+            self.assertEquals(len(groups), 1, "Wrong number of groups returned")
+            self.assertEquals(groups[0].compiler, "foo", "readGroups() has wrong information")
+            self.assertEquals(groups[0].optimization, "*", "readGroups() has wrong information")
+            self.assertEquals(groups[0].parallel, "*", "readGroups() has wrong information")
+            self.assertEquals(fullCount(groups[0]), 3, "readGroups() has wrong information")
+            self.assertEquals(groups[0]["ccompiler"], "gcc", "readGroups() has wrong information")
+            self.assertEquals(groups[0]["cflags"], "-O0", "readGroups() has wrong information")
+            self.assertEquals(groups[0].defines["testvariable"], "foo", "readGroups() has wrong information")
+        finally:
+            utilityFunctions.removeDir(tempDir)
+
+    def test_readGroups13(self):
+        fileContents = textwrap.dedent("""
+                                       wrongParens, *, * (
+                                           ccompiler = gcc
+                                           cflags = -O0
+                                           testVariable = foo
+                                        )
+                                       """)
+        try:
+            tempDir = mdTestUtilities.makeTempDir()
+            filePath = mdTestUtilities.makeTempFile(tempDir, fileContents)
+            groups = overrides.readGroups(filePath)
+            self.assertEquals(groups, None, "readGroups() should have failed to read groups")
         finally:
             utilityFunctions.removeDir(tempDir)
 

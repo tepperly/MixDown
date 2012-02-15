@@ -94,7 +94,8 @@ class Tokenizer(object):
             token.value = line[0]
             line = line[1:]
         else:
-            logger.writeError("Tokenizer failed on: " + line, filePath=self.fileName, exitProgram=True)
+            logger.writeError("Tokenizer failed on: " + line, filePath=self.fileName)
+            return None, line
 
         line = line.lstrip()
         return token, line
@@ -107,8 +108,11 @@ class Tokenizer(object):
             while not EOF:
                 while currLine != "":
                     token, currLine = self._getToken(currLine, previousToken)
+                    if token == None:
+                        return False
                     previousToken = token
                     self.tokens.append(token)
                 currLine, EOF = self._getLine(f)
+            return True
         finally:
             f.close()
