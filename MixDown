@@ -23,7 +23,7 @@
 # Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 
 import multiprocessing, os, sys, tarfile, time, urllib
-from md import commands, defines, exceptions, importer, logger, options, overrides, project, utilityFunctions
+from md import commands, defines, exceptions, importer, logger, options, overrides, profiler, project, utilityFunctions
 
 #--------------------------------Main---------------------------------
 def main():
@@ -33,11 +33,13 @@ def main():
         succeeded = True
         partialImport = False
         mdOptions = options.Options()
+        mdProject = None
         if not mdOptions.processCommandline(sys.argv):
             sys.exit(1)
 
         if (not mdOptions.importMode or not mdOptions.targetsToImport) and\
-           not mdOptions.cleanMode and mdOptions.projectFile == "":
+           not mdOptions.cleanMode and mdOptions.projectFile == "" and\
+           not mdOptions.profileMode:
             mdOptions.printUsageAndExit("MixDown's mode could not be determined")
         timeStarted = time.time()
 
@@ -45,6 +47,8 @@ def main():
             mdProject, partialImport = importer.importTargets(mdOptions)
             if mdProject == None or partialImport:
                 succeeded = False
+        elif mdOptions.profileMode:
+            succeeded = profiler.profile(mdOptions)
         else:
             if mdOptions.cleanMixDown:
                 cleanMixDown(mdOptions)
@@ -124,7 +128,10 @@ def main():
         timeFinished = time.time()
         timeElapsed = timeFinished - timeStarted
 
-        message = "Project"
+        if mdOptions.profileMode:
+            message = "Profile"
+        else:
+            message = "Project"
         if mdProject != None:
             message += " " + mdProject.name
 
@@ -136,6 +143,8 @@ def main():
                 logger.writeMessage("\nProject " + mdProject.name + " has been imported to file " + mdProject.path)
             elif mdOptions.cleanMode:
                 logger.writeMessage("\n" + mdProject.name + " has been cleaned in " + os.path.abspath(mdOptions.buildDir))
+            elif mdOptions.profileMode:
+                logger.writeMessage("\nComputer has been profiled to file " + os.path.abspath(mdOptions.overrideFile))
             else:
                 logger.writeMessage("\n" + mdProject.name + " has been built in " + os.path.abspath(mdOptions.buildDir))
                 logger.writeMessage(mdProject.name + " has been installed to " + os.path.abspath(mdOptions.defines[defines.mdPrefix[0]]))

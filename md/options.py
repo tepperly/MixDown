@@ -44,6 +44,7 @@ class Options(object):
         self.optimizationGroupName = ""
         self.parallelGroupName = ""
         self.overrideGroup = None
+        self.overrideSearchPath = ["/usr/local", os.environ["HOME"]]
         self.defines = defines.Defines()
         defines.setPrefixDefines(self.defines, '/usr/local')
 
@@ -117,17 +118,13 @@ class Options(object):
             currFlag = currArg[:2].lower()
             currValue = currArg[2:]
 
-            if currFlag in ("-p", "-l", "-j", "-b", "-w", "-k", "-o", "-g"):
+            if currFlag in ("-p", "-l", "-j", "-b", "-w", "-k", "-o", "-g", "-v"):
                 logger.writeError("Command-line option is not allowed in import mode: " + currArg)
                 return False
             if currFlag == "-i":
                 if not validateOption(currFlag, currValue):
                     return False
                 self.interactive = True
-            elif currFlag == "-v":
-                if not validateOption(currFlag, currValue):
-                    return False
-                self.verbose = True
             else:
                 logger.writeError("File not found or command-line option not understood: " + currArg)
                 return False
@@ -136,6 +133,40 @@ class Options(object):
             self.printUsage()
             logger.writeError("No packages given when MixDown is in import mode")
             return False
+
+        return True
+
+    def __processProfileCommandline(self, commandline):
+        if len(commandline) < 2:
+            self.printUsage()
+            return False
+
+        self.verbose = True
+        for currArg in commandline[1:]:
+            if currArg.lower() in ("/help", "/h", "-help", "--help", "-h"):
+                self.printUsage()
+                return False
+            elif currArg == "--profile":
+                continue
+
+            currFlag = currArg[:2].lower()
+            currValue = currArg[2:]
+
+            if currFlag in ("-p", "-l", "-j", "-b", "-w", "-k", "-o", "-g", "-i", "-v"):
+                logger.writeError("Command-line option is not allowed in profile mode: " + currArg)
+                return False
+            elif currFlag == "-d":
+                if not validateOptionPair(currFlag, currValue):
+                    return False
+                self.overrideSearchPath = currValue
+            elif os.path.splitext(currArg)[1] == ".mdo":
+                if os.path.isfile(currArg):
+                    logger.writeError("Given override file name already exists: " + currArg)
+                    return False
+                self.overrideFile = currArg
+            else:
+                logger.writeError("File not found or command-line option not understood: " + currArg)
+                return False
 
         return True
 
@@ -152,10 +183,16 @@ class Options(object):
             elif loweredArg == "--clean":
                 self.cleanMode = True
                 self.cleanMixDown = False
+            elif loweredArg == "--profile":
+                self.profileMode = True
 
-        if self.cleanMode and self.importMode:
-                logger.writeError("MixDown cannot be in both import mode and clean mode")
+        if (self.cleanMode and (self.profileMode or self.importMode)) or\
+           (self.profileMode and (self.importMode or self.cleanMode)):
+                logger.writeError("MixDown cannot be in both two command-line modes at the same time. Run 'MixDown --help' for instructions.")
                 return False
+
+        if self.profileMode:
+            return self.__processProfileCommandline(commandline)
         if self.importMode:
             return self.__processImportCommandline(commandline)
 
