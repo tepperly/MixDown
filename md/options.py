@@ -29,6 +29,7 @@ class Options(object):
         self.buildDir = "mdBuild"
         self.downloadDir = "mdDownload"
         self.logDir = "mdLogFiles"
+        self.profileMode = False
         self.cleanMode = False
         self.cleanMixDown = True
         self.verbose = False
@@ -100,7 +101,6 @@ class Options(object):
             self.printUsage()
             return False
 
-        self.verbose = True
         for currArg in commandline[1:]:
             if currArg.lower() in ("/help", "/h", "-help", "--help", "-h"):
                 self.printUsage()
@@ -118,13 +118,17 @@ class Options(object):
             currFlag = currArg[:2].lower()
             currValue = currArg[2:]
 
-            if currFlag in ("-p", "-l", "-j", "-b", "-w", "-k", "-o", "-g", "-v"):
+            if currFlag in ("-p", "-l", "-j", "-b", "-w", "-k", "-o", "-g"):
                 logger.writeError("Command-line option is not allowed in import mode: " + currArg)
                 return False
             if currFlag == "-i":
                 if not validateOption(currFlag, currValue):
                     return False
                 self.interactive = True
+            elif currFlag == "-v":
+                if not validateOption(currFlag, currValue):
+                    return False
+                self.verbose = True
             else:
                 logger.writeError("File not found or command-line option not understood: " + currArg)
                 return False
