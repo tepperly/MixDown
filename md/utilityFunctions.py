@@ -65,9 +65,9 @@ def findShallowestFile(startPath, fileList):
     q = Queue.Queue()
     q.put(startPath)
     while not q.empty():
-        currPath = includeTrailingPathDelimiter(q.get())
+        currPath = q.get()
         for item in os.listdir(currPath):
-            itemPath = currPath + item
+            itemPath = os.path.join(currPath, item)
             if os.path.isdir(itemPath):
                 q.put(itemPath)
             elif item in fileList:
