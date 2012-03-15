@@ -20,7 +20,7 @@
 # along with this program; if not, write to the Free Software Foundation,
 # Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 
-import os, sys
+import os, socket, sys
 import defines, logger, target, utilityFunctions
 
 class Options(object):
@@ -40,12 +40,12 @@ class Options(object):
         self.prefixDefined = False
         self.skipSteps = ""
         self.threadCount = 1
-        self.overrideFile = ""
+        self.overrideFile = os.path.join(os.getcwd(), socket.gethostname() + ".mdo")
         self.compilerGroupName = ""
         self.optimizationGroupName = ""
         self.parallelGroupName = ""
         self.overrideGroup = None
-        self.overrideSearchPath = ["/usr/local", os.environ["HOME"]]
+        self.overrideSearchPath = []
         self.defines = defines.Defines()
         defines.setPrefixDefines(self.defines, '/usr/local')
 
@@ -162,7 +162,15 @@ class Options(object):
             elif currFlag == "-d":
                 if not validateOptionPair(currFlag, currValue):
                     return False
-                self.overrideSearchPath = currValue
+                paths = currValue.split(",")
+                for path in paths:
+                    self.overrideSearchPath.append((path, False))
+            elif currFlag == "-r":
+                if not validateOptionPair(currFlag, currValue):
+                    return False
+                paths = currValue.split(",")
+                for path in paths:
+                    self.overrideSearchPath.append((path, True))
             elif os.path.splitext(currArg)[1] == ".mdo":
                 if os.path.isfile(currArg):
                     logger.writeError("Given override file name already exists: " + currArg)
@@ -171,6 +179,9 @@ class Options(object):
             else:
                 logger.writeError("File not found or command-line option not understood: " + currArg)
                 return False
+
+        if len(self.overrideSearchPath) == 0:
+            self.overrideSearchPath = [("/usr/local/bin", False), ("/usr/bin", False)]
 
         return True
 
