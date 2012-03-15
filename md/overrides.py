@@ -42,6 +42,15 @@ class OverrideGroup(dict):
         self.parallel = ""
         self.defines = defines.Defines()
 
+    def __str__(self):
+        retStr = self.compiler + ", " + self.optimization + ", " + self.parallel + " {\n"
+        for key in self.keys():
+            retStr += "    " + key + " = " + self[key] + "\n"
+        for key in self.defines.keys():
+            retStr += "    " + key + " = " + self.defines[key] + "\n"
+        retStr += "}\n"
+        return retStr
+
     def __contains__(self, key):
         return defines.normalizeKey(key) in self.keys()
 
