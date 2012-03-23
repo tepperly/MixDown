@@ -70,7 +70,6 @@ def profile(mdOptions):
                 gnuGroup["objcxxcompiler"] = fullPath
             elif exe == "cpp":
                 gnuGroup["cpreprocessor"] = fullPath
-                gnuGroup["cxxpreprocessor"] = fullPath
                 gnuGroup["objccpreprocessor"] = fullPath
                 gnuGroup["objcxxpreprocessor"] = fullPath
             elif exe == "gfortran":
@@ -96,7 +95,12 @@ def profile(mdOptions):
             gnuGroup.optimization = "*"
             gnuGroup.parallel = "*"
             overrideGroups.append(gnuGroup)
+            addGnuOptimizationGroup(overrideGroups, gnuGroup)
         if len(intelGroup) > 0:
+            #Do this to stop the creation of intel groups if only cpp is found
+            if "cpp" in groups[key]:
+                intelGroup["cpreprocessor"] = fullPath
+
             intelGroup.compiler = os.path.join(key, "INTEL")
             intelGroup.optimization = "*"
             intelGroup.parallel = "*"
@@ -108,3 +112,41 @@ def profile(mdOptions):
     outFile.close()
 
     return True
+
+def addGnuOptimizationGroup(groups, compilerGroup):
+    debugGroup = overrides.OverrideGroup()
+    debugGroup.compiler = compilerGroup.compiler
+    debugGroup.optimization = "debug"
+    debugGroup.parallel = "*"
+
+    releaseGroup = overrides.OverrideGroup()
+    releaseGroup.compiler = compilerGroup.compiler
+    releaseGroup.optimization = "release"
+    releaseGroup.parallel = "*"
+
+    gccDebugFlags = "-g -O0 -Wall"
+    gccReleaseFlags = "-O2 -Wall"
+    if compilerGroup.has_key("ccompiler"):
+        debugGroup["cflags"] = gccDebugFlags
+        releaseGroup["cflags"] = gccReleaseFlags
+    if compilerGroup.has_key("cxxcompiler"):
+        debugGroup["cxxflags"] = gccDebugFlags
+        releaseGroup["cxxflags"] = gccReleaseFlags
+    if compilerGroup.has_key("objccompiler"):
+        debugGroup["objcflags"] = gccDebugFlags
+        releaseGroup["objcflags"] = gccReleaseFlags
+    if compilerGroup.has_key("objcxxcompiler"):
+        debugGroup["objcxxflags"] = gccDebugFlags
+        releaseGroup["objcxxflags"] = gccReleaseFlags
+    if compilerGroup.has_key("cpreprocessor"):
+        debugGroup["cppflags"] = "-Wall"
+        releaseGroup["cppflags"] = "-Wall"
+    if compilerGroup.has_key("fcompiler"):
+        debugGroup["fflags"] = "-Wall"
+        releaseGroup["fflags"] = "-Wall"
+    if compilerGroup.has_key("f77compiler"):
+        debugGroup["f77flags"] = "-Wall"
+        releaseGroup["f77flags"] = "-Wall"
+
+    groups.append(debugGroup)
+    groups.append(releaseGroup)
