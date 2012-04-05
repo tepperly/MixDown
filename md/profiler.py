@@ -105,6 +105,7 @@ def profile(mdOptions):
             intelGroup.optimization = "*"
             intelGroup.parallel = "*"
             overrideGroups.append(intelGroup)
+            addIntelOptimizationGroup(overrideGroups, intelGroup)
 
     outFile = open(mdOptions.overrideFile, "w")
     for group in overrideGroups:
@@ -147,6 +148,38 @@ def addGnuOptimizationGroup(groups, compilerGroup):
     if compilerGroup.has_key("f77compiler"):
         debugGroup["f77flags"] = "-Wall"
         releaseGroup["f77flags"] = "-Wall"
+
+    groups.append(debugGroup)
+    groups.append(releaseGroup)
+
+def addIntelOptimizationGroup(groups, compilerGroup):
+    debugGroup = overrides.OverrideGroup()
+    debugGroup.compiler = compilerGroup.compiler
+    debugGroup.optimization = "debug"
+    debugGroup.parallel = "*"
+
+    releaseGroup = overrides.OverrideGroup()
+    releaseGroup.compiler = compilerGroup.compiler
+    releaseGroup.optimization = "release"
+    releaseGroup.parallel = "*"
+
+    iccDebugFlags = "-debug full -O0 -Wall"
+    iccReleaseFlags = "-debug none -O2 -Wall"
+    if compilerGroup.has_key("ccompiler"):
+        debugGroup["cflags"] = iccDebugFlags
+        releaseGroup["cflags"] = iccReleaseFlags
+    if compilerGroup.has_key("cxxcompiler"):
+        debugGroup["cxxflags"] = iccDebugFlags
+        releaseGroup["cxxflags"] = iccReleaseFlags
+    if compilerGroup.has_key("cpreprocessor"):
+        debugGroup["cppflags"] = "-Wall"
+        releaseGroup["cppflags"] = "-Wall"
+    if compilerGroup.has_key("fcompiler"):
+        debugGroup["fflags"] = "-O0 -warn all"
+        releaseGroup["fflags"] = "-O2 -warn all"
+    if compilerGroup.has_key("f77compiler"):
+        debugGroup["f77flags"] = "-O0 -warn all"
+        releaseGroup["f77flags"] = "-O2 -warn all"
 
     groups.append(debugGroup)
     groups.append(releaseGroup)
