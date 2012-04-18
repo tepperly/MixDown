@@ -43,8 +43,9 @@ def findExecutables(dirPairs, exeWildCards):
 def profile(mdOptions):
     gnuList = ["gcc", "gobjc", "cpp", "g++", "gfortran", "g77"]
     intelList = ["icc", "icl", "ifort", "ifc"]
+    pathscaleList = ["pathCC", "pathcc", "pathf90"]
 
-    exes = findExecutables(mdOptions.overrideSearchPath, gnuList + intelList)
+    exes = findExecutables(mdOptions.overrideSearchPath, gnuList + intelList + pathscaleList)
 
     groups = {}
     for currPath in exes:
@@ -58,6 +59,7 @@ def profile(mdOptions):
     for key in groups.keys():
         gnuGroup = overrides.OverrideGroup()
         intelGroup = overrides.OverrideGroup()
+        pathscaleGroup = overrides.OverrideGroup()
         for exe in groups[key]:
             fullPath = os.path.join(key, exe)
             #GNU
@@ -89,6 +91,13 @@ def profile(mdOptions):
             elif exe == "ifc" and not intelGroup.has_key("fcompiler"):
                 intelGroup["fcompiler"] = fullPath
                 intelGroup["f77compiler"] = fullPath
+            #Pathscale
+            elif exe == "pathCC":
+                pathscaleGroup["cxxcompiler"] = fullPath
+            elif exe == "pathcc":
+                pathscaleGroup["ccompiler"] = fullPath
+            elif exe == "pathf90":
+                pathscaleGroup["fcompiler"] = fullPath
 
         if len(gnuGroup) > 0:
             gnuGroup.compiler = os.path.join(key, "GNU")
@@ -106,6 +115,16 @@ def profile(mdOptions):
             intelGroup.parallel = "*"
             overrideGroups.append(intelGroup)
             addIntelOptimizationGroup(overrideGroups, intelGroup)
+        if len(pathscaleGroup) > 0:
+            #Do this to stop the creation of intel groups if only cpp is found
+            if "cpp" in groups[key]:
+                pathscaleGroup["cpreprocessor"] = fullPath
+
+            pathscaleGroup.compiler = os.path.join(key, "PATHSCALE")
+            pathscaleGroup.optimization = "*"
+            pathscaleGroup.parallel = "*"
+            overrideGroups.append(pathscaleGroup)
+            addPathscaleOptimizationGroup(overrideGroups, pathscaleGroup)
 
     outFile = open(mdOptions.overrideFile, "w")
     for group in overrideGroups:
@@ -180,6 +199,35 @@ def addIntelOptimizationGroup(groups, compilerGroup):
     if compilerGroup.has_key("f77compiler"):
         debugGroup["f77flags"] = "-O0 -warn all"
         releaseGroup["f77flags"] = "-O2 -warn all"
+
+    groups.append(debugGroup)
+    groups.append(releaseGroup)
+
+def addPathscaleOptimizationGroup(groups, compilerGroup):
+    debugGroup = overrides.OverrideGroup()
+    debugGroup.compiler = compilerGroup.compiler
+    debugGroup.optimization = "debug"
+    debugGroup.parallel = "*"
+
+    releaseGroup = overrides.OverrideGroup()
+    releaseGroup.compiler = compilerGroup.compiler
+    releaseGroup.optimization = "release"
+    releaseGroup.parallel = "*"
+
+    pathDebugFlags = "-g -O0 -Wall"
+    pathReleaseFlags = "-O2 -Wall"
+    if compilerGroup.has_key("ccompiler"):
+        debugGroup["cflags"] = pathDebugFlags
+        releaseGroup["cflags"] = pathReleaseFlags
+    if compilerGroup.has_key("cxxcompiler"):
+        debugGroup["cxxflags"] = pathDebugFlags
+        releaseGroup["cxxflags"] = pathReleaseFlags
+    if compilerGroup.has_key("cpreprocessor"):
+        debugGroup["cppflags"] = "-Wall"
+        releaseGroup["cppflags"] = "-Wall"
+    if compilerGroup.has_key("fcompiler"):
+        debugGroup["fflags"] = pathDebugFlags
+        releaseGroup["fflags"] = pathReleaseFlags
 
     groups.append(debugGroup)
     groups.append(releaseGroup)
