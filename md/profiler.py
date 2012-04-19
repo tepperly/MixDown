@@ -43,7 +43,8 @@ def findExecutables(dirPairs, exeWildCards):
 def profile(mdOptions):
     gnuList = ["gcc", "gobjc", "cpp", "g++", "gfortran", "g77"]
     intelList = ["icc", "icl", "ifort", "ifc"]
-    pathscaleList = ["pathCC", "pathcc", "pathf90"]
+    pathscaleList = ["pathCC", "pathcc", "pathf90", "pathf95"]
+    portlandGroupList = ["pgcc", "pgCC", "pgf77", "pgf95"]
 
     exes = findExecutables(mdOptions.overrideSearchPath, gnuList + intelList + pathscaleList)
 
@@ -60,6 +61,7 @@ def profile(mdOptions):
         gnuGroup = overrides.OverrideGroup()
         intelGroup = overrides.OverrideGroup()
         pathscaleGroup = overrides.OverrideGroup()
+        portlandGroupGroup = overrides.OverrideGroup()
         for exe in groups[key]:
             fullPath = os.path.join(key, exe)
             #GNU
@@ -92,12 +94,25 @@ def profile(mdOptions):
                 intelGroup["fcompiler"] = fullPath
                 intelGroup["f77compiler"] = fullPath
             #Pathscale
-            elif exe == "pathCC":
-                pathscaleGroup["cxxcompiler"] = fullPath
             elif exe == "pathcc":
                 pathscaleGroup["ccompiler"] = fullPath
-            elif exe == "pathf90":
+            elif exe == "pathCC":
+                pathscaleGroup["cxxcompiler"] = fullPath
+            elif exe == "pathf90" and not pathscaleGroup.has_key("fcompiler"):
+                pathscaleGroup["f77compiler"] = fullPath
                 pathscaleGroup["fcompiler"] = fullPath
+            elif exe == "pathf95":
+                pathscaleGroup["f77compiler"] = fullPath
+                pathscaleGroup["fcompiler"] = fullPath
+            #Portland Group
+            elif exe == "pgcc":
+                portlandGroupGroup["ccompiler"] = fullPath
+            elif exe == "pgCC":
+                portlandGroupGroup["cxxcompiler"] = fullPath
+            elif exe == "pgf77":
+                portlandGroupGroup["f77compiler"] = fullPath
+            elif exe == "pgf95":
+                portlandGroupGroup["fcompiler"] = fullPath
 
         if len(gnuGroup) > 0:
             gnuGroup.compiler = os.path.join(key, "GNU")
@@ -116,7 +131,7 @@ def profile(mdOptions):
             overrideGroups.append(intelGroup)
             addIntelOptimizationGroup(overrideGroups, intelGroup)
         if len(pathscaleGroup) > 0:
-            #Do this to stop the creation of intel groups if only cpp is found
+            #Do this to stop the creation of pathscale groups if only cpp is found
             if "cpp" in groups[key]:
                 pathscaleGroup["cpreprocessor"] = fullPath
 
@@ -125,6 +140,16 @@ def profile(mdOptions):
             pathscaleGroup.parallel = "*"
             overrideGroups.append(pathscaleGroup)
             addPathscaleOptimizationGroup(overrideGroups, pathscaleGroup)
+        if len(portlandGroupGroup) > 0:
+            #Do this to stop the creation of Portland Group groups if only cpp is found
+            if "cpp" in groups[key]:
+                portlandGroupGroup["cpreprocessor"] = fullPath
+
+            portlandGroupGroup.compiler = os.path.join(key, "PATHSCALE")
+            portlandGroupGroup.optimization = "*"
+            portlandGroupGroup.parallel = "*"
+            overrideGroups.append(portlandGroupGroup)
+            addPortlandGroupOptimizationGroup(overrideGroups, portlandGroupGroup)
 
     outFile = open(mdOptions.overrideFile, "w")
     for group in overrideGroups:
@@ -228,6 +253,35 @@ def addPathscaleOptimizationGroup(groups, compilerGroup):
     if compilerGroup.has_key("fcompiler"):
         debugGroup["fflags"] = pathDebugFlags
         releaseGroup["fflags"] = pathReleaseFlags
+
+    groups.append(debugGroup)
+    groups.append(releaseGroup)
+
+def addPortlandGroupOptimizationGroup(groups, compilerGroup):
+    debugGroup = overrides.OverrideGroup()
+    debugGroup.compiler = compilerGroup.compiler
+    debugGroup.optimization = "debug"
+    debugGroup.parallel = "*"
+
+    releaseGroup = overrides.OverrideGroup()
+    releaseGroup.compiler = compilerGroup.compiler
+    releaseGroup.optimization = "release"
+    releaseGroup.parallel = "*"
+
+    portlandDebugFlags = "-g -O0"
+    portlandReleaseFlags = "-O2"
+    if compilerGroup.has_key("ccompiler"):
+        debugGroup["cflags"] = portlandDebugFlags
+        releaseGroup["cflags"] = portlandReleaseFlags
+    if compilerGroup.has_key("cxxcompiler"):
+        debugGroup["cxxflags"] = portlandDebugFlags
+        releaseGroup["cxxflags"] = portlandReleaseFlags
+    if compilerGroup.has_key("cpreprocessor"):
+        debugGroup["cppflags"] = "-Wall"
+        releaseGroup["cppflags"] = "-Wall"
+    if compilerGroup.has_key("fcompiler"):
+        debugGroup["fflags"] = portlandDebugFlags
+        releaseGroup["fflags"] = portlandReleaseFlags
 
     groups.append(debugGroup)
     groups.append(releaseGroup)
