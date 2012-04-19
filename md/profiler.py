@@ -145,7 +145,7 @@ def profile(mdOptions):
             if "cpp" in groups[key]:
                 portlandGroupGroup["cpreprocessor"] = fullPath
 
-            portlandGroupGroup.compiler = os.path.join(key, "PATHSCALE")
+            portlandGroupGroup.compiler = os.path.join(key, "PORTLANDGROUP")
             portlandGroupGroup.optimization = "*"
             portlandGroupGroup.parallel = "*"
             overrideGroups.append(portlandGroupGroup)
