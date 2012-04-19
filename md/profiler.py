@@ -45,8 +45,9 @@ def profile(mdOptions):
     intelList = ["icc", "icl", "ifort", "ifc"]
     pathscaleList = ["pathCC", "pathcc", "pathf90", "pathf95"]
     portlandGroupList = ["pgcc", "pgCC", "pgf77", "pgf95"]
+    fullExeList = gnuList + intelList + pathscaleList + portlandGroupList
 
-    exes = findExecutables(mdOptions.overrideSearchPath, gnuList + intelList + pathscaleList)
+    exes = findExecutables(mdOptions.overrideSearchPath, fullExeList)
 
     groups = {}
     for currPath in exes:
