@@ -327,6 +327,19 @@ class Options(object):
             print "Error: " + errorStr + "\n"
 
         print "\
+    Profile Mode: \n\
+        Example Usage: MixDown --profile\n\
+    \n\
+        Required:\n\
+        --profile                 Toggle Profile mode\n\
+    \n\
+        Optional:\n\
+        -d<list>      List of non-recursive search directories (comma-delimited)\n\
+           Example: -d/home/foo/bin,/usr/local/bin\n\
+        -r            List of recursive search directories (comma-delimited)\n\
+           Example: -r/home/foo/bin,/usr/local/bin\n\
+        <.mdo output file>   Path to outputted MixDown override group file\n\
+    \n\
     Import Mode: \n\
         Example Usage: MixDown --import foo.tar.gz http://path/to/bar\n\
     \n\
