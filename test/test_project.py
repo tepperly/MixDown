@@ -198,6 +198,50 @@ class Test_project(unittest.TestCase):
         finally:
             utilityFunctions.removeDir(tempDir)
 
+    def test_readProjectInvalidDependsCase1(self):
+        projectFileContents = textwrap.dedent("""
+                                            Name: a
+                                            Path: a-1.11.tar.gz
+                                            DependsOn: b c
+
+                                            Name: b
+                                            Path: b-2.22.tar.gz
+                                            DependsOn: c
+
+                                            Name: c
+                                            Path: c-3.33.tar.gz
+                                            """)
+        try:
+            tempDir = mdTestUtilities.makeTempDir()
+            projectFilePath = mdTestUtilities.makeTempFile(tempDir, projectFileContents, ".md")
+            projects = project.Project(projectFilePath)
+            option = options.Options()
+            self.assertEquals(projects.read(), False, "Project file read should have failed")
+        finally:
+            utilityFunctions.removeDir(tempDir)
+
+    def test_readProjectInvalidDependsCase2(self):
+        projectFileContents = textwrap.dedent("""
+                                            Name: a
+                                            Path: a-1.11.tar.gz
+                                            DependsOn: b+c
+
+                                            Name: b
+                                            Path: b-2.22.tar.gz
+                                            DependsOn: c
+
+                                            Name: c
+                                            Path: c-3.33.tar.gz
+                                            """)
+        try:
+            tempDir = mdTestUtilities.makeTempDir()
+            projectFilePath = mdTestUtilities.makeTempFile(tempDir, projectFileContents, ".md")
+            projects = project.Project(projectFilePath)
+            option = options.Options()
+            self.assertEquals(projects.read(), False, "Project file read should have failed")
+        finally:
+            utilityFunctions.removeDir(tempDir)
+
     def test_validateSingleTargetProjectWithSteps(self):
         projectFileContents = textwrap.dedent("""
                                             Name: a

@@ -178,6 +178,9 @@ class Project(object):
                                 dependsOnList = utilityFunctions.stripItemsInList(currPair[1].split(","))
                                 normalizedName = target.normalizeName(currTarget.name)
                                 for dependency in dependsOnList:
+                                    if not dependency.isalnum():
+                                        logger.writeError("Dependancy name, '" + dependency + "', found with invalid character. Only alphanumeric is allowed.", currTarget.name, "", self.path, lineCount)
+                                        return False
                                     if target.normalizeName(dependency) == normalizedName:
                                         logger.writeError("Project targets cannot depend on themselves", currTarget.name, "", self.path, lineCount)
                                         return False
