@@ -20,7 +20,7 @@
 # along with this program; if not, write to the Free Software Foundation,
 # Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 
-import os, collections, errno, Queue
+import os, collections, errno, re, Queue
 import commands, defines, exceptions, logger, target, utilityFunctions
 
 class Project(object):
@@ -178,7 +178,7 @@ class Project(object):
                                 dependsOnList = utilityFunctions.stripItemsInList(currPair[1].split(","))
                                 normalizedName = target.normalizeName(currTarget.name)
                                 for dependency in dependsOnList:
-                                    if not dependency.isalnum():
+                                    if not re.match(r'[\w\.+_\-]+$', dependency):
                                         logger.writeError("Dependancy name, '" + dependency + "', found with invalid character. Only alphanumeric is allowed.", currTarget.name, "", self.path, lineCount)
                                         return False
                                     if target.normalizeName(dependency) == normalizedName:

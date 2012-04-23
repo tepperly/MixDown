@@ -224,7 +224,7 @@ class Test_project(unittest.TestCase):
         projectFileContents = textwrap.dedent("""
                                             Name: a
                                             Path: a-1.11.tar.gz
-                                            DependsOn: b+c
+                                            DependsOn: b{c
 
                                             Name: b
                                             Path: b-2.22.tar.gz
