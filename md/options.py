@@ -40,7 +40,7 @@ class Options(object):
         self.prefixDefined = False
         self.skipSteps = ""
         self.threadCount = 1
-        self.overrideFile = os.path.join(os.getcwd(), socket.gethostname() + ".mdo")
+        self.overrideFile = ""
         self.compilerGroupName = ""
         self.optimizationGroupName = ""
         self.parallelGroupName = ""
@@ -182,6 +182,8 @@ class Options(object):
 
         if len(self.overrideSearchPath) == 0:
             self.overrideSearchPath = [("/usr/local/bin", False), ("/usr/bin", False)]
+        if self.overrideFile == "":
+            self.overrideFile = os.path.join(os.getcwd(), socket.gethostname() + ".mdo")
 
         return True
 
