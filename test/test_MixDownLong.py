@@ -28,7 +28,7 @@ from md import logger, utilityFunctions
 class Test_MixDownLong(unittest.TestCase):
     def test_subversion(self):
         svnURL = "http://subversion.tigris.org/downloads/subversion-1.6.12.tar.bz2"
-        aprURL = "http://mirror.candidhosting.com/pub/apache/apr/apr-1.4.5.tar.bz2"
+        aprURL = "http://mirror.candidhosting.com/pub/apache/apr/apr-1.4.6.tar.bz2"
         aprUtilURL = "http://mirror.candidhosting.com/pub/apache//apr/apr-util-1.3.12.tar.gz"
         neonURL = "http://www.webdav.org/neon/neon-0.29.5.tar.gz"
         sqliteURL = "http://www.sqlite.org/sqlite-autoconf-3070500.tar.gz"
