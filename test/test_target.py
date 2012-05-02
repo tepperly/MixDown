@@ -20,7 +20,8 @@
 # along with this program; if not, write to the Free Software Foundation,
 # Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 
-import os, sys, unittest, mdTestUtilities
+import os, shutil, sys, unittest
+import mdTestUtilities
 
 if not ".." in sys.path:
     sys.path.append("..")
@@ -28,6 +29,18 @@ if not ".." in sys.path:
 from md import cvs, defines, svn, git, hg, logger, options, target, utilityFunctions
 
 class Test_target(unittest.TestCase):
+    def test_targetPathToName01(self):
+        try:
+            tempDir = mdTestUtilities.makeTempDir()
+            tarDir, tarName = mdTestUtilities.createBzipFile(tempDir)
+            tarPath = os.path.join(tempDir, tarName)
+            path = os.path.join(tempDir, "apr-1.4.5.tar.bz2")
+            shutil.move(tarPath, path)
+            name = target.targetPathToName(path)
+            self.assertEquals(name, "apr", "Wrong name returned")
+        finally:
+            utilityFunctions.removeDir(tempDir)
+
     def test_determineOutputPath1(self):
         option = options.Options()
         option.buildDir = "."
