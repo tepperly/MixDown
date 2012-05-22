@@ -29,12 +29,13 @@ class Options(object):
         self.buildDir = "mdBuild"
         self.downloadDir = "mdDownload"
         self.logDir = "mdLogFiles"
+        self.statusLogPath = "/tmp/mixdown-statusLog"
         self.profileMode = False
         self.cleanMode = False
+        self.importMode = False
         self.cleanMixDown = True
         self.verbose = False
         self.logger = "file"
-        self.importMode = False
         self.targetsToImport = []
         self.interactive = False
         self.prefixDefined = False

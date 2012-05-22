@@ -64,7 +64,7 @@ class LoggerConsole(logger.LoggerBase):
 
     def reportSuccess(self, targetName="", targetStep="", timeInSeconds=0):
         messagePrefix = self.__formatMessagePrefix(targetName, targetStep)
-        message = messagePrefix + "Succeeded\n"
+        message = messagePrefix + "success\n"
         if timeInSeconds != 0:
             message += messagePrefix + "Time " + logger.secondsToHMS(timeInSeconds) + "\n"
         self._writeStdOut(message)

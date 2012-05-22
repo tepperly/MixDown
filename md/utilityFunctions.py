@@ -24,6 +24,11 @@ import fileinput
 
 import os, Queue, re, shutil, subprocess, sys, tarfile, tempfile, urllib, urllib2, zipfile
 
+def boolToStr(s):
+    if s.lower() == "true":
+        return True
+    return False
+
 def downloadFile(URL, downloadDir):
     filePath = os.path.join(downloadDir, URLToFilename(URL))
     if not os.path.exists(downloadDir):

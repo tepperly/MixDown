@@ -74,7 +74,7 @@ class Target(object):
         self._skipSteps = []
         self.pythonCallInfo = python.PythonCallInfo()
         self.buildSteps = []
-        self.succeeded = False
+        self.success = False
 
     def validate(self, mdOptions):
         normalizedName = normalizeName(self.name)
@@ -162,7 +162,7 @@ class Target(object):
 
     def findBuildStep(self, name):
         for buildStep in self.buildSteps:
-            if buildStep.name == name:
+            if buildStep.name.lower() == name.lower():
                 return buildStep
         return None
 

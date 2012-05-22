@@ -35,6 +35,113 @@ class Project(object):
         self.__examined = False
         self.defines = defines.Defines()
 
+    def writeStatusLog(self, options):
+        fd = open(options.statusLogPath, 'w')
+        try:
+            fd.write("path:" + self.path + "\n")
+            fd.write("buildDir:" + options.buildDir + "\n")
+            fd.write("prefix" + ":" + os.path.abspath(options.defines[defines.mdPrefix[0]]) + ":" + str(options.prefixDefined) + "\n")
+            fd.write("\n")
+
+            for target in self.targets:
+                fd.write(target.name + ":" + str(target.success) + "\n")
+                for step in target.buildSteps:
+                    if step.command == "":
+                        fd.write(step.name + "::True\n")
+                    else:
+                        fd.write(step.name + ":" + step.command + ":" + str(step.success) + "\n")
+                fd.write("\n")
+            fd.flush()
+        finally:
+            fd.close()
+
+    def __getStatusLogLine(self, fd, lineCount):
+        while True:
+            l = fd.readline()
+            lineCount += 1
+            if l == "":
+                return [], lineCount, True
+            l = l.strip()
+            if l == "":
+                continue
+            else:
+                break
+        l = l.split(':')
+        return l, lineCount, False
+
+    def __assureEqualsInStatusLog(self, l, name, value):
+        #Note just get rid of this function.....
+        if l[0].lower() != name.lower():
+            logger.writeError("Unknown line in status log:\n" + ':'.join(l), filePath="options.statusLogPath")
+            return False
+        if l[1] != value:
+            return False
+        return True
+
+    def readStatusLog(self, options):
+        lineCount = 0
+        if not os.path.exists(options.statusLogPath) or not os.path.isfile(options.statusLogPath):
+            return True
+
+        fd = open(options.statusLogPath, 'r')
+        try:
+            #path:<self.path>
+            l, lineCount, EOF = self.__getStatusLogLine(fd, lineCount)
+            if EOF:
+                return False
+            if len(l) != 2:
+                logger.writeError("Unknown line in status log:\n" + ':'.join(l), filePath="options.statusLogPath", lineNumber=lineCount)
+                return False
+            if not self.__assureEqualsInStatusLog(l, "path", self.path):
+                return False
+            #buildDir:<options.buildDir>
+            l, lineCount, EOF = self.__getStatusLogLine(fd, lineCount)
+            if EOF:
+                return False
+            if len(l) != 2:
+                logger.writeError("Unknown line in status log:\n" + ':'.join(l), filePath="options.statusLogPath", lineNumber=lineCount)
+                return False
+            if not self.__assureEqualsInStatusLog(l, "buildDir", options.buildDir):
+                return False
+            #prefix:<prefix>:<defined>
+            l, lineCount, EOF = self.__getStatusLogLine(fd, lineCount)
+            if EOF:
+                return False
+            if len(l) != 3:
+                logger.writeError("Unknown line in status log:\n" + ':'.join(l), filePath="options.statusLogPath", lineNumber=lineCount)
+                return False
+            if not self.__assureEqualsInStatusLog(l, "prefix", os.path.abspath(options.defines[defines.mdPrefix[0]])):
+                return False
+            if l[2] != str(options.prefixDefined):
+                return False
+
+            #Target groups: one target line followed by multiple step lines
+            #<target.name>:<success>
+            #<step.name>:<step.command>:<step.success>
+            while True:
+                l, lineCount, EOF = self.__getStatusLogLine(fd, lineCount)
+                if EOF:
+                    break
+                if len(l) == 2:
+                    currTarget = self.getTarget(l[0])
+                    if currTarget == None:
+                        logger.writeError("Unknown line in status log:\n" + ':'.join(l), filePath="options.statusLogPath", lineNumber=lineCount)
+                        continue
+                    currTarget.success = utilityFunctions.boolToStr(l[1])
+                elif len(l) == 3:
+                    if currTarget == None:
+                        continue
+                    currStep = currTarget.findBuildStep(l[0])
+                    if currStep == None:
+                        continue
+                    currStep.success = utilityFunctions.boolToStr(l[2])
+                    if currStep.command != l[1]:
+                        currStep.success = False
+                else:
+                    logger.writeError("Unknown line in status log:\n" + ':'.join(l), filePath="options.statusLogPath", lineNumber=lineCount)
+        finally:
+            fd.close()
+
     def addSkipStepFromOptions(self, options):
         if options.skipSteps == '' or options.skipSteps == None:
             return True

@@ -30,7 +30,7 @@ def main():
     logger.setLogger("console")
     logger.writeMessage("MixDown - A tool to simplify building\n")
     try:
-        succeeded = True
+        success = True
         partialImport = False
         mdOptions = options.Options()
         mdProject = None
@@ -46,9 +46,9 @@ def main():
         if mdOptions.importMode:
             mdProject, partialImport = importer.importTargets(mdOptions)
             if mdProject == None or partialImport:
-                succeeded = False
+                success = False
         elif mdOptions.profileMode:
-            succeeded = profiler.profile(mdOptions)
+            success = profiler.profile(mdOptions)
         else:
             if mdOptions.cleanMixDown:
                 cleanMixDown(mdOptions)
@@ -70,8 +70,9 @@ def main():
 
             mdProject = setup(mdOptions)
             if mdProject == None:
-                succeeded = False
+                success = False
             else:
+                mdProject.readStatusLog(mdOptions)
                 #Define Hierarchy: options defines <  project defines < override group defines
                 mdOptions.defines.combine(mdProject.defines)
                 if mdOptions.overrideGroup:
@@ -80,8 +81,8 @@ def main():
                 if mdOptions.threadCount == 1:
                     for target in reversed(mdProject.targets):
                         commands.buildTarget(target, mdOptions)
-                        if target.succeeded == False:
-                            succeeded = False
+                        if target.success == False:
+                            success = False
                             break
                 else:
                     lock = multiprocessing.RLock()
@@ -118,11 +119,11 @@ def main():
                             mdProject.replaceTarget(resultTarget)
 
                         for target in reversed(mdProject.targets):
-                            if target.dependencyDepth == currDepth and not target.succeeded:
+                            if target.dependencyDepth == currDepth and not target.success:
                                 if jobCount != 1:
                                     logger.writeError(target.name + " failed.  Due to threading, you may need to scroll up to read error message.")
-                                succeeded = False
-                        if not succeeded:
+                                success = False
+                        if not success:
                             break
 
         timeFinished = time.time()
@@ -135,10 +136,13 @@ def main():
         if mdProject != None:
             message += " " + mdProject.name
 
-        if not succeeded:
+        if mdProject != None and not mdOptions.importMode and not mdOptions.cleanMode and not mdOptions.profileMode:
+            mdProject.writeStatusLog(mdOptions)
+
+        if not success:
             message += " failed."
         else:
-            message += " succeeded."
+            message += " success."
             if mdOptions.importMode:
                 logger.writeMessage("\nProject " + mdProject.name + " has been imported to file " + mdProject.path)
             elif mdOptions.cleanMode:
@@ -155,10 +159,10 @@ def main():
     except exceptions.ToolNotInstalledException, e:
         logger.writeError("%s not found." % e.tool)
         logger.writeError("This project requires that %s is installed on your system." % e.tool)
-        succeeded = False
+        success = False
     finally:
         logger.close()
-    if succeeded:
+    if success:
         sys.exit()
     else:
         sys.exit(1)

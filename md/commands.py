@@ -27,8 +27,9 @@ class BuildStep(object):
     def __init__(self, name="", command=""):
         self.name = name
         self.command = command
+        self.success = False
 
-buildSteps = ["fetch", "unpack", "patch", "preconfig", "config", "build", "install", "clean"]
+buildSteps = ["fetch", "unpack", "patch", "preconfig", "config", "build", "test", "install", "clean"]
 
 def buildStepActor(target, buildStep, options, lock=None):
     try:
@@ -74,6 +75,7 @@ def buildStepActor(target, buildStep, options, lock=None):
     timeElapsed = timeFinished - timeStart
 
     if returnCode != 0:
+        buildStep.success = False
         try:
             if lock:
                 lock.acquire()
@@ -83,6 +85,7 @@ def buildStepActor(target, buildStep, options, lock=None):
                 lock.release()
         return False
 
+    buildStep.success = True
     try:
         if lock:
             lock.acquire()
@@ -95,13 +98,13 @@ def buildStepActor(target, buildStep, options, lock=None):
 def buildTarget(target, options, lock=None):
     if options.cleanMode:
         cleanStep = target.findBuildStep("clean")
-        target.succeeded = buildStepActor(target, cleanStep, options, lock)
+        target.success = buildStepActor(target, cleanStep, options, lock)
     else:
         for buildStep in target.buildSteps:
             if buildStep.name == "clean" or buildStep.command == "":
                 continue
-            target.succeeded = buildStepActor(target, buildStep, options, lock)
-            if not target.succeeded:
+            target.success = buildStepActor(target, buildStep, options, lock)
+            if not target.success:
                 break
 
 def buildTargetThreaded(jobQueue, resultQueue, options, lock):
