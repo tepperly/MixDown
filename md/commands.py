@@ -32,16 +32,6 @@ class BuildStep(object):
 buildSteps = ["fetch", "unpack", "patch", "preconfig", "config", "build", "test", "install", "clean"]
 
 def buildStepActor(target, buildStep, options, lock=None):
-    try:
-        if lock:
-            lock.acquire()
-        logger.reportStart(target.name, buildStep.name)
-    finally:
-        if lock:
-            lock.release()
-    returnCode = None
-
-    timeStart = time.time()
     if target.isStepToBeSkipped(buildStep.name):
         try:
             if lock:
@@ -52,6 +42,26 @@ def buildStepActor(target, buildStep, options, lock=None):
                 lock.release()
         return True
 
+    if target.isStepPreviouslyDone(buildStep.name):
+        try:
+            if lock:
+                lock.acquire()
+            logger.reportSkipped(target.name, buildStep.name, "Build step successfully built in previous MixDown build")
+        finally:
+            if lock:
+                lock.release()
+        return True
+
+    try:
+        if lock:
+            lock.acquire()
+        logger.reportStart(target.name, buildStep.name)
+    finally:
+        if lock:
+            lock.release()
+    returnCode = None
+
+    timeStart = time.time()
     command = options.defines.expand(buildStep.command)
     isPythonCommand, namespace, function = python.parsePythonCommand(command)
     if isPythonCommand:
@@ -100,12 +110,15 @@ def buildTarget(target, options, lock=None):
         cleanStep = target.findBuildStep("clean")
         target.success = buildStepActor(target, cleanStep, options, lock)
     else:
-        for buildStep in target.buildSteps:
-            if buildStep.name == "clean" or buildStep.command == "":
-                continue
-            target.success = buildStepActor(target, buildStep, options, lock)
-            if not target.success:
-                break
+        if target.success:
+            logger.reportSkipped(target.name, "", "Target successfully built in previous MixDown build")
+        else:
+            for buildStep in target.buildSteps:
+                if buildStep.name == "clean" or buildStep.command == "":
+                    continue
+                target.success = buildStepActor(target, buildStep, options, lock)
+                if not target.success:
+                    break
 
 def buildTargetThreaded(jobQueue, resultQueue, options, lock):
     target = None
