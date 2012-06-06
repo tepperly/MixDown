@@ -98,7 +98,7 @@ class LoggerFile(logger.LoggerBase):
 
     def reportSuccess(self, targetName="", targetStep="", timeInSeconds=0):
         messagePrefix = self.__formatMessagePrefix(targetName, targetStep)
-        message = messagePrefix + "success"
+        message = messagePrefix + "Succeeded"
         if timeInSeconds != 0:
             message += " in " + logger.secondsToHMS(timeInSeconds)
         message += ".\n"
