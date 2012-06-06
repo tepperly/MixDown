@@ -36,6 +36,10 @@ class Project(object):
         self.defines = defines.Defines()
 
     def writeStatusLog(self, options):
+        tempDir = os.path.dirname(options.statusLogPath)
+        if not os.path.exists(tempDir):
+            os.makedirs(tempDir)
+
         fd = open(options.statusLogPath, 'w')
         try:
             fd.write("path:" + self.path + "\n")
