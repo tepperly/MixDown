@@ -182,3 +182,9 @@ class Target(object):
             if step.startswith(stepName):
                 return True
         return False
+
+    def isStepPreviouslyDone(self, stepName):
+        for step in self.buildSteps:
+            if step.name == stepName:
+                return step.success
+        return False
