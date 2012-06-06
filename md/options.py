@@ -20,7 +20,7 @@
 # along with this program; if not, write to the Free Software Foundation,
 # Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 
-import os, socket, sys
+import os, socket, sys, tempfile
 import defines, logger, target, utilityFunctions
 
 class Options(object):
@@ -29,7 +29,7 @@ class Options(object):
         self.buildDir = "mdBuild"
         self.downloadDir = "mdDownload"
         self.logDir = "mdLogFiles"
-        self.statusLogPath = "/tmp/mixdown-statusLog"
+        self.statusLogPath = ""
         self.profileMode = False
         self.cleanMode = False
         self.importMode = False
@@ -74,6 +74,11 @@ class Options(object):
     Compiler:     " + self.compilerGroupName + "\n\
     Optimization: " + self.optimizationGroupName + "\n\
     Parallel:     " + self.parallelGroupName + "\n"
+
+    def setStatusLogPath(self, prefix, projectName):
+        tempDir = os.path.join(tempfile.gettempdir(), 'mixdown')
+        projectIdentifier = os.path.join(prefix, projectName).replace(os.path.sep, '%')
+        self.statusLogPath = os.path.join(tempDir, projectIdentifier)
 
     def validate(self):
         if not self.__validateOptionsDir(self.buildDir) or not\
