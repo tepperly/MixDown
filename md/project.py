@@ -187,6 +187,7 @@ class Project(object):
                 return False
             self.__assignDepthToTargetList()
             self.targets = self.__sortTargetList(self.targets)
+            self.__expandDependancyLists()
             for targets in self.targets:
                 if not targets.examine(options):
                     return False
@@ -400,3 +401,11 @@ class Project(object):
             greater = self.__sortTargetList([x for x in targetList[1:] if x.dependencyDepth >= pivot.dependencyDepth])
             lesser = self.__sortTargetList([x for x in targetList[1:] if x.dependencyDepth < pivot.dependencyDepth])
             return lesser + [pivot] + greater
+
+    def __expandDependancyLists(self):
+        for t in reversed(self.targets):
+            for depName in t.dependsOn[:]:
+                dep = self.getTarget(depName)
+                t.expandedDependsOn.append(depName)
+                t.expandedDependsOn += dep.dependsOn
+            t.expandedDependsOn = utilityFunctions.removeDuplicatesFromList(t.expandedDependsOn)

@@ -155,6 +155,18 @@ def removeDir(path):
     if os.path.exists(path):
         shutil.rmtree(path)
 
+def removeDuplicatesFromList(myList):
+    l = myList[:]
+    if l:
+        l.sort()
+        last = l[-1]
+        for i in range(len(l)-2, -1, -1):
+            if last == l[i]:
+                del l[i]
+            else:
+                last = l[i]
+    return l
+
 def splitFileName(fileName):
     if fileName.endswith(os.path.sep):
         basename = fileName[:-1]

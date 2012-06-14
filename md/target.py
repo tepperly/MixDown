@@ -71,6 +71,7 @@ class Target(object):
         self.outputPathSpecified = False
         self.dependencyDepth = 0
         self.dependsOn = []
+        self.expandedDependsOn = []
         self._skipSteps = []
         self.pythonCallInfo = python.PythonCallInfo()
         self.buildSteps = []
