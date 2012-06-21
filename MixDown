@@ -73,8 +73,9 @@ def main():
                 success = False
             else:
                 mdOptions.setStatusLogPath(mdOptions.defines[defines.mdPrefix[0]], mdProject.name)
-                mdProject.readStatusLog(mdOptions)
-                mdProject.fixTargetSuccessBasedOnDependancies()
+                if not mdOptions.fullRebuild:
+                    mdProject.readStatusLog(mdOptions)
+                    mdProject.fixTargetSuccessBasedOnDependancies()
 
                 #Define Hierarchy: options defines <  project defines < override group defines
                 mdOptions.defines.combine(mdProject.defines)
