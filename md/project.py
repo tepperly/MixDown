@@ -35,6 +35,14 @@ class Project(object):
         self.__examined = False
         self.defines = defines.Defines()
 
+    def fixTargetSuccessBasedOnDependancies(self):
+        for t in self.targets:
+            for depName in t.expandedDependsOn:
+                d = self.getTarget(depName)
+                if not d.success:
+                    t.success = False
+                    break
+
     def writeStatusLog(self, options):
         tempDir = os.path.dirname(options.statusLogPath)
         if not os.path.exists(tempDir):
