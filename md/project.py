@@ -35,7 +35,27 @@ class Project(object):
         self.__examined = False
         self.defines = defines.Defines()
 
-    def fixTargetSuccessBasedOnDependancies(self):
+    def determineStartPoint(self):
+        self.determineTargetsBuildStepStart()
+        self.determineTargetsSuccess()
+
+    def determineTargetsBuildStepStart(self):
+        for t in self.targets:
+            stepFailed = False
+            for index, step in enumerate(t.buildSteps):
+                if step.success:
+                    continue
+                stepFailed = True
+                t.path = step.restartPath
+                break
+            if index != len(t.buildSteps) - 1:
+                for step in t.buildSteps[index:]:
+                    step.success = False
+            if stepFailed:
+                t.success = False
+
+    def determineTargetsSuccess(self):
+        #Todo: This needs to handle after changing a success status changes the targets that depend on the changed target
         for t in self.targets:
             for depName in t.expandedDependsOn:
                 d = self.getTarget(depName)
@@ -50,8 +70,8 @@ class Project(object):
 
         fd = open(options.statusLogPath, 'w')
         try:
-            fd.write("path:" + self.path + "\n")
-            fd.write("buildDir:" + options.buildDir + "\n")
+            fd.write("path:" + os.path.abspath(self.path) + "\n")
+            fd.write("buildDir:" + os.path.abspath(options.buildDir) + "\n")
             fd.write("prefix" + ":" + os.path.abspath(options.defines[defines.mdPrefix[0]]) + ":" + str(options.prefixDefined) + "\n")
             fd.write("\n")
 
@@ -59,9 +79,9 @@ class Project(object):
                 fd.write(target.name + ":" + str(target.success) + "\n")
                 for step in target.buildSteps:
                     if step.command == "":
-                        fd.write(step.name + "::True\n")
+                        fd.write(step.name + "::" + step.restartPath + ":True\n")
                     else:
-                        fd.write(step.name + ":" + step.command + ":" + str(step.success) + "\n")
+                        fd.write(step.name + ":" + step.command + ":" + step.restartPath + ":" + str(step.success) + "\n")
                 fd.write("\n")
             fd.flush()
         finally:
@@ -104,7 +124,7 @@ class Project(object):
             if len(l) != 2:
                 logger.writeError("Unknown line in status log:\n" + ':'.join(l), filePath="options.statusLogPath", lineNumber=lineCount)
                 return False
-            if not self.__assureEqualsInStatusLog(l, "path", self.path):
+            if not self.__assureEqualsInStatusLog(l, "path", os.path.abspath(self.path)):
                 return False
             #buildDir:<options.buildDir>
             l, lineCount, EOF = self.__getStatusLogLine(fd, lineCount)
@@ -113,7 +133,7 @@ class Project(object):
             if len(l) != 2:
                 logger.writeError("Unknown line in status log:\n" + ':'.join(l), filePath="options.statusLogPath", lineNumber=lineCount)
                 return False
-            if not self.__assureEqualsInStatusLog(l, "buildDir", options.buildDir):
+            if not self.__assureEqualsInStatusLog(l, "buildDir", os.path.abspath(options.buildDir)):
                 return False
             #prefix:<prefix>:<defined>
             l, lineCount, EOF = self.__getStatusLogLine(fd, lineCount)
@@ -129,7 +149,7 @@ class Project(object):
 
             #Target groups: one target line followed by multiple step lines
             #<target.name>:<success>
-            #<step.name>:<step.command>:<step.success>
+            #<step.name>:<step.command>:<step.restartPath>:<step.success>
             while True:
                 l, lineCount, EOF = self.__getStatusLogLine(fd, lineCount)
                 if EOF:
@@ -140,13 +160,14 @@ class Project(object):
                         logger.writeError("Unknown line in status log:\n" + ':'.join(l), filePath="options.statusLogPath", lineNumber=lineCount)
                         continue
                     currTarget.success = utilityFunctions.boolToStr(l[1])
-                elif len(l) == 3:
+                elif len(l) == 4:
                     if currTarget == None:
                         continue
                     currStep = currTarget.findBuildStep(l[0])
                     if currStep == None:
                         continue
-                    currStep.success = utilityFunctions.boolToStr(l[2])
+                    currStep.restartPath = l[2]
+                    currStep.success = utilityFunctions.boolToStr(l[3])
                     if currStep.command != l[1]:
                         currStep.success = False
                 else:
