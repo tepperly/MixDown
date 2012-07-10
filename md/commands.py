@@ -27,6 +27,7 @@ class BuildStep(object):
     def __init__(self, name="", command=""):
         self.name = name
         self.command = command
+        self.restartPath = "" #Note: saved for incase build needs to be restarted, not used during building (target.path is)
         self.success = False
 
 buildSteps = ["fetch", "unpack", "patch", "preconfig", "config", "build", "test", "install", "clean"]
@@ -114,6 +115,7 @@ def buildTarget(target, options, lock=None):
             logger.reportSkipped(target.name, "", "Target successfully built in previous MixDown build")
         else:
             for buildStep in target.buildSteps:
+                buildStep.restartPath = target.path
                 if buildStep.name == "clean" or buildStep.command == "":
                     continue
                 target.success = buildStepActor(target, buildStep, options, lock)
