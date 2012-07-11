@@ -55,7 +55,6 @@ class Project(object):
                 t.success = False
 
     def determineTargetsSuccess(self):
-        #Todo: This needs to handle after changing a success status changes the targets that depend on the changed target
         for t in self.targets:
             for depName in t.expandedDependsOn:
                 d = self.getTarget(depName)
