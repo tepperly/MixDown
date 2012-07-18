@@ -96,6 +96,7 @@ mdFCompiler = "_FCompiler", ""
 mdF77Compiler = "_F77Compiler", ""
 mdOBJCCompiler = "_OBJCCompiler", ""
 mdOBJCXXCompiler = "_OBJCXXCompiler", ""
+mdOBJCPreProcessor = "_OBJCPreProcessor", ""
 mdOBJCXXPreProcessor = "_OBJCXXPreProcessor", ""
 
 #Compilers Flags
@@ -109,8 +110,8 @@ mdLinkerFlags = "_LinkerFlags", ""
 mdLinkerFlagsEXE = "_mdLinkerFlagsEXE", ""
 mdLinkerFlagsModule = "_mdLinkerFlagsModule", ""
 mdLinkerFlagsShared = "_mdLinkerFlagsShared", ""
-mdOBJCFlags = "OBJCFlags", ""
-mdOBJCXXFlags = "OBJCXXFlags", ""
+mdOBJCFlags = "_OBJCFlags", ""
+mdOBJCXXFlags = "_OBJCXXFlags", ""
 
 #Libraries
 mdLibs = "_Libs", ""
@@ -127,8 +128,9 @@ autoToolsCXXCompiler = "_AutotoolsCXXCompiler", "CXX=" + surround(mdCXXCompiler[
 autoToolsFCompiler = "_AutotoolsFCompiler", "FC=" + surround(mdFCompiler[0])
 autoToolsF77Compiler = "_AutotoolsF77Compiler", "F77=" + surround(mdF77Compiler[0])
 autoToolsOBJCCompiler = "_AutotoolsOBJCCompiler", "OBJC=" + surround(mdOBJCCompiler[0])
-autoToolsOBJCXXCompiler = "_AutotoolsOBJCCompiler", "OBJCXX=" + surround(mdOBJCXXCompiler[0])
-autoToolsOBJCXXPreProcessor = "_AutotoolsOBJCPreProcessor", "OBJCXXCPP=" + surround(mdOBJCXXPreProcessor[0])
+autoToolsOBJCXXCompiler = "_AutotoolsOBJCXXCompiler", "OBJCXX=" + surround(mdOBJCXXCompiler[0])
+autoToolsOBJCPreProcessor = "_AutotoolsOBJCPreProcessor", "OBJCPP=" + surround(mdOBJCPreProcessor[0])
+autoToolsOBJCXXPreProcessor = "_AutotoolsOBJCXXPreProcessor", "OBJCXXCPP=" + surround(mdOBJCXXPreProcessor[0])
 
 #Compilers Flags
 autoToolsCFlags = "_AutotoolsCFlags", "CFLAGS=" + surround(mdCFlags[0])
@@ -139,7 +141,7 @@ autoToolsFFlags = "_AutotoolsFFlags", "FCFLAGS=" + surround(mdFFlags[0])
 autoToolsF77Flags = "_AutotoolsF77Flags", "FFLAGS=" + surround(mdF77Flags[0])
 autoToolsLinkerFlags = "_AutotoolsLinkerFlags", "LDFLAGS=" + surround(mdLinkerFlags[0])
 autoToolsOBJCFlags = "_AutotoolsOBJCFlags", "OBJCFLAGS=" + surround(mdOBJCFlags[0])
-autoToolsOBJCXXFlags = "_AutotoolsOBJCFlags", "OBJCXXFLAGS=" + surround(mdOBJCXXFlags[0])
+autoToolsOBJCXXFlags = "_AutotoolsOBJCXXFlags", "OBJCXXFLAGS=" + surround(mdOBJCXXFlags[0])
 
 #Libraries
 autoToolsLibs = "_AutotoolsLibs", "LIBS=" + surround(mdLibs[0])
@@ -158,7 +160,7 @@ cmakeCXXCompiler = "_CMakeCXXCompiler","-DCMAKE_CXX_COMPILER=" + surround(mdCXXC
 cmakeFCompiler = "_CMakeFCompiler", "-DCMAKE_Fortran_COMPILER=" + surround(mdFCompiler[0])
 cmakeF77Compiler = "_CMakeF77Compiler", "-DCMAKE_F77_COMPILER=" + surround(mdF77Compiler[0])
 cmakeOBJCCompiler = "_CMakeOBJCCompiler", "-DCMAKE_OBJC_COMPILER=" + surround(mdOBJCCompiler[0])
-cmakeOBJCXXCompiler = "_CMakeOBJCCompiler", "-DCMAKE_OBJCXX_COMPILER=" + surround(mdOBJCXXCompiler[0])
+cmakeOBJCXXCompiler = "_CMakeOBJCXXCompiler", "-DCMAKE_OBJCXX_COMPILER=" + surround(mdOBJCXXCompiler[0])
 
 #Compilers Flags
 cmakeCFlags = "_CMakeCFlags", "-DCMAKE_C_FLAGS=" + surround(mdCFlags[0])
@@ -169,7 +171,7 @@ cmakeLinkerFlagsEXE = "_CMakeLinkerFlagsEXE", "-DCMAKE_EXE_LINKER_FLAGS=" + surr
 cmakeLinkerFlagsModule = "_CMakeLinkerFlagsModule", "-DCMAKE_MODULE_LINKER_FLAGS=" + surround(mdLinkerFlagsModule[0])
 cmakeLinkerFlagsShared = "_CMakeLinkerFlagsShared", "-DCMAKE_SHARED_LINKER_FLAGS=" + surround(mdLinkerFlagsShared[0])
 cmakeOBJCFlags = "_CMakeOBJCFlags", "-DCMAKE_OBJC_FLAGS=" + surround(mdOBJCFlags[0])
-cmakeOBJCXXFlags = "_CMakeOBJCFlags", "-DCMAKE_OBJCXX_FLAGS=" + surround(mdOBJCXXFlags[0])
+cmakeOBJCXXFlags = "_CMakeOBJCXXFlags", "-DCMAKE_OBJCXX_FLAGS=" + surround(mdOBJCXXFlags[0])
 
 cmakeCompilers = "_CMakeCompilers", ""
 cmakeFlags = "_CMakeFlags", ""
@@ -240,6 +242,10 @@ def __setToolDefines(defs, overrideGroup):
         defs[cmakeOBJCXXCompiler[0]] = cmakeOBJCXXCompiler[1]
         autoTools += " " + surround(autoToolsOBJCXXCompiler[0])
         cmake += " " + surround(cmakeOBJCXXCompiler[0])
+    if "OBJCPreProcessor" in overrideGroup:
+        defs[mdOBJCPreProcessor[0]] = overrideGroup["OBJCPreProcessor"]
+        defs[autoToolsOBJCPreProcessor[0]] = autoToolsOBJCPreProcessor[1]
+        autoTools += " " + surround(autoToolsOBJCCompiler[0])
     if "OBJCXXPreProcessor" in overrideGroup:
         defs[mdOBJCXXPreProcessor[0]] = overrideGroup["OBJCXXPreProcessor"]
         defs[autoToolsOBJCXXPreProcessor[0]] = autoToolsOBJCXXPreProcessor[1]
