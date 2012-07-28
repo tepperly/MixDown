@@ -105,6 +105,9 @@ def createBlankFiles(path, fileList):
     for fileName in fileList:
         open(os.path.join(path, fileName), 'w').close()
 
+def makeFileExecutable(path):
+    os.chmod(path, 0777)
+
 def makeTempDir():
     return tempfile.mkdtemp(prefix="mixdown-")
 

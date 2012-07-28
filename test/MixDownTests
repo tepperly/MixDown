@@ -24,7 +24,7 @@
 
 import sys, unittest
 import test_autoTools, test_cmake, test_cvs, test_defines, test_git, test_hg, test_options, test_overrides, test_steps
-import test_svn, test_project, test_target, test_MixDownLong, test_MixDownShort, test_utilityFunctions
+import test_svn, test_profiler, test_project, test_target, test_MixDownLong, test_MixDownShort, test_utilityFunctions
 
 if not ".." in sys.path:
     sys.path.append("..")
@@ -43,6 +43,7 @@ def main():
     suite.addTest(test_hg.suite())
     suite.addTest(test_options.suite())
     suite.addTest(test_overrides.suite())
+    suite.addTest(test_profiler.suite())
     suite.addTest(test_project.suite())
     suite.addTest(test_steps.suite())
     suite.addTest(test_svn.suite())
