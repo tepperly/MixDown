@@ -74,8 +74,11 @@ def main():
             else:
                 mdOptions.setStatusLogPath(mdOptions.defines[defines.mdPrefix[0]], mdProject.name)
                 if not mdOptions.fullRebuild:
-                    mdProject.readStatusLog(mdOptions)
-                    mdProject.determineStartPoint()
+                    readSuccess, statusLogExisted = mdProject.readStatusLog(mdOptions)
+                    if not readSuccess:
+                        logger.writeError("Reading previous project status log failed, starting build at beginning.")
+                    if readSuccess and statusLogExisted:
+                        mdProject.determineStartPoint()
 
                 #Define Hierarchy: options defines <  project defines < override group defines
                 mdOptions.defines.combine(mdProject.defines)
