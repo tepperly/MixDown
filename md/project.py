@@ -75,7 +75,7 @@ class Project(object):
             fd.write("\n")
 
             for target in self.targets:
-                fd.write(target.name + ":" + str(target.success) + "\n")
+                fd.write(target.name + ":" + target.origPath + ":" + str(target.success) + "\n")
                 for step in target.buildSteps:
                     if step.command == "":
                         fd.write(step.name + "::" + step.restartPath + ":True\n")
@@ -112,53 +112,54 @@ class Project(object):
     def readStatusLog(self, options):
         lineCount = 0
         if not os.path.exists(options.statusLogPath) or not os.path.isfile(options.statusLogPath):
-            return True
+            return True, False
 
         fd = open(options.statusLogPath, 'r')
         try:
             #path:<self.path>
             l, lineCount, EOF = self.__getStatusLogLine(fd, lineCount)
             if EOF:
-                return False
+                return False, True
             if len(l) != 2:
                 logger.writeError("Unknown line in status log:\n" + ':'.join(l), filePath="options.statusLogPath", lineNumber=lineCount)
-                return False
+                return False, True
             if not self.__assureEqualsInStatusLog(l, "path", os.path.abspath(self.path)):
-                return False
+                return False, True
             #buildDir:<options.buildDir>
             l, lineCount, EOF = self.__getStatusLogLine(fd, lineCount)
             if EOF:
-                return False
+                return False, True
             if len(l) != 2:
                 logger.writeError("Unknown line in status log:\n" + ':'.join(l), filePath="options.statusLogPath", lineNumber=lineCount)
-                return False
+                return False, True
             if not self.__assureEqualsInStatusLog(l, "buildDir", os.path.abspath(options.buildDir)):
-                return False
+                return False, True
             #prefix:<prefix>:<defined>
             l, lineCount, EOF = self.__getStatusLogLine(fd, lineCount)
             if EOF:
-                return False
+                return False, True
             if len(l) != 3:
                 logger.writeError("Unknown line in status log:\n" + ':'.join(l), filePath="options.statusLogPath", lineNumber=lineCount)
-                return False
+                return False, True
             if not self.__assureEqualsInStatusLog(l, "prefix", os.path.abspath(options.defines[defines.mdPrefix[0]])):
-                return False
+                return False, True
             if l[2] != str(options.prefixDefined):
-                return False
+                return False, True
 
             #Target groups: one target line followed by multiple step lines
-            #<target.name>:<success>
+            #<target.name>:<target.origPath>:<success>
             #<step.name>:<step.command>:<step.restartPath>:<step.success>
             while True:
                 l, lineCount, EOF = self.__getStatusLogLine(fd, lineCount)
                 if EOF:
                     break
-                if len(l) == 2:
+                if len(l) == 3:
                     currTarget = self.getTarget(l[0])
                     if currTarget == None:
                         logger.writeError("Unknown line in status log:\n" + ':'.join(l), filePath="options.statusLogPath", lineNumber=lineCount)
                         continue
-                    currTarget.success = utilityFunctions.boolToStr(l[1])
+                    currTarget.origPath = l[1]
+                    currTarget.success = utilityFunctions.boolToStr(l[2])
                 elif len(l) == 4:
                     if currTarget == None:
                         continue
@@ -171,6 +172,7 @@ class Project(object):
                         currStep.success = False
                 else:
                     logger.writeError("Unknown line in status log:\n" + ':'.join(l), filePath="options.statusLogPath", lineNumber=lineCount)
+            return True, True
         finally:
             fd.close()
 
@@ -275,7 +277,7 @@ class Project(object):
                     equalsIndex = currLine.find("=")
 
                     if (colonIndex == -1) and (equalsIndex == -1):
-                        logger.writeError("Line could not be understood by project parser.  Lines can be comments, variables, or project definitions.", "", "", self.path, lineCount)
+                        logger.writeError("Line could not be understood by project parser.  Lines can be comments, defines, or target information.", "", "", self.path, lineCount)
                         return False
 
                     if ((colonIndex == -1) and (equalsIndex != -1)) or\
@@ -303,6 +305,7 @@ class Project(object):
                             if currTarget.path != "":
                                 logger.writeError("Project targets can only have one 'Path' defined", "", "", self.path, lineCount)
                                 return False
+                            currTarget.origPath = currPair[1]
                             currTarget.path = currPair[1]
                         elif currName == "output":
                             if currTarget.outputPathSpecified:
