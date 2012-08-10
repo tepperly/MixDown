@@ -194,8 +194,10 @@ def addGnuOptimizationGroup(groups, compilerGroup):
         debugGroup["f77flags"] = "-Wall"
         releaseGroup["f77flags"] = "-Wall"
 
-    groups.append(debugGroup)
-    groups.append(releaseGroup)
+    if len(debugGroup) > 0:
+        groups.append(debugGroup)
+    if len(releaseGroup) > 0:
+        groups.append(releaseGroup)
 
 def addIntelOptimizationGroup(groups, compilerGroup):
     debugGroup = overrides.OverrideGroup()
@@ -226,8 +228,10 @@ def addIntelOptimizationGroup(groups, compilerGroup):
         debugGroup["f77flags"] = "-O0 -warn all"
         releaseGroup["f77flags"] = "-O2 -warn all"
 
-    groups.append(debugGroup)
-    groups.append(releaseGroup)
+    if len(debugGroup) > 0:
+        groups.append(debugGroup)
+    if len(releaseGroup) > 0:
+        groups.append(releaseGroup)
 
 def addPathscaleOptimizationGroup(groups, compilerGroup):
     debugGroup = overrides.OverrideGroup()
@@ -254,9 +258,14 @@ def addPathscaleOptimizationGroup(groups, compilerGroup):
     if compilerGroup.has_key("fcompiler"):
         debugGroup["fflags"] = pathDebugFlags
         releaseGroup["fflags"] = pathReleaseFlags
+    if compilerGroup.has_key("f77compiler"):
+        debugGroup["f77flags"] = pathDebugFlags
+        releaseGroup["f77flags"] = pathReleaseFlags
 
-    groups.append(debugGroup)
-    groups.append(releaseGroup)
+    if len(debugGroup) > 0:
+        groups.append(debugGroup)
+    if len(releaseGroup) > 0:
+        groups.append(releaseGroup)
 
 def addPortlandGroupOptimizationGroup(groups, compilerGroup):
     debugGroup = overrides.OverrideGroup()
@@ -283,6 +292,11 @@ def addPortlandGroupOptimizationGroup(groups, compilerGroup):
     if compilerGroup.has_key("fcompiler"):
         debugGroup["fflags"] = portlandDebugFlags
         releaseGroup["fflags"] = portlandReleaseFlags
+    if compilerGroup.has_key("f77compiler"):
+        debugGroup["f77flags"] = portlandDebugFlags
+        releaseGroup["f77flags"] = portlandReleaseFlags
 
-    groups.append(debugGroup)
-    groups.append(releaseGroup)
+    if len(debugGroup) > 0:
+        groups.append(debugGroup)
+    if len(releaseGroup) > 0:
+        groups.append(releaseGroup)
