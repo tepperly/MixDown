@@ -99,6 +99,9 @@ def createSvnRepository(tempDir):
     return repoURL
 
 def createBlankFile(path):
+    dirName = os.path.dirname(os.path.abspath(path))
+    if not os.path.exists(dirName):
+        os.makedirs(dirName)
     open(path, 'w').close()
 
 def createBlankFiles(path, fileList):
