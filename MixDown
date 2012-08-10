@@ -185,9 +185,6 @@ def setup(mdOptions):
 
     if not mdOptions.validate():
         return None
-    if not mdOptions.cleanMode and not mdOptions.importMode:
-        os.makedirs(mdOptions.buildDir)
-        os.makedirs(mdOptions.downloadDir)
 
     mdProject = project.Project(mdOptions.projectFile)
     if not mdProject.read():
