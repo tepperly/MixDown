@@ -70,7 +70,7 @@ def getDependencies(path, name="", verbose=True):
 
     try:
         helpFile = open(helpFileName, "r")
-        regexp = re.compile(r"--with-([a-zA-Z\-_]+)=(?:PREFIX|PATH|DIR)")
+        regexp = re.compile(r"--with-([a-zA-Z\-_]+)=(?:PREFIX|prefix|PATH|path|DIR|dir)")
         for line in helpFile:
             match = regexp.search(line)
             if match != None:
