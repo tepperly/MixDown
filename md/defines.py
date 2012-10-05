@@ -34,7 +34,7 @@ class Defines(dict):
         strippedKey = normalizeKey(key, False)
         value = ""
         if normalizedKey in self:
-            value = super(Defines, self).__getitem__(normalizeKey(key))
+            value = super(Defines, self).__getitem__(normalizedKey)
         elif strippedKey in os.environ:
             value = os.environ[strippedKey]
         return value
