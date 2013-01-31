@@ -167,6 +167,8 @@ class Project(object):
                     if currStep == None:
                         continue
                     currStep.restartPath = l[2]
+                    if currStep.restartPath == "":
+                        currStep.restartPath = currTarget.origPath
                     currStep.success = utilityFunctions.boolToStr(l[3])
                     if currStep.command != l[1]:
                         currStep.success = False
@@ -420,6 +422,8 @@ class Project(object):
                 currTarget = self.getTarget(currName)
                 for currChildName in currTarget.dependsOn:
                     currChildTarget = self.getTarget(currChildName)
+                    if not currChildTarget:
+                        logger.writeError("Target '" + currTarget.name + "' has non-existant dependency '" + currChildName + "'", "", self.path, exitProgram=True)
                     if currChildTarget.dependencyDepth < (currTarget.dependencyDepth + 1):
                         currChildTarget.dependencyDepth = currTarget.dependencyDepth + 1
                         q.put(currChildName)

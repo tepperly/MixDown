@@ -63,6 +63,11 @@ def importTargets(options):
                     return None, False
             logger.writeMessage("Analyzing for dependencies...", target.name)
             possibleDeps = autoTools.getDependencies(target.path, target.name)
+            if possibleDeps == None:
+                target.comment = "Unable to parse 'configure --help' output. MixDown cannot determine dependencies for this target."
+                logger.writeError(target.comment, target.name)
+                partialImport = True
+                possibleDeps = []
         elif make.isMakeProject(target.path):
             target.comment = "Make project found. MixDown cannot determine dependencies from Make projects."
             logger.writeError(target.comment, target.name)
