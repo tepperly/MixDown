@@ -208,8 +208,8 @@ def __setToolDefines(defs, overrideGroup):
         defs[mdCCompiler[0]] = overrideGroup["CCompiler"]
         defs[autoToolsCCompiler[0]] = autoToolsCCompiler[1]
         defs[cmakeCCompiler[0]] = cmakeCCompiler[1]
-        autoTools = surround(autoToolsCCompiler[0])
-        cmake = surround(autoToolsCCompiler[0])
+        autoTools += " " + surround(autoToolsCCompiler[0])
+        cmake += " " + surround(cmakeCCompiler[0])
     if "CPreProcessor" in overrideGroup:
         defs[mdCPreProcessor[0]] = overrideGroup["CPreProcessor"]
         defs[autoToolsCPreProcessor[0]] = autoToolsCPreProcessor[1]
@@ -219,7 +219,9 @@ def __setToolDefines(defs, overrideGroup):
     if "CXXCompiler" in overrideGroup:
         defs[mdCXXCompiler[0]] = overrideGroup["CXXCompiler"]
         defs[autoToolsCXXCompiler[0]] = autoToolsCXXCompiler[1]
+        defs[cmakeCXXCompiler[0]] = cmakeCXXCompiler[1]
         autoTools += " " + surround(autoToolsCXXCompiler[0])
+        cmake += " " + surround(cmakeCXXCompiler[0])
     if "FCompiler" in overrideGroup:
         defs[mdFCompiler[0]] = overrideGroup["FCompiler"]
         defs[autoToolsFCompiler[0]] = autoToolsFCompiler[1]
