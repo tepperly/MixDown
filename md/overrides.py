@@ -20,6 +20,7 @@
 # along with this program; if not, write to the Free Software Foundation,
 # Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 
+import os
 from tokenizer import Tokenizer, TokenType
 import defines, logger
 
@@ -74,6 +75,9 @@ class OverrideGroup(dict):
             self.defines[key] = child.defines[key]
 
 def readGroups(filename):
+    if not os.path.exists(filename):
+        logger.writeError("Given Override file path did not exist. Check your -o command line option.", filePath=filename)
+        return None
     groups = list()
     overrideGroup = None
     tokenizer = Tokenizer(filename)

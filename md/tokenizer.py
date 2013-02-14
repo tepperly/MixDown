@@ -101,9 +101,8 @@ class Tokenizer(object):
         return token, line
 
     def tokenize(self):
-        try:
-            previousToken = Token()
-            f = open(self.fileName)
+        previousToken = Token()
+        with open(self.fileName) as f:
             currLine, EOF = self._getLine(f)
             while not EOF:
                 while currLine != "":
@@ -114,5 +113,3 @@ class Tokenizer(object):
                     self.tokens.append(token)
                 currLine, EOF = self._getLine(f)
             return True
-        finally:
-            f.close()
