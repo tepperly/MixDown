@@ -342,7 +342,7 @@ class Options(object):
 
         print "\
     Profile Mode: \n\
-        Example Usage: MixDown --profile\n\
+        Example Usage: mixdown --profile\n\
     \n\
         Required:\n\
         --profile                 Toggle Profile mode\n\
@@ -355,7 +355,7 @@ class Options(object):
         <.mdo output file>   Path to outputted MixDown override group file\n\
     \n\
     Import Mode: \n\
-        Example Usage: MixDown --import foo.tar.gz http://path/to/bar\n\
+        Example Usage: mixdown --import foo.tar.gz http://path/to/bar\n\
     \n\
         Required:\n\
         --import                  Toggle Import mode\n\
@@ -366,7 +366,7 @@ class Options(object):
         -v            Verbose Mode\n\
     \n\
     Build Mode (Default): \n\
-        Example Usage: MixDown foo.md\n\
+        Example Usage: mixdown foo.md\n\
     \n\
         Required:\n\
         <path to .md file>   Path to MixDown project file\n\
@@ -389,7 +389,7 @@ class Options(object):
         -k            Keeps previously existing MixDown directories\n\
     \n\
     Clean Mode: \n\
-        Example Usage: MixDown --clean foo.md\n\
+        Example Usage: mixdown --clean foo.md\n\
     \n\
         Required:\n\
         --clean              Toggle Clean mode\n\
