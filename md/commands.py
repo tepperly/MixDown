@@ -68,7 +68,7 @@ def buildStepActor(target, buildStep, options, lock=None):
     if isPythonCommand:
         success = python.callPythonCommand(namespace, function, target, options)
         if not success:
-            returnCode = 1
+            returnCode = success == 0
         else:
             returnCode = 0
     else:
@@ -79,8 +79,13 @@ def buildStepActor(target, buildStep, options, lock=None):
         finally:
             if lock:
                 lock.release()
-        outFd = logger.getOutFd(target.name, buildStep.name)
-        returnCode = utilityFunctions.executeSubProcess(command, target.path, outFd)
+
+        if not os.path.exists(target.path):
+            logger.writeError(target.name + "'s path does not exist when about to execute build command in step " + buildStep.name + ".", filePath=target.path)
+            returnCode = 1
+        else:
+            outFd = logger.getOutFd(target.name, buildStep.name)
+            returnCode = utilityFunctions.executeSubProcess(command, target.path, outFd)
 
     timeFinished = time.time()
     timeElapsed = timeFinished - timeStart
@@ -113,6 +118,9 @@ def buildTarget(target, options, lock=None):
     else:
         if target.success:
             logger.reportSkipped(target.name, "", "Target successfully built in previous MixDown build")
+        elif target.prefix != "" and os.path.exists(options.defines.expand(target.prefix)):
+            logger.reportSkipped(target.name, "", "Target's defined prefix detected.")
+            target.success = True
         else:
             for buildStep in target.buildSteps:
                 buildStep.restartPath = target.path

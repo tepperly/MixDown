@@ -1,4 +1,4 @@
-# Copyright (c) 2010-2012, Lawrence Livermore National Security, LLC
+# Copyright (c) 2010-2013, Lawrence Livermore National Security, LLC
 # Produced at Lawrence Livermore National Laboratory
 # LLNL-CODE-462894
 # All rights reserved.
@@ -22,6 +22,8 @@
 
 import os, re, tarfile
 import autoTools, cmake, commands, git, hg, logger, options, python, svn, utilityFunctions
+
+targetFields = ['name', 'path', 'aliases', 'dependson', 'prefix']
 
 def normalizeName(name):
     return name.strip().lower()
@@ -67,6 +69,7 @@ class Target(object):
         self.aliases = []
         self.origPath = path
         self.path = path
+        self.prefix = ""
         self.outputPath = ""
         self.outputPathSpecified = False
         self.dependencyDepth = 0
@@ -85,7 +88,7 @@ class Target(object):
             return False
         for alias in self.aliases:
             if normalizeName(alias) == normalizedName:
-                logger.writeError(self.name + ": Target's alias cannot be same as it's name")
+                logger.writeError("Target's alias cannot be same as it's name", self.name)
                 return False
 
         #Check for write access to install directories used in commands.
@@ -153,6 +156,8 @@ class Target(object):
             retStr += "Aliases: " + ",".join(self.aliases) + "\n"
         if self.outputPathSpecified:
             retStr += "Output: " + self.outputPath + "\n"
+        if self.prefix != "":
+            retStr += "Prefix: " + self.prefix + "\n"
         if len(self.dependsOn) != 0:
             retStr += "DependsOn: " + ",".join(self.dependsOn) + "\n"
         if len(self._skipSteps) != 0:

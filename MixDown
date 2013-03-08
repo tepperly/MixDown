@@ -191,6 +191,7 @@ def setup(mdOptions):
         return None
     if not mdProject.addSkipStepFromOptions(mdOptions):
         return None
+    mdProject.setTargetFieldsAsDefines(mdOptions.defines)
 
     if not mdProject.examine(mdOptions):
         return None

@@ -1,4 +1,4 @@
-# Copyright (c) 2010-2012, Lawrence Livermore National Security, LLC
+# Copyright (c) 2010-2013, Lawrence Livermore National Security, LLC
 # Produced at Lawrence Livermore National Laboratory
 # LLNL-CODE-462894
 # All rights reserved.
@@ -260,6 +260,16 @@ class Project(object):
         if targetFound:
             self.targets[i] = newTarget
 
+    def setTargetFieldsAsDefines(self, defines):
+        validTargetFields = target.targetFields + commands.buildSteps
+        for currTarget in self.targets:
+            for currField in validTargetFields:
+                name = currTarget.name + '.' + currField
+                value = getattr(currTarget, currField, "")
+                if isinstance(value, list):
+                    value = ", ".join(value)
+                defines[name] = value
+
     def read(self):
         if self.path == "":
             logger.writeError("No project file was specified")
@@ -347,6 +357,11 @@ class Project(object):
                                 logger.writeError("Project targets can only have one 'SkipSteps' defined (use a comma delimited list for multiple steps)", "", "", self.path, lineCount)
                                 return False
                             currTarget.skipSteps = utilityFunctions.stripItemsInList(str.lower(currPair[1]).split(","))
+                        elif currName == "prefix":
+                            if currTarget.prefix != "":
+                                logger.writeError("Project targets can only have one 'Prefix' defined", "", "", self.path, lineCount)
+                                return False
+                            currTarget.prefix = currPair[1]
                         elif currName in commands.buildSteps:
                             if currTarget.findBuildStep(currName) != None:
                                 logger.writeError("Project targets can only have one '" + currName + "' defined", "", "", self.path, lineCount)
