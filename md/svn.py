@@ -53,14 +53,18 @@ def isSvnRepo(location):
         return True
     return False
 
-def svnCheckout(repoLocation, outPath):
+def svnCheckout(repoLocation, outPath, outfd=None):
     repoLocation = repoLocation.strip()
     outPath = outPath.strip()
     if repoLocation == "" or outPath == "" or not isSvnInstalled():
         return False
-    outFile = open(os.devnull, "w")
-    returnCode = utilityFunctions.executeSubProcess("svn co --non-interactive " + repoLocation + " " + outPath, outFileHandle = outFile)
-    outFile.close()
+    if outfd == None:
+        outFile = open(os.devnull, "w")
+    else:
+        outFile = outfd
+    returnCode = utilityFunctions.executeSubProcess("svn co --non-interactive " + repoLocation + " " + os.path.abspath(outPath), outFileHandle = outFile)
+    if outfd == None:
+        outFile.close()
     if returnCode == 0:
         return True
     return False
