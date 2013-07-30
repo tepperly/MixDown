@@ -362,6 +362,11 @@ class Project(object):
                                 logger.writeError("Project targets can only have one 'Prefix' defined", "", "", self.path, lineCount)
                                 return False
                             currTarget.prefix = currPair[1]
+                        elif currName == "version":
+                            if currTarget.version != "":
+                                logger.writeError("Project targets can only have one 'Version' defined", "", "", self.path, lineCount)
+                                return False
+                            currTarget.version = currPair[1]
                         elif currName in commands.buildSteps:
                             if currTarget.findBuildStep(currName) != None:
                                 logger.writeError("Project targets can only have one '" + currName + "' defined", "", "", self.path, lineCount)
