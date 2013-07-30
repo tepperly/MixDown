@@ -68,7 +68,7 @@ def buildStepActor(target, buildStep, options, lock=None):
     if isPythonCommand:
         success = python.callPythonCommand(namespace, function, target, options)
         if not success:
-            returnCode = success == 0
+            returnCode = 1
         else:
             returnCode = 0
     else:
