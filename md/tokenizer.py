@@ -69,6 +69,11 @@ class Tokenizer(object):
             currLine, EOF = self._getLine(f, currLine[:-1])
         return currLine, False
 
+    def _isValidIdentifierCharacter(self, value):
+        if value.isalnum() or value in ['_', '-']:
+            return True
+        return False
+
     def _getToken(self, line, previousToken):
         token = Token()
         start = 0
@@ -79,12 +84,11 @@ class Tokenizer(object):
             token.type = TokenType.String
             token.value = line
             line = ""
-        elif line[0].isalnum():
+        elif self._isValidIdentifierCharacter(line[0]):
             token.type = TokenType.Identifier
             finish = 1
             while finish < lineLength:
-                if not line[0:finish].isalnum():
-                    finish -= 1
+                if not self._isValidIdentifierCharacter(line[finish]):
                     break
                 finish += 1
             token.value = line[0:finish]
