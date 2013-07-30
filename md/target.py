@@ -23,7 +23,7 @@
 import os, re, tarfile
 import autoTools, cmake, commands, git, hg, logger, options, python, svn, utilityFunctions
 
-targetFields = ['name', 'path', 'aliases', 'dependson', 'prefix']
+targetFields = ['name', 'version', 'path', 'aliases', 'dependson', 'prefix']
 
 def normalizeName(name):
     return name.strip().lower()
@@ -70,6 +70,7 @@ class Target(object):
         self.origPath = path
         self.path = path
         self.prefix = ""
+        self.version = ""
         self.outputPath = ""
         self.outputPathSpecified = False
         self.dependencyDepth = 0
@@ -158,6 +159,8 @@ class Target(object):
             retStr += "Output: " + self.outputPath + "\n"
         if self.prefix != "":
             retStr += "Prefix: " + self.prefix + "\n"
+        if self.version != "":
+            retStr += "Version: " + self.version + "\n"
         if len(self.dependsOn) != 0:
             retStr += "DependsOn: " + ",".join(self.dependsOn) + "\n"
         if len(self._skipSteps) != 0:
