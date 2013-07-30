@@ -20,25 +20,29 @@
 # along with this program; if not, write to the Free Software Foundation,
 # Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 
-import os, tarfile, urllib, zipfile
+import distutils, os, tarfile, urllib, zipfile
 import git, hg, logger, svn, utilityFunctions
 
 def fetch(pythonCallInfo):
+    outfd = logger.getOutFd(pythonCallInfo.name, "fetch")
     if git.isGitRepo(pythonCallInfo.currentPath):
         if not git.gitCheckout(pythonCallInfo.currentPath, pythonCallInfo.outputPath):
             pythonCallInfo.logger.writeError("Given Git repo '" + pythonCallInfo.currentPath +"' was unable to be checked out")
+            pythonCallInfo.success = False
         else:
             pythonCallInfo.currentPath = pythonCallInfo.outputPath
             pythonCallInfo.success = True
     elif hg.isHgRepo(pythonCallInfo.currentPath):
         if not hg.hgCheckout(pythonCallInfo.currentPath, pythonCallInfo.outputPath):
             pythonCallInfo.logger.writeError("Given Hg repo '" + pythonCallInfo.currentPath +"' was unable to be checked out")
+            pythonCallInfo.success = False
         else:
             pythonCallInfo.currentPath = pythonCallInfo.outputPath
             pythonCallInfo.success = True
     elif svn.isSvnRepo(pythonCallInfo.currentPath):
-        if not svn.svnCheckout(pythonCallInfo.currentPath, pythonCallInfo.outputPath):
+        if not svn.svnCheckout(pythonCallInfo.currentPath, pythonCallInfo.outputPath, outfd):
             pythonCallInfo.logger.writeError("Given Svn repo '" + pythonCallInfo.currentPath +"' was unable to be checked out")
+            pythonCallInfo.success = False
         else:
             pythonCallInfo.currentPath = pythonCallInfo.outputPath
             pythonCallInfo.success = True
@@ -50,9 +54,10 @@ def fetch(pythonCallInfo):
         pythonCallInfo.currentPath = filenamePath
         pythonCallInfo.success = True
     elif os.path.isdir(pythonCallInfo.currentPath):
-        if pythonCallInfo.outputPathSpecified:
+        if pythonCallInfo.outputPathSpecified and \
+           os.path.abspath(pythonCallInfo.currentPath) != os.path.abspath(pythonCallInfo.outputPath):
             distutils.dir_util.copy_tree(pythonCallInfo.currentPath, pythonCallInfo.outputPath)
-            pythonCallInfo.currentPath = self.pythonCallInfo.outputPath
+            pythonCallInfo.currentPath = pythonCallInfo.outputPath
         pythonCallInfo.success = True
     elif os.path.isfile(pythonCallInfo.currentPath):
         pythonCallInfo.success = True
