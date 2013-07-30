@@ -77,6 +77,8 @@ def callPythonCommand(namespace, function, target, options):
 
     try:
         target.pythonCallInfo.success = False
+        target.pythonCallInfo.name = target.name
+        target.pythonCallInfo.version = target.version
         target.pythonCallInfo.currentPath = target.path
         target.pythonCallInfo.outputPath = target.outputPath
         target.pythonCallInfo.outputPathSpecified = target.outputPathSpecified
@@ -101,6 +103,8 @@ def callPythonCommand(namespace, function, target, options):
 class PythonCallInfo(object):
     def __init__(self):
         self.success = False
+        self.name = ""
+        self.version = ""
         self.currentPath = ""
         self.outputPath = ""
         self.outputPathSpecified = False
