@@ -312,14 +312,19 @@ class Options(object):
                 groupsList = currValue.split(",")
                 length = len(groupsList)
                 if length >= 1:
-                    self.compilerGroupName = groupsList[0].lower()
+                    self.compilerGroupName = groupsList[0].lower().strip()
                 if length >= 2:
-                    self.optimizationGroupName = groupsList[1].lower()
+                    self.optimizationGroupName = groupsList[1].lower().strip()
                 if length >= 3:
-                    self.parallelGroupName = groupsList[2].lower()
+                    self.parallelGroupName = groupsList[2].lower().strip()
                 if self.compilerGroupName == "" and self.optimizationGroupName == "" and self.parallelGroupName == "":
                     logger.writeError("Override command-line option used but no group(s) specified.")
                     return False
+
+                if self.optimizationGroupName == "":
+                    self.optimizationGroupName = "*"
+                if self.parallelGroupName == "":
+                    self.parallelGroupName = "*"
             else:
                 logger.writeError("Command-line argument '" + currArg + "' not understood")
                 return False
