@@ -85,117 +85,110 @@ def surround(name):
     return "$(" + name + ")"
 
 #-----------------AutoTools----------------
-mdJobSlots = "_JobSlots", ""
-mdPrefix = "_Prefix", ""
+mdJobSlots = "JobSlots", ""
+mdPrefix = "Prefix", ""
 
 #Compilers
-mdCCompiler = "_CCompiler", ""
-mdCPreProcessor = "_CPreProcessor", ""
-mdCXXCompiler = "_CXXCompiler", ""
-mdFCompiler = "_FCompiler", ""
-mdF77Compiler = "_F77Compiler", ""
-mdOBJCCompiler = "_OBJCCompiler", ""
-mdOBJCXXCompiler = "_OBJCXXCompiler", ""
-mdOBJCPreProcessor = "_OBJCPreProcessor", ""
-mdOBJCXXPreProcessor = "_OBJCXXPreProcessor", ""
+mdCCompiler = "CCompiler", ""
+mdCPreProcessor = "CPreProcessor", ""
+mdCXXCompiler = "CXXCompiler", ""
+mdFCompiler = "FCompiler", ""
+mdF77Compiler = "F77Compiler", ""
+mdOBJCCompiler = "OBJCCompiler", ""
+mdOBJCXXCompiler = "OBJCXXCompiler", ""
+mdOBJCPreProcessor = "OBJCPreProcessor", ""
+mdOBJCXXPreProcessor = "OBJCXXPreProcessor", ""
 
 #Compilers Flags
-mdCFlags = "_CFlags", ""
-mdCDefines = "_CDefines", ""
-mdCPPFlags = "_CPPFlags", ""
-mdCXXFlags = "_CXXFlags", ""
-mdFFlags = "_FFlags", ""
-mdF77Flags = "_F77Flags", ""
-mdLinkerFlags = "_LinkerFlags", ""
-mdLinkerFlagsEXE = "_mdLinkerFlagsEXE", ""
-mdLinkerFlagsModule = "_mdLinkerFlagsModule", ""
-mdLinkerFlagsShared = "_mdLinkerFlagsShared", ""
-mdOBJCFlags = "_OBJCFlags", ""
-mdOBJCXXFlags = "_OBJCXXFlags", ""
+mdCFlags = "CFlags", ""
+mdCDefines = "CDefines", ""
+mdCPPFlags = "CPPFlags", ""
+mdCXXFlags = "CXXFlags", ""
+mdFFlags = "FFlags", ""
+mdF77Flags = "F77Flags", ""
+mdLinkerFlags = "LinkerFlags", ""
+mdLinkerFlagsEXE = "mdLinkerFlagsEXE", ""
+mdLinkerFlagsModule = "mdLinkerFlagsModule", ""
+mdLinkerFlagsShared = "mdLinkerFlagsShared", ""
+mdOBJCFlags = "OBJCFlags", ""
+mdOBJCXXFlags = "OBJCXXFlags", ""
 
 #Libraries
-mdLibs = "_Libs", ""
-mdFLibs = "_FLibs", ""
-mdF77Libs = "_F77Libs", ""
+mdLibs = "Libs", ""
+mdFLibs = "FLibs", ""
+mdF77Libs = "F77Libs", ""
 
 #-----------------AutoTools----------------
-autoToolsPrefix = "_AutoToolsPrefix", "--prefix=" + surround(mdPrefix[0])
+autoToolsPrefix = "AutoToolsPrefix", "--prefix=" + surround(mdPrefix[0])
 
 #Compilers
-autoToolsCCompiler = "_AutotoolsCCompiler", "CC=" + surround(mdCCompiler[0])
-autoToolsCPreProcessor = "_AutotoolsCPreProcessor", "CPP=" + surround(mdCPreProcessor[0])
-autoToolsCXXCompiler = "_AutotoolsCXXCompiler", "CXX=" + surround(mdCXXCompiler[0])
-autoToolsFCompiler = "_AutotoolsFCompiler", "FC=" + surround(mdFCompiler[0])
-autoToolsF77Compiler = "_AutotoolsF77Compiler", "F77=" + surround(mdF77Compiler[0])
-autoToolsOBJCCompiler = "_AutotoolsOBJCCompiler", "OBJC=" + surround(mdOBJCCompiler[0])
-autoToolsOBJCXXCompiler = "_AutotoolsOBJCXXCompiler", "OBJCXX=" + surround(mdOBJCXXCompiler[0])
-autoToolsOBJCPreProcessor = "_AutotoolsOBJCPreProcessor", "OBJCPP=" + surround(mdOBJCPreProcessor[0])
-autoToolsOBJCXXPreProcessor = "_AutotoolsOBJCXXPreProcessor", "OBJCXXCPP=" + surround(mdOBJCXXPreProcessor[0])
+autoToolsCCompiler = "AutotoolsCCompiler", "CC=" + surround(mdCCompiler[0])
+autoToolsCPreProcessor = "AutotoolsCPreProcessor", "CPP=" + surround(mdCPreProcessor[0])
+autoToolsCXXCompiler = "AutotoolsCXXCompiler", "CXX=" + surround(mdCXXCompiler[0])
+autoToolsFCompiler = "AutotoolsFCompiler", "FC=" + surround(mdFCompiler[0])
+autoToolsF77Compiler = "AutotoolsF77Compiler", "F77=" + surround(mdF77Compiler[0])
+autoToolsOBJCCompiler = "AutotoolsOBJCCompiler", "OBJC=" + surround(mdOBJCCompiler[0])
+autoToolsOBJCXXCompiler = "AutotoolsOBJCXXCompiler", "OBJCXX=" + surround(mdOBJCXXCompiler[0])
+autoToolsOBJCPreProcessor = "AutotoolsOBJCPreProcessor", "OBJCPP=" + surround(mdOBJCPreProcessor[0])
+autoToolsOBJCXXPreProcessor = "AutotoolsOBJCXXPreProcessor", "OBJCXXCPP=" + surround(mdOBJCXXPreProcessor[0])
 
 #Compilers Flags
-autoToolsCFlags = "_AutotoolsCFlags", "CFLAGS=" + surround(mdCFlags[0])
-autoToolsCDefines = "_AutotoolsCDefines", "DEFS=" + surround(mdCDefines[0])
-autoToolsCPPFlags = "_AutotoolsCPPFlags", "CPPFLAGS=" + surround(mdCPPFlags[0])
-autoToolsCXXFlags = "_AutotoolsCXXFlags", "CXXFLAGS=" + surround(mdCXXFlags[0])
-autoToolsFFlags = "_AutotoolsFFlags", "FCFLAGS=" + surround(mdFFlags[0])
-autoToolsF77Flags = "_AutotoolsF77Flags", "FFLAGS=" + surround(mdF77Flags[0])
-autoToolsLinkerFlags = "_AutotoolsLinkerFlags", "LDFLAGS=" + surround(mdLinkerFlags[0])
-autoToolsOBJCFlags = "_AutotoolsOBJCFlags", "OBJCFLAGS=" + surround(mdOBJCFlags[0])
-autoToolsOBJCXXFlags = "_AutotoolsOBJCXXFlags", "OBJCXXFLAGS=" + surround(mdOBJCXXFlags[0])
+autoToolsCFlags = "AutotoolsCFlags", "CFLAGS=" + surround(mdCFlags[0])
+autoToolsCDefines = "AutotoolsCDefines", "DEFS=" + surround(mdCDefines[0])
+autoToolsCPPFlags = "AutotoolsCPPFlags", "CPPFLAGS=" + surround(mdCPPFlags[0])
+autoToolsCXXFlags = "AutotoolsCXXFlags", "CXXFLAGS=" + surround(mdCXXFlags[0])
+autoToolsFFlags = "AutotoolsFFlags", "FCFLAGS=" + surround(mdFFlags[0])
+autoToolsF77Flags = "AutotoolsF77Flags", "FFLAGS=" + surround(mdF77Flags[0])
+autoToolsLinkerFlags = "AutotoolsLinkerFlags", "LDFLAGS=" + surround(mdLinkerFlags[0])
+autoToolsOBJCFlags = "AutotoolsOBJCFlags", "OBJCFLAGS=" + surround(mdOBJCFlags[0])
+autoToolsOBJCXXFlags = "AutotoolsOBJCXXFlags", "OBJCXXFLAGS=" + surround(mdOBJCXXFlags[0])
 
 #Libraries
-autoToolsLibs = "_AutotoolsLibs", "LIBS=" + surround(mdLibs[0])
-autoToolsFLibs = "_AutotoolsFLibs", "FCLIBS=" + surround(mdFLibs[0])
-autoToolsF77Libs = "_AutotoolsF77Libs", "FLIBS=" + surround(mdF77Libs[0])
+autoToolsLibs = "AutotoolsLibs", "LIBS=" + surround(mdLibs[0])
+autoToolsFLibs = "AutotoolsFLibs", "FCLIBS=" + surround(mdFLibs[0])
+autoToolsF77Libs = "AutotoolsF77Libs", "FLIBS=" + surround(mdF77Libs[0])
 
-autoToolsCompilers = "_AutoToolsCompilers", ""
-autoToolsFlags = "_AutoToolsFlags", ""
+autoToolsCompilers = "AutoToolsCompilers", ""
+autoToolsFlags = "AutoToolsFlags", ""
 
 #-----------------CMake----------------
-cmakePrefix = "_CMakePrefix", "-DCMAKE_PREFIX_PATH=" + surround(mdPrefix[0]) + " -DCMAKE_INSTALL_PREFIX=" + surround(mdPrefix[0])
+cmakePrefix = "CMakePrefix", "-DCMAKE_PREFIX_PATH=" + surround(mdPrefix[0]) + " -DCMAKE_INSTALLPREFIX=" + surround(mdPrefix[0])
 
 #Compilers
-cmakeCCompiler = "_CMakeCCompiler", "-DCMAKE_C_COMPILER=" + surround(mdCCompiler[0])
-cmakeCXXCompiler = "_CMakeCXXCompiler","-DCMAKE_CXX_COMPILER=" + surround(mdCXXCompiler[0])
-cmakeFCompiler = "_CMakeFCompiler", "-DCMAKE_Fortran_COMPILER=" + surround(mdFCompiler[0])
-cmakeF77Compiler = "_CMakeF77Compiler", "-DCMAKE_F77_COMPILER=" + surround(mdF77Compiler[0])
-cmakeOBJCCompiler = "_CMakeOBJCCompiler", "-DCMAKE_OBJC_COMPILER=" + surround(mdOBJCCompiler[0])
-cmakeOBJCXXCompiler = "_CMakeOBJCXXCompiler", "-DCMAKE_OBJCXX_COMPILER=" + surround(mdOBJCXXCompiler[0])
+cmakeCCompiler = "CMakeCCompiler", "-DCMAKE_C_COMPILER=" + surround(mdCCompiler[0])
+cmakeCXXCompiler = "CMakeCXXCompiler","-DCMAKE_CXX_COMPILER=" + surround(mdCXXCompiler[0])
+cmakeFCompiler = "CMakeFCompiler", "-DCMAKE_Fortran_COMPILER=" + surround(mdFCompiler[0])
+cmakeF77Compiler = "CMakeF77Compiler", "-DCMAKE_F77_COMPILER=" + surround(mdF77Compiler[0])
+cmakeOBJCCompiler = "CMakeOBJCCompiler", "-DCMAKE_OBJC_COMPILER=" + surround(mdOBJCCompiler[0])
+cmakeOBJCXXCompiler = "CMakeOBJCXXCompiler", "-DCMAKE_OBJCXX_COMPILER=" + surround(mdOBJCXXCompiler[0])
 
 #Compilers Flags
-cmakeCFlags = "_CMakeCFlags", "-DCMAKE_C_FLAGS=" + surround(mdCFlags[0])
-cmakeCXXFlags = "_CMakeCXXFlags", " -DCMAKE_CXX_FLAGS=" + surround(mdCXXFlags[0])
-cmakeFFlags = "_CMakeFFlags", "-DCMAKE_Fortran_FLAGS=" + surround(mdFFlags[0])
-cmakeF77Flags = "_CMakeF77Flags", "-DCMAKE_F77_FLAGS=" + surround(mdF77Flags[0])
-cmakeLinkerFlagsEXE = "_CMakeLinkerFlagsEXE", "-DCMAKE_EXE_LINKER_FLAGS=" + surround(mdLinkerFlagsEXE[0])
-cmakeLinkerFlagsModule = "_CMakeLinkerFlagsModule", "-DCMAKE_MODULE_LINKER_FLAGS=" + surround(mdLinkerFlagsModule[0])
-cmakeLinkerFlagsShared = "_CMakeLinkerFlagsShared", "-DCMAKE_SHARED_LINKER_FLAGS=" + surround(mdLinkerFlagsShared[0])
-cmakeOBJCFlags = "_CMakeOBJCFlags", "-DCMAKE_OBJC_FLAGS=" + surround(mdOBJCFlags[0])
-cmakeOBJCXXFlags = "_CMakeOBJCXXFlags", "-DCMAKE_OBJCXX_FLAGS=" + surround(mdOBJCXXFlags[0])
+cmakeCFlags = "CMakeCFlags", "-DCMAKE_C_FLAGS=" + surround(mdCFlags[0])
+cmakeCXXFlags = "CMakeCXXFlags", " -DCMAKE_CXX_FLAGS=" + surround(mdCXXFlags[0])
+cmakeFFlags = "CMakeFFlags", "-DCMAKE_Fortran_FLAGS=" + surround(mdFFlags[0])
+cmakeF77Flags = "CMakeF77Flags", "-DCMAKE_F77_FLAGS=" + surround(mdF77Flags[0])
+cmakeLinkerFlagsEXE = "CMakeLinkerFlagsEXE", "-DCMAKE_EXE_LINKER_FLAGS=" + surround(mdLinkerFlagsEXE[0])
+cmakeLinkerFlagsModule = "CMakeLinkerFlagsModule", "-DCMAKE_MODULE_LINKER_FLAGS=" + surround(mdLinkerFlagsModule[0])
+cmakeLinkerFlagsShared = "CMakeLinkerFlagsShared", "-DCMAKE_SHARED_LINKER_FLAGS=" + surround(mdLinkerFlagsShared[0])
+cmakeOBJCFlags = "CMakeOBJCFlags", "-DCMAKE_OBJC_FLAGS=" + surround(mdOBJCFlags[0])
+cmakeOBJCXXFlags = "CMakeOBJCXXFlags", "-DCMAKE_OBJCXX_FLAGS=" + surround(mdOBJCXXFlags[0])
 
-cmakeCompilers = "_CMakeCompilers", ""
-cmakeFlags = "_CMakeFlags", ""
+cmakeCompilers = "CMakeCompilers", ""
+cmakeFlags = "CMakeFlags", ""
 
 #GNUMake
-makeJobSlots = "_MakeJobSlots", "-j" + surround(mdJobSlots[0])
+makeJobSlots = "MakeJobSlots", "-j" + surround(mdJobSlots[0])
 
 #GCC
-gccCFlags = "_GCCCFlags", ""
-gccCXXFlags = "_GCCCXXFlags", ""
-gccOptimize = "_GCCOptimize", ""
+gccCFlags = "GCCCFlags", ""
+gccCXXFlags = "GCCCXXFlags", ""
+gccOptimize = "GCCOptimize", ""
 
 #gfortran
-gfortranFFlags = "_GFortranFFlags", ""
-gfortranOptimize = "_GFortranOptimize", ""
+gfortranFFlags = "GFortranFFlags", ""
+gfortranOptimize = "GFortranOptimize", ""
 
 #-----------------Set Defines----------------
-def quoteDefine(define, defineToBeAdded=""):
-    if defineToBeAdded == "":
-        finalDefine = '"' + define.strip('"') + '"'
-    else:
-        finalDefine = '"' + define.strip('"') + " " + defineToBeAdded.strip('"') + '"'
-    return finalDefine
-
 def setOverrideDefines(defs, overrideGroup):
     __setToolDefines(defs, overrideGroup)
     __setFlagDefines(defs, overrideGroup)
@@ -280,60 +273,60 @@ def __setFlagDefines(defs, overrideGroup):
         ldFlagsShared = ldFlags
 
     if ldFlags != "":
-        defs[mdLinkerFlags[0]] = quoteDefine(ldFlags)
+        defs[mdLinkerFlags[0]] = ldFlags
         defs[autoToolsLinkerFlags[0]] = autoToolsLinkerFlags[1]
         autoTools += surround(autoToolsLinkerFlags[0]) + " "
     if ldFlagsEXE != "":
-        defs[mdLinkerFlagsEXE[0]] = quoteDefine(ldFlagsEXE)
+        defs[mdLinkerFlagsEXE[0]] = ldFlagsEXE
         defs[cmakeLinkerFlagsEXE[0]] = cmakeLinkerFlagsEXE[1]
         cmake += surround(cmakeLinkerFlagsEXE[0]) + " "
     if ldFlagsModule != "":
-        defs[mdLinkerFlagsModule[0]] = quoteDefine(ldFlagsModule)
+        defs[mdLinkerFlagsModule[0]] = ldFlagsModule
         defs[cmakeLinkerFlagsModule[0]] = cmakeLinkerFlagsModule[1]
         cmake += surround(cmakeLinkerFlagsModule[0]) + " "
     if ldFlagsShared != "":
-        defs[mdLinkerFlagsShared[0]] = quoteDefine(ldFlagsShared)
+        defs[mdLinkerFlagsShared[0]] = ldFlagsShared
         defs[cmakeLinkerFlagsShared[0]] = cmakeLinkerFlagsShared[1]
         cmake += surround(cmakeLinkerFlagsShared[0]) + " "
 
     if "CFlags" in overrideGroup:
-        defs[mdCFlags[0]] = quoteDefine(overrideGroup["CFlags"])
+        defs[mdCFlags[0]] = overrideGroup["CFlags"]
         defs[autoToolsCFlags[0]] = autoToolsCFlags[1]
         defs[cmakeCFlags[0]] = cmakeCFlags[1]
         autoTools += surround(autoToolsCFlags[0]) + " "
         cmake += surround(cmakeCFlags[0]) + " "
     if "CPPFlags" in overrideGroup:
-        defs[mdCPPFlags[0]] = quoteDefine(overrideGroup["CPPFlags"])
+        defs[mdCPPFlags[0]] = overrideGroup["CPPFlags"]
         defs[autoToolsCPPFlags[0]] = autoToolsCPPFlags[1]
         defs[cmakeCPPFlags[0]] = cmakeCPPFlags[1]
         autoTools += surround(autoToolsCPPFlags[0]) + " "
         cmake += surround(cmakeCPPFlags[0]) + " "
     if "CXXFlags" in overrideGroup:
-        defs[mdCXXFlags[0]] = quoteDefine(overrideGroup["CXXFlags"])
+        defs[mdCXXFlags[0]] = overrideGroup["CXXFlags"]
         defs[autoToolsCXXFlags[0]] = autoToolsCXXFlags[1]
         defs[cmakeCXXFlags[0]] = cmakeCXXFlags[1]
         autoTools += surround(autoToolsCXXFlags[0]) + " "
         cmake += surround(cmakeCXXFlags[0]) + " "
     if "FFlags" in overrideGroup:
-        defs[mdFFlags[0]] = quoteDefine(overrideGroup["FFlags"])
+        defs[mdFFlags[0]] = overrideGroup["FFlags"]
         defs[autoToolsFFlags[0]] = autoToolsFFlags[1]
         defs[cmakeFFlags[0]] = cmakeFFlags[1]
         autoTools += surround(autoToolsFFlags[0]) + " "
         cmake += surround(cmakeFFlags[0]) + " "
     if "F77Flags" in overrideGroup:
-        defs[mdF77Flags[0]] = quoteDefine(overrideGroup["F77Flags"])
+        defs[mdF77Flags[0]] = overrideGroup["F77Flags"]
         defs[autoToolsF77Flags[0]] = autoToolsF77Flags[1]
         defs[cmakeF77Flags[0]] = cmakeF77Flags[1]
         autoTools += surround(autoToolsF77Flags[0]) + " "
         cmake += surround(cmakeF77Flags[0]) + " "
     if "OBJCFlags" in overrideGroup:
-        defs[mdOBJCFlags[0]] = quoteDefine(overrideGroup["OBJCFlags"])
+        defs[mdOBJCFlags[0]] = overrideGroup["OBJCFlags"]
         defs[autoToolsOBJCFlags[0]] = autoToolsOBJCFlags[1]
         defs[cmakeOBJCFlags[0]] = cmakeOBJCFlags[1]
         autoTools += surround(autoToolsOBJCFlags[0]) + " "
         cmake += surround(cmakeOBJCFlags[0]) + " "
     if "OBJCXXFlags" in overrideGroup:
-        defs[mdOBJCXXFlags[0]] = quoteDefine(overrideGroup["OBJCXXFlags"])
+        defs[mdOBJCXXFlags[0]] = overrideGroup["OBJCXXFlags"]
         defs[autoToolsOBJCXXFlags[0]] = autoToolsOBJCXXFlags[1]
         defs[cmakeOBJCXXFlags[0]] = cmakeOBJCXXFlags[1]
         autoTools += surround(autoToolsOBJCXXFlags[0]) + " "
