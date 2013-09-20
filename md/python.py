@@ -82,7 +82,7 @@ def callPythonCommand(namespace, function, target, options):
         target.pythonCallInfo.currentPath = target.path
         target.pythonCallInfo.outputPath = target.outputPath
         target.pythonCallInfo.outputPathSpecified = target.outputPathSpecified
-        target.pythonCallInfo.prefix = options.defines[defines.mdPrefix[0]]
+        target.pythonCallInfo.prefix = options.defines.expand(target.prefix)
         target.pythonCallInfo.downloadDir = options.downloadDir
         pythonCallInfo = getattr(importedNamespace, function)(target.pythonCallInfo)
     except AttributeError as e:
@@ -92,10 +92,9 @@ def callPythonCommand(namespace, function, target, options):
 
     if not pythonCallInfo.success:
         return False
-    target.path = pythonCallInfo.currentPath
-    target.outputPath = pythonCallInfo.outputPath
+    target.path = os.path.abspath(pythonCallInfo.currentPath)
+    target.outputPath = os.path.abspath(pythonCallInfo.outputPath)
     target.outputPathSpecified = pythonCallInfo.outputPathSpecified
-    options.defines[defines.mdPrefix[0]] = target.pythonCallInfo.prefix
     options.downloadDir = pythonCallInfo.downloadDir
     target.pythonCallInfo = pythonCallInfo
     return True
