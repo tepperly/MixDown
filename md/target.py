@@ -95,6 +95,8 @@ class Target(object):
         #Check for write access to install directories used in commands.
         if not mdOptions.cleanMode and not mdOptions.importMode:
             for buildStep in self.buildSteps:
+                if buildStep.command == "":
+                    continue
                 expandedCommand = mdOptions.defines.expand(buildStep.command)
                 installDir = autoTools.getInstallDir(expandedCommand)
                 if installDir == "":
@@ -197,3 +199,13 @@ class Target(object):
             if step.name == stepName:
                 return step.success
         return False
+
+    def setTargetFieldsAsDefines(self, defines):
+        validTargetFields = targetFields + commands.buildSteps
+        for currField in validTargetFields:
+            name = self.name + '.' + currField
+            value = getattr(self, currField, "")
+            if isinstance(value, list):
+                value = ", ".join(value)
+            defines[name] = value
+

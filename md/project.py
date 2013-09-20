@@ -261,14 +261,8 @@ class Project(object):
             self.targets[i] = newTarget
 
     def setTargetFieldsAsDefines(self, defines):
-        validTargetFields = target.targetFields + commands.buildSteps
         for currTarget in self.targets:
-            for currField in validTargetFields:
-                name = currTarget.name + '.' + currField
-                value = getattr(currTarget, currField, "")
-                if isinstance(value, list):
-                    value = ", ".join(value)
-                defines[name] = value
+            currTarget.setTargetFieldsAsDefines(defines)
 
     def read(self):
         if self.path == "":
