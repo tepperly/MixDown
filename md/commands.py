@@ -30,7 +30,7 @@ class BuildStep(object):
         self.restartPath = "" #Note: saved for incase build needs to be restarted, not used during building (target.path is)
         self.success = False
 
-buildSteps = ["fetch", "unpack", "patch", "preconfig", "config", "build", "test", "install", "clean"]
+buildSteps = ["fetch", "unpack", "patch", "preconfig", "config", "build", "test", "install", "postinstall", "clean"]
 
 def buildStepActor(target, buildStep, options, lock=None):
     if target.isStepToBeSkipped(buildStep.name):
@@ -126,6 +126,8 @@ def buildTarget(target, options, lock=None):
                 buildStep.restartPath = target.path
                 if buildStep.name == "clean" or buildStep.command == "":
                     continue
+                #Update target defines after each step
+                target.setTargetFieldsAsDefines(options.defines)
                 target.success = buildStepActor(target, buildStep, options, lock)
                 if not target.success:
                     break
