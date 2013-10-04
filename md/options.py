@@ -43,9 +43,7 @@ class Options(object):
         self.skipSteps = ""
         self.threadCount = 1
         self.overrideFile = ""
-        self.compilerGroupName = ""
-        self.optimizationGroupName = ""
-        self.parallelGroupName = ""
+        self.overrideGroupNames = []
         self.overrideGroup = None
         self.overrideSearchPath = []
         self.defines = defines.Defines()
@@ -59,23 +57,20 @@ class Options(object):
         else:
             modeStr = "Build"
         return "Options:\n\
-  Mode:           " + modeStr + "\n\
-  Project File:   " + self.projectFile + "\n\
-  Build Dir:      " + self.buildDir + "\n\
-  Download Dir:   " + self.downloadDir + "\n\
-  Log Dir:        " + self.logDir + "\n\
-  Clean MixDown:  " + str(self.cleanMixDown) + "\n\
-  Full Rebuild:   " + str(self.fullRebuild) + "\n\
-  Verbose:        " + str(self.verbose) + "\n\
-  Logger:         " + self.logger.capitalize() + "\n\
-  Thread Count:   " + str(self.threadCount) + "\n\
-  Job Count:      " + self.defines[defines.surround(defines.mdJobSlots[0])] + "\n\
-  Skip Steps:     " + self.skipSteps + "\n\
-  Override File:  " + self.overrideFile + "\n\
-  Override Group Names:\n\
-    Compiler:     " + self.compilerGroupName + "\n\
-    Optimization: " + self.optimizationGroupName + "\n\
-    Parallel:     " + self.parallelGroupName + "\n"
+  Mode:                 " + modeStr + "\n\
+  Project File:         " + self.projectFile + "\n\
+  Build Dir:            " + self.buildDir + "\n\
+  Download Dir:         " + self.downloadDir + "\n\
+  Log Dir:              " + self.logDir + "\n\
+  Clean MixDown:        " + str(self.cleanMixDown) + "\n\
+  Full Rebuild:         " + str(self.fullRebuild) + "\n\
+  Verbose:              " + str(self.verbose) + "\n\
+  Logger:               " + self.logger.capitalize() + "\n\
+  Thread Count:         " + str(self.threadCount) + "\n\
+  Job Count:            " + self.defines[defines.surround(defines.mdJobSlots[0])] + "\n\
+  Skip Steps:           " + self.skipSteps + "\n\
+  Override File:        " + self.overrideFile + "\n\
+  Override Group Names: " + ", ".join(self.overrideGroupNames) + "\n"
 
     def setStatusLogPath(self, prefix, projectName):
         tempDir = os.path.join(tempfile.gettempdir(), 'mixdown')
@@ -90,11 +85,11 @@ class Options(object):
         if self.importMode and self.cleanMode:
             logger.writeError("MixDown cannot be in both import mode and clean mode")
             return False
-        if self.overrideFile == "" and (self.compilerGroupName != "" or self.optimizationGroupName != "" or self.parallelGroupName != ""):
+        if self.overrideFile == "" and len(self.overrideGroupNames) == 0:
             logger.writeError("Override group name(s) given but no override file specified.  Use command-line option '-o<filename>'.")
             return False
-        if self.overrideFile != "" and self.compilerGroupName == "" and self.optimizationGroupName == "" and self.parallelGroupName == "":
-            logger.writeError("Override file given but no override group(s) specified.  Use command-line option '-g<Compiler>,<Debug>,<Parallel>'.")
+        if self.overrideFile != "" and len(self.overrideGroupNames) == 0:
+            logger.writeError("Override file given but no override group(s) specified.  Use command-line option '-g<Name>[,<Name>...]'.")
             return False
         return True
 
@@ -309,25 +304,20 @@ class Options(object):
             elif currFlag == "-g":
                 if not validateOptionPair(currFlag, currValue):
                     return False
-                groupsList = currValue.split(",")
-                length = len(groupsList)
-                if length >= 1:
-                    self.compilerGroupName = groupsList[0].lower().strip()
-                if length >= 2:
-                    self.optimizationGroupName = groupsList[1].lower().strip()
-                if length >= 3:
-                    self.parallelGroupName = groupsList[2].lower().strip()
-                if self.compilerGroupName == "" and self.optimizationGroupName == "" and self.parallelGroupName == "":
-                    logger.writeError("Override command-line option used but no group(s) specified.")
+                groupNames = currValue.split(",")
+                if len(groupNames) == 0:
+                    logger.writeError("Override group command-line option used but no names specified.")
                     return False
-
-                if self.optimizationGroupName == "":
-                    self.optimizationGroupName = "*"
-                if self.parallelGroupName == "":
-                    self.parallelGroupName = "*"
+                for groupName in groupNames:
+                    currGroupName = groupName.lower().strip()
+                    if currGroupName == "":
+                        logger.writeError("Empty override group name given on command-line")
+                        return False
+                    self.overrideGroupNames.append(currGroupName)
             else:
                 logger.writeError("Command-line argument '" + currArg + "' not understood")
                 return False
+
         if self.projectFile == "":
             self.printUsage()
             if self.cleanMode:
@@ -384,9 +374,9 @@ class Options(object):
         -s<list>      Add steps to skip for individual targets\n\
            Example: -starget1:preconfig,target2:config\n\
         -o<path>      Specify path to Override Groups file\n\
-        -g<Compiler>,<Debug>,<Parallel>  Specify Override Groups\n\
+        -g<Name>[,<Name>...]  Specify Override Groups\n\
            Example: -gGNU,Debug,MPI\n\
-           Example: -gGNU,,\n\
+           Example: -gGNU\n\
         -p<path>      Override prefix directory\n\
         -b<path>      Override build directory\n\
         -w<path>      Override download directory\n\

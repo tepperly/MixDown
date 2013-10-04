@@ -116,9 +116,7 @@ def profile(mdOptions):
                 portlandGroupGroup["fcompiler"] = fullPath
 
         if len(gnuGroup) > 0:
-            gnuGroup.compiler = os.path.join(key, "GNU")
-            gnuGroup.optimization = "*"
-            gnuGroup.parallel = "*"
+            gnuGroup.name = [os.path.join(key, "GNU")]
             overrideGroups.append(gnuGroup)
             addGnuOptimizationGroup(overrideGroups, gnuGroup)
         if len(intelGroup) > 0:
@@ -126,9 +124,7 @@ def profile(mdOptions):
             if "cpp" in groups[key]:
                 intelGroup["cpreprocessor"] = fullPath
 
-            intelGroup.compiler = os.path.join(key, "INTEL")
-            intelGroup.optimization = "*"
-            intelGroup.parallel = "*"
+            intelGroup.name = [os.path.join(key, "INTEL")]
             overrideGroups.append(intelGroup)
             addIntelOptimizationGroup(overrideGroups, intelGroup)
         if len(pathscaleGroup) > 0:
@@ -136,9 +132,7 @@ def profile(mdOptions):
             if "cpp" in groups[key]:
                 pathscaleGroup["cpreprocessor"] = fullPath
 
-            pathscaleGroup.compiler = os.path.join(key, "PATHSCALE")
-            pathscaleGroup.optimization = "*"
-            pathscaleGroup.parallel = "*"
+            pathscaleGroup.name = [os.path.join(key, "PATHSCALE")]
             overrideGroups.append(pathscaleGroup)
             addPathscaleOptimizationGroup(overrideGroups, pathscaleGroup)
         if len(portlandGroupGroup) > 0:
@@ -146,9 +140,7 @@ def profile(mdOptions):
             if "cpp" in groups[key]:
                 portlandGroupGroup["cpreprocessor"] = fullPath
 
-            portlandGroupGroup.compiler = os.path.join(key, "PORTLANDGROUP")
-            portlandGroupGroup.optimization = "*"
-            portlandGroupGroup.parallel = "*"
+            portlandGroupGroup.name = [os.path.join(key, "PORTLANDGROUP")]
             overrideGroups.append(portlandGroupGroup)
             addPortlandGroupOptimizationGroup(overrideGroups, portlandGroupGroup)
 
@@ -161,14 +153,10 @@ def profile(mdOptions):
 
 def addGnuOptimizationGroup(groups, compilerGroup):
     debugGroup = overrides.OverrideGroup()
-    debugGroup.compiler = compilerGroup.compiler
-    debugGroup.optimization = "debug"
-    debugGroup.parallel = "*"
+    debugGroup.name = [compilerGroup.name[0], "debug"]
 
     releaseGroup = overrides.OverrideGroup()
-    releaseGroup.compiler = compilerGroup.compiler
-    releaseGroup.optimization = "release"
-    releaseGroup.parallel = "*"
+    releaseGroup.name = [compilerGroup.name[0], "release"]
 
     gccDebugFlags = "-g -O0 -Wall"
     gccReleaseFlags = "-O2 -Wall"
@@ -201,14 +189,10 @@ def addGnuOptimizationGroup(groups, compilerGroup):
 
 def addIntelOptimizationGroup(groups, compilerGroup):
     debugGroup = overrides.OverrideGroup()
-    debugGroup.compiler = compilerGroup.compiler
-    debugGroup.optimization = "debug"
-    debugGroup.parallel = "*"
+    debugGroup.name = [compilerGroup.name[0], "debug"]
 
     releaseGroup = overrides.OverrideGroup()
-    releaseGroup.compiler = compilerGroup.compiler
-    releaseGroup.optimization = "release"
-    releaseGroup.parallel = "*"
+    releaseGroup.name = [compilerGroup.name[0], "release"]
 
     iccDebugFlags = "-debug full -O0 -Wall"
     iccReleaseFlags = "-debug none -O2 -Wall"
@@ -235,14 +219,10 @@ def addIntelOptimizationGroup(groups, compilerGroup):
 
 def addPathscaleOptimizationGroup(groups, compilerGroup):
     debugGroup = overrides.OverrideGroup()
-    debugGroup.compiler = compilerGroup.compiler
-    debugGroup.optimization = "debug"
-    debugGroup.parallel = "*"
+    debugGroup.name = [compilerGroup.name[0], "debug"]
 
     releaseGroup = overrides.OverrideGroup()
-    releaseGroup.compiler = compilerGroup.compiler
-    releaseGroup.optimization = "release"
-    releaseGroup.parallel = "*"
+    releaseGroup.name = [compilerGroup.name[0], "release"]
 
     pathDebugFlags = "-g -O0 -Wall"
     pathReleaseFlags = "-O2 -Wall"
@@ -269,14 +249,10 @@ def addPathscaleOptimizationGroup(groups, compilerGroup):
 
 def addPortlandGroupOptimizationGroup(groups, compilerGroup):
     debugGroup = overrides.OverrideGroup()
-    debugGroup.compiler = compilerGroup.compiler
-    debugGroup.optimization = "debug"
-    debugGroup.parallel = "*"
+    debugGroup.name = [compilerGroup.name[0], "debug"]
 
     releaseGroup = overrides.OverrideGroup()
-    releaseGroup.compiler = compilerGroup.compiler
-    releaseGroup.optimization = "release"
-    releaseGroup.parallel = "*"
+    releaseGroup.name = [compilerGroup.name[0], "release"]
 
     portlandDebugFlags = "-g -O0"
     portlandReleaseFlags = "-O2"

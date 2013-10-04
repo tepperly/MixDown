@@ -38,13 +38,11 @@ reservedOverrides = ["ccompiler",        "cflags",    "cdefines",
 
 class OverrideGroup(dict):
     def __init__(self):
-        self.compiler = ""
-        self.optimization = ""
-        self.parallel = ""
+        self.name = []
         self.defines = defines.Defines()
 
     def __str__(self):
-        retStr = self.compiler + ", " + self.optimization + ", " + self.parallel + " {\n"
+        retStr = ", ".join(self.name) + " {\n"
         for key in self.keys():
             retStr += "    " + key + " = " + self[key] + "\n"
         for key in self.defines.keys():
@@ -66,9 +64,7 @@ class OverrideGroup(dict):
             return None
 
     def combine(self, child):
-        self.compiler = child.compiler
-        self.optimization = child.optimization
-        self.parallel = child.parallel
+        self.name = child.name
         for key in child:
             self[key] = child[key]
         for key in child.defines:
@@ -76,7 +72,7 @@ class OverrideGroup(dict):
 
 def readGroups(filename):
     if not os.path.exists(filename):
-        logger.writeError("Given Override file path did not exist. Check your -o command line option.", filePath=filename)
+        logger.writeError("Given Override file path did not exist. Check your -o command-line option.", filePath=filename)
         return None
     groups = list()
     overrideGroup = None
@@ -88,53 +84,34 @@ def readGroups(filename):
     lengthOfTokens = len(tokens)
 
     while i < lengthOfTokens:
-        #Syntax start: <compiler group name>, <optimization group name>, <parallel group name>
-        if tokens[i].type == TokenType.Identifier:
-            overrideGroup = OverrideGroup()
-            overrideGroup.compiler = tokens[i].value
-        else:
-            logger.writeError("Expected Compiler Override group name '" + tokens[i].value + "'", filePath=filename)
-            return None
-        i += 1
-        if i >= lengthOfTokens:
-            logger.writeError("Parsing ended inside of Override group. Please finish file and re-run MixDown.", filePath=filename)
-            return None
+        #Syntax start: <name>[, <name>]*
+        overrideGroup = OverrideGroup()
+        while not (tokens[i].type == TokenType.Symbol and tokens[i].value == '{'):
+            if len(overrideGroup.name) > 50:
+                logger.writeError("Override group name exceeded limit (50).", filePath=filename)
+                return None
 
-        if not (tokens[i].type == TokenType.Symbol and tokens[i].value == ','):
-            logger.writeError("Expected ',' got '" + tokens[i].value + "'", filePath=filename)
-            return None
-        i += 1
-        if i >= lengthOfTokens:
-            logger.writeError("Parsing ended inside of Override group. Please finish file and re-run MixDown.", filePath=filename)
-            return None
+            if tokens[i].type == TokenType.Identifier:
+                overrideGroup.name.append(tokens[i].value.lower())
+                i += 1
+                if i >= lengthOfTokens:
+                    logger.writeError("Parsing ended inside of Override group. Please finish file and re-run MixDown.", filePath=filename)
+                    return None
 
-        if tokens[i].type == TokenType.Identifier or (tokens[i].type == TokenType.Symbol and tokens[i].value == '*'):
-            overrideGroup.optimization = tokens[i].value
-        else:
-            logger.writeError("Expected either Optimization Override group name or '*' got '" + tokens[i].value + "'", filePath=filename)
-            return None
-        i += 1
-        if i >= lengthOfTokens:
-            logger.writeError("Parsing ended inside of Override group. Please finish file and re-run MixDown.", filePath=filename)
-            return None
-
-        if not (tokens[i].type == TokenType.Symbol and tokens[i].value == ','):
-            logger.writeError("Expected ',' got '" + tokens[i].value + "'", filePath=filename)
-            return None
-        i += 1
-        if i >= lengthOfTokens:
-            logger.writeError("Parsing ended inside of Override group. Please finish file and re-run MixDown.", filePath=filename)
-            return None
-
-        if tokens[i].type == TokenType.Identifier or (tokens[i].type == TokenType.Symbol and tokens[i].value == '*'):
-            overrideGroup.parallel = tokens[i].value
-        else:
-            logger.writeError("Expected either Parallel Override group name or '*' got '" + tokens[i].value + "'", filePath=filename)
-            return None
-        i += 1
-        if i >= lengthOfTokens:
-            logger.writeError("Parsing ended inside of Override group. Please finish file and re-run MixDown.", filePath=filename)
-            return None
+                if tokens[i].type == TokenType.Symbol and tokens[i].value == '{':
+                    #End of override group name syntax hit
+                    break
+                elif tokens[i].type == TokenType.Symbol and tokens[i].value == ',':
+                    i += 1
+                    if i >= lengthOfTokens:
+                        logger.writeError("Parsing ended inside of Override group. Please finish file and re-run MixDown.", filePath=filename)
+                        return None
+                else:
+                    logger.writeError("Expected ',' got '" + tokens[i].value + "'", filePath=filename)
+                    return None
+            else:
+                logger.writeError("Expected Override group name, got '" + tokens[i].value + "'", filePath=filename)
+                return None
         #Syntax end
 
         #Syntax start:
@@ -195,61 +172,25 @@ def readGroups(filename):
 
         #Syntax end
 
+        overrideGroupNames = ", ".join(overrideGroup)
+        for group in groups:
+            if ", ".join(group.name) == overrideGroupNames:
+                logger.writeError("Duplicate override group name found: " + overrideGroupNames, filePath=options.overrideFile)
+                return None
         groups.append(overrideGroup)
     return groups
 
 def selectGroups(groups, options):
-    compilerGroupSet = False
-    optimizationGroupSet = False
-    parallelGroupSet = False
     finalGroup = OverrideGroup()
 
-    if options.compilerGroupName == '*' and options.optimizationGroupName == '*' and options.parallelGroupName == '*':
-        logger.writeError("Invalid override group name : *, *, *")
-        return None
-    if options.compilerGroupName == '*' or (options.optimizationGroupName == '*' and options.parallelGroupName != '*'):
-        logger.writeError("Invalid override group name : " + options.compilerGroupName + ", " + options.optimizationGroupName + ", " + options.parallelGroupName\
-                          + "\n*'s can only be used to the right and not to the left of a defined override group name.")
-        return None
-
-    for group in groups:
-        if (group.compiler.lower() == options.compilerGroupName and group.compiler != "*")\
-           and group.optimization == '*'\
-           and group.parallel == '*':
-            if compilerGroupSet:
-                logger.writeError("Duplicate override group found: " + group.compiler + ",* ,*", filePath=options.overrideFile)
-                return None
-            finalGroup.combine(group)
-            compilerGroupSet = True
-    if compilerGroupSet == False and options.compilerGroupName != '*':
-        logger.writeError("Compiler override group not found: " + options.compilerGroupName, filePath=options.overrideFile)
-        return None
-
-    for group in groups:
-        if (group.compiler.lower() == options.compilerGroupName and group.compiler != "*")\
-           and (group.optimization.lower() == options.optimizationGroupName and group.optimization != "*")\
-           and group.parallel == '*':
-            if optimizationGroupSet:
-                logger.writeError("Duplicate override group found: " + group.compiler + ", " + group.optimization + ",*", filePath=options.overrideFile)
-                return None
-            finalGroup.combine(group)
-            optimizationGroupSet = True
-    if optimizationGroupSet == False and options.optimizationGroupName != '*':
-        logger.writeError("Optimization override group not found: " + options.optimizationGroupName, filePath=options.overrideFile)
-        return None
-
-    for group in groups:
-        if (group.compiler.lower() == options.compilerGroupName and group.compiler != "*")\
-           and (group.optimization.lower() == options.optimizationGroupName and group.optimization != "*")\
-           and (group.parallel.lower() == options.parallelGroupName and group.parallel != "*"):
-            if parallelGroupSet:
-                logger.writeError("Duplicate override group found: " + group.compiler + ", " + group.optimization + ", " + group.parallel, filePath=options.overrideFile)
-                return None
-            finalGroup.combine(group)
-            parallelGroupSet = True
-    if parallelGroupSet == False and options.parallelGroupName != '*':
-        logger.writeError("Parallel override group not found: " + options.parallelGroupName, filePath=options.overrideFile)
-        return None
-
+    for nameLength in range(1, len(options.overrideGroupNames)+1):
+        increasingGroupName = ", ".join(options.overrideGroupNames[:nameLength])
+        for currGroup in groups:
+            if len(currGroup.name) != nameLength:
+                continue
+            currGroupName = ", ".join(currGroup.name)
+            if currGroupName == increasingGroupName:
+                finalGroup.combine(currGroup)
+                break
 
     return finalGroup

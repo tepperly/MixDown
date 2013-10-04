@@ -53,21 +53,6 @@ def main():
             if mdOptions.cleanMixDown:
                 cleanMixDown(mdOptions)
 
-            if mdOptions.overrideFile != ""\
-               and mdOptions.compilerGroupName != ""\
-               and mdOptions.optimizationGroupName != ""\
-               and mdOptions.parallelGroupName != "":
-                overrideGroups = overrides.readGroups(mdOptions.overrideFile)
-                if overrideGroups == None:
-                    sys.exit(1)
-                finalGroup = overrides.selectGroups(overrideGroups, mdOptions)
-                if finalGroup == None:
-                    logger.writeError("Selecting Override group failed.")
-                    sys.exit(1)
-                else:
-                    mdOptions.overrideGroup = finalGroup
-                    defines.setOverrideDefines(mdOptions.defines, finalGroup)
-
             mdProject = setup(mdOptions)
             if mdProject == None:
                 success = False
@@ -182,6 +167,18 @@ def setup(mdOptions):
         logger.writeMessage(str(mdOptions))
         if not mdOptions.prefixDefined and not mdOptions.cleanMode:
             logger.writeMessage("No prefix defined, defaulting to '" + mdOptions.defines[defines.mdPrefix[0]] + "'")
+
+    if mdOptions.overrideFile != "":
+        overrideGroups = overrides.readGroups(mdOptions.overrideFile)
+        if overrideGroups == None:
+            sys.exit(1)
+        finalGroup = overrides.selectGroups(overrideGroups, mdOptions)
+        if finalGroup == None:
+            logger.writeError("Selecting Override group failed.")
+            sys.exit(1)
+        else:
+            mdOptions.overrideGroup = finalGroup
+            defines.setOverrideDefines(mdOptions.defines, finalGroup)
 
     if not mdOptions.validate():
         return None
