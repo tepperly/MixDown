@@ -77,13 +77,8 @@ def callPythonCommand(namespace, function, target, options):
 
     try:
         target.pythonCallInfo.success = False
-        target.pythonCallInfo.name = target.name
-        target.pythonCallInfo.version = target.version
-        target.pythonCallInfo.currentPath = target.path
-        target.pythonCallInfo.outputPath = target.outputPath
-        target.pythonCallInfo.outputPathSpecified = target.outputPathSpecified
-        target.pythonCallInfo.prefix = options.defines.expand(target.prefix)
-        target.pythonCallInfo.downloadDir = options.downloadDir
+        target.pythonCallInfo.target = target
+        target.pythonCallInfo.options = options
         pythonCallInfo = getattr(importedNamespace, function)(target.pythonCallInfo)
     except AttributeError as e:
         logger.writeError(str(e))
@@ -92,21 +87,12 @@ def callPythonCommand(namespace, function, target, options):
 
     if not pythonCallInfo.success:
         return False
-    target.path = os.path.abspath(pythonCallInfo.currentPath)
-    target.outputPath = os.path.abspath(pythonCallInfo.outputPath)
-    target.outputPathSpecified = pythonCallInfo.outputPathSpecified
-    options.downloadDir = pythonCallInfo.downloadDir
-    target.pythonCallInfo = pythonCallInfo
+    target = pythonCallInfo.target
     return True
 
 class PythonCallInfo(object):
     def __init__(self):
         self.success = False
-        self.name = ""
-        self.version = ""
-        self.currentPath = ""
-        self.outputPath = ""
-        self.outputPathSpecified = False
-        self.prefix = ""
-        self.downloadDir = ""
+        self.target = None
+        self.options = None
         self.logger = logger.Logger()
