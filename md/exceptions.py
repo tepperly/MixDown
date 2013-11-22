@@ -1,4 +1,4 @@
-# Copyright (c) 2010-2012, Lawrence Livermore National Security, LLC
+# Copyright (c) 2010-2013, Lawrence Livermore National Security, LLC
 # Produced at Lawrence Livermore National Laboratory
 # LLNL-CODE-462894
 # All rights reserved.
@@ -29,7 +29,7 @@ class ToolNotInstalledException(Exception):
     def _get_message(self):
         return self._message
 
-    def _set_message(self, message): 
+    def _set_message(self, message):
         self._message = message
 
     message = property(_get_message, _set_message)
