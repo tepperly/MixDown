@@ -398,8 +398,8 @@ class Options(object):
            Example: -starget1:preconfig,target2:config\n\
         -o<path>      Specify path to Override Groups file\n\
         -g<Name>[,<Name>...]  Specify Override Groups\n\
-        Example: -gGNU,Debug,MPI\n\
-        Example: -gGNU\n\
+           Example: -gGNU,Debug,MPI\n\
+           Example: -gGNU\n\
         -p<path>      Override prefix directory\n\
         -b<path>      Override build directory\n\
         -w<path>      Override download directory\n\
