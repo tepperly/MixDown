@@ -58,7 +58,7 @@ def main():
                 success = False
             else:
                 mdOptions.setStatusLogPath(mdOptions.defines[defines.mdPrefix[0]], mdProject.name)
-                if not mdOptions.fullRebuild:
+                if mdOptions.restart:
                     readSuccess, statusLogExisted = mdProject.readStatusLog(mdOptions)
                     if statusLogExisted:
                         if not readSuccess:

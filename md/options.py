@@ -29,7 +29,7 @@ class Options(object):
         self.buildDir = "mdBuild"
         self.downloadDir = "mdDownload"
         self.logDir = "mdLogFiles"
-        self.fullRebuild = False
+        self.restart = False
         self.statusLogPath = ""
         self.profileMode = False
         self.cleanMode = False
@@ -63,7 +63,7 @@ class Options(object):
   Download Dir:         " + self.downloadDir + "\n\
   Log Dir:              " + self.logDir + "\n\
   Clean MixDown:        " + str(self.cleanMixDown) + "\n\
-  Full Rebuild:         " + str(self.fullRebuild) + "\n\
+  Restart build:        " + str(self.restart) + "\n\
   Verbose:              " + str(self.verbose) + "\n\
   Logger:               " + self.logger.capitalize() + "\n\
   Thread Count:         " + str(self.threadCount) + "\n\
@@ -270,10 +270,10 @@ class Options(object):
                 if not validateOptionPair(currFlag, currValue):
                     return False
                 self.logger = str.lower(currValue)
-            elif currFlag == "-f":
+            elif currFlag == "-r":
                 if not validateOption(currFlag, currValue):
                     return False
-                self.fullRebuild = True
+                self.restart = True
             elif currFlag == "-b":
                 if not validateOptionPair(currFlag, currValue):
                     return False
@@ -368,7 +368,7 @@ class Options(object):
     \n\
         Optional:\n\
         -v            Verbose Mode\n\
-        -f            Force full rebuild (ignores success of previous build)\n\
+        -r            Restart build on failed step or changed step\n\
         -j<number>    Number of build job slots\n\
         -t<number>    Number of threads used to build concurrent targets\n\
         -s<list>      Add steps to skip for individual targets\n\
