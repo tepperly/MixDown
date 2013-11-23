@@ -71,7 +71,7 @@ class Project(object):
         try:
             fd.write("path:" + os.path.abspath(self.path) + "\n")
             fd.write("buildDir:" + os.path.abspath(options.buildDir) + "\n")
-            fd.write("prefix" + ":" + os.path.abspath(options.defines[defines.mdPrefix[0]]) + ":" + str(options.prefixDefined) + "\n")
+            fd.write("prefix:" + os.path.abspath(options.defines[defines.mdPrefix[0]]) + ":" + str(options.prefixDefined) + "\n")
             fd.write("\n")
 
             for target in self.targets:
@@ -161,6 +161,7 @@ class Project(object):
                     currTarget.origPath = l[1]
                     currTarget.success = utilityFunctions.boolToStr(l[2])
                 elif len(l) == 4:
+                    currTarget = self.getTarget(l[0])
                     if currTarget == None:
                         continue
                     currStep = currTarget.findBuildStep(l[0])
