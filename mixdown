@@ -168,6 +168,23 @@ def setup(mdOptions):
         if not mdOptions.prefixDefined and not mdOptions.cleanMode:
             logger.writeMessage("No prefix defined, defaulting to '" + mdOptions.defines[defines.mdPrefix[0]] + "'")
 
+    if mdOptions.overrideFile == "" and len(mdOptions.overrideGroupNames) > 0:
+        logger.writeMessage("Override file was not specified while override group name was specified.\nTrying to find override file...")
+        cwd = os.path.abspath(os.getcwd())
+        for currName in os.listdir(cwd):
+            currPath = os.path.join(cwd, currName)
+            if os.path.isfile(currPath):
+                if os.path.splitext(currPath)[1] == ".mdo":
+                    if mdOptions.overrideFile != "":
+                        logger.writeError("More than one override file ('.mdo') found in current working directory. Must specifiy '-o' on command line.", filePath=cwd)
+                        sys.exit(1)
+                    mdOptions.overrideFile = currPath
+        if mdOptions.overrideFile == "":
+            logger.writeError("No override file ('.mdo') found in current working directory. Must specifiy '-o' on command line.", filePath=cwd)
+            sys.exit(1)
+        else:
+            logger.writeMessage("Found override file: " + mdOptions.overrideFile)
+
     if mdOptions.overrideFile != "":
         overrideGroups = overrides.readGroups(mdOptions.overrideFile)
         if overrideGroups == None:
