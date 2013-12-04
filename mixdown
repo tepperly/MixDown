@@ -34,13 +34,10 @@ def main():
         partialImport = False
         mdOptions = options.Options()
         mdProject = None
+
         if not mdOptions.processCommandline(sys.argv):
             sys.exit(1)
 
-        if (not mdOptions.importMode or not mdOptions.targetsToImport) and\
-           not mdOptions.cleanMode and mdOptions.projectFile == "" and\
-           not mdOptions.profileMode:
-            mdOptions.printUsageAndExit("MixDown's mode could not be determined")
         timeStarted = time.time()
 
         if mdOptions.importMode:
@@ -163,27 +160,37 @@ def main():
 #--------------------------------Setup---------------------------------
 def setup(mdOptions):
     logger.setLogger(mdOptions.logger, mdOptions.logDir)
-    if mdOptions.verbose:
-        logger.writeMessage(str(mdOptions))
-        if not mdOptions.prefixDefined and not mdOptions.cleanMode:
-            logger.writeMessage("No prefix defined, defaulting to '" + mdOptions.defines[defines.mdPrefix[0]] + "'")
+    if not mdOptions.prefixDefined and not mdOptions.cleanMode:
+        logger.writeMessage("No prefix defined, defaulting to '" + mdOptions.defines[defines.mdPrefix[0]] + "'")
+
+    if mdOptions.projectFile == "":
+        logger.writeMessage("Project file was not specified on command-line.\nTrying to find project file...")
+        cwd = os.path.abspath(os.getcwd())
+        projectFiles = utilityFunctions.findFilesWithExtension(cwd, ".md")
+        if len(projectFiles) == 0:
+            logger.writeError("No project file ('.md') found in current working directory. Must specifiy on command line.", filePath=cwd)
+            sys.exit(1)
+        if len(projectFiles) > 1:
+            logger.writeError("More than one project file ('.md') found in current working directory. Must specifiy on command line.", filePath=cwd)
+            sys.exit(1)
+        mdOptions.projectFile = projectFiles[0]
+        logger.writeMessage("Found project file: " + mdOptions.projectFile + "\n")
 
     if mdOptions.overrideFile == "" and len(mdOptions.overrideGroupNames) > 0:
         logger.writeMessage("Override file was not specified while override group name was specified.\nTrying to find override file...")
         cwd = os.path.abspath(os.getcwd())
-        for currName in os.listdir(cwd):
-            currPath = os.path.join(cwd, currName)
-            if os.path.isfile(currPath):
-                if os.path.splitext(currPath)[1] == ".mdo":
-                    if mdOptions.overrideFile != "":
-                        logger.writeError("More than one override file ('.mdo') found in current working directory. Must specifiy '-o' on command line.", filePath=cwd)
-                        sys.exit(1)
-                    mdOptions.overrideFile = currPath
-        if mdOptions.overrideFile == "":
+        overrideFiles = utilityFunctions.findFilesWithExtension(cwd, ".mdo")
+        if len(overrideFiles) == 0:
             logger.writeError("No override file ('.mdo') found in current working directory. Must specifiy '-o' on command line.", filePath=cwd)
             sys.exit(1)
-        else:
-            logger.writeMessage("Found override file: " + mdOptions.overrideFile)
+        if len(overrideFiles) > 1:
+            logger.writeError("More than one override file ('.mdo') found in current working directory. Must specifiy '-o' on command line.", filePath=cwd)
+            sys.exit(1)
+        mdOptions.overrideFile = overrideFiles[0]
+        logger.writeMessage("Found override file: " + mdOptions.overrideFile + "\n")
+
+    if mdOptions.verbose:
+        logger.writeMessage(str(mdOptions))
 
     if mdOptions.overrideFile != "":
         overrideGroups = overrides.readGroups(mdOptions.overrideFile)
@@ -238,7 +245,7 @@ def setup(mdOptions):
 
 def cleanMixDown(mdOptions):
     try:
-        logger.writeMessage("Cleaning MixDown directories...")
+        logger.writeMessage("Cleaning MixDown directories...\n")
         utilityFunctions.removeDir(mdOptions.buildDir)
         utilityFunctions.removeDir(mdOptions.downloadDir)
         utilityFunctions.removeDir(mdOptions.logDir)
