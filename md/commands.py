@@ -121,6 +121,9 @@ def buildTarget(target, options, lock=None):
         elif target.prefix != "" and os.path.exists(options.defines.expand(target.prefix)):
             logger.reportSkipped(target.name, "", "Target's defined prefix detected.")
             target.success = True
+        elif not (target.name in options.targetsToBuild):
+            logger.reportSkipped(target.name, "", "Target was not specified on command-line.")
+            target.success = True
         else:
             for buildStep in target.buildSteps:
                 buildStep.restartPath = target.path

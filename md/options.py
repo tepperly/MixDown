@@ -37,6 +37,7 @@ class Options(object):
         self.cleanMixDown = True
         self.verbose = False
         self.logger = "file"
+        self.targetsToBuild = []
         self.targetsToImport = []
         self.interactive = False
         self.prefixDefined = False
@@ -121,7 +122,7 @@ class Options(object):
             currFlag = currArg[:2].lower()
             currValue = currArg[2:]
 
-            if currFlag in ("-p", "-l", "-j", "-b", "-w", "-k", "-o", "-g", "-f"):
+            if currFlag in ("-p", "-l", "-n", "-j", "-b", "-w", "-k", "-o", "-g", "-f"):
                 logger.writeError("Command-line option is not allowed in import mode: " + currArg)
                 return False
             if currFlag == "-i":
@@ -159,7 +160,7 @@ class Options(object):
             currFlag = currArg[:2].lower()
             currValue = currArg[2:]
 
-            if currFlag in ("-p", "-l", "-j", "-b", "-w", "-k", "-o", "-g", "-i", "-v", "-f"):
+            if currFlag in ("-p", "-l", "-n", "-j", "-b", "-w", "-k", "-o", "-g", "-i", "-v", "-f"):
                 logger.writeError("Command-line option is not allowed in profile mode: " + currArg)
                 return False
             elif currFlag == "-d":
@@ -301,30 +302,36 @@ class Options(object):
                 if not validateOptionPair(currFlag, currValue):
                     return False
                 self.overrideFile = currValue
+            elif currFlag == "-n":
+                if not validateOptionPair(currFlag, currValue):
+                    return False
+                names = currValue.split(",")
+                if len(names) == 0:
+                    logger.writeError("Build target names command-line option used but no names specified.")
+                    return False
+                for name in names:
+                    currName = name.lower().strip()
+                    if currName == "":
+                        logger.writeError("Empty build target name given on command-line (option '-n')")
+                        return False
+                    self.targetsToBuild.append(currName)
             elif currFlag == "-g":
                 if not validateOptionPair(currFlag, currValue):
                     return False
-                groupNames = currValue.split(",")
-                if len(groupNames) == 0:
+                names = currValue.split(",")
+                if len(names) == 0:
                     logger.writeError("Override group command-line option used but no names specified.")
                     return False
-                for groupName in groupNames:
-                    currGroupName = groupName.lower().strip()
-                    if currGroupName == "":
-                        logger.writeError("Empty override group name given on command-line")
+                for name in names:
+                    currName = name.lower().strip()
+                    if currName == "":
+                        logger.writeError("Empty override group name given on command-line (option '-g')")
                         return False
-                    self.overrideGroupNames.append(currGroupName)
+                    self.overrideGroupNames.append(currName)
             else:
                 logger.writeError("Command-line argument '" + currArg + "' not understood")
                 return False
 
-        if self.projectFile == "":
-            self.printUsage()
-            if self.cleanMode:
-                logger.writeError("No MixDown project file given when MixDown is in clean mode")
-            else:
-                logger.writeError("No MixDown project file given when MixDown is in build mode")
-            return False
         return True
 
     def printUsageAndExit(self, errorStr=""):
@@ -371,6 +378,8 @@ class Options(object):
         -r            Restart build on failed step or changed step\n\
         -j<number>    Number of build job slots\n\
         -t<number>    Number of threads used to build concurrent targets\n\
+        -n<list>      Name of specific targets to build\n\
+           Example: -nFoo,bar\n\
         -s<list>      Add steps to skip for individual targets\n\
            Example: -starget1:preconfig,target2:config\n\
         -o<path>      Specify path to Override Groups file\n\
