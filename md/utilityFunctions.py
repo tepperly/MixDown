@@ -66,6 +66,15 @@ def executeSubProcess(command, workingDirectory=tempfile.gettempdir(), outFileHa
         printErrorAndExit("Command '" + command + "': exited with error code " + str(process.returncode))
     return process.returncode
 
+def findFilesWithExtension(path, extension):
+    foundFiles = []
+    for currName in os.listdir(path):
+        currPath = os.path.join(path, currName)
+        if os.path.isfile(currPath):
+            if os.path.splitext(currPath)[1] == extension:
+                foundFiles.append(currPath)
+    return foundFiles
+
 def findShallowestFile(startPath, fileList):
     q = Queue.Queue()
     q.put(startPath)
