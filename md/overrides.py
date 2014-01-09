@@ -39,14 +39,11 @@ reservedOverrides = ["ccompiler",        "cflags",    "cdefines",
 class OverrideGroup(dict):
     def __init__(self):
         self.name = []
-        self.defines = defines.Defines()
 
     def __str__(self):
         retStr = ", ".join(self.name) + " {\n"
         for key in self.keys():
             retStr += "    " + key + " = " + self[key] + "\n"
-        for key in self.defines.keys():
-            retStr += "    " + key + " = " + self.defines[key] + "\n"
         retStr += "}\n"
         return retStr
 
@@ -67,8 +64,6 @@ class OverrideGroup(dict):
         self.name = child.name
         for key in child:
             self[key] = child[key]
-        for key in child.defines:
-            self.defines[key] = child.defines[key]
 
 def readGroups(filename):
     if not os.path.exists(filename):
@@ -163,11 +158,7 @@ def readGroups(filename):
                 logger.writeError("Parsing ended inside of Override group. Please finish file and re-run MixDown.", filePath=filename)
                 return None
 
-            #Compiler Overrides
-            if overrideName in reservedOverrides:
-                overrideGroup[overrideName] = overrideString
-            else:
-                overrideGroup.defines[overrideName] = overrideString
+            overrideGroup[overrideName] = overrideString
             #Syntax end
 
         #Syntax end
@@ -180,11 +171,11 @@ def readGroups(filename):
         groups.append(overrideGroup)
     return groups
 
-def selectGroups(groups, options):
+def selectGroups(groups, overrideGroupNames):
     finalGroup = OverrideGroup()
 
-    for nameLength in range(1, len(options.overrideGroupNames)+1):
-        increasingGroupName = ", ".join(options.overrideGroupNames[:nameLength])
+    for nameLength in range(1, len(overrideGroupNames)+1):
+        increasingGroupName = ", ".join(overrideGroupNames[:nameLength])
         for currGroup in groups:
             if len(currGroup.name) != nameLength:
                 continue

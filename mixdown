@@ -66,7 +66,7 @@ def main():
                 #Define Hierarchy: options defines <  project defines < override group defines
                 mdOptions.defines.combine(mdProject.defines)
                 if mdOptions.overrideGroup:
-                    mdOptions.defines.combine(mdOptions.overrideGroup.defines)
+                    mdOptions.defines.combine(mdOptions.overrideGroup)
 
                 if mdOptions.threadCount == 1:
                     for target in reversed(mdProject.targets):
@@ -196,7 +196,7 @@ def setup(mdOptions):
         overrideGroups = overrides.readGroups(mdOptions.overrideFile)
         if overrideGroups == None:
             sys.exit(1)
-        finalGroup = overrides.selectGroups(overrideGroups, mdOptions)
+        finalGroup = overrides.selectGroups(overrideGroups, mdOptions.overrideGroupNames)
         if finalGroup == None:
             logger.writeError("Selecting Override group failed.")
             sys.exit(1)
