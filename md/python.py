@@ -88,6 +88,7 @@ def callPythonCommand(namespace, function, target, options):
     if not pythonCallInfo.success:
         return False
     target = pythonCallInfo.target
+    options = pythonCallInfo.options
     return True
 
 class PythonCallInfo(object):
