@@ -121,7 +121,7 @@ def buildTarget(target, options, lock=None):
         elif target.prefix != "" and os.path.exists(options.defines.expand(target.prefix)):
             logger.reportSkipped(target.name, "", "Target's defined prefix detected.")
             target.success = True
-        elif len(options.targetsToBuild) != 0 and not (target.name.lower().strip() in options.targetsToBuild):
+        elif not options.targetSpecifiedToBuild(target.name):
             logger.reportSkipped(target.name, "", "Target was not specified on command-line.")
             target.success = True
         else:

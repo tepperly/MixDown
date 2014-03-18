@@ -20,7 +20,7 @@
 # along with this program; if not, write to the Free Software Foundation,
 # Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 
-import os, socket, sys, tempfile
+import getpass, os, socket, sys, tempfile
 import defines, logger, target, utilityFunctions
 
 class Options(object):
@@ -73,8 +73,14 @@ class Options(object):
   Override File:        " + self.overrideFile + "\n\
   Override Group Names: " + ", ".join(self.overrideGroupNames) + "\n"
 
+    def targetSpecifiedToBuild(self, targetName):
+        if len(self.targetsToBuild) != 0 and not (targetName.lower().strip() in self.targetsToBuild):
+            return False
+        return True
+
     def setStatusLogPath(self, prefix, projectName):
-        tempDir = os.path.join(tempfile.gettempdir(), 'mixdown')
+        username = getpass.getuser()
+        tempDir = os.path.join(tempfile.gettempdir(), "mixdown-" + username)
         projectIdentifier = os.path.join(prefix, projectName).replace(os.path.sep, '%')
         self.statusLogPath = os.path.join(tempDir, projectIdentifier)
 

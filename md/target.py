@@ -93,7 +93,7 @@ class Target(object):
                 return False
 
         #Check for write access to install directories used in commands.
-        if not mdOptions.cleanMode and not mdOptions.importMode:
+        if mdOptions.targetSpecifiedToBuild(self.name) and not mdOptions.cleanMode and not mdOptions.importMode:
             for buildStep in self.buildSteps:
                 if buildStep.command == "":
                     continue
