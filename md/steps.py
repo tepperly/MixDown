@@ -16,7 +16,7 @@
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the terms and
 # conditions of the GNU Lesser General Public License for more details.
 #
-#  You should have recieved a copy of the GNU Lesser General Public License
+#  You should have received a copy of the GNU Lesser General Public License
 # along with this program; if not, write to the Free Software Foundation,
 # Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 
@@ -24,63 +24,63 @@ import distutils, os, tarfile, urllib, zipfile
 import git, hg, logger, svn, utilityFunctions
 
 def fetch(pythonCallInfo):
-    outfd = logger.getOutFd(pythonCallInfo.name, "fetch")
-    if git.isGitRepo(pythonCallInfo.currentPath):
-        if not git.gitCheckout(pythonCallInfo.currentPath, pythonCallInfo.outputPath):
-            pythonCallInfo.logger.writeError("Given Git repo '" + pythonCallInfo.currentPath +"' was unable to be checked out")
+    outfd = logger.getOutFd(pythonCallInfo.target.name, "fetch")
+    if git.isGitRepo(pythonCallInfo.target.path):
+        if not git.gitCheckout(pythonCallInfo.target.path, pythonCallInfo.target.outputPath):
+            pythonCallInfo.logger.writeError("Given Git repo '" + pythonCallInfo.target.path +"' was unable to be checked out")
             pythonCallInfo.success = False
         else:
-            pythonCallInfo.currentPath = pythonCallInfo.outputPath
+            pythonCallInfo.target.path = pythonCallInfo.target.outputPath
             pythonCallInfo.success = True
-    elif hg.isHgRepo(pythonCallInfo.currentPath):
-        if not hg.hgCheckout(pythonCallInfo.currentPath, pythonCallInfo.outputPath):
-            pythonCallInfo.logger.writeError("Given Hg repo '" + pythonCallInfo.currentPath +"' was unable to be checked out")
+    elif hg.isHgRepo(pythonCallInfo.target.path):
+        if not hg.hgCheckout(pythonCallInfo.target.path, pythonCallInfo.target.outputPath):
+            pythonCallInfo.logger.writeError("Given Hg repo '" + pythonCallInfo.target.path +"' was unable to be checked out")
             pythonCallInfo.success = False
         else:
-            pythonCallInfo.currentPath = pythonCallInfo.outputPath
+            pythonCallInfo.target.path = pythonCallInfo.target.outputPath
             pythonCallInfo.success = True
-    elif svn.isSvnRepo(pythonCallInfo.currentPath):
-        if not svn.svnCheckout(pythonCallInfo.currentPath, pythonCallInfo.outputPath, outfd):
-            pythonCallInfo.logger.writeError("Given Svn repo '" + pythonCallInfo.currentPath +"' was unable to be checked out")
+    elif svn.isSvnRepo(pythonCallInfo.target.path):
+        if not svn.svnCheckout(pythonCallInfo.target.path, pythonCallInfo.target.outputPath, outfd):
+            pythonCallInfo.logger.writeError("Given Svn repo '" + pythonCallInfo.target.path +"' was unable to be checked out")
             pythonCallInfo.success = False
         else:
-            pythonCallInfo.currentPath = pythonCallInfo.outputPath
+            pythonCallInfo.target.path = pythonCallInfo.target.outputPath
             pythonCallInfo.success = True
-    elif utilityFunctions.isURL(pythonCallInfo.currentPath):
-        filenamePath = os.path.join(pythonCallInfo.downloadDir, utilityFunctions.URLToFilename(pythonCallInfo.currentPath))
-        if not os.path.exists(pythonCallInfo.downloadDir):
-            os.mkdir(pythonCallInfo.downloadDir)
-        urllib.urlretrieve(pythonCallInfo.currentPath, filenamePath)
-        pythonCallInfo.currentPath = filenamePath
+    elif utilityFunctions.isURL(pythonCallInfo.target.path):
+        filenamePath = os.path.join(pythonCallInfo.options.downloadDir, utilityFunctions.URLToFilename(pythonCallInfo.target.path))
+        if not os.path.exists(pythonCallInfo.options.downloadDir):
+            os.mkdir(pythonCallInfo.options.downloadDir)
+        urllib.urlretrieve(pythonCallInfo.target.path, filenamePath)
+        pythonCallInfo.target.path = filenamePath
         pythonCallInfo.success = True
-    elif os.path.isdir(pythonCallInfo.currentPath):
-        if pythonCallInfo.outputPathSpecified and \
-           os.path.abspath(pythonCallInfo.currentPath) != os.path.abspath(pythonCallInfo.outputPath):
-            distutils.dir_util.copy_tree(pythonCallInfo.currentPath, pythonCallInfo.outputPath)
-            pythonCallInfo.currentPath = pythonCallInfo.outputPath
+    elif os.path.isdir(pythonCallInfo.target.path):
+        if pythonCallInfo.target.outputPathSpecified and \
+           os.path.abspath(pythonCallInfo.target.path) != os.path.abspath(pythonCallInfo.target.outputPath):
+            distutils.dir_util.copy_tree(pythonCallInfo.target.path, pythonCallInfo.target.outputPath)
+            pythonCallInfo.target.path = pythonCallInfo.target.outputPath
         pythonCallInfo.success = True
-    elif os.path.isfile(pythonCallInfo.currentPath):
+    elif os.path.isfile(pythonCallInfo.target.path):
         pythonCallInfo.success = True
 
     return pythonCallInfo
 
 def unpack(pythonCallInfo):
-    if os.path.isfile(pythonCallInfo.currentPath):
-        if not utilityFunctions.validateCompressedFile(pythonCallInfo.currentPath):
+    if os.path.isfile(pythonCallInfo.target.path):
+        if not utilityFunctions.validateCompressedFile(pythonCallInfo.target.path):
             pythonCallInfo.success = False
         else:
-            if tarfile.is_tarfile(pythonCallInfo.currentPath):
-                utilityFunctions.untar(pythonCallInfo.currentPath, pythonCallInfo.outputPath, True)
-                pythonCallInfo.currentPath = pythonCallInfo.outputPath
+            if tarfile.is_tarfile(pythonCallInfo.target.path):
+                utilityFunctions.untar(pythonCallInfo.target.path, pythonCallInfo.target.outputPath, True)
+                pythonCallInfo.target.path = pythonCallInfo.target.outputPath
                 pythonCallInfo.success = True
-            elif zipfile.is_zipfile(pythonCallInfo.currentPath):
-                utilityFunctions.unzip(pythonCallInfo.currentPath, pythonCallInfo.outputPath, True)
-                pythonCallInfo.currentPath = pythonCallInfo.outputPath
+            elif zipfile.is_zipfile(pythonCallInfo.target.path):
+                utilityFunctions.unzip(pythonCallInfo.target.path, pythonCallInfo.target.outputPath, True)
+                pythonCallInfo.target.path = pythonCallInfo.target.outputPath
                 pythonCallInfo.success = True
-    elif os.path.isdir(pythonCallInfo.currentPath):
+    elif os.path.isdir(pythonCallInfo.target.path):
         pythonCallInfo.success = True
     else:
-        pythonCallInfo.logger.writeError("Given path '" + pythonCallInfo.currentPath + "' not understood by MixDown's unpack (path should be a file or a directory at this point)")
+        pythonCallInfo.logger.writeError("Given path '" + pythonCallInfo.target.path + "' not understood by MixDown's unpack (path should be a file or a directory at this point)")
         pythonCallInfo.success = False
 
     return pythonCallInfo
