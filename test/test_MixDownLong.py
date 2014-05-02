@@ -16,7 +16,7 @@
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the terms and
 # conditions of the GNU Lesser General Public License for more details.
 #
-#  You should have recieved a copy of the GNU Lesser General Public License
+#  You should have received a copy of the GNU Lesser General Public License
 # along with this program; if not, write to the Free Software Foundation,
 # Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 
@@ -59,13 +59,13 @@ class Test_MixDownLong(unittest.TestCase):
             sqlitePath = utilityFunctions.downloadFile(sqliteURL, downloadDir)
             self.assertNotEquals(sqlitePath, "", "Sqlite failed to download")
 
-            importRC = utilityFunctions.executeSubProcess("MixDown --import " + svnPath + " " + aprPath + " " + aprUtilPath + " " + neonPath + " " + sqlitePath, tempDir)
+            importRC = utilityFunctions.executeSubProcess("mixdown --import " + svnPath + " " + aprPath + " " + aprUtilPath + " " + neonPath + " " + sqlitePath, tempDir)
             self.assertEquals(importRC, 0, "Subversion test case failed import.")
 
-            buildRC = utilityFunctions.executeSubProcess("MixDown subversion-1.6.12.md -ptestPrefix" + skipAPRPreconfig, tempDir)
+            buildRC = utilityFunctions.executeSubProcess("mixdown subversion-1.6.12.md -ptestPrefix" + skipAPRPreconfig, tempDir)
             self.assertEquals(buildRC, 0, "Subversion test case failed build.")
 
-            cleanRC = utilityFunctions.executeSubProcess("MixDown --clean subversion-1.6.12.md", tempDir)
+            cleanRC = utilityFunctions.executeSubProcess("mixdown --clean subversion-1.6.12.md", tempDir)
             self.assertEquals(cleanRC, 0, "Subversion test case failed clean.")
 
             prefix = os.path.join(tempDir, "testPrefix")
