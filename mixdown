@@ -63,14 +63,15 @@ def main():
                         else:
                             mdProject.determineStartPoint()
 
-                #Define Hierarchy: options defines <  project defines < override group defines
+                #Define Hierarchy: options defines <  project defines < override group defines < command line defines
                 mdOptions.defines.combine(mdProject.defines)
                 if mdOptions.overrideGroup:
                     mdOptions.defines.combine(mdOptions.overrideGroup)
+                mdOptions.defines.combine(mdOptions.commandLineDefines)
 
                 if mdOptions.threadCount == 1:
                     for target in reversed(mdProject.targets):
-                        commands.buildTarget(target, mdOptions)
+                        commands.buildTarget(target, mdOptions, mdProject)
                         if target.success == False:
                             success = False
                             break
@@ -96,7 +97,7 @@ def main():
                         for _ in range(processCount):
                             jobQueue.put(None)
                         for _ in range(processCount):
-                            p = multiprocessing.Process(target=commands.buildTargetThreaded, args=(jobQueue,resultQueue,mdOptions,lock,))
+                            p = multiprocessing.Process(target=commands.buildTargetThreaded, args=(jobQueue,resultQueue,mdOptions,mdProject,lock,))
                             processes.append(p)
 
                         for p in processes:

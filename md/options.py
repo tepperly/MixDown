@@ -48,6 +48,8 @@ class Options(object):
         self.overrideGroup = None
         self.overrideSearchPath = []
         self.defines = defines.Defines()
+        # Note: Use this only to store the command line defines then it gets combined into self.defines (use self.defines)
+        self.commandLineDefines = defines.Defines()
         defines.setPrefixDefines(self.defines, '/usr/local')
 
     def __str__(self):
@@ -289,6 +291,10 @@ class Options(object):
                 if not validateOptionPair(currFlag, currValue):
                     return False
                 self.downloadDir = currValue
+            elif currFlag == "-f":
+                if not validateOptionPair(currFlag, currValue):
+                    return False
+                self.logDir = currValue
             elif currFlag == "-k":
                 if not validateOption(currFlag, currValue):
                     return False
@@ -308,6 +314,18 @@ class Options(object):
                 if not validateOptionPair(currFlag, currValue):
                     return False
                 self.overrideFile = currValue
+            elif currFlag == "-d":
+                if not validateOptionPair(currFlag, currValue):
+                    return False
+                for definePair in currValue.split(","):
+                    splitPair = definePair.split("=")
+                    if len(splitPair) != 2:
+                        logger.writeError("Invalid define pair given, " + definePair)
+                        return False
+                    if splitPair[0].lower() in self.commandLineDefines:
+                        logger.writeError("Define pair already given, " + definePair)
+                        return False
+                    self.commandLineDefines[splitPair[0]] = splitPair[1]
             elif currFlag == "-n":
                 if not validateOptionPair(currFlag, currValue):
                     return False
@@ -386,6 +404,8 @@ class Options(object):
         -t<number>    Number of threads used to build concurrent targets\n\
         -n<list>      Name of specific targets to build\n\
            Example: -nFoo,bar\n\
+        -d<list>      List of defines to used during building\n\
+           Example: -dfoo=value1,bar=baz\n\
         -s<list>      Add steps to skip for individual targets\n\
            Example: -starget1:preconfig,target2:config\n\
         -o<path>      Specify path to Override Groups file\n\
@@ -395,7 +415,8 @@ class Options(object):
         -p<path>      Override prefix directory\n\
         -b<path>      Override build directory\n\
         -w<path>      Override download directory\n\
-        -l<logger>    Override default logger (Console, File, Html)\n\
+        -f<path>      Override file logger directory\n\
+        -l<logger>    Override default logger (Console, File)\n\
         -k            Keeps previously existing MixDown directories\n\
     \n\
     Clean Mode: \n\
@@ -418,7 +439,8 @@ class Options(object):
         -p<path>      Override prefix directory\n\
         -b<path>      Override build directory\n\
         -w<path>      Override download directory\n\
-        -l<logger>    Override default logger (Console, File, Html)\n\
+        -f<path>      Override file logger directory\n\
+        -l<logger>    Override default logger (Console, File)\n\
     \n\
     Default Directories:\n\
     Builds:       mdBuild/\n\

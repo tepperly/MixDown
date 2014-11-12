@@ -53,7 +53,7 @@ def parsePythonCommand(command):
 
     return isPythonCommand, namespace, function
 
-def callPythonCommand(namespace, function, target, options):
+def callPythonCommand(namespace, function, target, options, project):
     filename = namespace + ".py"
     if not namespace == "steps" and not os.path.exists(filename):
         logger.writeError("Expected python file, " + filename + ", not found")
@@ -79,6 +79,7 @@ def callPythonCommand(namespace, function, target, options):
         target.pythonCallInfo.success = False
         target.pythonCallInfo.target = target
         target.pythonCallInfo.options = options
+        target.pythonCallInfo.project = project
         pythonCallInfo = getattr(importedNamespace, function)(target.pythonCallInfo)
     except AttributeError as e:
         logger.writeError(str(e))
@@ -89,6 +90,7 @@ def callPythonCommand(namespace, function, target, options):
         return False
     target = pythonCallInfo.target
     options = pythonCallInfo.options
+    project = pythonCallInfo.project
     return True
 
 class PythonCallInfo(object):
@@ -96,4 +98,5 @@ class PythonCallInfo(object):
         self.success = False
         self.target = None
         self.options = None
+        self.project = None
         self.logger = logger.Logger()

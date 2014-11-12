@@ -88,13 +88,10 @@ class LoggerFile(logger.LoggerBase):
         else:
             message = messagePrefix + "Skipped.\n"
         self._writeStdOut(message)
-        if targetName != "":
-            self.__lookupOutFile(targetName, targetStep).write(message)
 
     def reportStart(self, targetName="", targetStep=""):
         message = self.__formatMessagePrefix(targetName, targetStep) + "Starting...\n"
         self._writeStdOut(message)
-        self.__lookupOutFile(targetName, targetStep).write(message)
 
     def reportSuccess(self, targetName="", targetStep="", timeInSeconds=0):
         messagePrefix = self.__formatMessagePrefix(targetName, targetStep)
@@ -103,7 +100,6 @@ class LoggerFile(logger.LoggerBase):
             message += " in " + logger.secondsToHMS(timeInSeconds)
         message += ".\n"
         self._writeStdOut(message)
-        self.__lookupOutFile(targetName, targetStep).write(message)
 
     def reportFailure(self, targetName="", targetStep="", timeInSeconds=0, returnCode=0, exitProgram=False):
         messagePrefix = self.__formatMessagePrefix(targetName, targetStep)
@@ -113,7 +109,6 @@ class LoggerFile(logger.LoggerBase):
         message += self.__formatErrorMessage(messagePrefix + "Failed with error code " + str(returnCode) + ".")
         message += "Look at following log file for failure reason:\n  " + self.__lookupOutFileName(targetName, targetStep) + "\n"
         self._writeStdErr(message)
-        self.__lookupOutFile(targetName, targetStep).write(message)
         if exitProgram:
             sys.exit()
 

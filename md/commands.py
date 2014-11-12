@@ -32,22 +32,22 @@ class BuildStep(object):
 
 buildSteps = ["fetch", "unpack", "patch", "preconfig", "config", "build", "test", "install", "postinstall", "clean"]
 
-def buildStepActor(target, buildStep, options, lock=None):
-    if target.isStepToBeSkipped(buildStep.name):
+def buildStepActor(target, options, project, lock=None):
+    if target.isStepToBeSkipped(target.currBuildStep.name):
         try:
             if lock:
                 lock.acquire()
-            logger.reportSkipped(target.name, buildStep.name, "Target specified to skip step")
+            logger.reportSkipped(target.name, target.currBuildStep.name, "Target specified to skip step")
         finally:
             if lock:
                 lock.release()
         return True
 
-    if target.isStepPreviouslyDone(buildStep.name):
+    if target.isStepPreviouslyDone(target.currBuildStep.name):
         try:
             if lock:
                 lock.acquire()
-            logger.reportSkipped(target.name, buildStep.name, "Build step successfully built in previous MixDown build")
+            logger.reportSkipped(target.name, target.currBuildStep.name, "Build step successfully built in previous MixDown build")
         finally:
             if lock:
                 lock.release()
@@ -56,17 +56,19 @@ def buildStepActor(target, buildStep, options, lock=None):
     try:
         if lock:
             lock.acquire()
-        logger.reportStart(target.name, buildStep.name)
+        logger.reportStart(target.name, target.currBuildStep.name)
+        #Refresh defines before start of every step
+        project.setTargetFieldsAsDefines(options.defines)
     finally:
         if lock:
             lock.release()
     returnCode = None
 
     timeStart = time.time()
-    command = options.defines.expand(buildStep.command)
+    command = options.defines.expand(target.currBuildStep.command)
     isPythonCommand, namespace, function = python.parsePythonCommand(command)
     if isPythonCommand:
-        success = python.callPythonCommand(namespace, function, target, options)
+        success = python.callPythonCommand(namespace, function, target, options, project)
         if not success:
             returnCode = 1
         else:
@@ -75,46 +77,46 @@ def buildStepActor(target, buildStep, options, lock=None):
         try:
             if lock:
                 lock.acquire()
-            logger.writeMessage("Executing command: " + command, target.name, buildStep.name, True)
+            logger.writeMessage("Executing command: " + command, target.name, target.currBuildStep.name, True)
         finally:
             if lock:
                 lock.release()
 
         if not os.path.exists(target.path):
-            logger.writeError(target.name + "'s path does not exist when about to execute build command in step " + buildStep.name + ".", filePath=target.path)
+            logger.writeError(target.name + "'s path does not exist when about to execute build command in step " + target.currBuildStep.name + ".", filePath=target.path)
             returnCode = 1
         else:
-            outFd = logger.getOutFd(target.name, buildStep.name)
+            outFd = logger.getOutFd(target.name, target.currBuildStep.name)
             returnCode = utilityFunctions.executeSubProcess(command, target.path, outFd)
 
     timeFinished = time.time()
     timeElapsed = timeFinished - timeStart
 
     if returnCode != 0:
-        buildStep.success = False
+        target.currBuildStep.success = False
         try:
             if lock:
                 lock.acquire()
-            logger.reportFailure(target.name, buildStep.name, timeElapsed, returnCode)
+            logger.reportFailure(target.name, target.currBuildStep.name, timeElapsed, returnCode)
         finally:
             if lock:
                 lock.release()
         return False
 
-    buildStep.success = True
+    target.currBuildStep.success = True
     try:
         if lock:
             lock.acquire()
-        logger.reportSuccess(target.name, buildStep.name, timeElapsed)
+        logger.reportSuccess(target.name, target.currBuildStep.name, timeElapsed)
     finally:
         if lock:
             lock.release()
     return True
 
-def buildTarget(target, options, lock=None):
+def buildTarget(target, options, project, lock=None):
     if options.cleanMode:
-        cleanStep = target.findBuildStep("clean")
-        target.success = buildStepActor(target, cleanStep, options, lock)
+        target.currBuildStep = target.findBuildStep("clean")
+        target.success = buildStepActor(target, options, project, lock)
     else:
         if target.success:
             logger.reportSkipped(target.name, "", "Target successfully built in previous MixDown build")
@@ -126,22 +128,21 @@ def buildTarget(target, options, lock=None):
             target.success = True
         else:
             for buildStep in target.buildSteps:
-                buildStep.restartPath = target.path
                 if buildStep.name == "clean" or buildStep.command == "":
                     continue
-                #Update target defines after each step
-                target.setTargetFieldsAsDefines(options.defines)
-                target.success = buildStepActor(target, buildStep, options, lock)
+                buildStep.restartPath = target.path
+                target.currBuildStep = buildStep
+                target.success = buildStepActor(target, options, project, lock)
                 if not target.success:
                     break
 
-def buildTargetThreaded(jobQueue, resultQueue, options, lock):
+def buildTargetThreaded(jobQueue, resultQueue, options, project, lock):
     target = None
     while True:
         target = jobQueue.get(False)
         if target == None:
             sys.exit(0)
-        buildTarget(target, options, lock)
+        buildTarget(target, options, project, lock)
         resultQueue.put(target)
 
 def getCommand(stepName, target):

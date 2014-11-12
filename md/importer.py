@@ -42,10 +42,12 @@ def importTargets(options):
         logger.writeMessage("Extracting target...", target.name)
 
         target.outputPath = os.path.join(tempDir, target.name)
-        if not commands.buildStepActor(target, fetchStep, options):
+        target.currBuildStep = fetchStep
+        if not commands.buildStepActor(target, options, None):
             utilityFunctions.removeDir(tempDir)
             return None, False
-        if not commands.buildStepActor(target, unpackStep, options):
+        target.currBuildStep = unpackStep
+        if not commands.buildStepActor(target, options, None):
             utilityFunctions.removeDir(tempDir)
             return None, False
 

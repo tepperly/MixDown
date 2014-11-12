@@ -78,6 +78,7 @@ class Target(object):
         self.expandedDependsOn = []
         self._skipSteps = []
         self.pythonCallInfo = python.PythonCallInfo()
+        self.currBuildStep = None
         self.buildSteps = []
         self.success = False
 
