@@ -202,7 +202,7 @@ class Target(object):
         return False
 
     def setTargetFieldsAsDefines(self, defines):
-        validTargetFields = targetFields + commands.buildSteps
+        validTargetFields = targetFields + commands.buildSteps + ['origPath']
         for currField in validTargetFields:
             name = self.name + '.' + currField
             value = getattr(self, currField, "")

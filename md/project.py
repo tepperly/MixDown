@@ -312,8 +312,9 @@ class Project(object):
                             if currTarget.path != "":
                                 logger.writeError("Project targets can only have one 'Path' defined", "", "", self.path, lineCount)
                                 return False
-                            currTarget.origPath = currPair[1]
-                            currTarget.path = currPair[1]
+                            fullPath = os.path.abspath(currPair[1])
+                            currTarget.origPath = fullPath
+                            currTarget.path = fullPath
                         elif currName == "output":
                             if currTarget.outputPathSpecified:
                                 logger.writeError("Project targets can only have one 'Output' defined", "", "", self.path, lineCount)
