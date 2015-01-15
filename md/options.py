@@ -239,6 +239,9 @@ class Options(object):
                     continue
             elif currArg.lower() == "--clean":
                 continue
+            elif currArg.lower().startswith("--pythonpath="):
+                sys.path.append(os.path.abspath(currArg[13:]))
+                continue
 
             #Handle all options that follow -<letter><option>
             currFlag = currArg[:2].lower()
@@ -418,6 +421,9 @@ class Options(object):
         -f<path>      Override file logger directory\n\
         -l<logger>    Override default logger (Console, File)\n\
         -k            Keeps previously existing MixDown directories\n\
+        --pythonpath=<path>\n\
+                      Adds path to PYTHONPATH to find custom python\n\
+                      files (use multiple times to add more than one path)\n\
     \n\
     Clean Mode: \n\
         Example Usage: mixdown --clean foo.md\n\

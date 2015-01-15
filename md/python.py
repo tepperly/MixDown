@@ -55,25 +55,28 @@ def parsePythonCommand(command):
 
 def callPythonCommand(namespace, function, target, options, project):
     filename = namespace + ".py"
-    if not namespace == "steps" and not os.path.exists(filename):
-        logger.writeError("Expected python file, " + filename + ", not found")
-        return False
-    else:
-        if os.path.isdir(filename):
-            logger.writeError("Expected python file, " + filename + ", found directory")
-            return False
+    projectPath = os.path.abspath(".")
+    if not projectPath in sys.path:
+        sys.path.insert(0, projectPath)
+    mixDownPath = os.path.dirname(sys.argv[0])
+    mdPath = os.path.join(mixDownPath, "md")
+    if os.path.exists(mdPath) and not mdPath in sys.path:
+        sys.path.insert(0, mdPath)
+    stepsPath = os.path.dirname(os.path.abspath(steps.__file__))
+    if mdPath != stepsPath and not stepsPath in sys.path:
+        sys.path.insert(0, stepsPath)
 
-        projectPath = os.path.abspath(".")
-        if not projectPath in sys.path:
-            sys.path.insert(0, projectPath)
-        mixDownPath = os.path.dirname(sys.argv[0])
-        mdPath = os.path.join(mixDownPath, "md")
-        if os.path.exists(mdPath) and not mdPath in sys.path:
-            sys.path.insert(0, mdPath)
-        stepsPath = os.path.dirname(os.path.abspath(steps.__file__))
-        if mdPath != stepsPath and not stepsPath in sys.path:
-            sys.path.insert(0, stepsPath)
-        importedNamespace = __import__(namespace)
+    namespaceFound = False
+    for currPath in sys.path:
+        currNamespacePath = os.path.join(currPath, filename)
+        if os.path.exists(currNamespacePath) and not os.path.isdir(currNamespacePath):
+            namespaceFound = True
+            break
+    if not namespaceFound:
+        logger.writeError("Could not find python file in path.", filePath=filename)
+        return False
+
+    importedNamespace = __import__(namespace)
 
     try:
         target.pythonCallInfo.success = False
