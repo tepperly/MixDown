@@ -56,7 +56,7 @@ class Defines(dict):
             if startIndex == -1:
                 break
             endIndex = expandedString.find(")", startIndex)
-            if startIndex == -1:
+            if endIndex == -1:
                 if inString == expandedString:
                     logger.writeError("Unterminated define found in '" + inString + "' starting at index " + str(startIndex), exitProgram=True)
                 else:
