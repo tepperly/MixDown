@@ -30,6 +30,7 @@ class Options(object):
         self.downloadDir = "mdDownload"
         self.logDir = "mdLogFiles"
         self.restart = False
+        self.continueBuilding = False
         self.statusLogPath = ""
         self.profileMode = False
         self.cleanMode = False
@@ -286,6 +287,10 @@ class Options(object):
                 if not validateOption(currFlag, currValue):
                     return False
                 self.restart = True
+            elif currFlag == "-c":
+                if not validateOption(currFlag, currValue):
+                    return False
+                self.continueBuilding = True
             elif currFlag == "-b":
                 if not validateOptionPair(currFlag, currValue):
                     return False
@@ -403,6 +408,7 @@ class Options(object):
         Optional:\n\
         -v            Verbose Mode\n\
         -r            Restart build on failed step or changed step\n\
+        -c            Continue to build all possible targets if some fail\n\
         -j<number>    Number of build job slots\n\
         -t<number>    Number of threads used to build concurrent targets\n\
         -n<list>      Name of specific targets to build\n\

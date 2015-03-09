@@ -81,6 +81,7 @@ class Target(object):
         self.currBuildStep = None
         self.buildSteps = []
         self.success = False
+        self.skippedDueToDependanciesFailing = False
 
     def validate(self, mdOptions):
         normalizedName = normalizeName(self.name)

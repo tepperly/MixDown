@@ -74,7 +74,8 @@ def main():
                         commands.buildTarget(target, mdOptions, mdProject)
                         if target.success == False:
                             success = False
-                            break
+                            if not mdOptions.continueBuilding:
+                                break
                 else:
                     lock = multiprocessing.RLock()
                     jobQueue = multiprocessing.Queue()
@@ -129,6 +130,29 @@ def main():
 
         if mdProject != None and not mdOptions.importMode and not mdOptions.cleanMode and not mdOptions.profileMode:
             mdProject.writeStatusLog(mdOptions)
+            if mdOptions.continueBuilding:
+                targetsSkippedCommandLine = []
+                targetsSuccess = []
+                targetsDependancyFailed = []
+                targetsFailed = []
+                for t in mdProject.targets:
+                    if not mdOptions.targetSpecifiedToBuild(t.name):
+                        targetsSkippedCommandLine.append(t.name)
+                    elif t.success == True:
+                        targetsSuccess.append(t.name)
+                    elif t.skippedDueToDependanciesFailing:
+                        targetsDependancyFailed.append(t.name)
+                    else:
+                        targetsFailed.append(t.name)
+
+                if len(targetsSuccess) > 0:
+                    logger.writeMessage("\nSuccess:\n{0}".format(" ".join(targetsSuccess)))
+                if len(targetsFailed) > 0:
+                    logger.writeMessage("\nFailed:\n{0}".format(" ".join(targetsFailed)))
+                if len(targetsDependancyFailed) > 0:
+                    logger.writeMessage("\nSkipped due to failed dependancy:\n{0}".format(" ".join(targetsDependancyFailed)))
+                if len(targetsSkippedCommandLine) > 0:
+                    logger.writeMessage("\nSkipped due to command line option:\n{0}".format(" ".join(targetsSkippedCommandLine)))
 
         if not success:
             message += " failed."

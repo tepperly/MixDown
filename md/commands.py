@@ -127,6 +127,15 @@ def buildTarget(target, options, project, lock=None):
             logger.reportSkipped(target.name, "", "Target was not specified on command-line.")
             target.success = True
         else:
+            if options.continueBuilding:
+                for dependancyName in target.expandedDependsOn:
+                    dependancyTarget = project.getTarget(dependancyName)
+                    if dependancyTarget.success == False:
+                        reasonString = "Target could not be built because dependant target ({0}) previously failed.".format(dependancyTarget.name)
+                        logger.reportSkipped(target.name, reason=reasonString)
+                        target.skippedDueToDependanciesFailing = True
+                        return
+
             for buildStep in target.buildSteps:
                 if buildStep.name == "clean" or buildStep.command == "":
                     continue
