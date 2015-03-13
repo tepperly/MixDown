@@ -23,7 +23,7 @@
 import os, re, tarfile
 import autoTools, cmake, commands, git, hg, logger, options, python, svn, utilityFunctions
 
-targetFields = ['name', 'version', 'path', 'aliases', 'dependson', 'prefix']
+targetFields = ['name', 'version', 'origPath', 'path', 'outputPath', 'aliases', 'dependson', 'prefix']
 
 def normalizeName(name):
     return name.strip().lower()
@@ -203,7 +203,7 @@ class Target(object):
         return False
 
     def setTargetFieldsAsDefines(self, defines):
-        validTargetFields = targetFields + commands.buildSteps + ['origPath']
+        validTargetFields = targetFields + commands.buildSteps
         for currField in validTargetFields:
             name = self.name + '.' + currField
             value = getattr(self, currField, "")
